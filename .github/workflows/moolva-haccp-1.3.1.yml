@@ -1,0 +1,119 @@
+name: Build MoOLVa HACCP Easy 1.3.1 Autonomous
+
+on:
+  push:
+    branches:
+      - moolva-haccp-easy-1.3.1-autonomous
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Decode source package
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $b64 = Get-Content 'moolva-haccp-easy-1.3.1/source.b64' -Raw
+          [IO.File]::WriteAllBytes('source.zip', [Convert]::FromBase64String($b64))
+          Expand-Archive 'source.zip' -DestinationPath 'src' -Force
+          (Get-Content 'src/easy_app.py' -Raw).Replace('1.3.0','1.3.1') | Set-Content 'src/easy_app.py' -Encoding UTF8
+          '1.3.1' | Set-Content 'src/.moolva_easy_version' -Encoding ASCII
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: 'x64'
+
+      - name: Install build dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r src/requirements.txt
+          python -m pip install 'pyinstaller>=6.10,<7'
+
+      - name: Run source self-test
+        shell: pwsh
+        working-directory: src
+        run: python easy_app.py --self-test
+
+      - name: Build autonomous portable EXE
+        shell: pwsh
+        working-directory: src
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name 'MoOLVa_HACCP_Easy_1.3.1_Portable' --icon 'assets/MoOLVa_HACCP.ico' --add-data 'assets;assets' --collect-all docx --collect-all reportlab --collect-all PIL easy_app.py
+
+      - name: Test frozen EXE
+        shell: pwsh
+        working-directory: src
+        run: |
+          $p = Start-Process -FilePath '.\dist\MoOLVa_HACCP_Easy_1.3.1_Portable.exe' -ArgumentList '--self-test' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Frozen EXE self-test failed with exit code $($p.ExitCode)" }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y --no-progress
+
+      - name: Create standard Windows installer
+        shell: pwsh
+        run: |
+          $iss = @'
+          [Setup]
+          AppId={{7A9687D6-AD47-44D9-A42C-43112E5873C1}
+          AppName=MoOLVa ХАССП Easy
+          AppVersion=1.3.1
+          AppVerName=MoOLVa ХАССП Easy 1.3.1
+          AppPublisher=MoOLVa
+          DefaultDirName={localappdata}\Programs\MoOLVaHACCPEasy
+          DefaultGroupName=MoOLVa ХАССП Easy
+          UninstallDisplayIcon={app}\MoOLVa_HACCP_Easy.exe
+          OutputDir=release
+          OutputBaseFilename=MoOLVa_HACCP_Easy_1.3.1_Setup
+          Compression=lzma2/max
+          SolidCompression=yes
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+          PrivilegesRequired=lowest
+          WizardStyle=modern
+          SetupIconFile=src\assets\MoOLVa_HACCP.ico
+          CloseApplications=yes
+          RestartApplications=no
+          DisableProgramGroupPage=yes
+
+          [Files]
+          Source: "src\dist\MoOLVa_HACCP_Easy_1.3.1_Portable.exe"; DestDir: "{app}"; DestName: "MoOLVa_HACCP_Easy.exe"; Flags: ignoreversion
+
+          [Icons]
+          Name: "{group}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVa_HACCP_Easy.exe"
+          Name: "{autodesktop}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVa_HACCP_Easy.exe"; Tasks: desktopicon
+
+          [Tasks]
+          Name: "desktopicon"; Description: "Создать ярлык на рабочем столе"; GroupDescription: "Дополнительные ярлыки:"; Flags: unchecked
+
+          [Run]
+          Filename: "{app}\MoOLVa_HACCP_Easy.exe"; Description: "Запустить MoOLVa ХАССП Easy"; Flags: nowait postinstall skipifsilent
+          '@
+          Set-Content -Path 'installer.iss' -Value $iss -Encoding UTF8
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" 'installer.iss'
+
+      - name: Verify installer and hashes
+        shell: pwsh
+        run: |
+          if (!(Test-Path 'release\MoOLVa_HACCP_Easy_1.3.1_Setup.exe')) { throw 'Setup EXE was not created' }
+          Copy-Item 'src\dist\MoOLVa_HACCP_Easy_1.3.1_Portable.exe' 'release\MoOLVa_HACCP_Easy_1.3.1_Portable.exe'
+          $lines = @()
+          Get-ChildItem release\*.exe | Sort-Object Name | ForEach-Object { $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); $lines += "$h  $($_.Name)" }
+          $lines | Set-Content 'release\SHA256SUMS.txt' -Encoding ASCII
+
+      - name: Upload autonomous Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa_HACCP_Easy_1.3.1_Autonomous_Windows
+          path: release/*
+          if-no-files-found: error
+          retention-days: 30
