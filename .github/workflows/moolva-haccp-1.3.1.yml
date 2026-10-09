@@ -9,56 +9,57 @@ on:
 jobs:
   build-windows:
     runs-on: windows-latest
-    timeout-minutes: 30
+    timeout-minutes: 35
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Decode source package
+      - name: Unpack verified source
         shell: pwsh
         run: |
-          $ErrorActionPreference = 'Stop'
-          $b64 = Get-Content 'moolva-haccp-easy-1.3.1/source.b64' -Raw
-          [IO.File]::WriteAllBytes('source.zip', [Convert]::FromBase64String($b64))
-          Expand-Archive 'source.zip' -DestinationPath 'src' -Force
-          (Get-Content 'src/easy_app.py' -Raw).Replace('1.3.0','1.3.1') | Set-Content 'src/easy_app.py' -Encoding UTF8
-          '1.3.1' | Set-Content 'src/.moolva_easy_version' -Encoding ASCII
+          $ErrorActionPreference = "Stop"
+          if (!(Test-Path "moolva-haccp-easy-1.3.1/source.zip")) { throw "source.zip is missing" }
+          Expand-Archive "moolva-haccp-easy-1.3.1/source.zip" -DestinationPath "src" -Force
+          (Get-Content "src/easy_app.py" -Raw).Replace("1.3.0","1.3.1") | Set-Content "src/easy_app.py" -Encoding UTF8
+          "1.3.1" | Set-Content "src/.moolva_easy_version" -Encoding ASCII
 
-      - name: Set up Python
+      - name: Set up Python x64
         uses: actions/setup-python@v5
         with:
-          python-version: '3.13'
-          architecture: 'x64'
+          python-version: "3.13"
+          architecture: "x64"
 
-      - name: Install build dependencies
+      - name: Install application and build dependencies
         shell: pwsh
         run: |
           python -m pip install --upgrade pip
           python -m pip install -r src/requirements.txt
-          python -m pip install 'pyinstaller>=6.10,<7'
+          python -m pip install "pyinstaller>=6.10,<7"
 
       - name: Run source self-test
         shell: pwsh
         working-directory: src
         run: python easy_app.py --self-test
 
-      - name: Build autonomous portable EXE
+      - name: Build autonomous Portable EXE
         shell: pwsh
         working-directory: src
-        run: pyinstaller --noconfirm --clean --onefile --windowed --name 'MoOLVa_HACCP_Easy_1.3.1_Portable' --icon 'assets/MoOLVa_HACCP.ico' --add-data 'assets;assets' --collect-all docx --collect-all reportlab --collect-all PIL easy_app.py
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name "MoOLVa_HACCP_Easy_1.3.1_Portable" --icon "assets/MoOLVa_HACCP.ico" --add-data "assets;assets" --collect-all docx --collect-all reportlab --collect-all PIL easy_app.py
 
-      - name: Test frozen EXE
+      - name: Test frozen Portable EXE
         shell: pwsh
         working-directory: src
         run: |
-          $p = Start-Process -FilePath '.\dist\MoOLVa_HACCP_Easy_1.3.1_Portable.exe' -ArgumentList '--self-test' -Wait -PassThru
+          $exe = ".\dist\MoOLVa_HACCP_Easy_1.3.1_Portable.exe"
+          if (!(Test-Path $exe)) { throw "Portable EXE was not created" }
+          $p = Start-Process -FilePath $exe -ArgumentList "--self-test" -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "Frozen EXE self-test failed with exit code $($p.ExitCode)" }
 
       - name: Install Inno Setup
         shell: pwsh
         run: choco install innosetup -y --no-progress
 
-      - name: Create standard Windows installer
+      - name: Build standard Windows Setup EXE
         shell: pwsh
         run: |
           $iss = @'
@@ -83,6 +84,7 @@ jobs:
           CloseApplications=yes
           RestartApplications=no
           DisableProgramGroupPage=yes
+          UsePreviousAppDir=yes
 
           [Files]
           Source: "src\dist\MoOLVa_HACCP_Easy_1.3.1_Portable.exe"; DestDir: "{app}"; DestName: "MoOLVa_HACCP_Easy.exe"; Flags: ignoreversion
@@ -97,18 +99,39 @@ jobs:
           [Run]
           Filename: "{app}\MoOLVa_HACCP_Easy.exe"; Description: "Запустить MoOLVa ХАССП Easy"; Flags: nowait postinstall skipifsilent
           '@
-          Set-Content -Path 'installer.iss' -Value $iss -Encoding UTF8
+          Set-Content -Path "installer.iss" -Value $iss -Encoding UTF8
           New-Item -ItemType Directory -Force -Path release | Out-Null
-          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" 'installer.iss'
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed" }
 
-      - name: Verify installer and hashes
+      - name: Test real installer on Windows
         shell: pwsh
         run: |
-          if (!(Test-Path 'release\MoOLVa_HACCP_Easy_1.3.1_Setup.exe')) { throw 'Setup EXE was not created' }
-          Copy-Item 'src\dist\MoOLVa_HACCP_Easy_1.3.1_Portable.exe' 'release\MoOLVa_HACCP_Easy_1.3.1_Portable.exe'
+          $ErrorActionPreference = "Stop"
+          $setup = (Resolve-Path "release\MoOLVa_HACCP_Easy_1.3.1_Setup.exe").Path
+          $installDir = Join-Path $env:LOCALAPPDATA "Programs\MoOLVaHACCPEasy"
+          $p = Start-Process -FilePath $setup -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/SP-","/TASKS=!desktopicon" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Setup installation failed with exit code $($p.ExitCode)" }
+          $installed = Join-Path $installDir "MoOLVa_HACCP_Easy.exe"
+          if (!(Test-Path $installed)) { throw "Installed EXE not found: $installed" }
+          $t = Start-Process -FilePath $installed -ArgumentList "--self-test" -Wait -PassThru
+          if ($t.ExitCode -ne 0) { throw "Installed EXE self-test failed with exit code $($t.ExitCode)" }
+          $uninstall = Join-Path $installDir "unins000.exe"
+          if (!(Test-Path $uninstall)) { throw "Uninstaller was not created" }
+          $u = Start-Process -FilePath $uninstall -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART" -Wait -PassThru
+          if ($u.ExitCode -ne 0) { throw "Uninstall test failed with exit code $($u.ExitCode)" }
+
+      - name: Prepare release and SHA256
+        shell: pwsh
+        run: |
+          Copy-Item "src\dist\MoOLVa_HACCP_Easy_1.3.1_Portable.exe" "release\MoOLVa_HACCP_Easy_1.3.1_Portable.exe"
           $lines = @()
-          Get-ChildItem release\*.exe | Sort-Object Name | ForEach-Object { $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower(); $lines += "$h  $($_.Name)" }
-          $lines | Set-Content 'release\SHA256SUMS.txt' -Encoding ASCII
+          Get-ChildItem release\*.exe | Sort-Object Name | ForEach-Object {
+            $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            $lines += "$h  $($_.Name)"
+          }
+          $lines | Set-Content "release\SHA256SUMS.txt" -Encoding ASCII
+          Get-Content "release\SHA256SUMS.txt"
 
       - name: Upload autonomous Windows build
         uses: actions/upload-artifact@v4
