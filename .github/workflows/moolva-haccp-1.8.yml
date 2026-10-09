@@ -112,7 +112,7 @@ jobs:
           $ErrorActionPreference = "Stop"
           New-Item -ItemType Directory -Force -Path previous | Out-Null
           gh run download 37944302823 --repo svarshan/git-repo --name MoOLVa_HACCP_Easy_1.7.0_Autonomous_Windows --dir previous
-          if ($LASTEXITCODE -ne 0) { throw "Could not download 1.6 installer" }
+          if ($LASTEXITCODE -ne 0) { throw "Could not download 1.7 installer" }
           $old = (Resolve-Path "previous/MoOLVa_HACCP_Easy_1.7.0_Setup.exe").Path
           $o=Start-Process -FilePath $old -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/SP-" -PassThru -Wait
           if ($o.ExitCode -ne 0) { throw "Previous version could not be installed" }
@@ -155,9 +155,9 @@ jobs:
           mark_upgrade_success(st,backup,version_tag='1.8.0')
           vid=int((Path(os.environ['TEMP'])/'moolva-upgrade-venue-id.txt').read_text())
           rows=st.list_records(vid,'upgrade_sentinel')
-          if len(rows)!=1 or rows[0]['data']['value']!='OLD_1_6_DATA_MUST_SURVIVE':
+          if len(rows)!=1 or rows[0]['data']['value']!='OLD_1_7_DATA_MUST_SURVIVE':
               raise SystemExit('Existing user data lost during upgrade')
-          assert st.get_venue(vid)['venue_name']=='Тест обновления 1.6'
+          assert st.get_venue(vid)['venue_name']=='Тест обновления 1.7'
           print('Upgrade from 1.7 to 1.8: original user DB retained, backup verified, schema migrated')
           '@
           $verify | Set-Content src/verify_upgrade.py -Encoding UTF8
