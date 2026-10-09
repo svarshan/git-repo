@@ -164,3 +164,24 @@ jobs:
           if ($u.ExitCode -ne 0) { throw "Uninstall test failed with exit code $($u.ExitCode)" }
 
 
+      - name: Prepare Windows release and SHA256
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          Copy-Item "src/dist/MoOLVa_HACCP_Easy_1.7.0_Portable.exe" "release/MoOLVa_HACCP_Easy_1.7.0_Portable.exe"
+          $lines = @()
+          Get-ChildItem "release/*.exe" | Sort-Object Name | ForEach-Object {
+            $hash = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            $lines += "$hash  $($_.Name)"
+          }
+          if ($lines.Count -ne 2) { throw "Expected exactly two EXE files" }
+          $lines | Set-Content "release/SHA256SUMS.txt" -Encoding ASCII
+          Get-Content "release/SHA256SUMS.txt"
+
+      - name: Upload autonomous Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa_HACCP_Easy_1.7.0_Autonomous_Windows
+          path: release/*
+          if-no-files-found: error
+          retention-days: 30
