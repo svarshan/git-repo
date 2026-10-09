@@ -41,7 +41,7 @@ jobs:
           $patch17 = "moolva-haccp-easy-1.7/delta.zip"
           if (!(Test-Path $patch17)) { throw "Missing MoOLVa Easy 1.7" }
           $hash17=(Get-FileHash $patch17 -Algorithm SHA256).Hash.ToLower()
-          if ($hash17 -ne "4392270a1fa2ea7e1062e3d91ec24ae39a173acb6a835cd1c8719ed3c4a882f1") { throw "1.7 source hash mismatch" }
+          if ($hash17 -ne "c1b3b98b188bc3271651c7cf328efb1f0285620895d60dc52c0100520db952fb") { throw "1.7 source hash mismatch" }
           Expand-Archive $patch17 -DestinationPath "src" -Force
           "1.7.0" | Set-Content "src/.moolva_easy_version" -Encoding ASCII
 
