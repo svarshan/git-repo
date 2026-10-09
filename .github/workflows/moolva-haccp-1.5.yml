@@ -29,7 +29,7 @@ jobs:
           $patch = "moolva-haccp-easy-1.5/delta.zip"
           if (!(Test-Path $patch)) { throw "MoOLVa Easy 1.5 patch missing" }
           $digest15=(Get-FileHash $patch -Algorithm SHA256).Hash.ToLower()
-          if($digest15 -ne "de4c183887bd317b7260815baca3fec9f2fc864fd1f98fc23d205dde8c1aa6e5"){ throw "MoOLVa Easy 1.5 patch integrity failure" }
+          if($digest15 -ne "c33cd54d0528b991d4d3132b2ca2626b2907759740b1ba27be14b9ee95134725"){ throw "MoOLVa Easy 1.5 patch integrity failure" }
           Expand-Archive $patch -DestinationPath "src" -Force
           "1.5.0" | Set-Content "src/.moolva_easy_version" -Encoding ASCII
 
