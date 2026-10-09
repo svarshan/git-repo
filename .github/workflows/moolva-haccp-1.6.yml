@@ -1,0 +1,160 @@
+name: Build MoOLVa HACCP Easy 1.6.0 Autonomous
+
+on:
+  push:
+    branches:
+      - moolva-haccp-easy-1.6-smart-control
+  workflow_dispatch:
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    timeout-minutes: 35
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Unpack verified source
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          if (!(Test-Path "moolva-haccp-easy-1.3.1/source.zip")) { throw "source.zip is missing" }
+          Expand-Archive "moolva-haccp-easy-1.3.1/source.zip" -DestinationPath "src" -Force
+          (Get-Content "src/easy_app.py" -Raw).Replace("1.3.0","1.3.1") | Set-Content "src/easy_app.py" -Encoding UTF8
+          "1.3.1" | Set-Content "src/.moolva_easy_version" -Encoding ASCII
+          Expand-Archive "moolva-haccp-easy-1.4/delta.zip" -DestinationPath "src" -Force
+          $digest=(Get-FileHash "moolva-haccp-easy-1.4/delta.zip" -Algorithm SHA256).Hash.ToLower()
+          if($digest -ne "0f050c73bbe2bbdc31f0ba56beeaaf3e7729c8210250bbb826bc7c27efb1a01f"){ throw "Delta integrity check failed" }
+          "1.4.0" | Set-Content "src/.moolva_easy_version" -Encoding ASCII
+          $patch = "moolva-haccp-easy-1.5/delta.zip"
+          if (!(Test-Path $patch)) { throw "MoOLVa Easy 1.5 patch missing" }
+          $digest15=(Get-FileHash $patch -Algorithm SHA256).Hash.ToLower()
+          if($digest15 -ne "c33cd54d0528b991d4d3132b2ca2626b2907759740b1ba27be14b9ee95134725"){ throw "MoOLVa Easy 1.5 patch integrity failure" }
+          Expand-Archive $patch -DestinationPath "src" -Force
+          "1.5.0" | Set-Content "src/.moolva_easy_version" -Encoding ASCII
+          $patch16 = "moolva-haccp-easy-1.6/delta.zip"
+          if (!(Test-Path $patch16)) { throw "MoOLVa Easy 1.6 patch missing" }
+          $digest16=(Get-FileHash $patch16 -Algorithm SHA256).Hash.ToLower()
+          if($digest16 -ne "1d4ce405f749b8b0481a10915ad51a8ac75022b9706fcff16898f9dc0a5df093"){ throw "MoOLVa Easy 1.6 patch integrity failure" }
+          Expand-Archive $patch16 -DestinationPath "src" -Force
+          "1.6.0" | Set-Content "src/.moolva_easy_version" -Encoding ASCII
+
+      - name: Set up Python x64
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+          architecture: "x64"
+
+      - name: Install application and build dependencies
+        shell: pwsh
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r src/requirements.txt
+          python -m pip install "pyinstaller>=6.10,<7"
+
+      - name: Run source self-test
+        shell: pwsh
+        working-directory: src
+        run: |
+          python easy_app.py --self-test
+          python -m unittest discover -s tests -p "test_*.py" -q
+
+      - name: Build autonomous Portable EXE
+        shell: pwsh
+        working-directory: src
+        run: pyinstaller --noconfirm --clean --onefile --windowed --name "MoOLVa_HACCP_Easy_1.6.0_Portable" --icon "assets/MoOLVa_HACCP.ico" --add-data "assets;assets" --collect-all docx --collect-all reportlab --collect-all PIL easy_app.py
+
+      - name: Test frozen Portable EXE
+        shell: pwsh
+        working-directory: src
+        run: |
+          $exe = ".\dist\MoOLVa_HACCP_Easy_1.6.0_Portable.exe"
+          if (!(Test-Path $exe)) { throw "Portable EXE was not created" }
+          $p = Start-Process -FilePath $exe -ArgumentList "--self-test" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Frozen EXE self-test failed with exit code $($p.ExitCode)" }
+
+      - name: Install Inno Setup
+        shell: pwsh
+        run: choco install innosetup -y --no-progress
+
+      - name: Build standard Windows Setup EXE
+        shell: pwsh
+        run: |
+          $iss = @'
+          [Setup]
+          AppId={{7A9687D6-AD47-44D9-A42C-43112E5873C1}
+          AppName=MoOLVa ХАССП Easy
+          AppVersion=1.6.0
+          AppVerName=MoOLVa ХАССП Easy 1.6.0
+          AppPublisher=MoOLVa
+          DefaultDirName={localappdata}\Programs\MoOLVaHACCPEasy
+          DefaultGroupName=MoOLVa ХАССП Easy
+          UninstallDisplayIcon={app}\MoOLVa_HACCP_Easy.exe
+          OutputDir=release
+          OutputBaseFilename=MoOLVa_HACCP_Easy_1.6.0_Setup
+          Compression=lzma2/max
+          SolidCompression=yes
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+          PrivilegesRequired=lowest
+          WizardStyle=modern
+          SetupIconFile=src\assets\MoOLVa_HACCP.ico
+          CloseApplications=yes
+          RestartApplications=no
+          DisableProgramGroupPage=yes
+          UsePreviousAppDir=yes
+
+          [Files]
+          Source: "src\dist\MoOLVa_HACCP_Easy_1.6.0_Portable.exe"; DestDir: "{app}"; DestName: "MoOLVa_HACCP_Easy.exe"; Flags: ignoreversion
+
+          [Icons]
+          Name: "{group}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVa_HACCP_Easy.exe"
+          Name: "{autodesktop}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVa_HACCP_Easy.exe"; Tasks: desktopicon
+
+          [Tasks]
+          Name: "desktopicon"; Description: "Создать ярлык на рабочем столе"; GroupDescription: "Дополнительные ярлыки:"; Flags: unchecked
+
+          [Run]
+          Filename: "{app}\MoOLVa_HACCP_Easy.exe"; Description: "Запустить MoOLVa ХАССП Easy"; Flags: nowait postinstall skipifsilent
+          '@
+          Set-Content -Path "installer.iss" -Value $iss -Encoding UTF8
+          New-Item -ItemType Directory -Force -Path release | Out-Null
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Inno Setup compilation failed" }
+
+      - name: Test real installer on Windows
+        shell: pwsh
+        run: |
+          $ErrorActionPreference = "Stop"
+          $setup = (Resolve-Path "release\MoOLVa_HACCP_Easy_1.6.0_Setup.exe").Path
+          $installDir = Join-Path $env:LOCALAPPDATA "Programs\MoOLVaHACCPEasy"
+          $p = Start-Process -FilePath $setup -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART","/SP-","/TASKS=!desktopicon" -Wait -PassThru
+          if ($p.ExitCode -ne 0) { throw "Setup installation failed with exit code $($p.ExitCode)" }
+          $installed = Join-Path $installDir "MoOLVa_HACCP_Easy.exe"
+          if (!(Test-Path $installed)) { throw "Installed EXE not found: $installed" }
+          $t = Start-Process -FilePath $installed -ArgumentList "--self-test" -Wait -PassThru
+          if ($t.ExitCode -ne 0) { throw "Installed EXE self-test failed with exit code $($t.ExitCode)" }
+          $uninstall = Join-Path $installDir "unins000.exe"
+          if (!(Test-Path $uninstall)) { throw "Uninstaller was not created" }
+          $u = Start-Process -FilePath $uninstall -ArgumentList "/VERYSILENT","/SUPPRESSMSGBOXES","/NORESTART" -Wait -PassThru
+          if ($u.ExitCode -ne 0) { throw "Uninstall test failed with exit code $($u.ExitCode)" }
+
+      - name: Prepare release and SHA256
+        shell: pwsh
+        run: |
+          Copy-Item "src\dist\MoOLVa_HACCP_Easy_1.6.0_Portable.exe" "release\MoOLVa_HACCP_Easy_1.6.0_Portable.exe"
+          $lines = @()
+          Get-ChildItem release\*.exe | Sort-Object Name | ForEach-Object {
+            $h = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLower()
+            $lines += "$h  $($_.Name)"
+          }
+          $lines | Set-Content "release\SHA256SUMS.txt" -Encoding ASCII
+          Get-Content "release\SHA256SUMS.txt"
+
+      - name: Upload autonomous Windows build
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa_HACCP_Easy_1.6.0_Autonomous_Windows
+          path: release/*
+          if-no-files-found: error
+          retention-days: 30
