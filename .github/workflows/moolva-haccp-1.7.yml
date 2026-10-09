@@ -121,8 +121,8 @@ jobs:
           (Path(os.environ['TEMP'])/'moolva-upgrade-venue-id.txt').write_text(str(vid),encoding='ascii')
           print('Seeded pre-upgrade venue id:',vid)
           '@
-          $seed | Set-Content seed_previous.py -Encoding UTF8
-          python seed_previous.py
+          $seed | Set-Content src/seed_previous.py -Encoding UTF8
+          python src/seed_previous.py
 
       - name: Test real installer on Windows
         shell: pwsh
