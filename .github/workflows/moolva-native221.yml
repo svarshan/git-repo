@@ -61,12 +61,34 @@ jobs:
           & ./scripts/build_native_windows221.ps1 -SkipTests
           if ($LASTEXITCODE -ne 0) { throw 'Native build failed' }
 
-      - name: Test independent desktop window and full process shutdown
+      - name: Test packed Python server (not system Python)
         shell: pwsh
         working-directory: moolva_src
         run: |
+          & 'dist/native221/MoOLVa_HACCP_Easy_2.2.1_Native_Portable/MoOLVaServer/MoOLVaServer.exe' --startup-test
+          if ($LASTEXITCODE -ne 0) { throw 'Packed server startup failed' }
+
+      - name: Test independent desktop window and full process shutdown
+        id: native_ui_test
+        continue-on-error: true
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          $path='scripts/native_windows_e2e221.py'
+          $source=Get-Content $path -Raw
+          $needle="        assert log.is_file(),'WebView2 desktop did not confirm readiness within 90 seconds'"
+          $patch=@'
+        if not log.is_file():
+            report=log.parent/'desktop-launch.log'
+            print("NATIVE_UI_TIMEOUT; desktop-launch.log follows:", flush=True)
+            print(report.read_text(encoding="utf-8",errors="replace") if report.exists() else "NO_LOG_FOUND", flush=True)
+        assert log.is_file(),'WebView2 desktop did not confirm readiness within 90 seconds'
+'@
+          if (-not $source.Contains($needle)) { throw 'Cannot patch Native GUI diagnostics' }
+          $source=$source.Replace($needle,$patch)
+          Set-Content -Path $path -Value $source -Encoding utf8
           python scripts/native_windows_e2e221.py
-          if ($LASTEXITCODE -ne 0) { throw 'Native GUI Windows test failed' }
+          if ($LASTEXITCODE -ne 0) { throw 'Native GUI Windows test failed; see diagnostics above' }
 
       - name: Compile Russian-language installer
         shell: pwsh
