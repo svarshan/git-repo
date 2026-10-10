@@ -1,0 +1,133 @@
+name: Build MoOLVa Native 2.2.1 Windows Installer
+
+on:
+  push:
+    branches: [moolva-native-221]
+    paths:
+      - 'moolva-native-221/**'
+      - '.github/workflows/moolva-native221.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore MoOLVa native source
+        shell: pwsh
+        run: |
+          $encoded = (Get-Content 'moolva-native-221/source/moolva_core_source.zip.b64' -Raw).Trim()
+          $archive = Join-Path $env:RUNNER_TEMP 'moolva221_source.zip'
+          [IO.File]::WriteAllBytes($archive, [Convert]::FromBase64String($encoded))
+          New-Item -ItemType Directory -Force 'moolva_src' | Out-Null
+          Expand-Archive -Path $archive -DestinationPath 'moolva_src' -Force
+          if (-not (Test-Path 'moolva_src/native221/Desktop/MoOLVaDesktop.csproj')) { throw 'Missing WPF source' }
+          if (-not (Test-Path 'moolva_src/web19/index.html')) { throw 'Missing UI source' }
+          if (-not (Test-Path 'moolva_src/web19_bridge.py')) { throw 'Missing server source' }
+          if (-not (Test-Path 'moolva_src/inventory_catalog196.json')) { throw 'Missing inventory catalog' }
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Test app startup on Windows
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          python web19_bridge.py --self-test
+          if ($LASTEXITCODE -ne 0) { throw 'Server self test failed' }
+          python web19_bridge.py --startup-test
+          if ($LASTEXITCODE -ne 0) { throw 'Server startup test failed' }
+
+      - name: Build self-contained WPF + Python application
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          & ./scripts/build_native_windows221.ps1 -SkipTests
+          if ($LASTEXITCODE -ne 0) { throw 'Native build failed' }
+
+      - name: Test independent desktop window and full process shutdown
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          python scripts/native_windows_e2e221.py
+          if ($LASTEXITCODE -ne 0) { throw 'Native GUI Windows test failed' }
+
+      - name: Compile Russian-language installer
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          $iscc = Get-Command ISCC.exe -ErrorAction SilentlyContinue
+          if (-not $iscc) {
+            choco install innosetup --no-progress -y
+            if ($LASTEXITCODE -ne 0) { throw 'Inno Setup installation failed' }
+          }
+          $iscc = @(
+            'C:\Program Files (x86)\Inno Setup 6\ISCC.exe',
+            'C:\Program Files\Inno Setup 6\ISCC.exe'
+          ) | Where-Object { Test-Path $_ } | Select-Object -First 1
+          if (-not $iscc) { throw 'ISCC.exe unavailable' }
+          @'
+          [Setup]
+          AppId=MoOLVaHACCPNative221
+          AppName=MoOLVa ХАССП Easy
+          AppVersion=2.2.1
+          AppPublisher=MoOLVa
+          DefaultDirName={localappdata}\Programs\MoOLVaHACCPEasyNative
+          DefaultGroupName=MoOLVa ХАССП Easy
+          OutputDir=dist
+          OutputBaseFilename=MoOLVa_HACCP_Easy_2.2.1_NATIVE_Setup
+          SetupIconFile=assets\MoOLVa_HACCP.ico
+          UninstallDisplayIcon={app}\MoOLVaDesktop.exe
+          LicenseFile=LICENSE_RU.txt
+          PrivilegesRequired=lowest
+          WizardStyle=modern
+          Compression=lzma2
+          SolidCompression=yes
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+          CloseApplications=yes
+          RestartApplications=no
+          DisableProgramGroupPage=yes
+          [Files]
+          Source: "dist\native221\MoOLVa_HACCP_Easy_2.2.1_Native_Portable\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+          [Icons]
+          Name: "{autoprograms}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVaDesktop.exe"
+          Name: "{autodesktop}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVaDesktop.exe"
+          [Run]
+          Filename: "{app}\MoOLVaDesktop.exe"; Description: "Запустить MoOLVa ХАССП Easy"; Flags: postinstall unchecked skipifsilent nowait
+          '@ | Set-Content -Encoding utf8 'MoOLVaNativeInstaller.iss'
+          & $iscc 'MoOLVaNativeInstaller.iss'
+          if ($LASTEXITCODE -ne 0) { throw 'Inno Setup compilation failed' }
+          if (-not (Test-Path 'dist/MoOLVa_HACCP_Easy_2.2.1_NATIVE_Setup.exe')) { throw 'Installer not found' }
+
+      - name: Smoke test installing EXE to isolated location
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          $installer=(Resolve-Path 'dist/MoOLVa_HACCP_Easy_2.2.1_NATIVE_Setup.exe').Path
+          $dest=Join-Path $env:RUNNER_TEMP 'MoOLVaNativeInstallTest'
+          $proc=Start-Process -FilePath $installer -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/DIR="'+$dest+'"')) -Wait -PassThru
+          if ($proc.ExitCode -ne 0) { throw "Installer returned code $($proc.ExitCode)" }
+          if (-not (Test-Path (Join-Path $dest 'MoOLVaDesktop.exe'))) { throw 'Installed application missing' }
+          if (-not (Test-Path (Join-Path $dest 'MoOLVaServer/MoOLVaServer.exe'))) { throw 'Installed server missing' }
+          Write-Host 'INSTALLER_SMOKE_OK'
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: MoOLVa-HACCP-Easy-2.2.1-Native-Windows-Installer
+          path: |
+            moolva_src/dist/MoOLVa_HACCP_Easy_2.2.1_NATIVE_Setup.exe
+            moolva_src/dist/MoOLVa_HACCP_Easy_2.2.1_Native_Portable.zip
+          retention-days: 14
