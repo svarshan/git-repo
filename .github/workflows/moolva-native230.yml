@@ -95,17 +95,17 @@ jobs:
           $test=Get-Content 'scripts/native_windows_e2e221.py' -Raw
           $needle="        assert log.is_file(),'WebView2 desktop did not confirm readiness within 90 seconds'"
           $replacement=@'
-          if not log.is_file():
-              print('NATIVE_WINDOW_TIMEOUT_DEBUG:', flush=True)
-              print('TEMP_LOCALAPPDATA=',env.get('LOCALAPPDATA'),flush=True)
-              for source in [
-                  Path(env['LOCALAPPDATA'])/'MoOLVaHACCPEasy'/'Logs'/'desktop-launch.log',
-                  Path(os.environ.get('USERPROFILE', str(Path.home())))/'AppData'/'Local'/'MoOLVaHACCPEasy'/'Logs'/'desktop-launch.log'
-              ]:
-                  print('LOG_PATH=',source,'EXISTS=',source.exists(),flush=True)
-                  if source.exists():
-                      print(source.read_text(encoding='utf-8',errors='replace')[-8000:],flush=True)
-          assert log.is_file(),'WebView2 desktop did not confirm readiness within 90 seconds'
+                  if not log.is_file():
+                      print('NATIVE_WINDOW_TIMEOUT_DEBUG:', flush=True)
+                      print('TEMP_LOCALAPPDATA=',env.get('LOCALAPPDATA'),flush=True)
+                      for source in [
+                          Path(env['LOCALAPPDATA'])/'MoOLVaHACCPEasy'/'Logs'/'desktop-launch.log',
+                          Path(os.environ.get('USERPROFILE', str(Path.home())))/'AppData'/'Local'/'MoOLVaHACCPEasy'/'Logs'/'desktop-launch.log'
+                      ]:
+                          print('LOG_PATH=',source,'EXISTS=',source.exists(),flush=True)
+                          if source.exists():
+                              print(source.read_text(encoding='utf-8',errors='replace')[-8000:],flush=True)
+                  assert log.is_file(),'WebView2 desktop did not confirm readiness within 90 seconds'
           '@
           if(-not $test.Contains($needle)){throw 'GUI diagnostic patch anchor not found'}
           $test=$test.Replace($needle,$replacement)
