@@ -12,6 +12,7 @@ def edit(path,needle,replacement):
     if needle not in s: raise RuntimeError("Source changed unexpectedly: "+str(path)+" :: "+needle[:70])
     p.write_text(s.replace(needle,replacement,1),encoding="utf-8")
 
+(root/'tests').mkdir(parents=True,exist_ok=True)
 shutil.copy2(src/'onboarding222.py',root/'onboarding222.py')
 shutil.copy2(src/'test_onboarding222.py',root/'tests'/'test_onboarding222.py')
 
