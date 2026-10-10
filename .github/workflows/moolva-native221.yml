@@ -78,12 +78,12 @@ jobs:
           $source=Get-Content $path -Raw
           $needle="        assert log.is_file(),'WebView2 desktop did not confirm readiness within 90 seconds'"
           $patch=@'
-        if not log.is_file():
-            report=log.parent/'desktop-launch.log'
-            print("NATIVE_UI_TIMEOUT; desktop-launch.log follows:", flush=True)
-            print(report.read_text(encoding="utf-8",errors="replace") if report.exists() else "NO_LOG_FOUND", flush=True)
-        assert log.is_file(),'WebView2 desktop did not confirm readiness within 90 seconds'
-'@
+                  if not log.is_file():
+                      report=log.parent/'desktop-launch.log'
+                      print("NATIVE_UI_TIMEOUT; desktop-launch.log follows:", flush=True)
+                      print(report.read_text(encoding="utf-8",errors="replace") if report.exists() else "NO_LOG_FOUND", flush=True)
+                  assert log.is_file(),'WebView2 desktop did not confirm readiness within 90 seconds'
+          '@
           if (-not $source.Contains($needle)) { throw 'Cannot patch Native GUI diagnostics' }
           $source=$source.Replace($needle,$patch)
           Set-Content -Path $path -Value $source -Encoding utf8
