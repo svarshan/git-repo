@@ -15,4 +15,11 @@ b='with closing(sqlite3.connect(temp)) as db:'
 if a not in s:raise SystemExit('Temporary backup connection anchor changed')
 s=s.replace(a,b,1)
 p.write_text(s,encoding='utf-8')
-print('Closed all SQLite backup handles before Windows rename: OK')
+# Windows tests must explicitly close test reader connections before deleting temp folders.
+test=Path(sys.argv[1])/'tests'/'test_intelligent24.py'
+t=test.read_text(encoding='utf-8')
+if 'from contextlib import closing' not in t:
+    t=t.replace('import unittest, tempfile, json, sqlite3', 'import unittest, tempfile, json, sqlite3\nfrom contextlib import closing')
+t=t.replace("with sqlite3.connect(r['path']) as db:", "with closing(sqlite3.connect(r['path'])) as db:")
+test.write_text(t,encoding='utf-8')
+print('Closed SQLite backup and test handles on Windows: OK')
