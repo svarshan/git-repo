@@ -109,6 +109,10 @@ jobs:
           '@
           if(-not $test.Contains($needle)){throw 'GUI diagnostic patch anchor not found'}
           $test=$test.Replace($needle,$replacement)
+          $markerOld="log=Path(env['LOCALAPPDATA'])/'MoOLVaHACCPEasy'/'Logs'/'native-ready.json'"
+          $markerNew="log=Path(os.environ['LOCALAPPDATA'])/'MoOLVaHACCPEasy'/'Logs'/'native-ready.json'"
+          if(-not $test.Contains($markerOld)){throw 'Native readiness path anchor missing'}
+          $test=$test.Replace($markerOld,$markerNew)
           Set-Content -Path 'scripts/native_windows_e2e221.py' -Encoding utf8 -Value $test
           python scripts/native_windows_e2e221.py
           if($LASTEXITCODE -ne 0){throw 'Native UI test failed — see desktop launch diagnostic'}
