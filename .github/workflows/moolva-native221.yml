@@ -31,6 +31,13 @@ jobs:
           if (-not (Test-Path 'moolva_src/web19_bridge.py')) { throw 'Missing server source' }
           if (-not (Test-Path 'moolva_src/inventory_catalog196.json')) { throw 'Missing inventory catalog' }
 
+      - name: Apply 2.2.2 guided onboarding
+        shell: pwsh
+        run: |
+          python moolva222/apply222.py moolva_src
+          if ($LASTEXITCODE -ne 0) { throw 'Guided enterprise source patch failed' }
+          if (-not (Test-Path 'moolva_src/onboarding222.py')) { throw 'Onboarding module not found' }
+
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
@@ -48,6 +55,13 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Server self test failed' }
           python web19_bridge.py --startup-test
           if ($LASTEXITCODE -ne 0) { throw 'Server startup test failed' }
+
+      - name: Guided enterprise tests
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          python -m unittest discover -s tests -p test_onboarding222.py -v
+          if ($LASTEXITCODE -ne 0) { throw 'Guided enterprise tests failed' }
 
       - name: Build self-contained WPF + Python application
         shell: pwsh
@@ -108,12 +122,12 @@ jobs:
           [Setup]
           AppId=MoOLVaHACCPNative221
           AppName=MoOLVa ХАССП Easy
-          AppVersion=2.2.1
+          AppVersion=2.2.2
           AppPublisher=MoOLVa
           DefaultDirName={localappdata}\Programs\MoOLVaHACCPEasyNative
           DefaultGroupName=MoOLVa ХАССП Easy
           OutputDir=dist
-          OutputBaseFilename=MoOLVa_HACCP_Easy_2.2.1_NATIVE_Setup
+          OutputBaseFilename=MoOLVa_HACCP_Easy_2.2.2_NATIVE_Setup
           SetupIconFile=assets\MoOLVa_HACCP.ico
           UninstallDisplayIcon={app}\MoOLVaDesktop.exe
           LicenseFile=LICENSE_RU.txt
@@ -136,13 +150,13 @@ jobs:
           '@ | Set-Content -Encoding utf8 'MoOLVaNativeInstaller.iss'
           & $iscc 'MoOLVaNativeInstaller.iss'
           if ($LASTEXITCODE -ne 0) { throw 'Inno Setup compilation failed' }
-          if (-not (Test-Path 'dist/MoOLVa_HACCP_Easy_2.2.1_NATIVE_Setup.exe')) { throw 'Installer not found' }
+          if (-not (Test-Path 'dist/MoOLVa_HACCP_Easy_2.2.2_NATIVE_Setup.exe')) { throw 'Installer not found' }
 
       - name: Smoke test installing EXE to isolated location
         shell: pwsh
         working-directory: moolva_src
         run: |
-          $installer=(Resolve-Path 'dist/MoOLVa_HACCP_Easy_2.2.1_NATIVE_Setup.exe').Path
+          $installer=(Resolve-Path 'dist/MoOLVa_HACCP_Easy_2.2.2_NATIVE_Setup.exe').Path
           $dest=Join-Path $env:RUNNER_TEMP 'MoOLVaNativeInstallTest'
           $proc=Start-Process -FilePath $installer -ArgumentList @('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/DIR="'+$dest+'"')) -Wait -PassThru
           if ($proc.ExitCode -ne 0) { throw "Installer returned code $($proc.ExitCode)" }
@@ -150,11 +164,17 @@ jobs:
           if (-not (Test-Path (Join-Path $dest 'MoOLVaServer/MoOLVaServer.exe'))) { throw 'Installed server missing' }
           Write-Host 'INSTALLER_SMOKE_OK'
 
+      - name: Label 2.2.2 portable package
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          Copy-Item 'dist/MoOLVa_HACCP_Easy_2.2.1_Native_Portable.zip' 'dist/MoOLVa_HACCP_Easy_2.2.2_Native_Portable.zip' -Force
+
       - uses: actions/upload-artifact@v4
         if: success()
         with:
-          name: MoOLVa-HACCP-Easy-2.2.1-Native-Windows-Installer
+          name: MoOLVa-HACCP-Easy-2.2.2-Native-Windows-Installer
           path: |
-            moolva_src/dist/MoOLVa_HACCP_Easy_2.2.1_NATIVE_Setup.exe
-            moolva_src/dist/MoOLVa_HACCP_Easy_2.2.1_Native_Portable.zip
+            moolva_src/dist/MoOLVa_HACCP_Easy_2.2.2_NATIVE_Setup.exe
+            moolva_src/dist/MoOLVa_HACCP_Easy_2.2.2_Native_Portable.zip
           retention-days: 14
