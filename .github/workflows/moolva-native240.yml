@@ -46,6 +46,8 @@ jobs:
           $archive=Join-Path $env:RUNNER_TEMP 'moolva24patch.zip'
           [IO.File]::WriteAllBytes($archive,[Convert]::FromBase64String($encoded))
           Expand-Archive -Path $archive -DestinationPath 'moolva_src' -Force
+          python moolva240/fix_windows_backup.py moolva_src
+          if($LASTEXITCODE -ne 0){throw 'Windows backup fix failed'}
           foreach($p in @('moolva_src/intelligent24.py','moolva_src/tests/test_intelligent24.py','moolva_src/web19/index.html')){
             if(-not (Test-Path $p)){throw "Missing 2.4 component: $p"}
           }
