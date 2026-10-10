@@ -5,6 +5,7 @@ on:
     branches: [moolva-native-221]
     paths:
       - 'moolva-native-221/**'
+      - 'moolva222/**'
       - '.github/workflows/moolva-native221.yml'
   workflow_dispatch:
 
