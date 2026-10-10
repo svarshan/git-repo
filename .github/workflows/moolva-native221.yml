@@ -53,6 +53,11 @@ jobs:
         shell: pwsh
         working-directory: moolva_src
         run: |
+          $buildScript='scripts/build_native_windows221.ps1'
+          $buildText=Get-Content $buildScript -Raw
+          if (-not $buildText.Contains('--specpath $target')) { throw 'Unexpected PyInstaller script layout' }
+          $buildText=$buildText.Replace('--specpath $target','--specpath $root')
+          Set-Content -Path $buildScript -Value $buildText -Encoding utf8
           & ./scripts/build_native_windows221.ps1 -SkipTests
           if ($LASTEXITCODE -ne 0) { throw 'Native build failed' }
 
