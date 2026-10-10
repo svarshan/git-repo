@@ -1,0 +1,201 @@
+name: MoOLVa HACCP Easy 2.4.0 Native Windows Release
+
+on:
+  push:
+    branches: [moolva-native-240]
+    paths: ['moolva240/**', '.github/workflows/moolva-native240.yml']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  native-build-and-test:
+    runs-on: windows-2022
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore 2.2.1 native baseline
+        shell: pwsh
+        run: |
+          $content=(Get-Content 'moolva-native-221/source/moolva_core_source.zip.b64' -Raw).Trim()
+          $archive=Join-Path $env:RUNNER_TEMP 'baseline.zip'
+          [IO.File]::WriteAllBytes($archive,[Convert]::FromBase64String($content))
+          New-Item -ItemType Directory -Force 'moolva_src' | Out-Null
+          Expand-Archive -Path $archive -DestinationPath 'moolva_src' -Force
+          if(-not (Test-Path 'moolva_src/web19_bridge.py')){throw 'Missing native baseline'}
+
+      - name: Apply 2.2.2 tested onboarding and 2.3 upgrades
+        shell: pwsh
+        run: |
+          python moolva222/apply222.py moolva_src
+          if($LASTEXITCODE -ne 0){throw 'Cannot restore 2.2.2 guided company setup'}
+          $encoded=(Get-Content 'moolva230/moolva230_patch.zip.b64' -Raw).Trim()
+          $archive=Join-Path $env:RUNNER_TEMP 'mo230overlay.zip'
+          [IO.File]::WriteAllBytes($archive,[Convert]::FromBase64String($encoded))
+          Expand-Archive -Path $archive -DestinationPath 'moolva_src' -Force
+          foreach($path in @('moolva_src/enterprise23.py','moolva_src/tests/test_enterprise23.py','moolva_src/native221/Desktop/MoOLVaDesktop.csproj')) {
+            if(-not (Test-Path $path)){throw "Missing 2.3 overlay: $path"}
+          }
+
+      - name: Apply MoOLVa 2.4 control overlay
+        shell: pwsh
+        run: |
+          $encoded=(Get-Content 'moolva240/moolva240_overlay.zip.b64' -Raw).Trim()
+          $archive=Join-Path $env:RUNNER_TEMP 'moolva24patch.zip'
+          [IO.File]::WriteAllBytes($archive,[Convert]::FromBase64String($encoded))
+          Expand-Archive -Path $archive -DestinationPath 'moolva_src' -Force
+          foreach($p in @('moolva_src/intelligent24.py','moolva_src/tests/test_intelligent24.py','moolva_src/web19/index.html')){
+            if(-not (Test-Path $p)){throw "Missing 2.4 component: $p"}
+          }
+          if(-not ((Get-Content 'moolva_src/.moolva_easy_version' -Raw).Trim() -eq '2.4.0')){throw 'Version file mismatch'}
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+          architecture: x64
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Verify guided company creation and isolated drafts
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          python -m unittest discover -s tests -p 'test_onboarding222.py' -v
+          if($LASTEXITCODE -ne 0){throw 'Guided onboarding tests failed'}
+          python -m unittest discover -s tests -p 'test_intelligent24.py' -v
+          if($LASTEXITCODE -ne 0){throw 'Smart HACCP 2.4 tests failed'}
+          python -m unittest discover -s tests -p 'test_enterprise23.py' -v
+          if($LASTEXITCODE -ne 0){throw 'Enterprise 2.3 tests failed'}
+
+      - name: Verify server and updated migration
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          python web19_bridge.py --self-test
+          if($LASTEXITCODE -ne 0){throw 'Server self-test failed'}
+          python web19_bridge.py --startup-test
+          if($LASTEXITCODE -ne 0){throw 'Startup or migration failed'}
+
+      - name: Package independent Python server and native WPF Desktop
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          & ./scripts/build_native_windows221.ps1 -SkipTests
+          if($LASTEXITCODE -ne 0){throw 'Native package build failed'}
+          $dir='dist/native221/MoOLVa_HACCP_Easy_2.4.0_Native_Portable'
+          if(-not (Test-Path "$dir/MoOLVaDesktop.exe")){throw 'Native desktop not found'}
+          if(-not (Test-Path "$dir/MoOLVaServer/MoOLVaServer.exe")){throw 'Python backend not found'}
+
+      - name: Smoke test packed Python without installed Python
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          & 'dist/native221/MoOLVa_HACCP_Easy_2.4.0_Native_Portable/MoOLVaServer/MoOLVaServer.exe' --startup-test
+          if($LASTEXITCODE -ne 0){throw 'Packed server startup test failed'}
+
+      - name: Test Native Desktop window and process shutdown
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          python scripts/native_windows_e2e221.py
+          if($LASTEXITCODE -ne 0){throw 'Native UI test failed — see desktop launch diagnostic'}
+
+      - name: Compile Russian native Windows installer
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          if(-not (Test-Path 'C:\Program Files (x86)\Inno Setup 6\ISCC.exe')){
+            choco install innosetup --no-progress -y
+            if($LASTEXITCODE -ne 0){throw 'Could not install Inno Setup compiler'}
+          }
+          $iscc='C:\Program Files (x86)\Inno Setup 6\ISCC.exe'
+          if(-not (Test-Path $iscc)){throw 'Missing Inno Setup compiler'}
+          @'
+          [Setup]
+          AppId=MoOLVaHACCPNative221
+          UsePreviousAppDir=yes
+          AppName=MoOLVa ХАССП Easy
+          AppVersion=2.4.0
+          AppPublisher=MoOLVa
+          DefaultDirName={localappdata}\Programs\MoOLVaHACCPEasyNative
+          DefaultGroupName=MoOLVa ХАССП Easy
+          OutputDir=dist
+          OutputBaseFilename=MoOLVa_HACCP_Easy_2.4.0_NATIVE_Setup
+          SetupIconFile=assets\MoOLVa_HACCP.ico
+          UninstallDisplayIcon={app}\MoOLVaDesktop.exe
+          LicenseFile=LICENSE_RU.txt
+          PrivilegesRequired=lowest
+          WizardStyle=modern
+          Compression=lzma2
+          SolidCompression=yes
+          ArchitecturesAllowed=x64compatible
+          ArchitecturesInstallIn64BitMode=x64compatible
+          CloseApplications=yes
+          RestartApplications=no
+          DisableProgramGroupPage=yes
+          [Code]
+          var
+            MoOLVaInstalledBefore: Boolean;
+
+          function InitializeSetup(): Boolean;
+          begin
+            MoOLVaInstalledBefore := FileExists(ExpandConstant('{localappdata}\\Programs\\MoOLVaHACCPEasyNative\\MoOLVaDesktop.exe'));
+            Result := True;
+          end;
+
+          procedure CurPageChanged(CurPageID: Integer);
+          begin
+            if CurPageID = wpWelcome then
+            begin
+              if MoOLVaInstalledBefore then
+                WizardForm.WelcomeLabel2.Caption := 'Найдена ранее установленная MoOLVa ХАССП Easy. Этот мастер обновит программу до 2.4.0. Существующая база SQLite расположена отдельно от файлов приложения. Перед миграцией приложение проверит и сохранит её копию.';
+            end;
+            if CurPageID = wpReady then
+            begin
+              if MoOLVaInstalledBefore then
+                WizardForm.NextButton.Caption := 'Обновить'
+              else
+                WizardForm.NextButton.Caption := 'Установить';
+            end;
+          end;
+
+          [Languages]
+          Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
+          [Files]
+          Source: "dist\native221\MoOLVa_HACCP_Easy_2.4.0_Native_Portable\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
+          [Icons]
+          Name: "{autoprograms}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVaDesktop.exe"
+          Name: "{autodesktop}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVaDesktop.exe"
+          [Run]
+          Filename: "{app}\MoOLVaDesktop.exe"; Description: "Запустить MoOLVa ХАССП Easy"; Flags: postinstall unchecked skipifsilent nowait
+          '@ | Set-Content -Encoding utf8 'MoOLVa230Installer.iss'
+          & $iscc 'MoOLVa230Installer.iss'
+          if($LASTEXITCODE -ne 0){throw 'Inno Setup compilation failed'}
+          if(-not (Test-Path 'dist/MoOLVa_HACCP_Easy_2.4.0_NATIVE_Setup.exe')){throw 'No installer output'}
+
+      - name: Validate installing setup on Windows
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          $installer=(Resolve-Path 'dist/MoOLVa_HACCP_Easy_2.4.0_NATIVE_Setup.exe').Path
+          $dir=Join-Path $env:RUNNER_TEMP 'MoOLVa230TestInstall'
+          $args=@('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/DIR="'+$dir+'"'))
+          $p=Start-Process -FilePath $installer -ArgumentList $args -Wait -PassThru
+          if($p.ExitCode -ne 0){throw "Setup exit $($p.ExitCode)"}
+          foreach($f in @('MoOLVaDesktop.exe','MoOLVaServer\MoOLVaServer.exe')){
+            if(-not (Test-Path (Join-Path $dir $f))){throw "Installed package missing $f"}
+          }
+          Write-Output 'WINDOWS_230_INSTALL_OK'
+
+      - uses: actions/upload-artifact@v4
+        if: success()
+        with:
+          name: MoOLVa-HACCP-Easy-2.4.0-Native-Windows
+          path: |
+            moolva_src/dist/MoOLVa_HACCP_Easy_2.4.0_NATIVE_Setup.exe
+            moolva_src/dist/MoOLVa_HACCP_Easy_2.4.0_Native_Portable.zip
+          retention-days: 14
