@@ -1,0 +1,47 @@
+name: MoOLVa Mahjong 2.1 Android APK
+on:
+  push:
+    branches: [moolva-mahjong-2.1]
+    paths:
+      - 'mahjong21/**'
+      - '.github/workflows/moolva-mahjong-21.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Verify and unpack MoOLVa source
+        run: |
+          mkdir -p mahjong21/android
+          base64 --decode mahjong21/source.tar.gz.b64 > /tmp/moolva21.tar.gz
+          echo '1bbc4b160b40627c2fc60430358277d434713141ba846939fa68273d5107341e  /tmp/moolva21.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/moolva21.tar.gz -C mahjong21/android
+      - name: Install Android SDK 35
+        run: |
+          yes | sdkmanager --licenses >/dev/null || true
+          sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Verify game mechanics and free-theme progression
+        working-directory: mahjong21/android
+        run: bash tests/run-tests.sh
+      - name: Compile debug APK
+        working-directory: mahjong21/android
+        run: gradle --no-daemon --stacktrace :app:assembleDebug
+      - name: Upload installable APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Mahjong-2.1-debug-apk
+          path: mahjong21/android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 30
