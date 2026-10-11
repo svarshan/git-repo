@@ -1,0 +1,57 @@
+name: MoOLVa 3.1.2 Clean Screenshot on AOSP Android Emulator
+on:
+  push:
+    branches: [moolva-mahjong-3.1.2-cinematic-stable]
+    paths: ['.github/workflows/moolva-312-aosp-screenshot.yml']
+  workflow_dispatch:
+permissions:
+  actions: read
+  contents: read
+jobs:
+  aosp-screen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v4
+        with:
+          name: 3DReborn-emulator-only-apk
+          run-id: 38155760002
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: ./apk
+      - name: Emulator screen without heavy Pixel Launcher
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: default
+          arch: x86_64
+          profile: pixel_6
+          cores: 4
+          ram-size: 4096M
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -camera-back none
+          script: |
+            adb shell settings put global window_animation_scale 0
+            adb shell settings put global transition_animation_scale 0
+            adb install apk/app-debug.apk
+            adb shell am start -n com.moolva.mahjong/.MainActivity --ez visual_preview true
+            sleep 14
+            adb shell am force-stop com.android.launcher3 || true
+            adb shell am force-stop com.google.android.apps.nexuslauncher || true
+            adb shell am start -n com.moolva.mahjong/.MainActivity --ez visual_preview true
+            sleep 7
+            adb shell screencap -p /sdcard/MoOLVa_3.1.2_AOSP_Screenshot.png
+            adb pull /sdcard/MoOLVa_3.1.2_AOSP_Screenshot.png MoOLVa_3.1.2_AOSP_Screenshot.png
+            adb logcat -d -s AndroidRuntime:E > MoOLVa_3.1.2_logcat.txt
+            if grep -q 'FATAL EXCEPTION' MoOLVa_3.1.2_logcat.txt; then cat MoOLVa_3.1.2_logcat.txt; exit 1; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-3.1.2-Clean-AOSP-Screenshot
+          path: |
+            MoOLVa_3.1.2_AOSP_Screenshot.png
+            MoOLVa_3.1.2_logcat.txt
+          if-no-files-found: error
+          retention-days: 30
