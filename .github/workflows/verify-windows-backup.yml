@@ -5,6 +5,7 @@ on:
     branches: [moolva-native-240, moolva-native-260-pro]
     paths:
       - moolva240/fix_windows_backup.py
+      - moolva240/test_windows_backup_patch.py
       - .github/workflows/verify-windows-backup.yml
 jobs:
   verify:
@@ -15,6 +16,11 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.13'
+      - name: Verify backup patch itself
+        shell: pwsh
+        run: |
+          python -m unittest discover -s moolva240 -p 'test_windows_backup_patch.py' -v
+          if($LASTEXITCODE -ne 0){throw 'Backup patch self-test failed'}
       - name: Restore native baseline
         shell: pwsh
         run: |
