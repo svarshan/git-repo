@@ -1,0 +1,75 @@
+name: MoOLVa Mahjong Ultimate 3.0.2 SDK Fix
+on:
+  push:
+    branches: [moolva-mahjong-3.0.2-sdkfix]
+    paths:
+      - 'mahjong302/**'
+      - '.github/workflows/moolva-mahjong-302-studio.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-source:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Decode source and verify
+        run: |
+          set -euo pipefail
+          mkdir -p mahjong302/project
+          base64 -d mahjong302/source.tar.gz.b64 > /tmp/moolva302.tar.gz
+          echo 'e072c5a7838f95a42c2f7e9d4d867a1040d2315141b120dff48b10a45a8a7e47  /tmp/moolva302.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/moolva302.tar.gz -C mahjong302/project
+          test -f mahjong302/project/START_HERE_SDK_SETUP.cmd
+          test -f mahjong302/project/TOOLS/Setup-AndroidSdk.ps1
+          test ! -e mahjong302/project/local.properties
+          jar tf mahjong302/project/gradle/wrapper/gradle-wrapper.jar | grep -q 'org/gradle/wrapper/WrapperExecutor.class'
+      - name: Install Android SDK platform 35
+        run: |
+          set -euo pipefail
+          SDKMANAGER=$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | sort -V | tail -1)
+          test -x "$SDKMANAGER"
+          echo 'ANDROID_HOME=/usr/local/lib/android/sdk' >> "$GITHUB_ENV"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Test clean-project Android SDK autodetection
+        working-directory: mahjong302/project
+        run: |
+          set -e
+          test ! -e local.properties
+          chmod +x gradlew
+          ./gradlew --no-daemon projects
+          grep -E '^sdk.dir=.+' local.properties
+          grep -E 'sdk.dir=.*/android/sdk' local.properties
+      - name: Run pure Java regression suite
+        working-directory: mahjong302/project
+        run: bash tests/run-tests.sh
+      - name: Compile and lint on Android SDK 35
+        working-directory: mahjong302/project
+        run: ./gradlew --no-daemon :app:assembleDebug :app:lintDebug --stacktrace
+      - name: Confirm package and version
+        run: |
+          set -e
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging mahjong302/project/app/build/outputs/apk/debug/app-debug.apk | head -n 5
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging mahjong302/project/app/build/outputs/apk/debug/app-debug.apk | grep -F "versionName='3.0.2'"
+      - name: Build clean ZIP for Android Studio, source only
+        run: |
+          set -euo pipefail
+          mkdir -p mahjong302/dist/MoOLVaMahjong_Ultimate_3_0_2
+          rsync -a --exclude='local.properties' --exclude='.gradle' --exclude='build' --exclude='out' \
+            mahjong302/project/ mahjong302/dist/MoOLVaMahjong_Ultimate_3_0_2/
+          cd mahjong302/dist
+          zip -qr ../MoOLVa_Mahjong_Ultimate_3.0.2_AndroidStudio_SDKFIX.zip MoOLVaMahjong_Ultimate_3_0_2
+          unzip -l ../MoOLVa_Mahjong_Ultimate_3.0.2_AndroidStudio_SDKFIX.zip | grep -F 'gradle-wrapper.jar'
+          if unzip -l ../MoOLVa_Mahjong_Ultimate_3.0.2_AndroidStudio_SDKFIX.zip | grep -E '/local.properties$'; then echo 'local.properties leaked into package'; exit 1; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Mahjong-Ultimate-3.0.2-AndroidStudio-SDKFIX
+          path: mahjong302/MoOLVa_Mahjong_Ultimate_3.0.2_AndroidStudio_SDKFIX.zip
+          retention-days: 30
+          if-no-files-found: error
