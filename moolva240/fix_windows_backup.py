@@ -44,4 +44,21 @@ if old in s:
 elif new not in s:
     raise SystemExit("Unexpected backup replace/finally pattern; refusing to change")
 p.write_text(s, encoding="utf-8")
+# sqlite3.Connection context managers commit/rollback but do not close handles.
+# Close test readers explicitly before TemporaryDirectory cleanup on Windows.
+test = root / "tests" / "test_intelligent24.py"
+if test.exists():
+    t = test.read_text(encoding="utf-8")
+    anchor = "import unittest, tempfile, json, sqlite3"
+    if "from contextlib import closing" not in t:
+        if anchor not in t:
+            raise SystemExit("Unexpected test imports; refusing unsafe edit")
+        t = t.replace(anchor, anchor + "\\nfrom contextlib import closing", 1)
+    original = "with sqlite3.connect(r['path']) as db:"
+    corrected = "with closing(sqlite3.connect(r['path'])) as db:"
+    if original in t:
+        t = t.replace(original, corrected)
+    elif corrected not in t:
+        raise SystemExit("Unexpected backup test connection pattern")
+    test.write_text(t, encoding="utf-8")
 print("Windows SQLite backup patch applied")
