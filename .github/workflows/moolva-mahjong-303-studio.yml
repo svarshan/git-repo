@@ -1,0 +1,115 @@
+name: MoOLVa Mahjong 3.0.3 Visual Deluxe Studio + Screenshot
+on:
+  push:
+    branches: [moolva-mahjong-3.0.3-visual-deluxe]
+    paths: ['mahjong303/**', '.github/workflows/moolva-mahjong-303-studio.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  android-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Unpack versioned source
+        run: |
+          set -euo pipefail
+          mkdir -p mahjong303/project
+          base64 -d mahjong303/source.tar.gz.b64 >/tmp/moolva303.tar.gz
+          echo '00dc78edde11307ef4d6d9678609df3f2edca332a2e2576efa3e4a7bcd63c34b  /tmp/moolva303.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/moolva303.tar.gz -C mahjong303/project
+          test -f mahjong303/project/START_HERE_SDK_SETUP.cmd
+          jar tf mahjong303/project/gradle/wrapper/gradle-wrapper.jar | grep -q 'org/gradle/wrapper/WrapperExecutor.class'
+      - name: Set Android SDK 35
+        run: |
+          set -euo pipefail
+          SDKMANAGER=$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | sort -V | tail -1)
+          echo 'ANDROID_HOME=/usr/local/lib/android/sdk' >> "$GITHUB_ENV"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Test all gameplay and 30 visual sets
+        working-directory: mahjong303/project
+        run: bash tests/run-tests.sh
+      - name: Clean-sync, compile APK and run lint
+        working-directory: mahjong303/project
+        run: |
+          chmod +x gradlew
+          ./gradlew --no-daemon :app:assembleDebug :app:lintDebug --stacktrace
+      - name: Confirm APK package identity and Visual Deluxe version
+        run: |
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging mahjong303/project/app/build/outputs/apk/debug/app-debug.apk | grep -F "versionName='3.0.3'"
+      - name: Zip standalone Android Studio project (NO APK)
+        run: |
+          set -euo pipefail
+          mkdir -p mahjong303/dist/MoOLVaMahjong_Ultimate_3_0_3_VisualDeluxe
+          rsync -a --exclude='.gradle' --exclude='build' --exclude='out' --exclude='local.properties' \
+            mahjong303/project/ mahjong303/dist/MoOLVaMahjong_Ultimate_3_0_3_VisualDeluxe/
+          cd mahjong303/dist
+          zip -qr ../MoOLVa_Mahjong_Ultimate_3.0.3_VisualDeluxe_AndroidStudio.zip MoOLVaMahjong_Ultimate_3_0_3_VisualDeluxe
+      - name: Upload Android Studio source ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Mahjong-3.0.3-VisualDeluxe-AndroidStudio
+          path: mahjong303/MoOLVa_Mahjong_Ultimate_3.0.3_VisualDeluxe_AndroidStudio.zip
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload intermediate debug APK for emulator preview only
+        uses: actions/upload-artifact@v4
+        with:
+          name: visual-deluxe-emulator-only-apk
+          path: mahjong303/project/app/build/outputs/apk/debug/app-debug.apk
+          retention-days: 1
+  screenshot-emulator:
+    needs: android-build
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    continue-on-error: true
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: actions/download-artifact@v4
+        with:
+          name: visual-deluxe-emulator-only-apk
+          path: ./apk
+      - name: Enable KVM acceleration
+        run: |
+          KVM_RULE='KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"'
+          echo "$KVM_RULE" | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm || true
+          ls -l /dev/kvm || true
+      - name: Boot Android emulator and capture real screen
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 35
+          target: google_apis
+          arch: x86_64
+          profile: pixel_6
+          cores: 2
+          ram-size: 2048M
+          heap-size: 512M
+          emulator-options: -no-window -no-audio -no-boot-anim -gpu swiftshader_indirect -no-snapshot -camera-back none
+          script: |
+            adb install apk/app-debug.apk
+            adb shell am start -n com.moolva.mahjong/.MainActivity --ez visual_preview true
+            sleep 12
+            adb shell screencap -p /sdcard/mahjong_visual_deluxe.png
+            adb pull /sdcard/mahjong_visual_deluxe.png MoOLVa_Mahjong_3.0.3_Emulator_Screenshot.png
+      - name: Upload real emulator screenshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Mahjong-3.0.3-Emulator-Screenshot
+          path: MoOLVa_Mahjong_3.0.3_Emulator_Screenshot.png
+          retention-days: 30
+          if-no-files-found: error
