@@ -20,7 +20,7 @@ vm.runInContext('let state={venue:7,employees23:['+
 const picker = context.window.MoOLVaStaffPicker302;
 assert(picker,'Global staff picker not installed');
 const names=picker.people();
-assert.deepStrictEqual(names.map(x=>x.name).sort(), ['Анна Иванова','Мария Зайцева','Пётр Смирнов'].sort());
+assert.deepStrictEqual(Array.from(names,x=>x.name).sort(), ['Анна Иванова','Мария Зайцева','Пётр Смирнов'].sort());
 function field(id,placeholder,label,attrs={}) {
   return {
     tagName:'INPUT',type:attrs.type||'text',id,name:attrs.name||'',
@@ -49,7 +49,7 @@ for (const [id,ph,lab] of [
 assert(!picker.isNameField(field('disabled-staff','ФИО','','',{disabled:true})));
 assert(!picker.isNameField(field('amount-owner','Ответственный','',{type:'number'})));
 vm.runInContext('state={venue:9,employees23:[{name:"Елена Петрова",position:"Повар"}]};',context);
-assert.deepStrictEqual(picker.people().map(x=>x.name),['Елена Петрова'],
+assert.deepStrictEqual(Array.from(picker.people(),x=>x.name),['Елена Петрова'],
   'Employee list leaked across enterprise switch');
 vm.runInContext('state={venue:0,employees23:[{name:"Случайный человек"}]};',context);
 assert.strictEqual(picker.people().length,0,'People shown without enterprise selected');
