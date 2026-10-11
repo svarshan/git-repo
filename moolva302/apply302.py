@@ -35,6 +35,9 @@ if bridge.is_file():
     # Change only literal version indicators, not SQLite migration steps.
     s = s.replace("'version':'3.0.1'", "'version':'3.0.2'")
     s = s.replace("'version':'3.0.0'", "'version':'3.0.2'")
+    # Startup self-test must expect the new release, not the old 3.0 baseline.
+    s = s.replace("['version']=='3.0.0'", "['version']=='3.0.2'")
+    s = s.replace("['version'] == '3.0.0'", "['version'] == '3.0.2'")
     bridge.write_text(s, encoding="utf-8")
 version.write_text("3.0.2\n", encoding="utf-8")
 print("MOOLVA_STAFF_PICKER_302_APPLIED")
