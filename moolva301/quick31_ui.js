@@ -42,10 +42,16 @@ function render(){
   if(editing||!p){
     html+='<div class="quick31-heading">Постоянные данные (настроить один раз)</div><div class="formgrid">';
     html+='<div class="formfield"><label>Название настройки * (например, Холодильник № 2)</label><input id="q31-title" value="'+escQ(p?.title||t?.name||'')+'" maxlength="120"></div>';
-    html+='<div class="formfield"><label>Оборудование / объект *</label><input id="q31-equipment" value="'+escQ(p?.equipment||'')+'" maxlength="200" placeholder="Холодильник №2"></div>';
-    html+='<div class="formfield"><label>Зона / местоположение *</label><input id="q31-zone" value="'+escQ(p?.zone||'')+'" maxlength="200" placeholder="Холодный цех"></div>';
+    const assets=(state.assets||[]).filter(x=>x&&x.display_name);
+    const matchAsset=assets.length===1?assets[0]:null;
+    const presetEquipment=p?.equipment||(matchAsset?.display_name||'');
+    const presetZone=p?.zone||(matchAsset?.location||'');
+    html+='<div class="formfield"><label>Оборудование / объект *</label><input id="q31-equipment" list="q31-assets" value="'+escQ(presetEquipment)+'" maxlength="200" placeholder="Выберите оборудование" onchange="quick31AssetSelected(this.value)">'+
+       '<datalist id="q31-assets">'+assets.map(x=>'<option value="'+escQ(x.display_name)+'"></option>').join('')+'</datalist></div>';
+    html+='<div class="formfield"><label>Зона / местоположение *</label><input id="q31-zone" value="'+escQ(presetZone)+'" maxlength="200" placeholder="Холодный цех"></div>';
     html+='<div class="formfield"><label>Ответственный *</label>';
-    let staff=employees(),presetOwner=p?.responsible||currentAccount?.display_name||'';
+    const scheduleOwner=(state.schedules||[]).find(x=>x.template_code===selectedCode)?.owner||'';
+    let staff=employees(),presetOwner=p?.responsible||scheduleOwner||currentAccount?.display_name||'';
     if(staff.length){
       html+='<select id="q31-responsible"><option value="">Выберите сотрудника</option>'+
           staff.map(x=>'<option value="'+escQ(x.name)+'" '+(x.name===presetOwner?'selected':'')+'>'+escQ(x.name)+(x.position?' — '+escQ(x.position):'')+'</option>').join('')+
@@ -96,6 +102,12 @@ async function load(code){
     showProfiles();render();
   }catch(e){toast(e.message);if(seq===serial&&$q('wizard-title'))$q('wizard-title').textContent='Ошибка загрузки журнала';}
 }
+window.quick31AssetSelected=function(name){
+  const asset=(state.assets||[]).find(x=>x.display_name===name);
+  if(asset&&asset.location&&$q('q31-zone'))$q('q31-zone').value=asset.location;
+  if($q('q31-title')&&(!profile()||$q('q31-title').value===existingTemplate()?.name))
+    $q('q31-title').value=name;
+};
 window.quick31ChangeJournal=function(code){selectedProfile=0;editing=false;requestKey='';load(code);};
 window.quick31SelectProfile=function(value){selectedProfile=Number(value)||0;editing=!selectedProfile;requestKey='';if(selectedProfile)localStorage.setItem(profileStorageKey(),String(selectedProfile));render();};
 window.quick31Edit=function(enabled){editing=!!enabled;render();};
