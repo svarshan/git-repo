@@ -41,7 +41,7 @@ source=guarded(source,before,route+before,"quick journal API")
 # The global exports.columns_for is already imported at module scope.
 import re
 source, removed = re.subn(
-    r"(?m)^[ \\t]+from exports import columns_for[^\\n]*\\r?\\n",
+    r"(?m)^[ \t]+from exports import columns_for[^\n]*\r?\n",
     "", source
 )
 if removed < 1:
