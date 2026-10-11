@@ -3,7 +3,7 @@ name: MoOLVa HACCP Easy 2.6 PRO Windows Candidate (2.4 baseline)
 on:
   push:
     branches: [moolva-native-260-pro]
-    paths: ['moolva240/**', '.github/workflows/moolva-native260.yml', 'RELEASE_2_6_PRO.md']
+    paths: ['moolva240/**', 'moolva260/**', '.github/workflows/moolva-native260.yml', 'RELEASE_2_6_PRO.md']
   workflow_dispatch:
 
 permissions:
@@ -68,6 +68,12 @@ jobs:
         with:
           dotnet-version: '8.0.x'
 
+      - name: Verify Windows updater process isolation and rollback
+        shell: pwsh
+        run: |
+          & ./moolva260/test_upgrade_guard.ps1
+          if($LASTEXITCODE -ne 0){throw 'MoOLVa Windows upgrade guard regression failed'}
+
       - name: Verify guided company creation and isolated drafts
         shell: pwsh
         working-directory: moolva_src
@@ -97,6 +103,20 @@ jobs:
           $dir='dist/native221/MoOLVa_HACCP_Easy_2.4.0_Native_Portable'
           if(-not (Test-Path "$dir/MoOLVaDesktop.exe")){throw 'Native desktop not found'}
           if(-not (Test-Path "$dir/MoOLVaServer/MoOLVaServer.exe")){throw 'Python backend not found'}
+
+      - name: Create signed-file hash manifest for installer verification
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          $portable='dist/native221/MoOLVa_HACCP_Easy_2.4.0_Native_Portable'
+          $files=@{}
+          foreach($rel in @('MoOLVaDesktop.exe','MoOLVaServer\MoOLVaServer.exe')){
+            $full=Join-Path $portable $rel
+            if(-not (Test-Path $full)){throw "Cannot hash missing release file: $rel"}
+            $files[$rel]=(Get-FileHash -Path $full -Algorithm SHA256).Hash
+          }
+          $manifest=@{version='2.6.0';files=$files}
+          $manifest | ConvertTo-Json -Depth 4 | Set-Content -Path (Join-Path $portable 'moolva_release_manifest.json') -Encoding utf8
 
       - name: Smoke test packed Python without installed Python
         shell: pwsh
@@ -142,16 +162,38 @@ jobs:
           SolidCompression=yes
           ArchitecturesAllowed=x64compatible
           ArchitecturesInstallIn64BitMode=x64compatible
-          CloseApplications=yes
+          CloseApplications=force
           RestartApplications=no
           DisableProgramGroupPage=yes
           [Code]
           var
             MoOLVaInstalledBefore: Boolean;
+            MoOLVaSnapshotDir: String;
+            MoOLVaPrepared: Boolean;
+            MoOLVaValidated: Boolean;
+
+          function RunMoOLVaGuard(Mode: String): Boolean;
+          var
+            ExitCode: Integer;
+            ScriptName: String;
+            CommandLine: String;
+          begin
+            ScriptName := ExpandConstant('{tmp}\upgrade_guard.ps1');
+            CommandLine := '-NoLogo -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "' +
+              ScriptName + '" -Mode ' + Mode + ' -InstallDir "' + ExpandConstant('{app}') +
+              '" -DataDir "' + ExpandConstant('{localappdata}\MoOLVaHACCPStudio') +
+              '" -SnapshotDir "' + MoOLVaSnapshotDir + '"';
+            Result := Exec(ExpandConstant('{sys}\WindowsPowerShell\v1.0\powershell.exe'),
+              CommandLine, '', SW_HIDE, ewWaitUntilTerminated, ExitCode);
+            if Result then
+              Result := (ExitCode = 0);
+          end;
 
           function InitializeSetup(): Boolean;
           begin
-            MoOLVaInstalledBefore := FileExists(ExpandConstant('{localappdata}\\Programs\\MoOLVaHACCPEasyNative\\MoOLVaDesktop.exe'));
+            MoOLVaInstalledBefore := FileExists(ExpandConstant('{localappdata}\Programs\MoOLVaHACCPEasyNative\MoOLVaDesktop.exe'));
+            MoOLVaPrepared := False;
+            MoOLVaValidated := False;
             Result := True;
           end;
 
@@ -160,7 +202,9 @@ jobs:
             if CurPageID = wpWelcome then
             begin
               if MoOLVaInstalledBefore then
-                WizardForm.WelcomeLabel2.Caption := 'Найдена ранее установленная MoOLVa ХАССП Easy. Этот мастер обновит программу до предварительной версии 2.6.0 (функциональная база 2.4.0). Существующая база SQLite расположена отдельно от файлов приложения. Перед миграцией приложение проверит и сохранит её копию.';
+                WizardForm.WelcomeLabel2.Caption :=
+                  'Установщик обновит MoOLVa до предварительной версии 2.6. Перед заменой файлов ' +
+                  'программа закроет свои процессы и создаст резервную копию программы и данных.';
             end;
             if CurPageID = wpReady then
             begin
@@ -171,9 +215,44 @@ jobs:
             end;
           end;
 
+          function PrepareToInstall(var NeedsRestart: Boolean): String;
+          begin
+            Result := '';
+            ExtractTemporaryFile('upgrade_guard.ps1');
+            MoOLVaSnapshotDir := ExpandConstant('{localappdata}\MoOLVaHACCPUpdateBackups\') +
+              GetDateTimeString('yyyymmdd_hhnnss_zzz', '-', ':');
+            if not RunMoOLVaGuard('Prepare') then
+              Result := 'MoOLVa не удалось безопасно остановить или сохранить резервную копию. ' +
+                'Установка прервана до изменения файлов. Проверьте свободное место на диске и права доступа.'
+            else
+              MoOLVaPrepared := True;
+          end;
+
+          procedure CurStepChanged(CurStep: TSetupStep);
+          begin
+            if (CurStep = ssPostInstall) and MoOLVaPrepared then
+            begin
+              if not RunMoOLVaGuard('Validate') then
+                RaiseException('Проверка файлов новой версии не пройдена. ' +
+                  'Установщик восстановит предыдущую версию из резервной копии.');
+              MoOLVaValidated := True;
+            end;
+          end;
+
+          procedure DeinitializeSetup();
+          begin
+            if MoOLVaPrepared and (not MoOLVaValidated) then
+            begin
+              if not RunMoOLVaGuard('Rollback') then
+                MsgBox('Не удалось автоматически восстановить предыдущую версию. ' +
+                  'Резервная копия сохранена в папке: ' + MoOLVaSnapshotDir, mbCriticalError, MB_OK);
+            end;
+          end;
+
           [Languages]
           Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
           [Files]
+          Source: "..\moolva260\upgrade_guard.ps1"; Flags: dontcopy
           Source: "dist\native221\MoOLVa_HACCP_Easy_2.4.0_Native_Portable\*"; DestDir: "{app}"; Flags: ignoreversion recursesubdirs createallsubdirs
           [Icons]
           Name: "{autoprograms}\MoOLVa ХАССП Easy"; Filename: "{app}\MoOLVaDesktop.exe"
@@ -190,14 +269,25 @@ jobs:
         working-directory: moolva_src
         run: |
           $installer=(Resolve-Path 'dist/MoOLVa_HACCP_Easy_2.6_PRO_CANDIDATE_Setup.exe').Path
-          $dir=Join-Path $env:RUNNER_TEMP 'MoOLVa230TestInstall'
+          $dir=Join-Path $env:LOCALAPPDATA 'MoOLVa26TestInstall'
           $args=@('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/DIR="'+$dir+'"'))
           $p=Start-Process -FilePath $installer -ArgumentList $args -Wait -PassThru
           if($p.ExitCode -ne 0){throw "Setup exit $($p.ExitCode)"}
           foreach($f in @('MoOLVaDesktop.exe','MoOLVaServer\MoOLVaServer.exe')){
             if(-not (Test-Path (Join-Path $dir $f))){throw "Installed package missing $f"}
           }
-          Write-Output 'WINDOWS_230_INSTALL_OK'
+          $manifest=Join-Path $dir 'moolva_release_manifest.json'
+          if(-not (Test-Path $manifest)){throw 'Installer failed to ship release hashes'}
+          $data=Join-Path $env:LOCALAPPDATA 'MoOLVaHACCPStudio'
+          New-Item -ItemType Directory -Force $data | Out-Null
+          $marker=Join-Path $data 'moolva_26_existing_data_marker.txt'
+          'DO_NOT_LOSE_EXISTING_DATA' | Set-Content -Path $marker
+          $p=Start-Process -FilePath $installer -ArgumentList $args -Wait -PassThru
+          if($p.ExitCode -ne 0){throw "Upgrade setup exit $($p.ExitCode)"}
+          if((Get-Content $marker -Raw).Trim() -ne 'DO_NOT_LOSE_EXISTING_DATA'){throw 'Existing data lost during upgrade'}
+          $snapshots=Get-ChildItem (Join-Path $env:LOCALAPPDATA 'MoOLVaHACCPUpdateBackups') -Directory -ErrorAction Stop
+          if($snapshots.Count -lt 2){throw 'Expected backups from both installations'}
+          Write-Output 'WINDOWS_260_INSTALL_AND_REINSTALL_DATA_OK'
 
       - uses: actions/upload-artifact@v4
         if: success()
