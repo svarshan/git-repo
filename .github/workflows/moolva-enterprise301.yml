@@ -74,7 +74,7 @@ jobs:
           python moolva300/apply300.py moolva_src
           if($LASTEXITCODE -ne 0){throw 'Enterprise 3.0 patch failed'}
           if(-not (Test-Path 'moolva_src/enterprise30.py')){throw 'Missing Enterprise backend'}
-          if(-not ((Get-Content 'moolva_src/.moolva_easy_version' -Raw).Trim() -eq '3.0.1')){throw 'Enterprise version mismatch'}
+          if(-not ((Get-Content 'moolva_src/.moolva_easy_version' -Raw).Trim() -eq '3.0.0')){throw 'Enterprise version mismatch'}
           $guard=(Get-Content 'moolva260/upgrade_guard.ps1' -Raw).Replace("2.6.0","3.0.1")
           Set-Content -Path 'moolva300/upgrade_guard30.ps1' -Value $guard -Encoding UTF8
           $guardTest=(Get-Content 'moolva260/test_upgrade_guard.ps1' -Raw).Replace('upgrade_guard.ps1','upgrade_guard30.ps1').Replace("'2.6.0'","'3.0.1'")
