@@ -1,8 +1,8 @@
-name: Verify MoOLVa 2.4 Windows backup fix
+name: Verify MoOLVa 2.6 PRO baseline
 on:
   workflow_dispatch:
   push:
-    branches: [moolva-native-240]
+    branches: [moolva-native-240, moolva-native-260-pro]
     paths:
       - moolva240/fix_windows_backup.py
       - .github/workflows/verify-windows-backup.yml
