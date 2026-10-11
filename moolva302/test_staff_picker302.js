@@ -46,7 +46,7 @@ for (const [id,ph,lab] of [
   ['calendar-date','2026-10-11','Дата'],
   ['search-product','Поиск товара','Наименование товара']
 ]) assert(!picker.isNameField(field(id,ph,lab)), 'Unsafe chooser in '+id);
-assert(!picker.isNameField(field('disabled-staff','ФИО','','',{disabled:true})));
+assert(!picker.isNameField(field('disabled-staff','ФИО','',{disabled:true})));
 assert(!picker.isNameField(field('amount-owner','Ответственный','',{type:'number'})));
 vm.runInContext('state={venue:9,employees23:[{name:"Елена Петрова",position:"Повар"}]};',context);
 assert.deepStrictEqual(Array.from(picker.people(),x=>x.name),['Елена Петрова'],
