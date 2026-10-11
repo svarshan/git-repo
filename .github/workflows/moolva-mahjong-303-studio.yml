@@ -24,7 +24,7 @@ jobs:
           set -euo pipefail
           mkdir -p mahjong303/project
           base64 -d mahjong303/source.tar.gz.b64 >/tmp/moolva303.tar.gz
-          echo '00dc78edde11307ef4d6d9678609df3f2edca332a2e2576efa3e4a7bcd63c34b  /tmp/moolva303.tar.gz' | sha256sum -c -
+          echo '05ef9ee9213b57c7f0c6c28047da26253ae38f2f259345122cbca1e3716b06b0  /tmp/moolva303.tar.gz' | sha256sum -c -
           tar -xzf /tmp/moolva303.tar.gz -C mahjong303/project
           test -f mahjong303/project/START_HERE_SDK_SETUP.cmd
           jar tf mahjong303/project/gradle/wrapper/gradle-wrapper.jar | grep -q 'org/gradle/wrapper/WrapperExecutor.class'
