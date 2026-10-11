@@ -53,7 +53,7 @@ if test.exists():
     if "from contextlib import closing" not in t:
         if anchor not in t:
             raise SystemExit("Unexpected test imports; refusing unsafe edit")
-        t = t.replace(anchor, anchor + "\\nfrom contextlib import closing", 1)
+        t = t.replace(anchor, anchor + "\nfrom contextlib import closing", 1)
     original = "with sqlite3.connect(r['path']) as db:"
     corrected = "with closing(sqlite3.connect(r['path'])) as db:"
     if original in t:
