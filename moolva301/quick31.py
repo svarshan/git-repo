@@ -58,12 +58,18 @@ def _columns(service,vid,code):
 def _kind(code,col):
     key=col['key']
     label=str(col['label']).lower().replace('ё','е')
-    if code=='fridge':
-        return {'c1':'auto_stamp','c2':'zone','c3':'equipment','c4':'reading'}.get(key,'reading')
-    # A signature is not an owner name and must always be entered by a human if required.
-    if any(w in label for w in ('подпис','подтвержден','согласован','утвержден')):
+    if code=='fridge' and key in ('c1','c2','c3','c4'):
+        return {'c1':'auto_stamp','c2':'zone','c3':'equipment','c4':'reading'}[key]
+    # Never forge a signature, including a combined "responsible / signature" field.
+    if 'подпис' in label:
+        return 'reading' if col.get('required') else 'empty_signature'
+    if any(w in label for w in ('подтвержден','согласован','утвержден')):
         return 'reading'
-    if any(w in label for w in ('дата и время','дата/время','дата, время')):
+    if any(w in label for w in ('примечан','комментар')):
+        return 'reading' if col.get('required') else 'comment'
+    if label in ('дата и время','дата/время','дата, время') or (
+        ('дата и время' in label or 'дата/время' in label) and
+        any(t in label for t in ('контрол','проверк','измерен','замер','осмотр'))):
         return 'auto_stamp'
     # Only examination timestamps are generated; expiry, preparation and delivery dates
     # are genuine facts, and remain editable.
@@ -191,6 +197,8 @@ def save_measurement(service,vid,payload,user):
         elif kind=='auto_date':results[key]=day
         elif kind=='auto_time':results[key]=clock
         elif kind=='auto_stamp':results[key]=day+' '+clock
+        elif kind=='empty_signature':results[key]=''
+        elif kind=='comment':results[key]=str(payload.get('comment') or '')[:1000]
     # Pass through the EXISTING record endpoint: validation, deviations, reminders,
     # draft clearing, audit and original exports remain intact.
     body={'venue':vid,'code':code,'photo':'','fields':results,
