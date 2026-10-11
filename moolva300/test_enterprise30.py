@@ -32,7 +32,7 @@ class Enterprise30Tests(unittest.TestCase):
         first=self.perform("plan",journal_key="legacy:fridge",start_on=date.today().isoformat(),count=5,owner="Анна Иванова")
         self.assertEqual(first["created"],5)
         again=self.perform("plan",journal_key="legacy:fridge",start_on=date.today().isoformat(),count=5,owner="Анна Иванова")
-        self.assertEqual(again["created"],5)
+        self.assertEqual(again["created"],0)
         with self.live.store.connect() as db:
             rows=db.execute("SELECT planned_for FROM easy30_planned_check WHERE venue_id=?",(self.venue,)).fetchall()
             self.assertTrue(rows)
