@@ -154,10 +154,12 @@ def plan_checks(store, vid, journal_key, start_day, count, responsible):
         """,(vid,journal_key)).fetchone()
         if not exists:raise ValueError("Сначала настройте график выбранного журнала")
         made=0
+        scheduled=0
         for days in range(366):
-            if made>=count:break
+            if scheduled>=count:break
             when=start+timedelta(days=days)
             if when.weekday()>=5:continue
+            scheduled+=1
             cur=db.execute("""
               INSERT OR IGNORE INTO easy30_planned_check
               (venue_id,journal_key,planned_for,responsible,created_at)
