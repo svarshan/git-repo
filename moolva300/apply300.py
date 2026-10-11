@@ -37,23 +37,24 @@ if anchor not in source:
 dispatcher="""        if action.startswith('enterprise30_'):
             if user is None:
                 raise ValueError('Необходимо войти в личный кабинет')
+            vid30=self._venue(b.get('venue'))
             if action=='enterprise30_board':
-                return enterprise30.dashboard(self.store,vid,str(b.get('employee') or ''))
+                return enterprise30.dashboard(self.store,vid30,str(b.get('employee') or ''))
             if action=='enterprise30_training':
-                return enterprise30.training(self.store,vid,user['id'])
+                return enterprise30.training(self.store,vid30,user['id'])
             if action=='enterprise30_training_ack':
-                return enterprise30.training_ack(self.store,vid,user['id'],b.get('key'))
+                return enterprise30.training_ack(self.store,vid30,user['id'],b.get('key'))
             if action=='enterprise30_plan':
-                return enterprise30.plan_checks(self.store,vid,b.get('journal_key'),
+                return enterprise30.plan_checks(self.store,vid30,b.get('journal_key'),
                     b.get('start_on'),b.get('count'),b.get('owner'))
             if action=='enterprise30_handover':
-                return enterprise30.handover(self.store,vid,b.get('sender'),b.get('recipient',''),b.get('note'))
+                return enterprise30.handover(self.store,vid30,b.get('sender'),b.get('recipient',''),b.get('note'))
             if action=='enterprise30_assistant':
                 return enterprise30.assistant(b.get('question'))
             if action=='enterprise30_search':
-                return enterprise30.search(self.store,vid,b.get('query'))
+                return enterprise30.search(self.store,vid30,b.get('query'))
             if action=='enterprise30_health':
-                return enterprise30.health(self.store,vid)
+                return enterprise30.health(self.store,vid30)
             raise ValueError('Неизвестная функция Enterprise 3.0')
 """
 source=replace_once(source,anchor,anchor+"\n"+dispatcher,"Enterprise action dispatcher")
