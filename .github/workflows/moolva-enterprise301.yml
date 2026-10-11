@@ -103,7 +103,7 @@ jobs:
           if 'quick31SaveReading' not in source:raise SystemExit('Quick Save handler missing')
           with tempfile.TemporaryDirectory() as folder:
               script=pathlib.Path(folder)/'journal-ui.js'
-              scripts=re.findall(r'<script[^>]*>([\\s\\S]*?)</script>',source)
+              scripts=re.findall(r'<script[^>]*>([\s\S]*?)</script>',source)
               for chunk in scripts:
                   if 'quick31SaveReading' in chunk:
                       script.write_text(chunk,encoding='utf-8')
