@@ -42,7 +42,8 @@ class QuickJournal301Tests(unittest.TestCase):
         p=self.make_profile()
         cols=self.act('profiles',code='fridge')['columns']
         self.assertEqual({c['key']:c['kind'] for c in cols},
-                         {'c1':'auto_stamp','c2':'zone','c3':'equipment','c4':'reading'})
+                         {'c1':'auto_stamp','c2':'zone','c3':'equipment','c4':'reading',
+                          'c5':'empty_signature','c6':'comment'})
         first=self.act('record',profile_id=p,readings={'c4':'+3,8'},confirmed=True,
                        request_key='first-'+str(p))
         self.assertTrue(first['saved'])
@@ -61,6 +62,8 @@ class QuickJournal301Tests(unittest.TestCase):
         self.assertEqual(entries[0]['equipment'],'Холодильник №2')
         self.assertEqual(entries[0]['zone'],'Холодный цех')
         self.assertEqual(entries[0]['responsible'],'Анна Иванова')
+        self.assertEqual(json.loads(entries[0]['data'])['c5'],'')
+        self.assertEqual(json.loads(entries[0]['data'])['c6'],'')
         self.assertEqual(entries[0]['observation_date'],date.today().isoformat())
         self.assertRegex(entries[1]['observation_time'],r'^\d{2}:\d{2}$')
 
@@ -112,7 +115,9 @@ class QuickJournal301Tests(unittest.TestCase):
          ('Дата изготовления','reading'),
          ('Температура','reading'),
          ('Результат обработки','reading'),
-         ('Подпись ответственного','reading'),
+         ('Подпись ответственного','empty_signature'),
+         ('Дата и время поступления','reading'),
+         ('Примечание','comment'),
          ('Ответственный сотрудник','responsible'),
          ('Помещение','fixed'),
          ('Камера','fixed'),
