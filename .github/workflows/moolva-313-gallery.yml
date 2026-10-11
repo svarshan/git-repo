@@ -46,28 +46,37 @@ jobs:
             adb shell am start -n com.moolva.mahjong/.MainActivity
             sleep 6
             adb exec-out screencap -p >gallery/01_home.png
-            adb shell input tap 540 2060
+            adb shell input tap 540 2135
             sleep 2
             adb exec-out screencap -p >gallery/02_themes.png
             adb shell input keyevent 4
             sleep 1
-            adb shell input tap 540 1890
+            adb shell input tap 540 1965
             sleep 2
             adb exec-out screencap -p >gallery/03_worlds.png
-            adb shell input tap 540 705
+            adb shell input tap 540 760
             sleep 1
             adb exec-out screencap -p >gallery/04_levels.png
-            adb shell input tap 146 850
+            adb shell input tap 146 880
             sleep 2
             adb exec-out screencap -p >gallery/05_game.png
             adb shell input keyevent 4
             sleep 1
-            adb shell input tap 945 424
+            adb shell input tap 945 474
             sleep 2
             adb exec-out screencap -p >gallery/06_settings.png
             adb logcat -d -s AndroidRuntime:E >gallery/android_errors.txt
             if grep -q 'FATAL EXCEPTION' gallery/android_errors.txt; then cat gallery/android_errors.txt; exit 1; fi
             file gallery/*.png
+            python3 - <<'PY'
+            from pathlib import Path
+            import hashlib
+            ims=sorted(Path('gallery').glob('*.png'))
+            hashes=[hashlib.sha256(p.read_bytes()).hexdigest() for p in ims]
+            print({p.name:h[:12] for p,h in zip(ims,hashes)})
+            if len(set(hashes)) < 5:
+                raise SystemExit('Captured screens were not distinct: inspect touch coordinates')
+            PY
       - uses: actions/upload-artifact@v4
         with:
           name: MoOLVa-313-Real-App-Screen-Gallery
