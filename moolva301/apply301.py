@@ -37,10 +37,15 @@ route="""        if action.startswith('quick31_'):
             raise ValueError('Неизвестная операция быстрого журнала')
 """
 source=guarded(source,before,route+before,"quick journal API")
-# In some base releases a redundant inner import shadows globally imported
-# columns_for across action('record'), raising UnboundLocalError on save.
-if "            from exports import columns_for\\n" in source:
-    source=source.replace("            from exports import columns_for\\n","",1)
+# Eliminate shadowing from any nested import inside LiveService.action.
+# The global exports.columns_for is already imported at module scope.
+import re
+source, removed = re.subn(
+    r"(?m)^[ \\t]+from exports import columns_for[^\\n]*\\r?\\n",
+    "", source
+)
+if removed < 1:
+    raise SystemExit("Expected legacy nested columns_for import was not found")
 bridge.write_text(source,encoding="utf-8")
 shutil.copy2(here/"quick31.py",root/"quick31.py")
 page=html.read_text(encoding="utf-8")
