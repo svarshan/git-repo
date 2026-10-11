@@ -41,7 +41,8 @@ function render(){
   let html='<div class="quick31-layout">'+choose+profiles;
   if(editing||!p){
     html+='<div class="quick31-heading">Постоянные данные (настроить один раз)</div><div class="formgrid">';
-    html+='<div class="formfield"><label>Название настройки * (например, Холодильник № 2)</label><input id="q31-title" value="'+escQ(p?.title||t?.name||'')+'" maxlength="120"></div>';
+    // Name is derived from equipment; novice never needs to invent a preset title.
+    html+='<div class="quick31-simple-tip">Настройте один раз. В дальнейшем понадобится только новое измерение.</div>';
     const assets=(state.assets||[]).filter(x=>x&&x.display_name);
     const matchAsset=assets.length===1?assets[0]:null;
     const presetEquipment=p?.equipment||(matchAsset?.display_name||'');
@@ -51,7 +52,10 @@ function render(){
     html+='<div class="formfield"><label>Зона / местоположение *</label><input id="q31-zone" value="'+escQ(presetZone)+'" maxlength="200" placeholder="Холодный цех"></div>';
     html+='<div class="formfield"><label>Ответственный *</label>';
     const scheduleOwner=(state.schedules||[]).find(x=>x.template_code===selectedCode)?.owner||'';
-    let staff=employees(),presetOwner=p?.responsible||scheduleOwner||currentAccount?.display_name||'';
+    let staff=employees();
+    let presetOwner=p?.responsible||scheduleOwner||
+      (staff.some(x=>x.name===currentAccount?.display_name)?currentAccount.display_name:'')||
+      (staff.length===1?staff[0].name:'');
     if(staff.length){
       html+='<select id="q31-responsible"><option value="">Выберите сотрудника</option>'+
           staff.map(x=>'<option value="'+escQ(x.name)+'" '+(x.name===presetOwner?'selected':'')+'>'+escQ(x.name)+(x.position?' — '+escQ(x.position):'')+'</option>').join('')+
@@ -80,14 +84,13 @@ function render(){
         '<input data-qactual="'+escQ(c.key)+'" autocomplete="off" inputmode="'+(/температур|влажност|масс|количеств|давлен|числ/i.test(c.label)?'decimal':'text')+
         '" placeholder="Введите реальное значение" '+(i===0?'autofocus':'')+'>')+'</div>';
     });
-    html+='<div class="formfield"><label>Комментарий (необязательно)</label><textarea id="q31-comment" rows="2" placeholder="Если нужно, добавьте сведения об отклонении"></textarea></div>';
-    html+='<label class="quick31-confirm"><input id="q31-confirm" type="checkbox">Подтверждаю, что проверка действительно выполнена сейчас, а значения фактические</label>'+
-        '<div class="fine" id="quick31-help">Дата и время обновятся автоматически. Новая запись не изменит ранее сохранённые результаты.</div>';
+    html+='<details class="quick31-optional"><summary>Комментарий (при необходимости)</summary><div class="formfield"><label>Комментарий</label><textarea id="q31-comment" rows="2" placeholder="Например, причина отклонения"></textarea></div></details>';
+    html+='<div class="fine" id="quick31-help">Нажимая «Сохранить фактическое значение», вы подтверждаете, что только что выполнили эту проверку. Дата и время будут поставлены автоматически, а прежние записи останутся в истории.</div>';
   }
   html+='</div>';
   $q('wizard-fields').innerHTML=html;
   let next=$q('wizard-next'),back=$q('wizard-back');
-  if(next){next.textContent=p&&!editing?'✓ Сохранить измерение':'Сохранить постоянные данные';next.disabled=sending;}
+  if(next){next.textContent=p&&!editing?'✓ Сохранить фактическое значение':'✓ Сохранить настройки';next.disabled=sending;}
   if(back)back.textContent='← К журналам';
 }
 async function load(code){
@@ -115,7 +118,7 @@ window.quick31SaveProfile=async function(){
   if(sending)return;
   const fixed={};document.querySelectorAll('[data-qfixed]').forEach(el=>fixed[el.dataset.qfixed]=el.value);
   const payload={code:selectedCode,id:selectedProfile||null,fixed,
-    title:$q('q31-title')?.value||'',equipment:$q('q31-equipment')?.value||'',
+    title:profile()?.title||$q('q31-equipment')?.value||'',equipment:$q('q31-equipment')?.value||'',
     zone:$q('q31-zone')?.value||'',responsible:$q('q31-responsible')?.value||''};
   sending=true;disabled(true);
   try{
@@ -129,7 +132,8 @@ window.quick31SaveReading=async function(){
   if(sending)return;
   let p=profile();if(!p)return toast('Сначала создайте настройки журнала');
   let actuals={};document.querySelectorAll('[data-qactual]').forEach(el=>actuals[el.dataset.qactual]=el.value.trim());
-  if(!$q('q31-confirm')?.checked)return toast('Подтвердите, что выполнили проверку сейчас');
+  // Clicking the explicitly labeled Save button is the user's confirmation.
+  // The server still requires confirmed:true; no automatic record is created.
   if(!requestKey)requestKey=makeRequestKey();
   sending=true;disabled(true);
   try{
@@ -162,6 +166,6 @@ window.startWizard=function(code){
 const oldAct=window.quick31ChangeJournal;
 window.quick31ChangeJournal=function(code){context=null;oldAct(code);};
 const style=document.createElement('style');
-style.textContent='.wizard{grid-template-columns:minmax(0,1fr) 250px!important}.wizard .stepper-card{display:none!important}.wizard .wizard-body{min-height:300px!important}.quick31-layout{display:grid;gap:14px;max-width:960px}.quick31-layout .formfield{margin:3px 0}.quick31-layout .formfield input,.quick31-layout .formfield select,.quick31-layout .formfield textarea{width:100%;box-sizing:border-box;min-height:45px;font-size:15px}.quick31-heading{font-weight:750;font-size:16px;margin-top:12px;color:#69ebb2}.quick31-meta{background:#233758;border:1px solid #44618c;padding:17px;border-radius:12px;line-height:2}.quick31-meta .btn{margin-top:8px}.quick31-actions{display:flex;flex-wrap:wrap;gap:10px}.quick31-confirm{display:flex;gap:10px;align-items:start;line-height:1.5;padding:12px;background:#253854;border:1px solid #536b8f;border-radius:12px}.quick31-confirm input{width:20px;height:20px;flex-shrink:0}.wizard .help-column{min-height:0!important}@media(max-width:950px){.wizard{grid-template-columns:1fr!important}}';
+style.textContent='.quick31-simple-tip{color:#c3dcf1;padding:9px 0;font-size:14px}.quick31-optional{margin-top:7px;border:1px solid #4b6285;border-radius:10px;padding:12px}.quick31-optional summary{cursor:pointer;color:#b8cae9}.wizard{grid-template-columns:minmax(0,1fr) 250px!important}.wizard .stepper-card{display:none!important}.wizard .wizard-body{min-height:300px!important}.quick31-layout{display:grid;gap:14px;max-width:960px}.quick31-layout .formfield{margin:3px 0}.quick31-layout .formfield input,.quick31-layout .formfield select,.quick31-layout .formfield textarea{width:100%;box-sizing:border-box;min-height:45px;font-size:15px}.quick31-heading{font-weight:750;font-size:16px;margin-top:12px;color:#69ebb2}.quick31-meta{background:#233758;border:1px solid #44618c;padding:17px;border-radius:12px;line-height:2}.quick31-meta .btn{margin-top:8px}.quick31-actions{display:flex;flex-wrap:wrap;gap:10px}.quick31-confirm{display:flex;gap:10px;align-items:start;line-height:1.5;padding:12px;background:#253854;border:1px solid #536b8f;border-radius:12px}.quick31-confirm input{width:20px;height:20px;flex-shrink:0}.wizard .help-column{min-height:0!important}@media(max-width:950px){.wizard{grid-template-columns:1fr!important}}';
 document.head.appendChild(style);
 })();
