@@ -1,0 +1,54 @@
+name: Verify MoOLVa 2.4 Windows backup fix
+on:
+  workflow_dispatch:
+  push:
+    branches: [moolva-native-240]
+    paths:
+      - moolva240/fix_windows_backup.py
+      - .github/workflows/verify-windows-backup.yml
+jobs:
+  verify:
+    runs-on: windows-2022
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - name: Restore native baseline
+        shell: pwsh
+        run: |
+          $content=(Get-Content 'moolva-native-221/source/moolva_core_source.zip.b64' -Raw).Trim()
+          $archive=Join-Path $env:RUNNER_TEMP 'baseline.zip'
+          [IO.File]::WriteAllBytes($archive,[Convert]::FromBase64String($content))
+          New-Item -ItemType Directory -Force 'moolva_src' | Out-Null
+          Expand-Archive -Path $archive -DestinationPath 'moolva_src' -Force
+          if(!(Test-Path 'moolva_src/web19_bridge.py')){throw 'Missing baseline'}
+      - name: Apply 2.2.2 and 2.3 overlays
+        shell: pwsh
+        run: |
+          python moolva222/apply222.py moolva_src
+          if($LASTEXITCODE -ne 0){throw '2.2.2 overlay failed'}
+          $encoded=(Get-Content 'moolva230/moolva230_patch.zip.b64' -Raw).Trim()
+          $archive=Join-Path $env:RUNNER_TEMP 'mo230overlay.zip'
+          [IO.File]::WriteAllBytes($archive,[Convert]::FromBase64String($encoded))
+          Expand-Archive -Path $archive -DestinationPath 'moolva_src' -Force
+      - name: Apply 2.4 overlay and Windows fix
+        shell: pwsh
+        run: |
+          $encoded=(Get-Content 'moolva240/moolva240_overlay.zip.b64' -Raw).Trim()
+          $archive=Join-Path $env:RUNNER_TEMP 'moolva24patch.zip'
+          [IO.File]::WriteAllBytes($archive,[Convert]::FromBase64String($encoded))
+          Expand-Archive -Path $archive -DestinationPath 'moolva_src' -Force
+          python moolva240/fix_windows_backup.py moolva_src
+          if($LASTEXITCODE -ne 0){throw 'Windows backup patch failed'}
+      - name: Run regression tests
+        shell: pwsh
+        working-directory: moolva_src
+        run: |
+          python -m unittest discover -s tests -p 'test_onboarding222.py' -v
+          if($LASTEXITCODE -ne 0){throw 'Onboarding regression'}
+          python -m unittest discover -s tests -p 'test_intelligent24.py' -v
+          if($LASTEXITCODE -ne 0){throw 'Backup regression'}
+          python -m unittest discover -s tests -p 'test_enterprise23.py' -v
+          if($LASTEXITCODE -ne 0){throw 'Enterprise regression'}
