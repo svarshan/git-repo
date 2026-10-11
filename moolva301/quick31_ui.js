@@ -92,7 +92,7 @@ async function load(code){
   try{
     let data=await act('quick31_profiles',{code:code});
     if(seq!==serial)return;
-    context=data;selectedProfile=Number(localStorage.getItem(profileStorageKey())||0);
+    context=data;context.loadedCode=code;selectedProfile=Number(localStorage.getItem(profileStorageKey())||0);
     showProfiles();render();
   }catch(e){toast(e.message);if(seq===serial&&$q('wizard-title'))$q('wizard-title').textContent='Ошибка загрузки журнала';}
 }
