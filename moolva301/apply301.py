@@ -37,6 +37,10 @@ route="""        if action.startswith('quick31_'):
             raise ValueError('Неизвестная операция быстрого журнала')
 """
 source=guarded(source,before,route+before,"quick journal API")
+# In some base releases a redundant inner import shadows globally imported
+# columns_for across action('record'), raising UnboundLocalError on save.
+if "            from exports import columns_for\\n" in source:
+    source=source.replace("            from exports import columns_for\\n","",1)
 bridge.write_text(source,encoding="utf-8")
 shutil.copy2(here/"quick31.py",root/"quick31.py")
 page=html.read_text(encoding="utf-8")
