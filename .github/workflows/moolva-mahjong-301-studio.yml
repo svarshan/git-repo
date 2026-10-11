@@ -1,0 +1,73 @@
+name: MoOLVa Mahjong Ultimate 3.0.1 Android Studio
+on:
+  push:
+    branches: [moolva-mahjong-3.0.1-syncfix]
+    paths:
+      - 'mahjong301/**'
+      - '.github/workflows/moolva-mahjong-301-studio.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  verify-and-package-android-studio:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+      - name: Unpack and verify project sources
+        run: |
+          set -euo pipefail
+          mkdir -p mahjong301/android
+          base64 --decode mahjong301/source.tar.gz.b64 > /tmp/moolva301.tar.gz
+          echo 'f6ab41d5f9e4d15ffd34200efc01ce642e75f14de0b640ad19ac7b16736332ef  /tmp/moolva301.tar.gz' | sha256sum -c -
+          tar -xzf /tmp/moolva301.tar.gz -C mahjong301/android
+      - name: Prepare Android SDK 35
+        run: |
+          set -euo pipefail
+          SDKMANAGER=$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | sort -V | tail -1)
+          test -x "$SDKMANAGER"
+          echo 'ANDROID_HOME=/usr/local/lib/android/sdk' >> "$GITHUB_ENV"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
+      - name: Run Java regression tests (1500 levels, case tile, save migration)
+        working-directory: mahjong301/android
+        run: bash tests/run-tests.sh
+      - name: Generate official Gradle 8.9 Wrapper
+        working-directory: mahjong301/android
+        run: |
+          set -e
+          gradle --no-daemon wrapper --gradle-version 8.9 --distribution-type bin
+          jar tf gradle/wrapper/gradle-wrapper.jar | grep -q 'org/gradle/wrapper/WrapperExecutor.class'
+          chmod +x gradlew
+          ./gradlew --version
+      - name: Build and lint using real Android SDK
+        working-directory: mahjong301/android
+        run: ./gradlew --no-daemon :app:assembleDebug :app:lintDebug --stacktrace
+      - name: Verify produced APK package metadata (not included in delivery)
+        run: |
+          set -e
+          "$ANDROID_HOME/build-tools/35.0.0/aapt" dump badging mahjong301/android/app/build/outputs/apk/debug/app-debug.apk | head -n 9
+      - name: Package clean Android Studio project (source only)
+        run: |
+          set -euo pipefail
+          mkdir -p mahjong301/dist/MoOLVaMahjongGarden
+          rsync -a --exclude='.gradle' --exclude='build' --exclude='out' --exclude='dist' \
+            mahjong301/android/ mahjong301/dist/MoOLVaMahjongGarden/
+          cd mahjong301/dist
+          zip -qr ../MoOLVa_Mahjong_Ultimate_3.0.1_AndroidStudio_FIXED.zip MoOLVaMahjongGarden
+          unzip -l ../MoOLVa_Mahjong_Ultimate_3.0.1_AndroidStudio_FIXED.zip | grep -F 'gradle-wrapper.jar'
+          sha256sum ../MoOLVa_Mahjong_Ultimate_3.0.1_AndroidStudio_FIXED.zip
+      - name: Upload Android Studio source ZIP
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Mahjong-Ultimate-3.0.1-AndroidStudio
+          path: mahjong301/MoOLVa_Mahjong_Ultimate_3.0.1_AndroidStudio_FIXED.zip
+          retention-days: 30
+          if-no-files-found: error
