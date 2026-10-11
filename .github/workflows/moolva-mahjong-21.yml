@@ -29,8 +29,11 @@ jobs:
           tar -xzf /tmp/moolva21.tar.gz -C mahjong21/android
       - name: Install Android SDK 35
         run: |
-          yes | sdkmanager --licenses >/dev/null || true
-          sdkmanager 'platforms;android-35' 'build-tools;35.0.0'
+          SDKMANAGER=$(find /usr/local/lib/android/sdk/cmdline-tools -name sdkmanager -type f | sort -V | tail -1)
+          test -x "$SDKMANAGER"
+          echo 'ANDROID_HOME=/usr/local/lib/android/sdk' >> "$GITHUB_ENV"
+          yes | "$SDKMANAGER" --licenses >/dev/null || true
+          "$SDKMANAGER" 'platforms;android-35' 'build-tools;35.0.0'
       - name: Verify game mechanics and free-theme progression
         working-directory: mahjong21/android
         run: bash tests/run-tests.sh
