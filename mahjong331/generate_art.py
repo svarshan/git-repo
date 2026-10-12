@@ -286,6 +286,6 @@ def main():
  images=[produce(i) for i in range(24)]
  sheet=Image.new('RGB',(6*156,4*210),'#17110b')
  for i,img in enumerate(images):sheet.paste(img.resize((144,180)),(i%6*156+6,i//6*210+8))
- sheet.save('/mnt/data/MoOLVa_3.3.1_Atelier_Art_Contact.jpg',quality=92)
+ sheet.save(ROOT/'ATELIER_PREVIEW_3.3.1.jpg',quality=92)
  print('Generated original tile motifs:',len(images),'at',OUT)
 if __name__=='__main__':main()
