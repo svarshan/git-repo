@@ -303,8 +303,8 @@ public final class Board3DView extends GLSurfaceView {
                 }
             }
             if(right>left+1&&bottom>top+1){
-                float zoom=Math.min(width*.90f/(right-left),height*.89f/(bottom-top));
-                zoom=Math.max(.90f,Math.min(1.38f,zoom));
+                float zoom=Math.min(width*.94f/(right-left),height*.89f/(bottom-top));
+                zoom=Math.max(.90f,Math.min(1.73f,zoom));
                 proj[0]*=zoom;proj[5]*=zoom;
                 Matrix.multiplyMM(mvp,0,proj,0,view,0);
             }
