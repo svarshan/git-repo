@@ -1,0 +1,59 @@
+name: Your Happy Ant 1.21.0 - local help XAPK test
+
+on:
+  workflow_dispatch:
+    inputs:
+      xapk_url:
+        description: "Direct HTTPS URL for original 1.21.0 XAPK (not web page)"
+        required: true
+        type: string
+      expected_sha256:
+        description: "SHA-256 checksum of original XAPK"
+        required: true
+        default: "7789e080ab81e5dea88fc4cac532b8d203a78a0697a4d7630a7789d531468b48"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install cryptography
+        run: python -m pip install cryptography
+      - name: Download and verify user-supplied XAPK
+        env:
+          XAPK_URL: ${{ inputs.xapk_url }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+        run: |
+          python - <<'PY'
+          import os, hashlib, urllib.request
+          url=os.environ["XAPK_URL"]
+          if not url.startswith("https://"):
+              raise SystemExit("A direct HTTPS URL is required")
+          h=hashlib.sha256()
+          with urllib.request.urlopen(url,timeout=120) as response,open("original.xapk","wb") as dest:
+              while part:=response.read(1024*1024):
+                  dest.write(part)
+                  h.update(part)
+          if h.hexdigest().lower()!=os.environ["EXPECTED_SHA256"].strip().lower():
+              raise SystemExit("Original XAPK SHA-256 mismatch")
+          print("Source SHA256:", h.hexdigest())
+          PY
+      - name: Build local-help test XAPK
+        run: python HappyAntOffline/build_xapk.py original.xapk Your_Happy_Ant_1.21.0_LOCAL_HELP_TEST.xapk
+      - name: Upload XAPK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Your_Happy_Ant_1.21.0_LOCAL_HELP_TEST_XAPK
+          path: Your_Happy_Ant_1.21.0_LOCAL_HELP_TEST.xapk
+          if-no-files-found: error
+          retention-days: 7
