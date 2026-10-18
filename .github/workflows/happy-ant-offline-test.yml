@@ -1,0 +1,64 @@
+name: Your Happy Ant - experimental offline APK
+run-name: Build experimental APK from user-provided XAPK
+on:
+  workflow_dispatch:
+    inputs:
+      xapk_url:
+        description: "Direct HTTPS download URL for Your Happy Ant 1.21.0 XAPK"
+        required: true
+        type: string
+      expected_sha256:
+        description: "Original XAPK SHA256"
+        required: true
+        default: "7789e080ab81e5dea88fc4cac532b8d203a78a0697a4d7630a7789d531468b48"
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout script
+        uses: actions/checkout@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - name: Install signing library
+        run: python -m pip install cryptography
+      - name: Download and verify supplied XAPK
+        env:
+          XAPK_URL: ${{ inputs.xapk_url }}
+          EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
+        run: |
+          python - <<'PY'
+          import hashlib,os,urllib.request
+          url=os.environ["XAPK_URL"]
+          if not url.startswith("https://"):
+              raise SystemExit("Only HTTPS XAPK URLs are accepted")
+          req=urllib.request.Request(url,headers={"User-Agent":"Mozilla/5.0"})
+          digest=hashlib.sha256()
+          with urllib.request.urlopen(req, timeout=90) as inp,open("Your_Happy_Ant_1.21.0.xapk","wb") as out:
+              while block:=inp.read(1024*1024):
+                  digest.update(block)
+                  out.write(block)
+          found=digest.hexdigest()
+          print("Downloaded SHA256:",found)
+          if found.lower()!=os.environ["EXPECTED_SHA256"].strip().lower():
+              raise SystemExit("XAPK SHA256 mismatch; refusing to build")
+          PY
+      - name: Assemble and sign single test APK
+        run: |
+          python HappyAntOffline/build_apk.py \
+            Your_Happy_Ant_1.21.0.xapk \
+            Your_Happy_Ant_1.21.0_OFFLINE_TEST.apk
+      - name: Upload experimental test APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: Your_Happy_Ant_1.21.0_OFFLINE_TEST
+          path: Your_Happy_Ant_1.21.0_OFFLINE_TEST.apk
+          if-no-files-found: error
+          retention-days: 7
