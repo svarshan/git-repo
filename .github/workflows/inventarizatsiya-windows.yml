@@ -1,0 +1,73 @@
+name: Инвентаризация — сборка Windows EXE
+on:
+  push:
+    branches:
+      - inventarizatsiya-v1
+    paths:
+      - "Inventarizatsiya/**"
+      - ".github/workflows/inventarizatsiya-windows.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-exe:
+    name: Собрать EXE и установщик
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - name: Скачать исходники
+        uses: actions/checkout@v4
+
+      - name: Установить .NET 8
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Распаковать исходный проект
+        shell: pwsh
+        run: |
+          Expand-Archive -LiteralPath "Inventarizatsiya/source.zip" -DestinationPath "." -Force
+          if (-not (Test-Path "Inventarizatsiya/Inventarizatsiya.csproj")) {
+            throw "Не найден проект Inventarizatsiya.csproj"
+          }
+
+      - name: Сборка единого EXE (Windows x64)
+        shell: pwsh
+        run: |
+          dotnet publish "Inventarizatsiya/Inventarizatsiya.csproj" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o "Inventarizatsiya/dist/portable"
+          if ($LASTEXITCODE -ne 0) { throw "Ошибка dotnet publish" }
+          if (-not (Test-Path "Inventarizatsiya/dist/portable/Inventarizatsiya.exe")) { throw "EXE не создан" }
+
+      - name: Опубликовать EXE для скачивания
+        uses: actions/upload-artifact@v4
+        with:
+          name: Inventarizatsiya_1.0_EXE_win-x64
+          path: Inventarizatsiya/dist/portable/*
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: Установить Inno Setup
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          choco install innosetup -y --no-progress
+          if ($LASTEXITCODE -ne 0) { throw "Не удалось установить Inno Setup" }
+
+      - name: Собрать установщик
+        shell: pwsh
+        continue-on-error: true
+        run: |
+          $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
+          if (-not (Test-Path $compiler)) { throw "Не найден ISCC.exe" }
+          & $compiler "Inventarizatsiya/Scripts/Installer.iss"
+          if ($LASTEXITCODE -ne 0) { throw "Ошибка компиляции установщика" }
+
+      - name: Опубликовать установщик
+        uses: actions/upload-artifact@v4
+        with:
+          name: Inventarizatsiya_1.0_Setup_win-x64
+          path: Inventarizatsiya/dist/installer/*.exe
+          if-no-files-found: warn
+          retention-days: 30
