@@ -1,4 +1,4 @@
-name: Инвентаризация — Windows 1.0.1 с проверкой запуска
+name: Инвентаризация — Windows 1.0.2 с проверкой запуска
 on:
   push:
     branches:
@@ -64,7 +64,7 @@ jobs:
       - name: Опубликовать готовый EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Inventarizatsiya_1.0.1_EXE_win-x64
+          name: Inventarizatsiya_1.0.2_EXE_win-x64
           path: Inventarizatsiya/dist/portable/*
           if-no-files-found: error
           retention-days: 30
@@ -75,7 +75,7 @@ jobs:
           choco install innosetup -y --no-progress
           if ($LASTEXITCODE -ne 0) { throw "Не удалось установить Inno Setup" }
 
-      - name: Собрать установщик 1.0.1
+      - name: Собрать установщик 1.0.2
         shell: pwsh
         run: |
           $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
@@ -86,7 +86,7 @@ jobs:
       - name: Опубликовать установщик
         uses: actions/upload-artifact@v4
         with:
-          name: Inventarizatsiya_1.0.1_Setup_win-x64
+          name: Inventarizatsiya_1.0.2_Setup_win-x64
           path: Inventarizatsiya/dist/installer/*.exe
           if-no-files-found: error
           retention-days: 30
