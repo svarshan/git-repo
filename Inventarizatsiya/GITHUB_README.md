@@ -1,17 +1,5 @@
-# Инвентаризация 1.0 — сборка в GitHub Actions
+# Инвентаризация 1.0.1 — исправление запуска
 
-Этот каталог содержит архив исходников WPF/.NET 8. Проект не связан с другими приложениями в репозитории.
+Приложение Windows WPF .NET 8, каталог 768 товаров. Исходники включены в Inventarizatsiya/source.zip.
 
-## EXE без установки
-Откройте Actions → «Инвентаризация — сборка Windows EXE» → успешный запуск → Artifacts → Inventarizatsiya_1.0_EXE_win-x64. Распакуйте скачанный ZIP и запустите Inventarizatsiya.exe на Windows 10/11 x64.
-
-## Установщик
-Если успешно прошёл шаг Inno Setup, в Artifacts будет также Inventarizatsiya_1.0_Setup_win-x64 — установщик для Windows.
-
-## Как пересобрать
-Выполните новый запуск workflow_dispatch на ветке inventarizatsiya-v1.
-
-## Исходники
-В архиве source.zip находятся полный проект .NET 8, 768 позиций базы, README и XAML. Все количества и цены демонстрационные.
-
-Сборка в GitHub не равнозначна функциональному тестированию приложения на ПК.
+В workflow выполняется компиляция, два тестовых запуска WPF с открытием каждой вкладки и публикация установщика с EXE. При ошибке в `%LOCALAPPDATA%\\Inventarizatsiya\\logs\\startup.log` сохраняется полная диагностика, а база `%LOCALAPPDATA%\\Inventarizatsiya\\inventory.db` не удаляется при обновлении.

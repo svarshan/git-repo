@@ -1,4 +1,4 @@
-name: Инвентаризация — сборка Windows EXE
+name: Инвентаризация — Windows 1.0.1 с проверкой запуска
 on:
   push:
     branches:
@@ -13,7 +13,7 @@ permissions:
 
 jobs:
   windows-exe:
-    name: Собрать EXE и установщик
+    name: Проверить запуск, собрать EXE и установщик
     runs-on: windows-latest
     timeout-minutes: 30
     steps:
@@ -33,31 +33,50 @@ jobs:
             throw "Не найден проект Inventarizatsiya.csproj"
           }
 
-      - name: Сборка единого EXE (Windows x64)
+      - name: Сборка EXE (Windows x64)
         shell: pwsh
         run: |
           dotnet publish "Inventarizatsiya/Inventarizatsiya.csproj" -c Release -r win-x64 --self-contained true -p:PublishSingleFile=true -p:IncludeNativeLibrariesForSelfExtract=true -o "Inventarizatsiya/dist/portable"
           if ($LASTEXITCODE -ne 0) { throw "Ошибка dotnet publish" }
           if (-not (Test-Path "Inventarizatsiya/dist/portable/Inventarizatsiya.exe")) { throw "EXE не создан" }
 
-      - name: Опубликовать EXE для скачивания
+      - name: Проверить запуск и каждую вкладку WPF
+        shell: pwsh
+        run: |
+          $exe = (Resolve-Path "Inventarizatsiya/dist/portable/Inventarizatsiya.exe").Path
+          $log = Join-Path $env:RUNNER_TEMP "inventarizatsiya-smoke-test.log"
+          $env:INVENTARIZATSIYA_DIAGNOSTIC_LOG = $log
+          for ($attempt = 1; $attempt -le 2; $attempt++) {
+            Write-Host "Smoke-test #$attempt : запуск $exe"
+            $proc = Start-Process -FilePath $exe -ArgumentList "--smoke-test" -PassThru
+            if (-not $proc.WaitForExit(90000)) {
+              $proc.Kill()
+              throw "WPF-приложение не завершило smoke-test за 90 секунд"
+            }
+            Write-Host "Код завершения: $($proc.ExitCode)"
+            if (Test-Path $log) {
+              Get-Content -LiteralPath $log | Select-Object -Last 160 | Write-Host
+            }
+            if ($proc.ExitCode -ne 0) { throw "Ошибка запуска WPF: см. журнал выше" }
+          }
+          Write-Host "OK: обе проверки открытия окна и вкладок пройдены"
+
+      - name: Опубликовать готовый EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Inventarizatsiya_1.0_EXE_win-x64
+          name: Inventarizatsiya_1.0.1_EXE_win-x64
           path: Inventarizatsiya/dist/portable/*
           if-no-files-found: error
           retention-days: 30
 
       - name: Установить Inno Setup
         shell: pwsh
-        continue-on-error: true
         run: |
           choco install innosetup -y --no-progress
           if ($LASTEXITCODE -ne 0) { throw "Не удалось установить Inno Setup" }
 
-      - name: Собрать установщик
+      - name: Собрать установщик 1.0.1
         shell: pwsh
-        continue-on-error: true
         run: |
           $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
           if (-not (Test-Path $compiler)) { throw "Не найден ISCC.exe" }
@@ -67,7 +86,7 @@ jobs:
       - name: Опубликовать установщик
         uses: actions/upload-artifact@v4
         with:
-          name: Inventarizatsiya_1.0_Setup_win-x64
+          name: Inventarizatsiya_1.0.1_Setup_win-x64
           path: Inventarizatsiya/dist/installer/*.exe
-          if-no-files-found: warn
+          if-no-files-found: error
           retention-days: 30
