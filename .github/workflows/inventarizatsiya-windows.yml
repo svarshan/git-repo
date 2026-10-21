@@ -1,4 +1,4 @@
-name: Инвентаризация Маяк 2.2 PRO — Excel и тест запуска
+name: Инвентаризация Маяк 2.3 — Умная столовая — Excel и тест запуска
 on:
   push:
     branches:
@@ -65,7 +65,7 @@ jobs:
       - name: Реальный скриншот WPF (Windows)
         uses: actions/upload-artifact@v4
         with:
-          name: Mayak_2.2_PRO_Real_Windows_Screenshot
+          name: Mayak_2.3_UmnayaStolovaya_Real_Windows_Screenshot
           path: ${{ runner.temp }}/mayak22_real_window.png
           if-no-files-found: error
           retention-days: 30
@@ -73,7 +73,7 @@ jobs:
       - name: Опубликовать готовый EXE
         uses: actions/upload-artifact@v4
         with:
-          name: Inventarizatsiya_2.2.0_EXE_win-x64
+          name: Inventarizatsiya_2.3.0_EXE_win-x64
           path: Inventarizatsiya/dist/portable/*
           if-no-files-found: error
           retention-days: 30
@@ -84,7 +84,7 @@ jobs:
           choco install innosetup -y --no-progress
           if ($LASTEXITCODE -ne 0) { throw "Не удалось установить Inno Setup" }
 
-      - name: Собрать установщик 2.2.0
+      - name: Собрать установщик 2.3.0
         shell: pwsh
         run: |
           $compiler = "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe"
@@ -95,7 +95,7 @@ jobs:
       - name: Опубликовать установщик
         uses: actions/upload-artifact@v4
         with:
-          name: Inventarizatsiya_2.2.0_Setup_win-x64
+          name: Inventarizatsiya_2.3.0_Setup_win-x64
           path: Inventarizatsiya/dist/installer/*.exe
           if-no-files-found: error
           retention-days: 30
