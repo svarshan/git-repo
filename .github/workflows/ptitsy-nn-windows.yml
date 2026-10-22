@@ -1,0 +1,62 @@
+name: Птицы НН — Windows EXE
+on:
+  workflow_dispatch:
+  push:
+    branches: [master]
+    paths:
+      - 'PtitsyNN/**'
+      - '.github/workflows/ptitsy-nn-windows.yml'
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 100
+    defaults:
+      run:
+        working-directory: PtitsyNN
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install catalog downloader
+        run: python -m pip install requests==2.32.5
+      - name: Generate offline catalog and download licensed real media
+        run: python -u scripts/make_catalog.py
+      - name: Verify generated JS and catalog
+        run: |
+          node --check app/app.js
+          node --check app/data.js
+          node --check main.cjs
+          npm test
+      - name: Install Electron builder
+        run: npm install --no-audit --no-fund
+      - name: Build installer and portable EXE
+        run: npm run build:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Upload EXE installers and coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ptitsy-NN-2.0-Windows
+          path: |
+            PtitsyNN/dist/*.exe
+            PtitsyNN/data/coverage.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload coverage even when packaging fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ptitsy-NN-Diagnostics
+          path: |
+            PtitsyNN/data/coverage.json
+          if-no-files-found: ignore
+          retention-days: 14
