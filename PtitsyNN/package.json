@@ -1,0 +1,60 @@
+{
+  "name": "ptitsy-nizhny-novgorod",
+  "version": "2.0.0",
+  "private": true,
+  "description": "Offline bird encyclopedia of Nizhny Novgorod Oblast",
+  "main": "main.cjs",
+  "license": "UNLICENSED",
+  "scripts": {
+    "start": "electron .",
+    "build:win": "electron-builder --win nsis portable --x64",
+    "test": "node --test tests/*.test.cjs"
+  },
+  "devDependencies": {
+    "electron": "44.9.3",
+    "electron-builder": "26.15.3"
+  },
+  "build": {
+    "appId": "ru.moolva.ptitsynn",
+    "productName": "Птицы Нижегородской области",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "main.cjs",
+      "app/**/*",
+      "package.json",
+      "data/coverage.json"
+    ],
+    "asar": true,
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        },
+        {
+          "target": "portable",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "runAfterFinish": false
+    },
+    "portable": {
+      "artifactName": "Ptitsy-NN-2.0-Portable-${arch}.exe"
+    },
+    "publish": null
+  }
+}
