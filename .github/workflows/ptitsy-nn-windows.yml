@@ -14,7 +14,7 @@ concurrency:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 100
+    timeout-minutes: 160
     defaults:
       run:
         working-directory: PtitsyNN
@@ -41,10 +41,16 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v1-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py') }}
+          key: ptitsy-nn-media-v2-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py') }}
+          restore-keys: |
+            ptitsy-nn-media-v2-${{ runner.os }}-
+            ptitsy-nn-media-v1-${{ runner.os }}-
       - name: Generate offline catalog and download licensed real media
-        if: steps.media-cache.outputs.cache-hit != 'true'
-        run: python -u scripts/make_catalog.py
+        run: |
+          python -m py_compile scripts/make_catalog.py
+          python -u scripts/make_catalog.py
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
       - name: Show verified media coverage
         shell: pwsh
         run: |
@@ -70,7 +76,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-2.0-Windows
+          name: Ptitsy-NN-2.1-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json
