@@ -129,7 +129,7 @@ def download(url,dst,limit):
   if dst.exists() and dst.stat().st_size<250:dst.unlink(missing_ok=True)
 def wiki(b):
  for title in [b['name'],b['latin']]:
-  r=query(WIKI,{'titles':title,'redirects':'1','prop':'extracts|pageimages','explaintext':'1','exintro':'1','piprop':'name','pithumbsize':'780'})
+  r=query(WIKI,{'titles':title,'redirects':'1','prop':'extracts|pageimages','explaintext':'1','piprop':'name','pithumbsize':'780'})
   p=next(iter(r.get('pages',[])),{})
   if not p or p.get('missing') or not p.get('pageid'):continue
   extract=str(p.get('extract','')).strip()
@@ -140,8 +140,8 @@ def wiki(b):
  return {},''
 def enrich(b):
  p,txt=wiki(b)
- if len(txt)>=280:
-  b['description']=re.sub(r'\n{3,}','\n\n',txt[:8000])
+ if len(txt)>=500:
+  b['description']=re.sub(r'\n{3,}','\n\n',txt[:16000])
   b['descriptionSource']='https://ru.wikipedia.org/?curid='+str(p['pageid'])
   b['articleComplete']=True
  else:
