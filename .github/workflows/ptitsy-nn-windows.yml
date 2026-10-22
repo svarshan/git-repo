@@ -10,11 +10,11 @@ permissions:
   contents: read
 concurrency:
   group: ptitsy-nn-windows-${{ github.ref }}
-  cancel-in-progress: false
+  cancel-in-progress: true
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 160
+    timeout-minutes: 90
     defaults:
       run:
         working-directory: PtitsyNN
@@ -46,11 +46,13 @@ jobs:
             ptitsy-nn-media-v2-${{ runner.os }}-
             ptitsy-nn-media-v1-${{ runner.os }}-
       - name: Generate offline catalog and download licensed real media
+        timeout-minutes: 48
         run: |
           python -m py_compile scripts/make_catalog.py
           python -u scripts/make_catalog.py
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+          BIRDS_FETCH_BUDGET_SECONDS: '1800'
       - name: Show verified media coverage
         shell: pwsh
         run: |

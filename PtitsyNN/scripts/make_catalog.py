@@ -29,6 +29,10 @@ INAT_GAP=1.15  # <= 52 requests/minute, below iNaturalist recommended 60/minute
 INAT_LOCK=threading.Lock()
 INAT_NEXT=[0.0]
 thread=threading.local()
+FETCH_DEADLINE=float('inf')
+
+def deadline_reached():
+ return time.monotonic() >= FETCH_DEADLINE
 UA=os.environ.get('BIRDS_USER_AGENT','MoOLVa Birds NN/2.1 (educational desktop encyclopedia; github.com/svarshan/git-repo)')
 FREE=('CC BY','CC-BY','CC0','PUBLIC DOMAIN','PD-','PD ','PDM','PUBLICDOMAIN')
 INVALID=('NC','ND','FAIR USE','COPYRIGHT','ALL RIGHTS','NONCOMMERCIAL')
@@ -45,9 +49,10 @@ def sess():
  return thread.sess
 def query(url,params):
  args={'action':'query','format':'json','formatversion':'2',**params}
- for tries in range(3):
+ for tries in range(2):
+  if deadline_reached():return {}
   try:
-   r=sess().get(url,params=args,timeout=20)
+   r=sess().get(url,params=args,timeout=(5,9))
    if r.status_code in (429,500,502,503,504):
     time.sleep(1.6*(tries+1))
     continue
@@ -118,6 +123,7 @@ def allowed_cc(code):
 
 def inat_search(latin,kind):
  """Research-grade observations; per-MEDIA license must permit redistribution."""
+ if deadline_reached():return []
  with INAT_LOCK:
   remaining=INAT_NEXT[0]-time.monotonic()
   if remaining>0:time.sleep(remaining)
@@ -125,7 +131,7 @@ def inat_search(latin,kind):
  try:
   params={'taxon_name':latin,'quality_grade':'research','per_page':20,'order':'desc','order_by':'created_at'}
   params['sounds' if kind=='audio' else 'photos']='true'
-  r=sess().get(INAT,params=params,timeout=(8,22))
+  r=sess().get(INAT,params=params,timeout=(5,12))
   r.raise_for_status()
   results=r.json().get('results',[])
  except (requests.RequestException,ValueError,AttributeError):
@@ -155,10 +161,10 @@ def inat_search(latin,kind):
 
 def xeno_audio(latin):
  """Optional xeno-canto API v3 source; requires user-owned API key in GitHub Secrets."""
- if not XENO_KEY:return []
+ if not XENO_KEY or deadline_reached():return []
  genus,species=latin.split(' ',1)
  try:
-  r=sess().get(XENO,params={'query':'gen:'+genus+' sp:'+species,'key':XENO_KEY},timeout=(8,24))
+  r=sess().get(XENO,params={'query':'gen:'+genus+' sp:'+species,'key':XENO_KEY},timeout=(5,12))
   r.raise_for_status()
   recs=r.json().get('recordings',[])
  except (requests.RequestException,ValueError,AttributeError):
@@ -209,8 +215,9 @@ def restore_existing():
  except (OSError,ValueError,KeyError):return {}
 
 def download(url,dst,limit):
+ if deadline_reached():return False
  try:
-  with sess().get(url,stream=True,timeout=(10,35)) as r:
+  with sess().get(url,stream=True,timeout=(5,16)) as r:
    r.raise_for_status()
    hostname=urlparse(r.url).hostname or ''
    if not (hostname=='upload.wikimedia.org' or hostname.endswith('.wikimedia.org') or hostname in ('static.inaturalist.org','inaturalist-open-data.s3.amazonaws.com','xeno-canto.org','www.xeno-canto.org') or hostname.endswith('.inaturalist.org')):return False
@@ -241,7 +248,29 @@ def wiki(b):
   if b['latin'].lower() not in extract[:1600].lower() and b['name'].lower()!=p.get('title','').lower():continue
   return p,extract
  return {},''
+def photo_choices(b,filename):
+ if filename:
+  item=photo_from_wikipedia(b,filename)
+  if item:yield item
+ if deadline_reached():return
+ item=english_page_photo(b['latin'])
+ if item:yield item
+ if deadline_reached():return
+ for item in media_search(b['latin'],'image')[:5]:yield item
+ if deadline_reached():return
+ for item in inat_search(b['latin'],'image')[:7]:yield item
+
+def audio_choices(b):
+ if deadline_reached():return
+ for item in media_search(b['latin'],'audio')[:4]:yield item
+ if deadline_reached():return
+ for item in inat_search(b['latin'],'audio')[:6]:yield item
+ if deadline_reached():return
+ for item in xeno_audio(b['latin'])[:5]:yield item
+
 def enrich(b):
+ if deadline_reached():return b
+ p={}
  if not b.get('articleComplete') or not b.get('description'):
   p,txt=wiki(b)
   if len(txt)>=500:
@@ -252,46 +281,49 @@ def enrich(b):
    b['description']='Полная справочная статья пока не найдена в проверенном открытом источнике.'
    b['descriptionSource']=None
    b['articleComplete']=False
- else:p={}
  if not valid_existing_media(b,'imageFile'):
   b['imageFile']=None
-  candidates=[]
-  filename=p.get('pageimage')
-  if filename:
-   fromwiki=photo_from_wikipedia(b,filename)
-   if fromwiki:candidates.append(fromwiki)
-  fromen=english_page_photo(b['latin'])
-  if fromen:candidates.append(fromen)
-  candidates+=media_search(b['latin'],'image')
-  candidates+=inat_search(b['latin'],'image')
   seen=set()
-  for url,credit,mime in candidates:
+  for url,credit,mime in photo_choices(b,p.get('pageimage')):
+   if deadline_reached():break
    if url in seen:continue
    seen.add(url)
    ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}.get(mime)
    if not ext:continue
    dst=M/'image'/(b['id']+'.'+ext)
    if download(url,dst,2_500_000):
-    b['imageFile']='media/image/'+dst.name;b['imageCredits']=credit;break
+    b['imageFile']='media/image/'+dst.name
+    b['imageCredits']=credit
+    break
    dst.unlink(missing_ok=True)
  if not valid_existing_media(b,'audioFile'):
   b['audioFile']=None
-  candidates=media_search(b['latin'],'audio')
-  candidates+=inat_search(b['latin'],'audio')
-  candidates+=xeno_audio(b['latin'])
   seen=set()
-  for url,credit,mime in candidates:
+  for url,credit,mime in audio_choices(b):
+   if deadline_reached():break
    if url in seen:continue
    seen.add(url)
    ext={'audio/ogg':'ogg','application/ogg':'ogg','audio/mpeg':'mp3','audio/wav':'wav','audio/x-wav':'wav'}.get(mime)
    if not ext:continue
    dst=M/'audio'/(b['id']+'.'+ext)
    if download(url,dst,5_300_000):
-    b['audioFile']='media/audio/'+dst.name;b['audioCredits']=credit;break
+    b['audioFile']='media/audio/'+dst.name
+    b['audioCredits']=credit
+    break
    dst.unlink(missing_ok=True)
  return b
 
+def checkpoint(birds):
+ APP.mkdir(exist_ok=True,parents=True)
+ (APP/'data.js').write_text('window.BIRDS_DATA='+json.dumps(birds,ensure_ascii=False,separators=(',',':'))+';',encoding='utf8')
+ report={'species':len(birds),'photos':sum(bool(b.get('imageFile')) for b in birds),'birdCalls':sum(bool(b.get('audioFile')) for b in birds),'articles':sum(bool(b.get('articleComplete')) for b in birds),'missingPhotos':[b['latin'] for b in birds if not b.get('imageFile')],'missingAudio':[b['latin'] for b in birds if not b.get('audioFile')],'missingArticles':[b['latin'] for b in birds if not b.get('articleComplete')]}
+ report['imageSources']={src:sum(bool(b.get('imageFile')) and src in (b.get('imageCredits') or {}).get('source','') for b in birds) for src in ('wikimedia.org','inaturalist.org')}
+ report['audioSources']={src:sum(bool(b.get('audioFile')) and src in (b.get('audioCredits') or {}).get('source','') for b in birds) for src in ('wikimedia.org','inaturalist.org','xeno-canto.org')}
+ (ROOT/'data'/'coverage.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
+ return report
+
 def main():
+ global FETCH_DEADLINE
  source=''.join((ROOT/'data'/'species.b64').read_text(encoding='ascii').split())
  lines=zlib.decompress(base64.b64decode(source)).decode('utf8').splitlines()
  prior=restore_existing()
@@ -308,22 +340,34 @@ def main():
   birds.append(bird)
  assert len(birds)==298,'Expected exactly 298 species from audited regional source'
  assert len({b['latin'] for b in birds})==298
- print('Catalog:',len(birds),'species. Downloading articles / licensed images / authentic bird calls...',flush=True)
- result=[None]*len(birds)
- with ThreadPoolExecutor(max_workers=3) as executor:
-  mapping={executor.submit(enrich,b):i for i,b in enumerate(birds)}
-  for n,fut in enumerate(as_completed(mapping),1):
-   idx=mapping[fut]
-   try: result[idx]=fut.result()
-   except Exception as exc:result[idx]=birds[idx];print('WARN',birds[idx]['latin'],str(exc)[:100],flush=True)
-   if n%15==0:print('Enriched',n,'/',len(birds),'images',sum(bool(x and x.get('imageFile')) for x in result),'sounds',sum(bool(x and x.get('audioFile')) for x in result),flush=True)
- birds=result
- APP.mkdir(exist_ok=True,parents=True)
- (APP/'data.js').write_text('window.BIRDS_DATA='+json.dumps(birds,ensure_ascii=False,separators=(',',':'))+';',encoding='utf8')
- report={'species':len(birds),'photos':sum(bool(b.get('imageFile')) for b in birds),'birdCalls':sum(bool(b.get('audioFile')) for b in birds),'articles':sum(bool(b.get('articleComplete')) for b in birds),'missingPhotos':[b['latin'] for b in birds if not b.get('imageFile')],'missingAudio':[b['latin'] for b in birds if not b.get('audioFile')],'missingArticles':[b['latin'] for b in birds if not b.get('articleComplete')]}
- report['imageSources']={src:sum(bool(b.get('imageFile')) and src in (b.get('imageCredits') or {}).get('source','') for b in birds) for src in ('wikimedia.org','inaturalist.org')}
- report['audioSources']={src:sum(bool(b.get('audioFile')) and src in (b.get('audioCredits') or {}).get('source','') for b in birds) for src in ('wikimedia.org','inaturalist.org','xeno-canto.org')}
- (ROOT/'data'/'coverage.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
+ # Always create a valid catalog before making ANY network calls.
+ for b in birds:
+  for media_field in ('imageFile','audioFile'):
+   if not valid_existing_media(b,media_field):
+    b[media_field]=None
+ initial=checkpoint(birds)
+ budget=max(60,min(2400,int(os.environ.get('BIRDS_FETCH_BUDGET_SECONDS','1800'))))
+ FETCH_DEADLINE=time.monotonic()+budget
+ print('Catalog:',len(birds),'species; starting licensed-media enrichment with',budget,'seconds budget.',flush=True)
+ print('Cached coverage:',{k:initial[k] for k in ('species','photos','birdCalls','articles')},flush=True)
+ processed=0
+ # Small batches prevent 298 slow queries from being queued and give reliable checkpoints.
+ for offset in range(0,len(birds),8):
+  if deadline_reached():
+   print('Fetch budget reached; moving to EXE build with all verified files.',flush=True)
+   break
+  with ThreadPoolExecutor(max_workers=4) as executor:
+   mapping={executor.submit(enrich,birds[i]):i for i in range(offset,min(offset+8,len(birds)))}
+   for fut in as_completed(mapping):
+    idx=mapping[fut]
+    try:birds[idx]=fut.result()
+    except Exception as exc:print('WARN',birds[idx]['latin'],str(exc)[:150],flush=True)
+    processed+=1
+  report=checkpoint(birds)
+  print('PROGRESS',processed,'/',len(birds),'photos',report['photos'],'sounds',report['birdCalls'],'articles',report['articles'],flush=True)
+ report=checkpoint(birds)
  print('MEDIA COVERAGE',json.dumps({k:report[k] for k in ('species','photos','birdCalls','articles')}),flush=True)
- if report['photos']==0 and report['birdCalls']==0:print('WARNING: Wikimedia availability restricted or no qualified results. Report states real counts.',flush=True)
+ if processed<len(birds):print('PARTIAL MEDIA CATALOG: more media can be added in a later build.',flush=True)
+ if report['photos']==0 and report['birdCalls']==0:print('WARNING: no permitted media available from sources; actual coverage is zero.',flush=True)
+
 if __name__=='__main__':main()
