@@ -14,7 +14,7 @@ concurrency:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 90
+    timeout-minutes: 110
     defaults:
       run:
         working-directory: PtitsyNN
@@ -43,16 +43,17 @@ jobs:
             PtitsyNN/data/coverage.json
           key: ptitsy-nn-media-v2-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py') }}
           restore-keys: |
+            ptitsy-nn-media-v3-${{ runner.os }}-
             ptitsy-nn-media-v2-${{ runner.os }}-
             ptitsy-nn-media-v1-${{ runner.os }}-
       - name: Generate offline catalog and download licensed real media
-        timeout-minutes: 48
+        timeout-minutes: 82
         run: |
           python -m py_compile scripts/make_catalog.py
           python -u scripts/make_catalog.py
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
-          BIRDS_FETCH_BUDGET_SECONDS: '1800'
+          BIRDS_FETCH_BUDGET_SECONDS: '4200'
       - name: Show verified media coverage
         shell: pwsh
         run: |
@@ -64,6 +65,15 @@ jobs:
           node --check app/data.js
           node --check main.cjs
           npm test
+      - name: Save downloaded media even if a later step fails
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            PtitsyNN/app/media
+            PtitsyNN/app/data.js
+            PtitsyNN/data/coverage.json
+          key: ptitsy-nn-media-v3-${{ runner.os }}-${{ github.sha }}
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
