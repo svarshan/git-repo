@@ -54,3 +54,25 @@ test('each of 298 bird cards has text, and detailed articles have source and ope
   }
  }
 });
+
+test('Voices PRO player and comparison integrated in offline app',()=>{
+ const p=fs.readFileSync(path.join(root,'app','audio-pro.js'),'utf8');
+ const a=fs.readFileSync(path.join(root,'app','app.js'),'utf8');
+ const h=fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+ assert.match(h,/src="audio-pro\.js"/);
+ assert.match(h,/data-view="compare"/);
+ assert.match(h,/id="compareContent"/);
+ assert.match(a,/window\.BirdAudioPro\?\.mountCard/);
+ assert.match(a,/window\.BirdAudioPro\?\.mountCompare/);
+ assert.match(a,/window\.BirdAudioPro\?\.stopAll/);
+ for(const feature of ['audio.playbackRate','audio.volume','audio.loop','audio.currentTime','exportReports','localStorage','other.pause()']){
+  assert.ok(p.includes(feature),'Missing player capability: '+feature);
+ }
+ assert.match(p,/не проверен прослушиванием специалиста/);
+});
+test('Audio technical review script ships with quality thresholds and human-audit disclaimer',()=>{
+ const s=fs.readFileSync(path.join(root,'scripts','audit_audio.py'),'utf8');
+ assert.match(s,/volumedetect,silencedetect/);
+ assert.match(s,/Duplicate recording/);
+ assert.match(s,/audioHumanReviewed/);
+});
