@@ -369,7 +369,7 @@ def main():
   group=next((g for g,genes in GROUPS.items() if genre in genes),'Прочие птицы')
   old=prior.get(latin,{})
   bird={'id':latin.lower().replace(' ','-'),'name':name,'latin':latin,'group':group,'imageFile':None,'audioFile':None,'imageCredits':None,'audioCredits':None,'articleComplete':False}
-  for field in ('imageFile','audioFile','imageCredits','audioCredits','articleComplete','description','descriptionSource'):
+  for field in ('imageFile','audioFile','imageCredits','audioCredits','articleComplete','description','descriptionSource','descriptionLanguage','descriptionAttribution','descriptionTitle','descriptionStatus'):
    if field in old:bird[field]=old[field]
   birds.append(bird)
  assert len(birds)==298,'Expected exactly 298 species from audited regional source'

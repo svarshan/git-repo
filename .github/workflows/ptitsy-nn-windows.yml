@@ -14,7 +14,7 @@ concurrency:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 110
+    timeout-minutes: 120
     defaults:
       run:
         working-directory: PtitsyNN
@@ -41,8 +41,9 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v4-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/curate_audio.py') }}
+          key: ptitsy-nn-media-v5-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
           restore-keys: |
+            ptitsy-nn-media-v5-${{ runner.os }}-
             ptitsy-nn-media-v4-${{ runner.os }}-
             ptitsy-nn-media-v3-${{ runner.os }}-
             ptitsy-nn-media-v2-${{ runner.os }}-
@@ -56,6 +57,13 @@ jobs:
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
           BIRDS_FETCH_BUDGET_SECONDS: '4200'
+      - name: Enrich every bird description from Wikipedia
+        timeout-minutes: 27
+        run: |
+          python -m py_compile scripts/enrich_articles.py
+          python -u scripts/enrich_articles.py
+        env:
+          BIRDS_WIKI_BUDGET_SECONDS: '1200'
       - name: Show verified media coverage
         shell: pwsh
         run: |
@@ -75,7 +83,7 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v3-${{ runner.os }}-${{ github.sha }}
+          key: ptitsy-nn-media-v5-${{ runner.os }}-${{ github.sha }}
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
@@ -90,7 +98,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-2.2-Windows
+          name: Ptitsy-NN-2.3-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json

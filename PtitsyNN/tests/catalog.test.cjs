@@ -29,7 +29,7 @@ test('only existing local media with open licenses, author and source credits',(
 test('description links point to Wikipedia',()=>{
  for(const b of birds)if(b.articleComplete){
   assert.ok(b.description.length>=280);
-  assert.match(b.descriptionSource,/^https:\/\/ru\.wikipedia\.org\//);
+  assert.match(b.descriptionSource,/^https:\/\/(ru|en)\.wikipedia\.org\//);
  }
 });
 
@@ -42,4 +42,15 @@ test('bird details modal fits small screens without cropping photo or inheriting
  assert.match(css,/body\.dialog-open\{overflow:hidden\}/);
  assert.match(app,/function showDialog\(\)[^}]*overlay\.scrollTop=0;[^}]*modal\.scrollTop=0;/);
  assert.match(app,/function close\(\)[^}]*document\.body\.classList\.remove\('dialog-open'\)/);
+});
+
+test('each of 298 bird cards has text, and detailed articles have source and open license',()=>{
+ for(const b of birds){
+  assert.ok(typeof b.description==='string'&&b.description.length>=140,'Missing: '+b.latin);
+  if(b.articleComplete){
+   assert.ok(b.description.length>=450);
+   assert.ok(['ru','en'].includes(b.descriptionLanguage));
+   assert.equal(b.descriptionAttribution?.license,'CC BY-SA 4.0');
+  }
+ }
 });

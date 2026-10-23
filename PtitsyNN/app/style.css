@@ -2,3 +2,5 @@
 /* The page keeps its scroll position, while opened bird details scroll independently. */
 body.dialog-open{overflow:hidden}
 @media(max-width:650px) and (max-height:500px){.detailphoto{height:160px}}
+
+.article-note{background:#e9f1f4;border-left:3px solid var(--sky);padding:8px 12px;border-radius:4px;color:#35586b;font-size:13px}
