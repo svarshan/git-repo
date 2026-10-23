@@ -4,3 +4,25 @@ body.dialog-open{overflow:hidden}
 @media(max-width:650px) and (max-height:500px){.detailphoto{height:160px}}
 
 .article-note{background:#e9f1f4;border-left:3px solid var(--sky);padding:8px 12px;border-radius:4px;color:#35586b;font-size:13px}
+
+/* Voices PRO 2.5 */
+.audio-pro{min-width:0;background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0 22px}
+.audio-pro-title{font-weight:700;font-size:15px;color:var(--blue);margin-bottom:9px}
+.audio-pro-primary{display:grid;grid-template-columns:auto minmax(70px,1fr) auto;gap:10px;align-items:center}
+.audio-pro button{border:1px solid var(--line);background:#fff;color:var(--blue);border-radius:7px;padding:9px}
+.audio-pro-play{background:var(--brick)!important;border-color:var(--brick)!important;color:#fff!important}
+.audio-pro-timeline{min-width:0;width:100%;accent-color:var(--brick)}
+.audio-pro-time{white-space:nowrap;font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.audio-pro-options,.audio-pro-feedback{display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin-top:12px}
+.audio-pro-label{display:flex;align-items:center;gap:7px;font-size:12px}
+.audio-pro-volume{width:110px;accent-color:var(--blue)}
+.audio-pro-speed,.audio-pro-problem,.compare-select{border:1px solid var(--line);border-radius:7px;background:white;color:var(--blue);padding:9px;min-width:0}
+.audio-pro-muted{font-size:12px;line-height:1.5;color:var(--muted)}
+.audio-pro-source{font-size:12px;color:var(--brick);display:inline-block}
+.audio-pro-feedback{border-top:1px solid var(--line);padding-top:10px}
+.audio-pro-report{font-size:12px}
+.compare-grid,.compare-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
+.compare-select-label{display:flex;flex-direction:column;gap:7px;font-weight:600;color:var(--blue)}
+.compare-slot{min-width:0}.compare-intro{color:var(--muted);max-width:770px}
+@media(max-width:870px){.compare-grid,.compare-toolbar{grid-template-columns:1fr}}
+@media(max-width:520px){.audio-pro{padding:10px}.audio-pro-primary{grid-template-columns:1fr auto}.audio-pro-timeline{grid-row:2;grid-column:1/-1}.audio-pro-volume{width:90px}.audio-pro-feedback{align-items:stretch;flex-direction:column}}
