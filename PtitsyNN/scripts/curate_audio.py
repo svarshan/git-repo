@@ -22,6 +22,9 @@ def run():
  for b in birds:
   media=b.get('audioFile')
   if not media:continue
+  # Already-normalized current-version assets are safe to reuse without lossy re-encoding.
+  if (b.get('audioCredits') or {}).get('audioProcessing') and (APP/media).is_file():
+   continue
   credit=b.get('audioCredits') or {}
   source=str(credit.get('source') or '')
   if not (source.startswith('https://commons.wikimedia.org/') or source.startswith('https://xeno-canto.org/')):
@@ -54,6 +57,10 @@ def run():
    # Don't label broken, inaudible or unsupported files as verified voices.
    b['audioFile']=None;b['audioCredits']=None;removed+=1
    print('AUDIO REJECT',b['latin'],str(e)[:150],flush=True)
+ # Do not ship old ambient conversations from previous caches as unused EXE resources.
+ referenced={str((APP/b['audioFile']).resolve()) for b in birds if b.get('audioFile')}
+ for stale in (APP/'media'/'audio').glob('*'):
+  if stale.is_file() and str(stale.resolve()) not in referenced:stale.unlink(missing_ok=True)
  DATA.write_text(prefix+json.dumps(birds,ensure_ascii=False,separators=(',',':'))+';',encoding='utf8')
  report_path=ROOT/'data'/'coverage.json'
  report=json.loads(report_path.read_text(encoding='utf8'))
