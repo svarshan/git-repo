@@ -14,7 +14,7 @@ concurrency:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 135
+    timeout-minutes: 150
     defaults:
       run:
         working-directory: PtitsyNN
@@ -41,7 +41,7 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v6-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
+          key: ptitsy-nn-media-v7-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
           restore-keys: |
             ptitsy-nn-media-v6-${{ runner.os }}-
             ptitsy-nn-media-v5-${{ runner.os }}-
@@ -50,17 +50,20 @@ jobs:
             ptitsy-nn-media-v2-${{ runner.os }}-
             ptitsy-nn-media-v1-${{ runner.os }}-
       - name: Generate offline catalog and download licensed real media
-        timeout-minutes: 93
+        timeout-minutes: 100
         run: |
           python -m py_compile scripts/make_catalog.py
           python -u scripts/make_catalog.py
           python -m py_compile scripts/harvest_voices.py
           python -u scripts/harvest_voices.py
+          python -m py_compile scripts/openverse_voices.py
+          python -u scripts/openverse_voices.py
           python -u scripts/curate_audio.py
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
           BIRDS_FETCH_BUDGET_SECONDS: '4200'
           BIRDS_VOICE_BUDGET_SECONDS: '1400'
+          BIRDS_OPENVERSE_BUDGET_SECONDS: '550'
       - name: Enrich every bird description from Wikipedia
         timeout-minutes: 27
         run: |

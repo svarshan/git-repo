@@ -4,7 +4,7 @@ const data=fs.readFileSync(path.join(root,'app','data.js'),'utf8');
 const box={window:{}};vm.runInNewContext(data,box);
 const birds=box.window.BIRDS_DATA;
 const mediaRoot=path.resolve(root,'app','media')+path.sep;
-const allowedMediaSource=/^https:\/\/(?:commons\.wikimedia\.org\/|www\.inaturalist\.org\/observations\/\d+(?:\/|$)|xeno-canto\.org\/\d+(?:\/|$))/;
+const allowedMediaSource=/^https:\/\/(?:commons\.wikimedia\.org\/|www\.inaturalist\.org\/observations\/\d+(?:\/|$)|xeno-canto\.org\/\d+(?:\/|$)|freesound\.org\/(?:people|s)\/|archive\.org\/details\/)/;
 const forbiddenLicense=/(?:by-nc|by-nd|nc-sa|nc-nd|noncommercial|no-derivatives)/i;
 test('full catalog of unique scientific species',()=>{
  assert.equal(birds.length,298);
