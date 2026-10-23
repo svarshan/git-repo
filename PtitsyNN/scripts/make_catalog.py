@@ -260,13 +260,37 @@ def photo_choices(b,filename):
  if deadline_reached():return
  for item in inat_search(b['latin'],'image')[:7]:yield item
 
+def curated_commons_audio(latin):
+ """Use Commons category assigned to the actual taxon, not generic field audio."""
+ if deadline_reached():return []
+ results=query(COMMONS,{'generator':'categorymembers','gcmtitle':'Category:Audio files of '+latin,'gcmtype':'file','gcmlimit':'100','prop':'imageinfo','iiprop':'url|size|mime|extmetadata'})
+ matches=[]
+ forbidden=re.compile(r'conversation|talking|interview|speech|human.voice|people.talking|soundscape|sound.cloud|forest.ambien|background.noise|narrat|read.aloud|podcast|radio',re.I)
+ for item in results.get('pages',[]):
+  title=str(item.get('title',''))
+  if forbidden.search(title):continue
+  info=(item.get('imageinfo') or [{}])[0]
+  mime=str(info.get('mime',''))
+  if mime not in ('audio/ogg','application/ogg','audio/mpeg','audio/wav','audio/x-wav'):continue
+  if int(info.get('size') or 0)>5_300_000:continue
+  credit=lic(info)
+  if not credit:continue
+  url=info.get('url')
+  if not url:continue
+  # Full scientific name, species category, or XC field-recording identifier
+  name_score=0 if re.search(r'XC\d{3,}',title,re.I) else 1 if latin.lower() in title.lower().replace('_',' ') else 2
+  type_score=0 if re.search(r'song|sing|call|voice|gesang|ruf|пени|крик',title,re.I) else 1
+  matches.append(((name_score,type_score,int(info.get('size') or 0)),url,credit,mime))
+ return [(url,credit,mime) for _,url,credit,mime in sorted(matches,key=lambda x:x[0])[:12]]
+
 def audio_choices(b):
  if deadline_reached():return
- for item in media_search(b['latin'],'audio')[:4]:yield item
- if deadline_reached():return
- for item in inat_search(b['latin'],'audio')[:6]:yield item
- if deadline_reached():return
+ # Species-specific field recordings only: no iNaturalist ambient observation sounds.
  for item in xeno_audio(b['latin'])[:5]:yield item
+ if deadline_reached():return
+ for item in curated_commons_audio(b['latin'])[:10]:yield item
+ if deadline_reached():return
+ for item in media_search(b['latin'],'audio')[:6]:yield item
 
 def enrich(b):
  if deadline_reached():return b
@@ -296,6 +320,16 @@ def enrich(b):
     b['imageCredits']=credit
     break
    dst.unlink(missing_ok=True)
+ current_audio_source=(b.get('audioCredits') or {}).get('source','')
+ # Old iNaturalist audio often includes speech/ambience despite Research Grade observation.
+ # Never reuse it as a verified standalone bird vocalization.
+ if 'inaturalist.org' in current_audio_source:
+  old=(APP/b.get('audioFile','')).resolve()
+  try:old.relative_to(M.resolve())
+  except ValueError:old=None
+  if old and old.exists():old.unlink(missing_ok=True)
+  b['audioFile']=None
+  b['audioCredits']=None
  if not valid_existing_media(b,'audioFile'):
   b['audioFile']=None
   seen=set()
@@ -345,6 +379,10 @@ def main():
   for media_field in ('imageFile','audioFile'):
    if not valid_existing_media(b,media_field):
     b[media_field]=None
+ for bird in birds:
+  if 'inaturalist.org' in str((bird.get('audioCredits') or {}).get('source','')):
+   bird['audioFile']=None
+   bird['audioCredits']=None
  initial=checkpoint(birds)
  budget=max(60,min(2400,int(os.environ.get('BIRDS_FETCH_BUDGET_SECONDS','1800'))))
  FETCH_DEADLINE=time.monotonic()+budget

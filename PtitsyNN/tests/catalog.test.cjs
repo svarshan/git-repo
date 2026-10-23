@@ -22,6 +22,7 @@ test('only existing local media with open licenses, author and source credits',(
   assert.ok(b[credit]?.author,'Missing author credit for '+b[file]);
   assert.ok(b[credit]?.license,'Missing license for '+b[file]);
   assert.doesNotMatch(b[credit].license,forbiddenLicense);
+  if(file==='audioFile')assert.doesNotMatch(b[credit].source,/inaturalist\.org/, 'Bird audio must not come from ambient iNaturalist observation');
   assert.match(b[credit]?.source||'',allowedMediaSource,'Unrecognized license source for '+b[file]);
  }
 });
