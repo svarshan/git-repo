@@ -35,8 +35,9 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/enrich_articles.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py
           node --check app/app.js
+          node --check app/audio-pro.js
       - name: Restore validated offline catalog cache
         id: media-cache
         uses: actions/cache@v4
@@ -45,8 +46,10 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v7-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
+          key: ptitsy-nn-media-v8-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/audit_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
           restore-keys: |
+            ptitsy-nn-media-v8-${{ runner.os }}-
+            ptitsy-nn-media-v7-${{ runner.os }}-
             ptitsy-nn-media-v6-${{ runner.os }}-
             ptitsy-nn-media-v5-${{ runner.os }}-
             ptitsy-nn-media-v4-${{ runner.os }}-
@@ -63,6 +66,7 @@ jobs:
           python -m py_compile scripts/openverse_voices.py
           python -u scripts/openverse_voices.py
           python -u scripts/curate_audio.py
+          python -u scripts/audit_audio.py
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
           BIRDS_FETCH_BUDGET_SECONDS: '4200'
@@ -80,9 +84,11 @@ jobs:
         run: |
           $r = Get-Content data/coverage.json -Raw | ConvertFrom-Json
           Write-Host "Species: $($r.species) | photos: $($r.photos) | voices: $($r.birdCalls) | articles: $($r.articles)"
+          Write-Host "Audio QA: accepted $($r.audioTechnicalAccepted) rejected $($r.audioTechnicalRejected)"
       - name: Verify generated JS and catalog
         run: |
           node --check app/app.js
+          node --check app/audio-pro.js
           node --check app/data.js
           node --check main.cjs
           npm test
@@ -94,7 +100,7 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v6-${{ runner.os }}-${{ github.sha }}
+          key: ptitsy-nn-media-v8-${{ runner.os }}-${{ github.sha }}
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
@@ -109,10 +115,12 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-2.4-Windows
+          name: Ptitsy-NN-2.5-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json
+            PtitsyNN/data/audio-audit.csv
+            PtitsyNN/data/audio-audit.json
           if-no-files-found: error
           retention-days: 30
       - name: Upload coverage even when packaging fails
