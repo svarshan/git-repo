@@ -33,7 +33,7 @@ function player(b){
  const label=(text,control)=>add(make('label','audio-pro-label',text+' '),control);
  add(root,add(make('div','audio-pro-options'),label('Громкость',volume),label('Скорость',speed),label('Повтор',loop)));
  const credit=b.audioCredits||{};
- root.appendChild(make('p','audio-pro-muted','Источник: '+(credit.author||'не указан')+' · '+(credit.license||'не указана')+'. Вид определён по метаданным; не проверен прослушиванием специалиста.'));
+ root.appendChild(make('p','audio-pro-muted','Тип звука: '+(credit.vocalization||'не определён')+' · Источник: '+(credit.author||'не указан')+' · '+(credit.license||'не указана')+'. Технический контроль: '+(credit.audioQuality?'пройден':'данных нет')+'. Вид определён по метаданным; не проверен прослушиванием специалиста.'));
  if(credit.source&&/^https:\/\/(commons\.wikimedia\.org\/|xeno-canto\.org\/|freesound\.org\/|archive\.org\/)/.test(credit.source)){
   const link=make('a','audio-pro-source','Открыть источник ↗');link.href=credit.source;link.target='_blank';link.rel='noopener noreferrer';root.appendChild(link);
  }
