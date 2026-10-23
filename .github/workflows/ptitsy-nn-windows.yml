@@ -33,6 +33,10 @@ jobs:
         run: python -m pip install requests==2.32.5 imageio-ffmpeg==0.6.0
       # Reuse audited and already downloaded media on subsequent builds.
       # Changing the species list or ingestion script invalidates this cache.
+      - name: Preflight Python and JavaScript syntax
+        run: |
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/enrich_articles.py
+          node --check app/app.js
       - name: Restore validated offline catalog cache
         id: media-cache
         uses: actions/cache@v4
