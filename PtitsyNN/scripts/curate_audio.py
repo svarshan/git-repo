@@ -27,7 +27,11 @@ def run():
    continue
   credit=b.get('audioCredits') or {}
   source=str(credit.get('source') or '')
-  if not (source.startswith('https://commons.wikimedia.org/') or source.startswith('https://xeno-canto.org/')):
+  if not (source.startswith('https://commons.wikimedia.org/') or
+          source.startswith('https://xeno-canto.org/') or
+          source.startswith('https://freesound.org/people/') or
+          source.startswith('https://freesound.org/s/') or
+          source.startswith('https://archive.org/details/')):
    b['audioFile']=None;b['audioCredits']=None;removed+=1;continue
   path=(APP/media).resolve()
   try:path.relative_to((APP/'media').resolve())
@@ -68,7 +72,7 @@ def run():
  report['missingAudio']=[b['latin'] for b in birds if not b.get('audioFile')]
  report['audioProcessed']=done
  report['audioRejected']=removed
- report['audioSources']={src:sum(bool(b.get('audioFile')) and src in (b.get('audioCredits') or {}).get('source','') for b in birds) for src in ('wikimedia.org','inaturalist.org','xeno-canto.org')}
+ report['audioSources']={src:sum(bool(b.get('audioFile')) and src in (b.get('audioCredits') or {}).get('source','') for b in birds) for src in ('wikimedia.org','inaturalist.org','xeno-canto.org','freesound.org','archive.org')}
  report_path.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
  print('CURATED AUDIO',{'normalized':done,'rejected':removed,'verified_audio':report['birdCalls'],'photos':report['photos']},flush=True)
 
