@@ -14,7 +14,7 @@ concurrency:
 jobs:
   windows:
     runs-on: windows-latest
-    timeout-minutes: 120
+    timeout-minutes: 135
     defaults:
       run:
         working-directory: PtitsyNN
@@ -41,22 +41,26 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v5-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
+          key: ptitsy-nn-media-v6-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
           restore-keys: |
+            ptitsy-nn-media-v6-${{ runner.os }}-
             ptitsy-nn-media-v5-${{ runner.os }}-
             ptitsy-nn-media-v4-${{ runner.os }}-
             ptitsy-nn-media-v3-${{ runner.os }}-
             ptitsy-nn-media-v2-${{ runner.os }}-
             ptitsy-nn-media-v1-${{ runner.os }}-
       - name: Generate offline catalog and download licensed real media
-        timeout-minutes: 82
+        timeout-minutes: 93
         run: |
           python -m py_compile scripts/make_catalog.py
           python -u scripts/make_catalog.py
+          python -m py_compile scripts/harvest_voices.py
+          python -u scripts/harvest_voices.py
           python -u scripts/curate_audio.py
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
           BIRDS_FETCH_BUDGET_SECONDS: '4200'
+          BIRDS_VOICE_BUDGET_SECONDS: '1400'
       - name: Enrich every bird description from Wikipedia
         timeout-minutes: 27
         run: |
@@ -83,7 +87,7 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v5-${{ runner.os }}-${{ github.sha }}
+          key: ptitsy-nn-media-v6-${{ runner.os }}-${{ github.sha }}
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
@@ -98,7 +102,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-2.3-Windows
+          name: Ptitsy-NN-2.4-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json

@@ -59,3 +59,7 @@ xeno-canto API v3 требует бесплатный личный ключ. Д�
 - Автоматическое выравнивание громкости, высокочастотная фильтрация гула и ограничение длительности звучания выполняются перед упаковкой EXE.
 - Если проверенной видовой записи не найдено — звуковая кнопка отключена. Не заменяем оригиналы синтетикой и случайным аудио.
 - Все фото сохраняются вместе со сведениями об авторе, источнике и открытой лицензии.
+
+## Version 2.4: world bird voice collection
+
+Expanded licensed audio search to exact-species Wikimedia Commons audio categories, open field recordings from Russia and the British Library archived on Commons. Matches scientific binomials plus manually vetted taxonomic synonyms (e.g. Chloris chloris / Carduelis chloris). File-specific license, author and original source are mandatory. Mixed bird soundscapes, iNaturalist generic ambient audio and human speech are excluded by metadata checks. Recordings are normalized by the existing audio curator; unavailable licensed recordings remain explicitly missing instead of receiving a similar species' call. The optional xeno-canto API remains gated on XENO_CANTO_API_KEY in GitHub Secrets. See data/coverage.json for exact coverage after build.
