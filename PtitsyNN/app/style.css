@@ -26,3 +26,21 @@ body.dialog-open{overflow:hidden}
 .compare-slot{min-width:0}.compare-intro{color:var(--muted);max-width:770px}
 @media(max-width:870px){.compare-grid,.compare-toolbar{grid-template-columns:1fr}}
 @media(max-width:520px){.audio-pro{padding:10px}.audio-pro-primary{grid-template-columns:1fr auto}.audio-pro-timeline{grid-row:2;grid-column:1/-1}.audio-pro-volume{width:90px}.audio-pro-feedback{align-items:stretch;flex-direction:column}}
+
+/* 2.6 Voices MAX: all-species listening and human review workspace */
+.voice-lab-head{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.voice-lab-search{flex:1 1 250px;min-width:150px;padding:11px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.voice-lab-filter{min-width:180px;padding:11px;border:1px solid var(--line);border-radius:8px;background:#fff}
+.voice-lab-summary,.voice-lab-muted{font-size:12px;color:var(--muted);line-height:1.55}
+.voice-lab-layout{display:grid;grid-template-columns:minmax(185px,270px) minmax(0,1fr);gap:14px;align-items:start}
+.voice-lab-list{max-height:70vh;max-height:70dvh;overflow-y:auto;overscroll-behavior:contain;background:#fff;border:1px solid var(--line);border-radius:10px;padding:5px}
+.voice-lab-bird{display:block;width:100%;text-align:left;padding:10px;font-size:12px;background:#fff;color:var(--ink);border:0;border-bottom:1px solid var(--line);border-radius:6px}
+.voice-lab-bird:hover,.voice-lab-bird.selected{background:#e2f2f5;color:var(--blue)}
+.voice-lab-detail{background:#fff;border:1px solid var(--line);border-radius:12px;padding:16px;min-width:0}
+.voice-lab-detail h3{font:normal 24px Georgia,serif;margin:0 0 8px;color:var(--blue)}
+.voice-lab-review{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+.voice-lab-review button{border:1px solid var(--line);border-radius:7px;padding:9px;background:white;color:var(--blue)}
+.voice-lab-review button:first-child{background:#17664c;color:#fff}
+.voice-lab-review button:nth-child(2){background:var(--brick);color:#fff}
+.voice-lab-note{display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:12px;background:#fff}
+@media(max-width:810px){.voice-lab-layout{grid-template-columns:1fr}.voice-lab-list{max-height:210px}}
