@@ -1,4 +1,4 @@
-# Птицы Нижегородской области — Windows 2.1
+# Птицы Нижегородской области — Windows 2.5
 
 Настоящее **настольное приложение для Windows 10/11 x64**, а не сайт в браузере.
 
@@ -65,3 +65,13 @@ xeno-canto API v3 требует бесплатный личный ключ. Д�
 Expanded licensed audio search to exact-species Wikimedia Commons audio categories, open field recordings from Russia and the British Library archived on Commons. Matches scientific binomials plus manually vetted taxonomic synonyms (e.g. Chloris chloris / Carduelis chloris). File-specific license, author and original source are mandatory. Mixed bird soundscapes, iNaturalist generic ambient audio and human speech are excluded by metadata checks. Recordings are normalized by the existing audio curator; unavailable licensed recordings remain explicitly missing instead of receiving a similar species' call. The optional xeno-canto API remains gated on XENO_CANTO_API_KEY in GitHub Secrets. See data/coverage.json for exact coverage after build.
 
 Additional 2.4 source: Openverse (https://openverse.org/), restricted to individually licensed CC BY, CC BY-SA, CC0, or public-domain audio, with the exact scientific binomial in the sound's title. Only source links from Freesound, Wikimedia Commons and Internet Archive are permitted; other sound libraries must provide explicit offline redistribution permission. Openverse credits include creator, license, URL, and index information. All accepted audio is converted to normalized, offline-playable MP3 in curate_audio.py.
+
+
+## MoOLVa 2.5 — «Голоса PRO»
+
+- В каждой карточке встроен аудиоплеер: громкость, перемотка, повтор, замедление/ускорение с сохранением высоты тона.
+- Отдельная вкладка «Сравнение голосов»: два выбранных вида, последовательное проигрывание без наложения.
+- Пользователь может пометить запись как тихую, содержащую человеческую речь, шум либо ошибочный вид и выгрузить локальный JSON-отчёт. Никаких внешних отправок.
+- Техническая экспертиза аудио в GitHub Actions на FFmpeg: проверка декодирования, громкости, тишины, одинаковых файлов для разных видов. Результаты: `data/audio-audit.csv`, `data/audio-audit.json`.
+- Техническая проверка **не доказывает**, что на записи отсутствует человеческая речь или что птица определена правильно. Поле `audioHumanReviewed=0` отражает отсутствие индивидуального прослушивания человеком.
+- Сохраняем предыдущую офлайн-базу реальных фотографий и статей, а для видов без допустимого звука не показываем подставной голос.
