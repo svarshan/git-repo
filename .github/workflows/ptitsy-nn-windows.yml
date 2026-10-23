@@ -35,9 +35,10 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py
           node --check app/app.js
           node --check app/audio-pro.js
+          node --check app/voice-lab.js
       - name: Restore validated offline catalog cache
         id: media-cache
         uses: actions/cache@v4
@@ -46,8 +47,9 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v8-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/audit_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
+          key: ptitsy-nn-media-v9-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/voice_max.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/audit_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
           restore-keys: |
+            ptitsy-nn-media-v9-${{ runner.os }}-
             ptitsy-nn-media-v8-${{ runner.os }}-
             ptitsy-nn-media-v7-${{ runner.os }}-
             ptitsy-nn-media-v6-${{ runner.os }}-
@@ -65,6 +67,7 @@ jobs:
           python -u scripts/harvest_voices.py
           python -m py_compile scripts/openverse_voices.py
           python -u scripts/openverse_voices.py
+          python -u scripts/voice_max.py
           python -u scripts/curate_audio.py
           python -u scripts/audit_audio.py
         env:
@@ -72,6 +75,7 @@ jobs:
           BIRDS_FETCH_BUDGET_SECONDS: '4200'
           BIRDS_VOICE_BUDGET_SECONDS: '1400'
           BIRDS_OPENVERSE_BUDGET_SECONDS: '550'
+          BIRDS_MAX_BUDGET_SECONDS: '600'
       - name: Enrich every bird description from Wikipedia
         timeout-minutes: 27
         run: |
@@ -85,13 +89,16 @@ jobs:
           $r = Get-Content data/coverage.json -Raw | ConvertFrom-Json
           Write-Host "Species: $($r.species) | photos: $($r.photos) | voices: $($r.birdCalls) | articles: $($r.articles)"
           Write-Host "Audio QA: accepted $($r.audioTechnicalAccepted) rejected $($r.audioTechnicalRejected)"
+          Write-Host "Voices MAX: xeno-canto key configured $($r.maxVoices.xenoApiKeyConfigured) / new sources $($r.maxVoices.newSources)"
       - name: Verify generated JS and catalog
         run: |
           node --check app/app.js
           node --check app/audio-pro.js
+          node --check app/voice-lab.js
           node --check app/data.js
           node --check main.cjs
           npm test
+          python -m unittest discover -s tests -p 'test_*.py'
       - name: Save downloaded media even if a later step fails
         if: always()
         uses: actions/cache/save@v4
@@ -100,7 +107,7 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v8-${{ runner.os }}-${{ github.sha }}
+          key: ptitsy-nn-media-v9-${{ runner.os }}-${{ github.sha }}
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
@@ -115,7 +122,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-2.5-Windows
+          name: Ptitsy-NN-2.6-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json
