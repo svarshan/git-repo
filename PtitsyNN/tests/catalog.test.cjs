@@ -76,3 +76,16 @@ test('Audio technical review script ships with quality thresholds and human-audi
  assert.match(s,/Duplicate recording/);
  assert.match(s,/audioHumanReviewed/);
 });
+
+test('Voices MAX listening lab renders and allows offline explicit human review',()=>{
+ const html=fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+ const js=fs.readFileSync(path.join(root,'app','voice-lab.js'),'utf8');
+ const app=fs.readFileSync(path.join(root,'app','app.js'),'utf8');
+ assert.match(html,/data-view="lab"/);
+ assert.match(html,/id="labContent"/);
+ assert.match(html,/src="voice-lab\.js"/);
+ assert.match(app,/window\.BirdVoiceLab\?\.render/);
+ for(const piece of ['ptitsy-nn.voice-lab.v1','localStorage','exportReview','mountCard','reviewedAt','source','license']){
+  assert.ok(js.includes(piece),'Missing human-audit feature: '+piece);
+ }
+});
