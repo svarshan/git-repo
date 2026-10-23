@@ -32,3 +32,14 @@ test('description links point to Wikipedia',()=>{
   assert.match(b.descriptionSource,/^https:\/\/ru\.wikipedia\.org\//);
  }
 });
+
+test('bird details modal fits small screens without cropping photo or inheriting stale scroll',()=>{
+ const css=fs.readFileSync(path.join(root,'app','style.css'),'utf8');
+ const app=fs.readFileSync(path.join(root,'app','app.js'),'utf8');
+ assert.match(css,/\.overlay\{[^}]*align-items:flex-start;[^}]*overflow-y:auto;/);
+ assert.match(css,/\.modal\{[^}]*max-height:calc\(100dvh - 32px\);[^}]*overflow-y:auto;/);
+ assert.match(css,/\.detailphoto img\{[^}]*object-fit:contain;/);
+ assert.match(css,/body\.dialog-open\{overflow:hidden\}/);
+ assert.match(app,/function showDialog\(\)[^}]*overlay\.scrollTop=0;[^}]*modal\.scrollTop=0;/);
+ assert.match(app,/function close\(\)[^}]*document\.body\.classList\.remove\('dialog-open'\)/);
+});
