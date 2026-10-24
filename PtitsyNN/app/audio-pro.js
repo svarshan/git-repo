@@ -12,7 +12,7 @@ function report(b,reason){
  try{localStorage.setItem(KEY,JSON.stringify(r.slice(-2000)));return true;}catch{return false;}
 }
 function exportReports(){
- const blob=new Blob([JSON.stringify({app:'MoOLVa Birds NN',version:'2.5',reports:reports()},null,2)],{type:'application/json'});
+ const blob=new Blob([JSON.stringify({app:'MoOLVa Birds NN',version:'2.7',reports:reports()},null,2)],{type:'application/json'});
  const url=URL.createObjectURL(blob),a=make('a');
  a.href=url;a.download='ptitsy-nn-audio-reports.json';document.body.appendChild(a);a.click();a.remove();
  setTimeout(()=>URL.revokeObjectURL(url),3000);
@@ -20,7 +20,7 @@ function exportReports(){
 function player(b){
  const root=make('section','audio-pro');
  root.appendChild(make('div','audio-pro-title',b.name+' · '+b.latin));
- if(!b.audioFile){root.appendChild(make('p','audio-pro-muted','Для этого вида нет лицензированной записи. Голос другой птицы не подставляется.'));return root;}
+ if(!b.audioFile){root.appendChild(make('p','audio-pro-muted','Для этого вида нет проверенной встроенной записи. Можно добавить собственное аудио ниже.'));window.BirdUltra?.render(root,b,null);return root;}
  const audio=make('audio');audio.src=b.audioFile;audio.preload='metadata';audio.preservesPitch=true;active.add(audio);
  const play=make('button','audio-pro-play','▶ Воспроизвести');play.type='button';
  const seek=make('input','audio-pro-timeline');seek.type='range';seek.min='0';seek.max='1000';seek.value='0';seek.step='1';seek.setAttribute('aria-label','Перемотка');
@@ -59,6 +59,7 @@ function player(b){
  volume.addEventListener('input',()=>{audio.volume=Math.max(0,Math.min(1,Number(volume.value)/100));});
  loop.addEventListener('change',()=>{audio.loop=loop.checked;});
  flag.addEventListener('click',()=>{result.textContent=report(b,select.value)?'Отмечено. Отчёт доступен для экспорта.':'Не удалось сохранить';});
+ window.BirdUltra?.render(root,b,audio);
  return root;
 }
 function mountCard(host,bird){if(!host)return;stopAll();host.replaceChildren(player(bird));}
