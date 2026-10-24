@@ -1,6 +1,6 @@
 <!doctype html><html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta http-equiv="Content-Security-Policy" content="default-src 'self' data:; script-src 'self'; style-src 'self'; img-src 'self' data:; media-src 'self' blob:; connect-src 'none'; object-src 'none'; base-uri 'none'"><title>Птицы Нижегородской области</title><link rel="stylesheet" href="style.css"><link rel="stylesheet" href="ui3.css"><link rel="stylesheet" href="living-world.css"><link rel="stylesheet" href="atlas5.css"><link rel="stylesheet" href="living6.css"></head>
 <body><div class="shell"><aside class="sidebar" aria-label="Основное меню">
-<div class="brand"><div id="ui3-logo" class="crest">🐦</div><div><strong>MoOLVa 6.3.1</strong><small>Птицы Нижегородской области</small><span>Живая энциклопедия</span></div></div>
+<div class="brand"><div id="ui3-logo" class="crest">🐦</div><div><strong>MoOLVa 7.0</strong><small>Птицы Нижегородской области</small><span>Полевой атлас PRO</span></div></div>
 <nav aria-label="Разделы приложения">
 <button data-view="catalog" class="navactive"><span class="navico" data-icon="home"></span><span>Главная</span></button>
 <button data-jump="catalogList" data-page="catalog"><span class="navico" data-icon="bird"></span><span>Все виды</span></button>
@@ -23,9 +23,9 @@
 <button data-view="expedition"><span class="navico" data-icon="journal"></span><span>Экспедиция</span></button>
 <button data-view="settings"><span class="navico" data-icon="settings"></span><span>Настройки</span></button>
 <button data-view="about"><span class="navico" data-icon="info"></span><span>О программе</span></button>
-</nav><div class="ui3-sideart" role="img" aria-label="Авторская панорама Нижнего Новгорода"></div><div class="sidefoot">MoOLVa 6.3.1<span>Живая энциклопедия</span><small>© 2026 · Полностью офлайн</small></div></aside>
+</nav><div class="ui3-sideart" role="img" aria-label="Авторская панорама Нижнего Новгорода"></div><div class="sidefoot">MoOLVa 7.0<span>Живая энциклопедия</span><small>© 2026 · Полностью офлайн</small></div></aside>
 <div class="workspace"><header class="top"><span class="top-title">Живая энциклопедия</span><label class="top-search"><span class="navico" data-icon="search"></span><input type="search" id="ui3-top-search" placeholder="Поиск птиц (русские и латинские названия)…" aria-label="Поиск по каталогу птиц"></label><div class="top-tools"><button type="button" data-view="settings" aria-label="Настройки"><span class="navico" data-icon="settings"></span></button></div></header><main><section id="catalog" class="view">
-<section class="ui3-hero"><h1>MoOLVa 6.3.1</h1><h2>Птицы Нижегородской области</h2><div class="ui3-sub">Живая энциклопедия</div><p>Природа рядом.<br>Птицы в родном крае.</p><span class="loc">⌖ Нижегородский кремль · Нижний Новгород</span></section>
+<section class="ui3-hero"><h1>MoOLVa 7.0</h1><h2>Птицы Нижегородской области</h2><div class="ui3-sub">Полевой атлас PRO</div><p>Природа рядом.<br>Птицы в родном крае.</p><span class="loc">⌖ Нижегородский кремль · Нижний Новгород</span></section>
 <div class="ui3-dashboard">
 <section class="metrics ui3-metrics" aria-label="Комплектность офлайн-каталога">
 <article><span class="ui3-metric-symbol" data-icon="bird"></span><div class="ui3-metric-body"><strong id="countAll">0</strong><span>видов птиц</span><div class="ui3-bar" data-bar="countAll"><i></i></div></div></article>
@@ -66,6 +66,7 @@
 <select id="habitatSpecies" class="living-select"><option value="all">Все виды</option></select>
 <label for="habitatSearch">Поиск названия</label><input id="habitatSearch" class="living-input" type="search" placeholder="Синица, дятел, латинское название…">
 <label for="habitatMonth">Месяц наблюдения</label><select id="habitatMonth" class="living-select"><option value="0">Все месяцы</option></select>
+<label for="habitatSeason">Сезон наблюдения</label><select id="habitatSeason" class="living-select"><option value="all">Все сезоны</option><option value="winter">Зима · дек.–фев.</option><option value="spring">Весна · март–май</option><option value="summer">Лето · июнь–авг.</option><option value="autumn">Осень · сент.–нояб.</option></select>
 <p class="living-note">Сезонные фильтры показывают только месяцы с достаточными опубликованными данными. Пустой месяц не означает, что птица отсутствует.</p>
 <button id="habitatSelectClear" class="living-button" type="button">Сбросить фильтр</button>
 <button id="habitatExport" class="living-button" type="button">Экспорт зон CSV для Excel</button>
@@ -90,8 +91,18 @@
 </div></section>
 <section id="birdai" class="view" hidden><div id="birdAI" class="living-section">
 <h1 class="living-title">Bird AI — настоящее распознавание птиц по голосу</h1>
-<p class="living-intro">Локальная предобученная модель Google Perch v2 (регион Восточная Европа). Для анализа достаточно записи WAV, MP3 или OGG. Модель самостоятельно обрабатывает пять секунд звука на вашем Windows-компьютере, без отправки файлов в сеть.</p>
-<div class="living-panel"><h3>Анализ записи</h3><div class="ai6-row">
+<p class="living-intro">Локальная предобученная модель Google Perch v2 (регион Восточная Европа). Анализируйте запись WAV, MP3, OGG, FLAC или звук с микрофона. Модель проверяет до двенадцати пят секундных фрагментов аудио на вашем Windows-компьютере, без отправки файлов в сеть.</p>
+<div class="living-panel"><h3>Анализ записи или запись с микрофона</h3>
+<p class="living-note">Переключите микрофон, чтобы записать пение рядом с вами. Звук обрабатывается только на компьютере. При наличии нескольких птиц результат может быть неоднозначным.</p>
+<div class="ai7-record">
+  <button class="living-button" id="birdAIMic" type="button">Начать запись с микрофона</button>
+  <button class="living-button" id="birdAIStop" type="button" disabled>Остановить запись</button>
+  <label for="birdAIDuration">Длительность</label>
+  <select id="birdAIDuration" class="living-select"><option value="10">10 секунд</option><option value="30" selected>30 секунд</option><option value="60">60 секунд</option></select>
+  <span id="birdAIRecordingStatus" role="status" class="living-note">Микрофон выключен</span>
+</div>
+<p class="living-note">Модель оценивает несколько пятисекундных фрагментов, результаты объединяются по меткам. Это не калиброванная вероятность.</p>
+<div class="ai6-row">
 <label>Файл с пением птицы <input id="birdAIFile" type="file" accept=".wav,.mp3,.ogg,.flac,audio/*"></label>
 <button class="living-button" id="birdAIRun" type="button" disabled>Распознать голос</button></div>
 <div id="birdAIPreview"></div><p id="birdAIStatus" role="status" class="living-note">Проверяю доступность локальной модели…</p>
