@@ -200,8 +200,9 @@ jobs:
         shell: pwsh
         run: |
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          $artifactVersion = $version -replace '\.0Get-Item "dist/MoOLVa-$version-Setup-x64.exe" -ErrorAction Stop
-          $portable = Get-Item "dist/MoOLVa-$version-Portable-x64.exe" -ErrorAction Stop
+          $artifactVersion = $version -replace '\.0$', ''
+          $setup = Get-Item "dist/MoOLVa-$artifactVersion-Setup-x64.exe" -ErrorAction Stop
+          $portable = Get-Item "dist/MoOLVa-$artifactVersion-Portable-x64.exe" -ErrorAction Stop
           if ($setup.Length -lt 30000000 -or $portable.Length -lt 30000000) { throw 'Unexpectedly small EXE' }
           $lines = @($setup, $portable) | ForEach-Object {
             $digest = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
@@ -240,7 +241,8 @@ jobs:
           $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
           if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid version' }
           $tag = "ptitsy-v$version"
-          $artifactVersion = $version -replace '\.0          $existing = gh release view $tag --json tagName --jq '.tagName' 2>$null
+          $artifactVersion = $version -replace '\.0$', ''
+          $existing = gh release view $tag --json tagName --jq '.tagName' 2>$null
           if ($LASTEXITCODE -eq 0) {
             Write-Host "Release $tag exists already; historical EXEs remain unchanged."
             exit 0
@@ -248,131 +250,6 @@ jobs:
           $sha = (git rev-parse HEAD).Trim()
           $setup = (Get-Item "dist/MoOLVa-$artifactVersion-Setup-x64.exe" -ErrorAction Stop).FullName
           $portable = (Get-Item "dist/MoOLVa-$artifactVersion-Portable-x64.exe" -ErrorAction Stop).FullName
-          $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
-          $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
-          $notes = "Built by GitHub Actions from $sha. Contains Windows Setup and Portable EXE, SHA256 checksums and media coverage report. Exact source snapshot: archive/ptitsy-$version-build-$($sha.Substring(0,12)). Please verify on Windows before relying on it."
-          gh release create $tag $setup $portable $sums $coverage --target $sha --title "MoOLVa Птицы Нижегородской области $version" --notes $notes
-          if ($LASTEXITCODE -ne 0) { throw 'Release creation failed; Actions artifacts retained separately.' }
-          Write-Host "Download: https://github.com/${{ github.repository }}/releases/tag/$tag"
-, ''
-          $setup = Get-Item "dist/MoOLVa-$artifactVersion-Setup-x64.exe" -ErrorAction Stop
-          $portable = Get-Item "dist/MoOLVa-$artifactVersion-Portable-x64.exe" -ErrorAction Stop
-          if ($setup.Length -lt 30000000 -or $portable.Length -lt 30000000) { throw 'Unexpectedly small EXE' }
-          $lines = @($setup, $portable) | ForEach-Object {
-            $digest = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-            "$digest *$($_.Name)"
-          }
-          Set-Content -Path dist/SHA256SUMS.txt -Value $lines -Encoding utf8
-          $lines | ForEach-Object { Write-Host $_ }
-      - name: Upload EXE installers and coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: Ptitsy-NN-7.0-Windows
-          path: |
-            PtitsyNN/dist/*.exe
-            PtitsyNN/dist/SHA256SUMS.txt
-            PtitsyNN/data/coverage.json
-            PtitsyNN/data/audio-audit.csv
-            PtitsyNN/data/audio-audit.json
-          if-no-files-found: error
-          retention-days: 30
-      - name: Upload coverage even when packaging fails
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Ptitsy-NN-Diagnostics
-          path: |
-            PtitsyNN/data/coverage.json
-          if-no-files-found: ignore
-          retention-days: 14
-      # Immutable published binaries stay available beyond temporary Actions artifacts.
-      - name: Publish versioned GitHub Release (never overwrite old EXEs)
-        if: success() && github.ref == 'refs/heads/master'
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid version' }
-          $tag = "ptitsy-v$version"
-          $existing = gh release view $tag --json tagName --jq '.tagName' 2>$null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "Release $tag exists already; historical EXEs remain unchanged."
-            exit 0
-          }
-          $sha = (git rev-parse HEAD).Trim()
-          $setup = (Get-Item "dist/MoOLVa-$version-Setup-x64.exe" -ErrorAction Stop).FullName
-          $portable = (Get-Item "dist/MoOLVa-$version-Portable-x64.exe" -ErrorAction Stop).FullName
-          $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
-          $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
-          $notes = "Built by GitHub Actions from $sha. Contains Windows Setup and Portable EXE, SHA256 checksums and media coverage report. Exact source snapshot: archive/ptitsy-$version-build-$($sha.Substring(0,12)). Please verify on Windows before relying on it."
-          gh release create $tag $setup $portable $sums $coverage --target $sha --title "MoOLVa Птицы Нижегородской области $version" --notes $notes
-          if ($LASTEXITCODE -ne 0) { throw 'Release creation failed; Actions artifacts retained separately.' }
-          Write-Host "Download: https://github.com/${{ github.repository }}/releases/tag/$tag"
-, ''
-          $existing = gh release view $tag --json tagName --jq '.tagName' 2>$null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "Release $tag exists already; historical EXEs remain unchanged."
-            exit 0
-          }
-          $sha = (git rev-parse HEAD).Trim()
-          $setup = (Get-Item "dist/MoOLVa-$version-Setup-x64.exe" -ErrorAction Stop).FullName
-          $portable = (Get-Item "dist/MoOLVa-$version-Portable-x64.exe" -ErrorAction Stop).FullName
-          $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
-          $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
-          $notes = "Built by GitHub Actions from $sha. Contains Windows Setup and Portable EXE, SHA256 checksums and media coverage report. Exact source snapshot: archive/ptitsy-$version-build-$($sha.Substring(0,12)). Please verify on Windows before relying on it."
-          gh release create $tag $setup $portable $sums $coverage --target $sha --title "MoOLVa Птицы Нижегородской области $version" --notes $notes
-          if ($LASTEXITCODE -ne 0) { throw 'Release creation failed; Actions artifacts retained separately.' }
-          Write-Host "Download: https://github.com/${{ github.repository }}/releases/tag/$tag"
-, ''
-          $setup = Get-Item "dist/MoOLVa-$artifactVersion-Setup-x64.exe" -ErrorAction Stop
-          $portable = Get-Item "dist/MoOLVa-$artifactVersion-Portable-x64.exe" -ErrorAction Stop
-          if ($setup.Length -lt 30000000 -or $portable.Length -lt 30000000) { throw 'Unexpectedly small EXE' }
-          $lines = @($setup, $portable) | ForEach-Object {
-            $digest = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
-            "$digest *$($_.Name)"
-          }
-          Set-Content -Path dist/SHA256SUMS.txt -Value $lines -Encoding utf8
-          $lines | ForEach-Object { Write-Host $_ }
-      - name: Upload EXE installers and coverage report
-        uses: actions/upload-artifact@v4
-        with:
-          name: Ptitsy-NN-7.0-Windows
-          path: |
-            PtitsyNN/dist/*.exe
-            PtitsyNN/dist/SHA256SUMS.txt
-            PtitsyNN/data/coverage.json
-            PtitsyNN/data/audio-audit.csv
-            PtitsyNN/data/audio-audit.json
-          if-no-files-found: error
-          retention-days: 30
-      - name: Upload coverage even when packaging fails
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: Ptitsy-NN-Diagnostics
-          path: |
-            PtitsyNN/data/coverage.json
-          if-no-files-found: ignore
-          retention-days: 14
-      # Immutable published binaries stay available beyond temporary Actions artifacts.
-      - name: Publish versioned GitHub Release (never overwrite old EXEs)
-        if: success() && github.ref == 'refs/heads/master'
-        shell: pwsh
-        env:
-          GH_TOKEN: ${{ github.token }}
-        run: |
-          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
-          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid version' }
-          $tag = "ptitsy-v$version"
-          $existing = gh release view $tag --json tagName --jq '.tagName' 2>$null
-          if ($LASTEXITCODE -eq 0) {
-            Write-Host "Release $tag exists already; historical EXEs remain unchanged."
-            exit 0
-          }
-          $sha = (git rev-parse HEAD).Trim()
-          $setup = (Get-Item "dist/MoOLVa-$version-Setup-x64.exe" -ErrorAction Stop).FullName
-          $portable = (Get-Item "dist/MoOLVa-$version-Portable-x64.exe" -ErrorAction Stop).FullName
           $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
           $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
           $notes = "Built by GitHub Actions from $sha. Contains Windows Setup and Portable EXE, SHA256 checksums and media coverage report. Exact source snapshot: archive/ptitsy-$version-build-$($sha.Substring(0,12)). Please verify on Windows before relying on it."
