@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 6.3.1
+name: Птицы НН — Windows EXE 7.0
 on:
   workflow_dispatch:
     inputs:
@@ -212,7 +212,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-6.3.1-Windows
+          name: Ptitsy-NN-7.0-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
