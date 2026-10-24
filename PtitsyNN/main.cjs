@@ -2,6 +2,8 @@
 const {app,BrowserWindow,shell,session,ipcMain}=require('electron');
 const path=require('node:path'),fs=require('node:fs');
 let modelPromise=null,running=false;
+let micAllowedUntil=0;
+const isTrusted=(wc)=>{try{const url=new URL(wc.getURL());return url.protocol==='file:' && url.pathname.endsWith('/app/index.html');}catch{return false;}};
 function assets(){
  const appDir=app.isPackaged
   ?path.join(__dirname.replace(/app\.asar$/, 'app.asar.unpacked'),'app','models')
@@ -42,7 +44,7 @@ function candidates(logits,labels){
  return pick.map(([i,v])=>({label:labels[i],score:Math.round(Math.exp(v-max)/sum*10000)/100})).filter(x=>x.score>0);
 }
 function window(){
- const w=new BrowserWindow({title:'MoOLVa 6.0 — Живая энциклопедия',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,
+ const w=new BrowserWindow({title:'MoOLVa 7.0 — Полевой атлас PRO',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,preload:path.join(__dirname,'preload.cjs')}});
  w.webContents.on('will-navigate',e=>e.preventDefault());
  w.webContents.setWindowOpenHandler(({url})=>{try{
@@ -53,10 +55,23 @@ function window(){
  return w;
 }
 app.whenReady().then(()=>{
- session.defaultSession.setPermissionRequestHandler((_wc,_p,done)=>done(false));
+ session.defaultSession.setPermissionRequestHandler((wc,permission,callback,details)=>{
+  const audioOnly=Array.isArray(details?.mediaTypes)&&details.mediaTypes.includes('audio')&&!details.mediaTypes.includes('video');
+  callback(permission==='media'&&audioOnly&&isTrusted(wc)&&Date.now()<micAllowedUntil);
+ });
+ session.defaultSession.setPermissionCheckHandler((wc,permission,_origin,details)=>{
+  if(permission!=='media')return false;
+  if(details?.mediaType==='video')return false;
+  return isTrusted(wc)&&Date.now()<micAllowedUntil;
+ });
+ ipcMain.handle('birdai-microphone-intent',event=>{
+  if(!isTrusted(event.sender))throw Error('Недоверенный источник микрофона');
+  micAllowedUntil=Date.now()+30000;
+  return true;
+ });
  ipcMain.handle('birdai-status',()=>modelStatus());
  ipcMain.handle('birdai-analyze',async(event,pcm)=>{
-  if(!event.sender.getURL().endsWith('/app/index.html'))throw Error('Недоверенный источник');
+  if(!isTrusted(event.sender))throw Error('Недоверенный источник');
   if(running)throw Error('Предыдущая запись ещё анализируется.');
   if(!(pcm instanceof Float32Array||Array.isArray(pcm))||pcm.length!==160000)throw Error('Нужна запись длиной пять секунд, 32 кГц.');
   const values=new Float32Array(pcm);
