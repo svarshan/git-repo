@@ -43,6 +43,7 @@ jobs:
           node --check app/field-assistant.js
           node --check app/ui3.js
           node --check app/habitat-atlas.js
+          node --check app/atlas5-extras.js
           node --check app/living-world.js
       - name: Restore validated offline catalog cache
         id: media-cache
@@ -121,6 +122,7 @@ jobs:
           node --check app/ultra-audio.js
           node --check app/field-assistant.js
           node --check app/data.js
+          node --check app/atlas5-extras.js
           node --check app/habitat-data.js
           node --check main.cjs
           npm test
@@ -150,7 +152,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-4.0-Windows
+          name: Ptitsy-NN-5.0-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json
