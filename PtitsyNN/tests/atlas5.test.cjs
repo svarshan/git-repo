@@ -39,11 +39,11 @@ test('seasonal API pipeline separates CC-licensed observations and coarse geogra
   }
  }
 });
-test('5.0 does not claim pretrained AI for real sounds or photos when no model is bundled',()=>{
+test('7.0 retains authentic atlas and only enables actual Perch v2 offline AI',()=>{
  const p=JSON.parse(read('package.json')),html=read('app/index.html');
- assert.equal(p.version,'6.0.0');
- assert.match(p.build.nsis.artifactName,/6\.0/);
- assert.match(p.build.portable.artifactName,/6\.0/);
- assert.match(html,/Автоматического AI-распознавания/);
+ assert.equal(p.version,'7.0.0');
+ assert.match(p.build.nsis.artifactName,/7\.0/);
+ assert.match(p.build.portable.artifactName,/7\.0/);
+ assert.match(html,/Google Perch v2/);
  assert.match(html,/Bird AI/);
 });

@@ -21,7 +21,7 @@ test('original field atlas remains with authentic regional offline map',()=>{
 });
 test('field atlas points link back to real species passports',()=>{
  const code=read('app/habitat-atlas.js');
- assert.match(code,/data-open/);
+ assert.match(code,/dataset\\.open/);
  assert.match(code,/window\.BirdHabitat/);
  assert.match(code,/verified|GBIF|опубликованн/i);
 });
