@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 7.2
+name: Птицы НН — Windows EXE 7.3
 on:
   workflow_dispatch:
     inputs:
@@ -59,7 +59,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -132,6 +132,32 @@ jobs:
           python -u scripts/enrich_articles.py
         env:
           BIRDS_WIKI_BUDGET_SECONDS: '420'
+      - name: Grow genuine open-licensed voices toward first milestone of 150
+        timeout-minutes: 30
+        shell: pwsh
+        run: |
+          if ('${{ steps.existing-catalog.outputs.ready }}' -eq 'true') {
+            Write-Host 'Searching additional licensed Commons and optional keyed Xeno-canto recordings in preserved catalog'
+            python -u scripts/voice_max.py
+            python -u scripts/openverse_voices.py
+          }
+          python -u scripts/voices_150.py
+          python -u scripts/audit_audio.py
+          python -u scripts/verify_cache.py
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+          BIRDS_MAX_BUDGET_SECONDS: '210'
+          BIRDS_OPENVERSE_BUDGET_SECONDS: '140'
+          BIRDS_VOICES_150_BUDGET_SECONDS: '1050'
+      - name: Report true voice milestone, including shortfall (never invent results)
+        shell: pwsh
+        run: |
+          $c = Get-Content data/coverage.json -Raw | ConvertFrom-Json
+          if (-not $c.milestone150) { throw 'Missing genuine voices 150 progress report' }
+          Write-Host "Genuine primary calls: $($c.birdCalls) / 298"
+          Write-Host "Milestone 150: $($c.milestone150.achieved)"
+          Write-Host "Remaining to goal: $($c.milestone150.shortfall)"
+          if ($c.birdCalls -lt 78) { throw 'Previous verified audio was lost' }
       - name: Show verified media coverage
         shell: pwsh
         run: |
@@ -222,23 +248,23 @@ jobs:
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.2-Portable-only
-          path: PtitsyNN/dist/MoOLVa-7.2-Portable-x64.exe
+          name: Ptitsy-NN-7.3-Portable-only
+          path: PtitsyNN/dist/MoOLVa-7.3-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.2-Setup-only
-          path: PtitsyNN/dist/MoOLVa-7.2-Setup-x64.exe
+          name: Ptitsy-NN-7.3-Setup-only
+          path: PtitsyNN/dist/MoOLVa-7.3-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.2-Windows
+          name: Ptitsy-NN-7.3-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
