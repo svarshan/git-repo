@@ -1,0 +1,28 @@
+/* MoOLVa 5.0 — Big Nature Atlas · accessible offline additions */
+.habitat-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px;margin:14px 0 17px}
+.habitat-stat{border:1px solid #395b77;background:linear-gradient(130deg,#112c45,#091d30);border-radius:12px;padding:13px 14px;display:flex;flex-direction:column;gap:3px}
+.habitat-stat strong{font:700 26px/1.1 "Segoe UI",sans-serif;color:#ecf8ff}
+.habitat-stat small{font-size:11px;color:#acc9e0}
+.habitat-map-wrap{box-shadow:0 12px 35px #0006}
+.habitat-tooltip{width:min(380px,90%);min-width:0;max-height:340px;padding:13px;overscroll-behavior:contain}
+.habitat-tooltip-heading{font-size:13px!important}
+.habitat-tooltip-list{gap:5px;max-height:250px;overflow:auto}
+.habitat-tooltip-list .habitat-species-row{display:flex;align-items:center;gap:9px;text-align:left;padding:7px 6px;color:#eaf7ff;border:1px solid #315771;border-radius:8px;background:#102c43}
+.habitat-tooltip-list .habitat-species-row:hover,.habitat-tooltip-list .habitat-species-row:focus-visible{border-color:#58c4e9;background:#184663}
+.habitat-bird-image,.habitat-no-photo{width:64px;height:64px;flex:0 0 64px;object-fit:cover;border-radius:8px;border:1px solid #5c809b}
+.habitat-no-photo{display:grid;place-items:center;font-size:9px;text-align:center;color:#b2c9dc;padding:4px}
+.habitat-species-caption{min-width:0;display:flex;flex-direction:column;gap:3px}
+.habitat-species-caption strong{font-size:12px;color:#eff9ff}
+.habitat-species-caption span,.habitat-species-caption small{font-size:10px;color:#a6d0e6;margin:0}
+.habitat-selection{background:#102b40;border:1px solid #315f7c;border-radius:10px;padding:11px;margin:14px 0;display:flex;gap:8px;flex-direction:column}
+.habitat-selection>.habitat-bird-image{width:116px;height:85px;flex-basis:auto}
+.habitat-selection>strong{font-size:15px;color:#e9faff}
+.habitat-selection>p{font-size:12px;line-height:1.6;color:#b8d6e7}
+.habitat-selection button{width:100%;margin:0}
+#habitatExport{color:#a0f0d8;border-color:#2e9574}
+#academyAudioQuiz audio{width:100%;max-width:500px;display:block;margin:10px 0 13px}
+#academyAudioQuiz .living-quiz-choices{margin:13px 0}
+#academyAudioQuiz [role=status]{color:#e5f7ff;font-size:13px}
+#atlas5BackupStatus{max-width:700px}
+@media(max-width:700px){.habitat-stats{grid-template-columns:repeat(3,1fr);gap:5px}.habitat-stat{padding:9px}.habitat-stat strong{font-size:18px}.habitat-tooltip{max-height:230px}.habitat-bird-image,.habitat-no-photo{width:47px;height:47px;flex-basis:47px}}
+@media(prefers-reduced-motion:reduce){.habitat-stage{transition:none}}
