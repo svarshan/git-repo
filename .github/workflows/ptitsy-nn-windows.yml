@@ -1,13 +1,18 @@
 name: Птицы НН — Windows EXE 6.3.1
 on:
   workflow_dispatch:
+    inputs:
+      source_ref:
+        description: 'Снимок исходников: архивная ветка или SHA; пусто = master'
+        required: false
+        type: string
   push:
     branches: [master]
     paths:
       - 'PtitsyNN/**'
       - '.github/workflows/ptitsy-nn-windows.yml'
 permissions:
-  contents: read
+  contents: write
 concurrency:
   group: ptitsy-nn-windows-${{ github.ref }}
   cancel-in-progress: true
@@ -21,6 +26,211 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.source_ref || github.sha }}
+      - name: Preserve complete source revision before build
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $commit = (git rev-parse HEAD).Trim()
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($version -notmatch '^\d+\.\d+\.\d+
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install catalog downloader
+        run: python -m pip install requests==2.32.5 imageio-ffmpeg==0.6.0
+      # Reuse audited and already downloaded media on subsequent builds.
+      # Changing the species list or ingestion script invalidates this cache.
+      - name: Preflight Python and JavaScript syntax
+        run: |
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py
+          node --check app/app.js
+          node --check app/audio-pro.js
+          node --check app/voice-lab.js
+          node --check app/ultra-audio.js
+          node --check app/field-assistant.js
+          node --check app/ui3.js
+          node --check app/habitat-atlas.js
+          node --check app/atlas5-extras.js
+          node --check app/living-world.js
+          node --check app/living6.js
+          node --check preload.cjs
+          node --check main.cjs
+          node --check scripts/test_ai.cjs
+      - name: Restore validated offline catalog cache
+        id: media-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            PtitsyNN/app/media
+            PtitsyNN/app/data.js
+            PtitsyNN/data/coverage.json
+          key: ptitsy-nn-media-v10-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/voice_max.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/audit_audio.py', 'PtitsyNN/scripts/ultra_tracks.py', 'PtitsyNN/scripts/enrich_articles.py') }}
+          restore-keys: |
+            ptitsy-nn-media-v10-${{ runner.os }}-
+            ptitsy-nn-media-v9-${{ runner.os }}-
+            ptitsy-nn-media-v8-${{ runner.os }}-
+      - name: Check complete offline media cache
+        id: existing-catalog
+        shell: pwsh
+        run: |
+          python scripts/verify_cache.py
+          if ($LASTEXITCODE -eq 0) {
+            "ready=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "Offline cache is incomplete; licensed materials will be fetched again."
+            "ready=false" >> $env:GITHUB_OUTPUT
+          }
+      - name: Reaudit cached audio before packaging
+        if: steps.existing-catalog.outputs.ready == 'true'
+        run: |
+          python -u scripts/audit_audio.py
+          python scripts/verify_cache.py
+      - name: Generate offline catalog and download licensed real media
+        if: steps.existing-catalog.outputs.ready != 'true'
+        timeout-minutes: 100
+        run: |
+          python -m py_compile scripts/make_catalog.py
+          python -u scripts/make_catalog.py
+          python -m py_compile scripts/harvest_voices.py
+          python -u scripts/harvest_voices.py
+          python -m py_compile scripts/openverse_voices.py
+          python -u scripts/openverse_voices.py
+          python -u scripts/voice_max.py
+          python -u scripts/curate_audio.py
+          python -u scripts/audit_audio.py
+          python -u scripts/ultra_tracks.py
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+          BIRDS_FETCH_BUDGET_SECONDS: '300'
+          BIRDS_VOICE_BUDGET_SECONDS: '240'
+          BIRDS_OPENVERSE_BUDGET_SECONDS: '180'
+          BIRDS_MAX_BUDGET_SECONDS: '210'
+          BIRDS_ULTRA_BUDGET_SECONDS: '360'
+      - name: Enrich every bird description from Wikipedia
+        if: steps.existing-catalog.outputs.ready != 'true'
+        timeout-minutes: 27
+        run: |
+          python -m py_compile scripts/enrich_articles.py
+          python -u scripts/enrich_articles.py
+        env:
+          BIRDS_WIKI_BUDGET_SECONDS: '420'
+      - name: Show verified media coverage
+        shell: pwsh
+        run: |
+          $r = Get-Content data/coverage.json -Raw | ConvertFrom-Json
+          Write-Host "Species: $($r.species) | photos: $($r.photos) | voices: $($r.birdCalls) | articles: $($r.articles)"
+          Write-Host "Audio QA: accepted $($r.audioTechnicalAccepted) rejected $($r.audioTechnicalRejected)"
+          Write-Host "Voices MAX: xeno-canto key configured $($r.maxVoices.xenoApiKeyConfigured) / new sources $($r.maxVoices.newSources)"
+          Write-Host "Voices ULTRA: total sound tracks $($r.audioTracksTotal) | additional tracks $($r.extraAudioTracks) | multi-track species $($r.multiTrackSpecies)"
+      - name: Try improving genuine voice coverage in validated cached catalog
+        if: steps.existing-catalog.outputs.ready == 'true' && github.event_name == 'workflow_dispatch'
+        timeout-minutes: 5
+        run: |
+          python -u scripts/voice_max.py
+          python -u scripts/ultra_tracks.py
+          python -u scripts/audit_audio.py
+          python scripts/verify_cache.py
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+          BIRDS_MAX_BUDGET_SECONDS: '100'
+          BIRDS_ULTRA_BUDGET_SECONDS: '65'
+      - name: Prepare offline map of Nizhny Novgorod Oblast and coarsened sightings
+        timeout-minutes: 12
+        run: python -u scripts/make_habitat.py
+      - name: Fetch and SHA256 validate real Apache-2.0 Perch v2 regional ONNX model
+        timeout-minutes: 14
+        run: python -u scripts/prepare_ai.py
+      - name: Verify generated JS and catalog
+        run: |
+          node --check app/app.js
+          node --check app/audio-pro.js
+          node --check app/voice-lab.js
+          node --check app/ultra-audio.js
+          node --check app/field-assistant.js
+          node --check app/data.js
+          node --check app/living6.js
+          node --check app/atlas5-extras.js
+          node --check app/habitat-data.js
+          node --check main.cjs
+          npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python -m unittest discover -s tests -p 'test_*.py'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Save downloaded media even if a later step fails
+        if: always()
+        uses: actions/cache/save@v4
+        with:
+          path: |
+            PtitsyNN/app/media
+            PtitsyNN/app/data.js
+            PtitsyNN/data/coverage.json
+          key: ptitsy-nn-media-v10-${{ runner.os }}-${{ github.sha }}
+      - name: Cache npm package downloads
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm
+          key: ptitsy-nn-npm-v1-${{ runner.os }}-${{ hashFiles('PtitsyNN/package.json') }}
+      - name: Install Electron builder
+        run: npm install --no-audit --no-fund
+      - name: Verify native Perch v2 inference on Windows
+        timeout-minutes: 6
+        run: node scripts/test_ai.cjs
+      - name: Build installer and portable EXE
+        run: npm run build:win
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Verify Setup and Portable Windows EXEs, make standard SHA256SUMS
+        shell: pwsh
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          $setup = Get-Item "dist/MoOLVa-$version-Setup-x64.exe" -ErrorAction Stop
+          $portable = Get-Item "dist/MoOLVa-$version-Portable-x64.exe" -ErrorAction Stop
+          if ($setup.Length -lt 30000000 -or $portable.Length -lt 30000000) { throw 'Suspiciously small executable' }
+          $lines = @($setup, $portable) | ForEach-Object {
+            $digest = (Get-FileHash $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant()
+            "$digest *$($_.Name)"
+          }
+          Set-Content dist/SHA256SUMS.txt -Value $lines -Encoding utf8
+          $lines | ForEach-Object { Write-Host $_ }
+      - name: Upload EXE installers and coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ptitsy-NN-6.3.1-Windows
+          path: |
+            PtitsyNN/dist/*.exe
+            PtitsyNN/dist/SHA256SUMS.txt
+            PtitsyNN/data/coverage.json
+            PtitsyNN/data/audio-audit.csv
+            PtitsyNN/data/audio-audit.json
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload coverage even when packaging fails
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ptitsy-NN-Diagnostics
+          path: |
+            PtitsyNN/data/coverage.json
+          if-no-files-found: ignore
+          retention-days: 14
+) { throw 'Invalid version' }
+          $branch = "archive/ptitsy-$version-build-$($commit.Substring(0,12))"
+          $existing = gh api "repos/${{ github.repository }}/git/ref/heads/$branch" --jq '.object.sha' 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            if ($existing.Trim() -ne $commit) { throw 'Ref exists for a different commit' }
+            Write-Host "Preserved earlier: $branch"
+          } else {
+            gh api -X POST "repos/${{ github.repository }}/git/refs" -f "ref=refs/heads/$branch" -f "sha=$commit"
+            if ($LASTEXITCODE -ne 0) { throw 'Cannot preserve source snapshot' }
+            Write-Host "Preserved source: $branch"
+          }
       - name: Node.js
         uses: actions/setup-node@v4
         with:
@@ -202,3 +412,26 @@ jobs:
             PtitsyNN/data/coverage.json
           if-no-files-found: ignore
           retention-days: 14
+      - name: Preserve both EXEs forever as versioned GitHub Release
+        if: success() && github.ref == 'refs/heads/master'
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          $version = (Get-Content package.json -Raw | ConvertFrom-Json).version
+          if ($version -notmatch '^\d+\.\d+\.\d+$') { throw 'Invalid application version' }
+          $tag = "ptitsy-v$version"
+          $old = gh release view $tag --json tagName --jq '.tagName' 2>$null
+          if ($LASTEXITCODE -eq 0) {
+            Write-Host "Existing GitHub Release $tag is immutable; no files changed."
+            exit 0
+          }
+          $sha = (git rev-parse HEAD).Trim()
+          $setup = (Get-Item "dist/MoOLVa-$version-Setup-x64.exe" -ErrorAction Stop).FullName
+          $portable = (Get-Item "dist/MoOLVa-$version-Portable-x64.exe" -ErrorAction Stop).FullName
+          $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
+          $report = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
+          $notes = "Built from SHA $sha on Windows by GitHub Actions. Files: Setup EXE, Portable EXE, SHA256SUMS.txt and media coverage report. Source preserved as archive/ptitsy-$version-build-$($sha.Substring(0,12)). Check SHA256 sums after download. Windows user testing is separate from CI."
+          gh release create $tag $setup $portable $sums $report --target $sha --title "MoOLVa Птицы Нижегородской области $version" --notes $notes
+          if ($LASTEXITCODE -ne 0) { throw 'Cannot create GitHub release; the build artifacts remain in Actions.' }
+          Write-Host "Release URL: https://github.com/${{ github.repository }}/releases/tag/$tag"
