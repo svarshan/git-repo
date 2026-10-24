@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE
+name: Птицы НН — Windows EXE 6.3.1
 on:
   workflow_dispatch:
   push:
@@ -172,12 +172,22 @@ jobs:
         run: npm run build:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Verify both Windows EXE builds and write SHA256
+        shell: pwsh
+        run: |
+          $setup=Get-Item "dist/MoOLVa-6.3.1-Setup-x64.exe" -ErrorAction SilentlyContinue
+          $portable=Get-Item "dist/MoOLVa-6.3.1-Portable-x64.exe" -ErrorAction SilentlyContinue
+          if (!$setup -or !$portable) { throw "Missing Setup or Portable EXE" }
+          if ($setup.Length -lt 30000000 -or $portable.Length -lt 30000000) { throw "Unexpectedly small executable" }
+          Get-FileHash $setup.FullName -Algorithm SHA256 | Format-List | Out-File -Encoding utf8 dist/SHA256SUMS.txt
+          Get-FileHash $portable.FullName -Algorithm SHA256 | Format-List | Out-File -Append -Encoding utf8 dist/SHA256SUMS.txt
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-6.0-Windows
+          name: Ptitsy-NN-6.3.1-Windows
           path: |
             PtitsyNN/dist/*.exe
+            PtitsyNN/dist/SHA256SUMS.txt
             PtitsyNN/data/coverage.json
             PtitsyNN/data/audio-audit.csv
             PtitsyNN/data/audio-audit.json
