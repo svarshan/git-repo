@@ -14,7 +14,7 @@ const markerLayer=$('#habitatPins'),chooser=$('#habitatSpecies'),search=$('#habi
 const yearRange=e=>e.fromYear===e.toYear?String(e.fromYear):e.fromYear+'–'+e.toYear;
 const months=['Все месяцы','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const fold=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').trim();
-let selectedId='all',selectedMonth=0,selectedSeason='all',zoom=1,visible=[],panX=0,panY=0;
+let selectedId='all',selectedMonth=0,selectedSeason='all',zoom=1,visible=[],panX=0,panY=0,lastTownLabelZoom=-1;
 const ultra=window.MOOLVA_ULTRA_MAP||null;
 const originalTowns=Array.isArray(window.MOOLVA_SETTLEMENTS)?window.MOOLVA_SETTLEMENTS:[];
 const osmTowns=Array.isArray(ultra?.places)?ultra.places:[];
@@ -136,10 +136,13 @@ function applyView(){
  panY=Math.max(-h*(zoom-1)/2,Math.min(h*(zoom-1)/2,panY));
  stage.style.transform='translate3d('+panX+'px,'+panY+'px,0) scale('+zoom+')';
  $('#habitatZoomLevel').textContent=Math.round(zoom*100)+'%';
- townLayer?.querySelectorAll('.habitat-town').forEach(el=>{
+ if(lastTownLabelZoom!==zoom){
+  lastTownLabelZoom=zoom;
+  townLayer?.querySelectorAll('.habitat-town').forEach(el=>{
    const tier=Number(el.dataset.tier||3);
    el.hidden=(tier===2&&zoom<1.25)||(tier===3&&zoom<2)||(tier>=4&&zoom<3.05);
   });
+ }
  hideTooltip();
 }
 function zoomTo(value){
