@@ -46,3 +46,28 @@ test('version 3.0 keeps installer and portable and does not load remote media',(
  assert.doesNotMatch(html,/<script[^>]+src="https?:/);
  new Function(js);
 });
+
+
+test('3.0 card badges report natural bird voice and article depth truthfully',()=>{
+ const vm=require('node:vm');
+ const context={window:{}};
+ vm.runInNewContext(file('app/material-flags.js'),context);
+ const api=context.window.BirdMaterialFlags;
+ assert.ok(api && typeof api.flags==='function');
+ const both=api.flags({audioFile:'media/audio/recording.mp3',articleComplete:true,description:'Длинное описание.'});
+ assert.deepEqual(Array.from(both,x=>x.kind),['voice-yes','article-yes']);
+ assert.match(api.markup({audioFile:'some.mp3',articleComplete:true}),/Голос птицы: есть/);
+ assert.match(api.markup({audioFile:'some.mp3',articleComplete:true}),/Описание: подробное/);
+ const missing=api.markup({audioFile:null,articleComplete:false,description:'Краткое описание.'});
+ assert.match(missing,/Голос птицы: нет/);
+ assert.match(missing,/Описание: краткое/);
+ assert.ok(!missing.includes('Голос птицы: есть'));
+ assert.equal(api.excerpt({description:'Птица гнездится в лесу.'},125),'Птица гнездится в лесу.');
+ for(const name of ['app/app.js','app/ui3.js','app/field-assistant.js']){
+  assert.match(file(name),/BirdMaterialFlags/,name);
+ }
+ assert.match(html,/src="material-flags\.js"/);
+ assert.ok(html.indexOf('material-flags.js')<html.indexOf('field-assistant.js'));
+ assert.match(css,/\.material-flag\.voice-yes/);
+ assert.match(css,/\.material-flag\.article-brief/);
+});
