@@ -72,3 +72,8 @@
 #habitatPlaceSummary button{width:auto;margin:4px 5px 4px 0;border:1px solid #588eae;border-radius:7px;padding:5px 8px;background:#123a52;color:#e2f7ff;cursor:pointer}
 .habitat-town-layer[hidden]{display:none}
 @media(max-width:950px){.habitat-town{font-size:9px;padding:2px 4px}.habitat-town--primary{font-size:10px}}
+
+.habitat-town[hidden]{display:none!important}
+.atlas7-launch{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0 5px}
+.atlas7-launch button{border:1px solid #6ac3df;border-radius:10px;background:#0d3a50e9;color:#f0faff;padding:10px 14px;font:600 13px 'Segoe UI',sans-serif;cursor:pointer;box-shadow:0 4px 13px #00172ba8}
+.atlas7-launch button:hover,.atlas7-launch button:focus-visible{background:#196584;outline:2px solid #93eaff;outline-offset:2px}
