@@ -26,3 +26,10 @@
 #atlas5BackupStatus{max-width:700px}
 @media(max-width:700px){.habitat-stats{grid-template-columns:repeat(3,1fr);gap:5px}.habitat-stat{padding:9px}.habitat-stat strong{font-size:18px}.habitat-tooltip{max-height:230px}.habitat-bird-image,.habitat-no-photo{width:47px;height:47px;flex-basis:47px}}
 @media(prefers-reduced-motion:reduce){.habitat-stage{transition:none}}
+.passport5{background:linear-gradient(140deg,#102c45,#081e31);padding:16px;margin:18px 0;border-radius:13px;border:1px solid #376a8c}
+.passport5 h3{margin:0 0 12px;font-size:19px;color:#dff4ff}
+.passport5-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.passport5-grid>div{display:flex;flex-direction:column;gap:4px;background:#0a2338;border:1px solid #3b5d76;border-radius:9px;padding:10px 12px}
+.passport5-grid b{font-size:11px;color:#93cbe9}.passport5-grid span{font-size:13px;color:#eef8fe;overflow-wrap:anywhere}
+.passport5 .living-note{margin:12px 0 0}
+@media(max-width:650px){.passport5-grid{grid-template-columns:1fr}}
