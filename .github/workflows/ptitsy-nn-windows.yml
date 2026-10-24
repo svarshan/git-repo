@@ -57,9 +57,6 @@ jobs:
             ptitsy-nn-media-v6-${{ runner.os }}-
             ptitsy-nn-media-v5-${{ runner.os }}-
             ptitsy-nn-media-v4-${{ runner.os }}-
-            ptitsy-nn-media-v3-${{ runner.os }}-
-            ptitsy-nn-media-v2-${{ runner.os }}-
-            ptitsy-nn-media-v1-${{ runner.os }}-
       - name: Generate offline catalog and download licensed real media
         timeout-minutes: 100
         run: |
