@@ -57,3 +57,71 @@ body.dialog-open{overflow:hidden}
 .ultra-delete{border:1px solid #8e2a23!important;border-radius:7px;color:#8e2a23!important;padding:8px 12px;background:white!important;margin-top:8px}
 .ultra-tracks>audio{display:block;width:100%;margin:12px 0}
 @media(max-width:520px){.ultra-tracks{padding:10px}.ultra-import-label{display:block}.ultra-import-label input{display:block;margin:9px 0}}
+
+/* 2.9 FIELD ASSISTANT: Night Nizhny Novgorod design. The cityscape is bundled locally. */
+:root{color-scheme:dark;--blue:#a1d6fa;--brick:#da7762;--sky:#66c9e7;--ink:#ecf3fa;--muted:#afc3d5;--paper:#0a1727;--line:#3a526b;--panel:rgba(9,24,40,.92);--panel-solid:#102238}
+html{scroll-behavior:smooth}
+body{background:#0a1727 url('nizhny-night.svg') center center / cover fixed no-repeat;color:var(--ink)}
+body::before{content:'';position:fixed;inset:0;background:linear-gradient(90deg,rgba(4,13,26,.72),rgba(5,15,27,.52) 43%,rgba(5,13,24,.76)),linear-gradient(180deg,rgba(6,18,33,.14),rgba(4,13,24,.48));pointer-events:none;z-index:0}
+.shell{position:relative;z-index:1}
+.sidebar{background:linear-gradient(160deg,rgba(5,18,34,.98),rgba(7,24,44,.94));border-right:1px solid #35506a;box-shadow:10px 0 45px #02070d66}
+.sidebar nav button{color:#bfdaf1}
+.sidebar nav button.navactive,.sidebar nav button:hover{background:#143955;color:#fff;box-shadow:inset 3px 0 0 var(--sky)}
+.brand strong{color:#fff}.sidefoot{border-top-color:#35506a}
+.crest{background:#8e2a23}
+.top{background:rgba(9,25,44,.87);border-bottom:1px solid var(--line);color:#d8e8f6;backdrop-filter:blur(12px)}
+.top strong{color:#84dfc4}
+main{position:relative}
+.intro{padding:36px 26px 28px;background:linear-gradient(105deg,rgba(8,23,41,.91),rgba(10,26,43,.48) 75%,rgba(8,23,41,.2));border:1px solid #344e647a;border-radius:18px;box-shadow:0 18px 45px #0006;margin:0 0 24px;backdrop-filter:blur(3px)}
+.intro h1{color:#fff;text-shadow:0 2px 18px #0009}
+.intro h1 em{color:#f0a17f}.overline{color:#91d8fb}.intro p{color:#d4e5ee}
+.metrics article,.bird,.filters,.journalrow,.longtext,.audio-pro,.voice-lab-list,.voice-lab-detail,.voice-lab-bird,.ultra-tracks{background:var(--panel);border:1px solid var(--line);box-shadow:0 8px 25px #0005;backdrop-filter:blur(14px)}
+.metrics article{border-top-color:#62b6cb}.metrics article:first-child{border-top-color:#da7762}
+.metrics strong,.heading h1,.heading h2,.meta h3,.dialogbody h2,.dialogbody h3,.journalrow strong,.voice-lab-detail h3,.ultra-title,.audio-pro-title,.compare-select-label,.fields label,.ultra-import-label{color:#e2f4ff}
+.metrics span,.heading span,.minor,.latin,.journalrow small{color:#b5cada}
+.bird:hover{border-color:#6a9dbe;box-shadow:0 12px 35px #0008;transform:translateY(-2px)}
+.photo,.detailphoto{background:#162c41}
+.photo .missing,.detailphoto .missing{color:#b1c9d8}
+.actions button,.credits a,.longtext a{color:#9bdcfd}
+.more,.toolbar button,.controls button,.dialogbody form button,.audio-pro button,.voice-lab-review button,.voice-lab-bird,.ultra-delete,.close{background:#152c43;color:#e5f5ff;border:1px solid #45627a}
+.more:hover,.toolbar button:hover,.controls button:hover,.audio-pro button:hover,.voice-lab-review button:hover,.voice-lab-bird:hover{background:#254766;color:#fff}
+.primary,.audio-pro-play{background:#8e2a23!important;color:#fff!important;border-color:#b95647!important}
+.fields input,.fields textarea,.fields select,.filters input,.filters select,.audio-pro-speed,.audio-pro-problem,.compare-select,.voice-lab-search,.voice-lab-filter,.voice-lab-note,.ultra-choose,.ultra-import-label input,.field-controls input,.field-controls select,.field-controls textarea,.field-select{background:#0e2032;color:#f0f7fd;border:1px solid #4d6980;border-radius:8px}
+input::placeholder,textarea::placeholder{color:#9eafc1}
+select option{background:#12263c;color:#f2f8ff}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid #80d8ff;outline-offset:2px}
+.modal{background:#0d2033;color:#e8f3fc;border:1px solid #456982}
+.shade{background:#010916db;backdrop-filter:blur(3px)}
+.dialogbody .controls button:first-child{background:#8e2a23;color:#fff}
+.credits{color:#b8d1df}.article-note{background:#173750;color:#cceafb;border-left-color:#62b6cb}
+.audio-pro-muted,.voice-lab-muted,.voice-lab-summary,.ultra-small{color:#b7cfdd}
+.audio-pro-source{color:#a6e4ff}
+.voice-lab-bird.selected{color:#fff;background:#28465e}
+.ultra-tracks{background:#112940e8}.ultra-canvas{border-color:#51859b}
+.ultra-delete{background:#172b3b!important;color:#ffb5a8!important}
+#notice{background:#224760;color:#fff}
+.field-card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:18px;box-shadow:0 9px 22px #0005;backdrop-filter:blur(15px)}
+.field-controls{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0;align-items:center}
+.field-controls input,.field-controls select{padding:10px 12px;min-width:170px;flex:1}
+.field-summary{color:#b6d7e8;font-size:13px;margin-bottom:15px}
+.field-compare{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.field-compare .field-card{min-width:0;overflow:hidden}
+.field-photo{height:210px;border-radius:10px;overflow:hidden;background:#162c41}
+.field-photo img{width:100%;height:100%;object-fit:contain}
+.field-result{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.field-result .bird{min-height:265px}
+.field-actions{display:flex;flex-wrap:wrap;gap:10px;margin:8px 0}
+.field-actions button{padding:9px 13px;border:1px solid #496a81;background:#1b3850;color:#e5f6ff;border-radius:8px}
+.field-actions button:hover{background:#2b5979}
+.field-chip{font-size:11px;display:inline-block;padding:3px 9px;border-radius:14px;background:#244663;color:#d2ecff}
+.field-muted{font-size:12px;color:var(--muted)}
+.field-panel-title{font:normal 20px Georgia,serif;color:#fff;margin:10px 0}
+.journal-filters{display:grid;grid-template-columns:2fr 1fr 1fr;gap:9px;margin:12px 0}
+.journal-filters>*{min-width:0}
+.journalrow-actions{display:flex;gap:8px;align-items:flex-start}
+.journalrow-actions button{color:#e9f7ff;border-color:#46627b;background:#1a3953}
+.journalrow-actions button:hover{background:#35576b}
+#journalSummary{color:#b2d7e9}
+@media(max-width:840px){.field-compare,.field-result{grid-template-columns:1fr}.journal-filters{grid-template-columns:1fr}}
+@media(max-width:650px){body{background-attachment:scroll}.sidebar nav{overflow-x:auto}.sidebar nav button{min-width:115px}.intro{padding:20px 15px}main{padding:20px 14px}.field-compare{grid-template-columns:1fr}}
+@media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}.bird:hover{transform:none}}
