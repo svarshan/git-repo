@@ -171,7 +171,7 @@ def download():
                                 if size>180_000_000:raise RuntimeError("Unexpected large input")
                                 h.write(chunk)
                 if cache.stat().st_size<15_000_000:raise RuntimeError("Truncated regional PBF")
-                if cache.open("rb").read(4)!=b"\x00\x00\x00":
+                if cache.open("rb").read(3)!=b"\x00\x00\x00":
                     # PBF header length starts with 4-byte network-order value, usually 0x000000xx.
                     raise RuntimeError("Unexpected input header")
                 return cache,url
