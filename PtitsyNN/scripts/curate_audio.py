@@ -63,6 +63,13 @@ def run():
    print('AUDIO REJECT',b['latin'],str(e)[:150],flush=True)
  # Do not ship old ambient conversations from previous caches as unused EXE resources.
  referenced={str((APP/b['audioFile']).resolve()) for b in birds if b.get('audioFile')}
+ for b in birds:
+  for t in b.get('audioTracks',[]) if isinstance(b.get('audioTracks'),list) else []:
+   if isinstance(t,dict) and str(t.get('path','')).startswith('media/audio/'):
+    p=(APP/t['path']).resolve()
+    try:p.relative_to((APP/'media'/'audio').resolve())
+    except ValueError:continue
+    if p.is_file():referenced.add(str(p))
  for stale in (APP/'media'/'audio').glob('*'):
   if stale.is_file() and str(stale.resolve()) not in referenced:stale.unlink(missing_ok=True)
  DATA.write_text(prefix+json.dumps(birds,ensure_ascii=False,separators=(',',':'))+';',encoding='utf8')
