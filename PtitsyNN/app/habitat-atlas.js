@@ -14,7 +14,9 @@ const markerLayer=$('#habitatPins'),chooser=$('#habitatSpecies'),search=$('#habi
 const yearRange=e=>e.fromYear===e.toYear?String(e.fromYear):e.fromYear+'–'+e.toYear;
 const months=['Все месяцы','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const fold=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').trim();
-let selectedId='all',selectedMonth=0,selectedSeason='all',zoom=1,visible=[];
+let selectedId='all',selectedMonth=0,selectedSeason='all',zoom=1,visible=[],panX=0,panY=0;
+const towns=Array.isArray(window.MOOLVA_SETTLEMENTS)?window.MOOLVA_SETTLEMENTS:[];
+const townLayer=$('#habitatTowns'),place=$('#habitatPlace'),placeSummary=$('#habitatPlaceSummary');
 const seasonMonths={winter:[12,1,2],spring:[3,4,5],summer:[6,7,8],autumn:[9,10,11]};
 function species(c){
  const q=fold(search.value);
@@ -81,7 +83,7 @@ function draw(){
  for(const c of visible){
   const pos=coords(c);if(!Number.isFinite(pos.left+pos.top)||pos.left<0||pos.left>100||pos.top<0||pos.top>100)continue;
   const list=species(c),btn=elem('button','habitat-pin',String(list.length));
-  btn.type='button';btn.style.left=pos.left+'%';btn.style.top=pos.top+'%';
+  btn.type='button';btn.style.left=pos.left+'%';btn.style.top=pos.top+'%';btn.dataset.zone=String(c.lat)+';'+String(c.lon);
   btn.setAttribute('aria-label','Зона с '+list.length+' видами: '+list.slice(0,3).map(s=>byId.get(s.id).name).join(', '));
   btn.title='Показать виды, опубликованные в этом районе';
   btn.addEventListener('mouseenter',()=>showTooltip(c,btn));
@@ -115,20 +117,105 @@ function draw(){
  if(!cells.length)summary.textContent='Проверенных зон нет: источник данных не был доступен при сборке. Фиктивные точки не рисуются.';
  else if(selectedMonth&&visible.length===0)summary.textContent+=' · Недостаточно данных по выбранному месяцу, это не означает отсутствия вида.';
 }
-function zoomTo(value){
- zoom=Math.max(1,Math.min(3,value));stage.style.transform='scale('+zoom+')';
- $('#habitatZoomLevel').textContent=Math.round(zoom*100)+'%';hideTooltip();
+/* Settlement positions are points of reference, not exact bird locations. */
+function distanceKm(a,b){
+ const toR=Math.PI/180,dp=(a.lat-b.lat)*toR,dl=(a.lon-b.lon)*toR;
+ const q=Math.sin(dp/2)**2+Math.cos(a.lat*toR)*Math.cos(b.lat*toR)*Math.sin(dl/2)**2;
+ return 6371*2*Math.atan2(Math.sqrt(q),Math.sqrt(Math.max(0,1-q)));
 }
-$('#habitatZoomIn')?.addEventListener('click',()=>zoomTo(zoom+.25));
-$('#habitatZoomOut')?.addEventListener('click',()=>zoomTo(zoom-.25));
+function applyView(){
+ const w=viewport.clientWidth,h=viewport.clientHeight;
+ panX=Math.max(-w*(zoom-1)/2,Math.min(w*(zoom-1)/2,panX));
+ panY=Math.max(-h*(zoom-1)/2,Math.min(h*(zoom-1)/2,panY));
+ stage.style.transform='translate3d('+panX+'px,'+panY+'px,0) scale('+zoom+')';
+ $('#habitatZoomLevel').textContent=Math.round(zoom*100)+'%';
+ townLayer?.querySelectorAll('.habitat-town--secondary').forEach(el=>{el.hidden=zoom<1.55;});
+ hideTooltip();
+}
+function zoomTo(value){
+ zoom=Math.max(1,Math.min(3.8,value));
+ if(zoom===1){panX=0;panY=0;}
+ applyView();
+}
+function focusTown(town){
+ if(!town)return;
+ zoom=Math.max(zoom,2.1);
+ const pos=coords(town),w=viewport.clientWidth,h=viewport.clientHeight;
+ panX=(.5-pos.left/100)*w*zoom;
+ panY=(.5-pos.top/100)*h*zoom;
+ applyView();
+ if(place)place.value=town.name;
+ if(!placeSummary)return;
+ placeSummary.replaceChildren();
+ placeSummary.append(elem('strong',null,town.name));
+ placeSummary.append(elem('p',null,'Координаты центра населённого пункта приблизительные. Ближайшие обобщённые зоны GBIF — это не подтверждение встреч в самом '+town.name+'.'));
+ const near=visible.map(c=>({c,d:distanceKm(town,c)})).filter(x=>Number.isFinite(x.d)&&x.d<=70).sort((a,b)=>a.d-b.d).slice(0,3);
+ if(!near.length){placeSummary.append(elem('p',null,'Для выбранных фильтров поблизости нет опубликованных зон. Это не означает отсутствия птиц.'));return;}
+ placeSummary.append(elem('p',null,'Ближайшие опубликованные зоны: '+near.length+' (в пределах 70 км от центра).'));
+ const ids=new Set();
+ for(const {c,d} of near){
+  const birdsHere=species(c);
+  const count=birdsHere.length;
+  const label=elem('button',null,'Зона около '+Math.round(d)+' км · '+count+' видов');
+  label.type='button';
+  label.addEventListener('click',()=>{
+   const btn=[...markerLayer.querySelectorAll('.habitat-pin')].find(b=>b.dataset.zone===String(c.lat)+';'+String(c.lon));
+   if(btn)showTooltip(c,btn);
+  });
+  placeSummary.append(label);
+  for(const s of birdsHere)ids.add(s.id);
+ }
+ placeSummary.append(elem('small',null,'Уникальных видов в этих укрупнённых зонах: '+ids.size+'. Данные исторических наблюдений, не прогноз.'));
+}
+function drawTowns(){
+ if(!townLayer||!place)return;
+ townLayer.replaceChildren();
+ if(!place.options.length||place.options.length===1){
+  addOpts(place,[['','Выберите населённый пункт'],...towns.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(t=>[t.name,t.name])]);
+ }
+ for(const town of towns){
+  const p=coords(town);
+  if(p.left<0||p.left>100||p.top<0||p.top>100)continue;
+  const btn=elem('button','habitat-town'+(town.tier===1?' habitat-town--primary':' habitat-town--secondary'),town.name);
+  btn.type='button';btn.style.left=p.left+'%';btn.style.top=p.top+'%';
+  btn.title='Населённый пункт '+town.name+' · поиск ближайших зон наблюдений';
+  btn.setAttribute('aria-label','Показать на карте '+town.name);
+  btn.hidden=town.tier!==1&&zoom<1.55;
+  btn.addEventListener('click',e=>{e.stopPropagation();focusTown(town);});
+  townLayer.append(btn);
+ }
+}
+
+place?.addEventListener('change',()=>focusTown(towns.find(t=>t.name===place.value)));
+$('#habitatShowTowns')?.addEventListener('change',e=>{if(townLayer)townLayer.hidden=!e.target.checked;});
+$('#habitatCenter')?.addEventListener('click',()=>{zoom=1;panX=0;panY=0;applyView();});
+$('#habitatZoomIn')?.addEventListener('click',()=>zoomTo(zoom+.35));
+$('#habitatZoomOut')?.addEventListener('click',()=>zoomTo(zoom-.35));
 $('#habitatReset')?.addEventListener('click',()=>zoomTo(1));
-viewport.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();zoomTo(zoom+(e.deltaY<0?.15:-.15));},{passive:false});
+viewport.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();zoomTo(zoom+(e.deltaY<0?.25:-.25));},{passive:false});
+let drag=null;
+viewport.addEventListener('pointerdown',e=>{
+ if(e.button!==0||e.target.closest('button,.habitat-tooltip'))return;
+ drag={id:e.pointerId,x:e.clientX,y:e.clientY,px:panX,py:panY};
+ viewport.classList.add('is-dragging');viewport.setPointerCapture(e.pointerId);
+});
+viewport.addEventListener('pointermove',e=>{
+ if(!drag||drag.id!==e.pointerId)return;
+ panX=drag.px+e.clientX-drag.x;panY=drag.py+e.clientY-drag.y;applyView();
+});
+const stopDrag=e=>{
+ if(!drag||drag.id!==e.pointerId)return;
+ drag=null;viewport.classList.remove('is-dragging');
+ if(viewport.hasPointerCapture(e.pointerId))viewport.releasePointerCapture(e.pointerId);
+};
+viewport.addEventListener('pointerup',stopDrag);
+viewport.addEventListener('pointercancel',stopDrag);
 chooser.addEventListener('change',()=>{selectedId=chooser.value;draw();});
 search.addEventListener('input',draw);
 month?.addEventListener('change',()=>{selectedMonth=Number(month.value)||0;if(selectedMonth&&season){season.value='all';selectedSeason='all';}draw();});
 season?.addEventListener('change',()=>{selectedSeason=season.value;if(selectedSeason!=='all'&&month){month.value='0';selectedMonth=0;}draw();});
 $('#habitatSelectClear')?.addEventListener('click',()=>{
- selectedId='all';selectedMonth=0;selectedSeason='all';chooser.value='all';if(month)month.value='0';if(season)season.value='all';search.value='';zoomTo(1);draw();
+ selectedId='all';selectedMonth=0;selectedSeason='all';if(place)place.value='';if(placeSummary)placeSummary.textContent='Выберите населённый пункт — покажем ближайшие обобщённые зоны наблюдений.';chooser.value='all';if(month)month.value='0';if(season)season.value='all';search.value='';zoomTo(1);draw();
 });
 $('#habitatPopupClose')?.addEventListener('click',hideTooltip);
 viewport.addEventListener('keydown',e=>{if(e.key==='Escape')hideTooltip();});
@@ -155,6 +242,6 @@ function exportCSV(){
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
 }
 $('#habitatExport')?.addEventListener('click',exportCSV);
-index();draw();
-window.BirdHabitat={focusSpecies,data,coords,exportCSV};
+index();draw();drawTowns();applyView();
+window.BirdHabitat={focusSpecies,focusTown,data,coords,exportCSV,towns};
 })();
