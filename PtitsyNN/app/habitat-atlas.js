@@ -1,115 +1,156 @@
 'use strict';
-/* Offline habitat atlas. Historical open observations aggregated into coarse cells.
-   Never renders personal journal coordinates or wildlife nest coordinates.
-*/
+/* MoOLVa 5.0 · offline, source-attributed and privacy-coarsened bird atlas. */
 (function(){
-const root=document.getElementById('habitatAtlas');
-if(!root)return;
+const root=document.getElementById('habitatAtlas');if(!root)return;
 const $=s=>root.querySelector(s);
 const birds=Array.isArray(window.BIRDS_DATA)?window.BIRDS_DATA:[];
 const byId=new Map(birds.map(b=>[b.id,b]));
-const dataset=window.HABITAT_DATA||{cells:[],bounds:{west:41.6,east:47.96,north:58.19,south:54.35},sampledRecords:0};
-const cells=Array.isArray(dataset.cells)?dataset.cells:[];
-const bounds=dataset.bounds||{west:41.6,east:47.96,north:58.19,south:54.35};
-const round=n=>Math.round(n*100)/100;
-const markers=$('#habitatPins'),chooser=$('#habitatSpecies'),search=$('#habitatSearch'),summary=$('#habitatSummary'),tooltip=$('#habitatTooltip'),stage=$('#habitatStage'),mapWrap=$('#habitatViewport');
-let selectedId='all',zoom=1,visible=[];
-const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-function totalCount(){return cells.reduce((n,c)=>n+c.total,0);}
+const data=window.HABITAT_DATA||{cells:[],bounds:{west:41.60,east:47.96,north:58.19,south:54.35}};
+const cells=Array.isArray(data.cells)?data.cells:[];
+const bounds=data.bounds||{west:41.60,east:47.96,north:58.19,south:54.35};
+const markerLayer=$('#habitatPins'),chooser=$('#habitatSpecies'),search=$('#habitatSearch'),
+ summary=$('#habitatSummary'),tooltip=$('#habitatTooltip'),stage=$('#habitatStage'),viewport=$('#habitatViewport'),
+ month=$('#habitatMonth'),stats=$('#habitatStats'),detail=$('#habitatSelection');
+const yearRange=e=>e.fromYear===e.toYear?String(e.fromYear):e.fromYear+'–'+e.toYear;
+const months=['Все месяцы','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+const fold=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').trim();
+let selectedId='all',selectedMonth=0,zoom=1,visible=[];
+function species(c){
+ const q=fold(search.value);
+ return (c.species||[]).filter(s=>{
+  const b=byId.get(s.id);if(!b)return false;
+  if(selectedId!=='all'&&s.id!==selectedId)return false;
+  if(selectedMonth&&!(Array.isArray(s.months)&&s.months.includes(selectedMonth)))return false;
+  return !q||fold(b.name+' '+b.latin+' '+(b.group||'')).includes(q);
+ });
+}
+function coords(c){return {left:100*(c.lon-bounds.west)/(bounds.east-bounds.west),top:100*(bounds.north-c.lat)/(bounds.north-bounds.south)};}
+function elem(tag,cls,text){
+ const x=document.createElement(tag);if(cls)x.className=cls;if(text!=null)x.textContent=String(text);return x;
+}
+function addOpts(select,options){
+ select.replaceChildren(...options.map(([id,label])=>{const e=elem('option',null,label);e.value=String(id);return e;}));
+}
 function index(){
- const featured=new Set();
- for(const c of cells)for(const s of c.species||[])if(byId.has(s.id))featured.add(s.id);
- const option=(value,label)=>{const e=document.createElement('option');e.value=value;e.textContent=label;return e;};
- chooser.replaceChildren(option('all','Все птицы с опубликованными наблюдениями'),
- ...birds.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(b=>option(b.id,b.name+(featured.has(b.id)?'':' — нет подтверждённых зон'))));
+ const featured=new Set(cells.flatMap(c=>(c.species||[]).map(s=>s.id)));
+ addOpts(chooser,[['all','Все виды с наблюдениями'],...birds.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru'))
+   .map(b=>[b.id,b.name+(featured.has(b.id)?'':' — нет проверенных зон')])]);
+ if(month)addOpts(month,months.map((t,i)=>[i,t]));
 }
-function species(c){return (c.species||[]).filter(s=>byId.has(s.id)&&(selectedId==='all'||s.id===selectedId));}
-function coords(c){
- const left=100*(c.lon-bounds.west)/(bounds.east-bounds.west);
- const top=100*(bounds.north-c.lat)/(bounds.north-bounds.south);
- return {left,top};
+function hideTooltip(){tooltip.hidden=true;tooltip.replaceChildren();}
+function thumbnail(b){
+ const image=b?.imageFile;
+ if(!image)return elem('span','habitat-no-photo','Нет проверенного фото');
+ const x=elem('img','habitat-bird-image');
+ x.src=image;x.alt='Фотография '+b.name;x.loading='lazy';return x;
 }
-function hideTooltip(){tooltip.hidden=true;}
 function showTooltip(c,origin){
- tooltip.replaceChildren();
- const title=document.createElement('strong');title.textContent='Зона возможной встречи · около '+round(c.lat)+'° с.ш., '+round(c.lon)+'° в.д.';
- tooltip.appendChild(title);
- const note=document.createElement('small');note.textContent='Обобщённая ячейка ~30 км, не координаты гнезда и не прогноз';tooltip.appendChild(note);
- const list=document.createElement('div');list.className='habitat-tooltip-list';
  const speciesList=species(c);
- for(const s of speciesList.slice(0,16)){
-  const b=byId.get(s.id);
-  const btt=document.createElement('button');btt.type='button';btt.dataset.open=s.id;
-  btt.textContent=b.name+' · '+s.n+' записей ('+s.fromYear+'–'+s.toYear+')';
-  list.appendChild(btt);
+ if(!speciesList.length)return hideTooltip();
+ tooltip.replaceChildren();
+ const h=elem('strong','habitat-tooltip-heading','Подтверждённые наблюдения · район карты');
+ const small=elem('small',null,'Ячейка ~30 км · '+speciesList.length+' видов · не координаты гнёзд');
+ tooltip.append(h,small);
+ const content=elem('div','habitat-tooltip-list');
+ for(const item of speciesList.slice(0,22)){
+  const b=byId.get(item.id),row=elem('button','habitat-species-row');
+  row.type='button';row.dataset.open=b.id;
+  const caption=elem('span','habitat-species-caption');
+  caption.append(elem('strong',null,b.name),
+    elem('span',null,(b.audioFile?'♪ Голос есть':'♪ Нет записи')+' · '+(b.articleComplete?'Подробная статья':'Краткая справка')),
+    elem('small',null,item.n+' сообщений о встречах · '+yearRange(item)+(selectedMonth?' · '+months[selectedMonth] : '')));
+  row.append(thumbnail(b),caption);content.appendChild(row);
  }
- if(speciesList.length>16){const more=document.createElement('span');more.textContent='И ещё '+(speciesList.length-16)+' видов';list.appendChild(more);}
- tooltip.appendChild(list);
- const box=origin.getBoundingClientRect(),holder=mapWrap.getBoundingClientRect();
- const x=Math.max(6,Math.min(holder.width-270,box.left-holder.left+14));
- const y=Math.max(6,Math.min(holder.height-190,box.top-holder.top+12));
- tooltip.style.left=x+'px';tooltip.style.top=y+'px';
+ if(speciesList.length>22)content.appendChild(elem('small',null,'Показано 22 из '+speciesList.length+' видов'));
+ tooltip.appendChild(content);
+ const rect=origin.getBoundingClientRect(),container=viewport.getBoundingClientRect();
+ const width=Math.min(380,Math.max(250,container.width-12));
+ tooltip.style.width=width+'px';
+ const maxX=Math.max(6,container.width-width-6);
+ tooltip.style.left=Math.min(maxX,Math.max(6,rect.left-container.left+16))+'px';
+ const maxY=Math.max(6,container.height-205);
+ tooltip.style.top=Math.min(maxY,Math.max(6,rect.top-container.top+20))+'px';
  tooltip.hidden=false;
 }
 function draw(){
  hideTooltip();
- const q=(search.value||'').trim().toLocaleLowerCase('ru').replace(/ё/g,'е');
- const filter=selectedId;
- visible=cells.filter(c=>species(c).length>0&&
-  (!q||species(c).some(s=>{const b=byId.get(s.id);return (b.name+' '+b.latin).toLocaleLowerCase('ru').replace(/ё/g,'е').includes(q);})));
- markers.replaceChildren();
+ visible=cells.filter(c=>species(c).length>0);
+ markerLayer.replaceChildren();
  for(const c of visible){
-  const pos=coords(c);
-  if(pos.left<0||pos.left>100||pos.top<0||pos.top>100)continue;
-  const btn=document.createElement('button');
-  btn.type='button';btn.className='habitat-pin';btn.style.left=pos.left+'%';btn.style.top=pos.top+'%';
-  const listed=species(c),names=listed.slice(0,3).map(s=>byId.get(s.id).name).join(', ');
-  btn.setAttribute('aria-label','Зона наблюдений: '+names+', '+listed.length+' видов. Показать сведения.');
-  btn.title=listed.length+' видов — '+names;
-  btn.textContent=String(listed.length);
+  const pos=coords(c);if(!Number.isFinite(pos.left+pos.top)||pos.left<0||pos.left>100||pos.top<0||pos.top>100)continue;
+  const list=species(c),btn=elem('button','habitat-pin',String(list.length));
+  btn.type='button';btn.style.left=pos.left+'%';btn.style.top=pos.top+'%';
+  btn.setAttribute('aria-label','Зона с '+list.length+' видами: '+list.slice(0,3).map(s=>byId.get(s.id).name).join(', '));
+  btn.title='Показать виды, опубликованные в этом районе';
   btn.addEventListener('mouseenter',()=>showTooltip(c,btn));
   btn.addEventListener('focus',()=>showTooltip(c,btn));
   btn.addEventListener('click',()=>showTooltip(c,btn));
-  markers.appendChild(btn);
+  markerLayer.appendChild(btn);
  }
- const matchingSpecies=new Set(visible.flatMap(c=>species(c).map(s=>s.id)));
- const title=filter==='all'?'все доступные виды':(byId.get(filter)?.name||'вид');
- summary.textContent='Показаны зоны: '+visible.length+' · видов: '+matchingSpecies.size+' · фильтр: '+title+'. Это обобщённые исторические наблюдения из GBIF, не гарантированные места обитания.';
- if(!cells.length){
-  summary.textContent='Проверенные точки пока не удалось загрузить. Карта области работает офлайн; фиктивные наблюдения не создаются. Проверьте источники в разделе «О программе».';
+ const unique=new Set(visible.flatMap(c=>species(c).map(s=>s.id)));
+ const subtitle=selectedId==='all'?'Все виды':(byId.get(selectedId)?.name||'Вид');
+ summary.textContent='Зон: '+visible.length+' · видов: '+unique.size+' · '+subtitle+(selectedMonth?' · '+months[selectedMonth]:'');
+ if(stats){
+  stats.replaceChildren();
+  for(const [number,title] of [[cells.length,'зон в базе'],[new Set(cells.flatMap(c=>(c.species||[]).map(s=>s.id))).size,'видов с зонами'],[data.matchingRecords||0,'отобранных записей']]){
+   const a=elem('div','habitat-stat');a.append(elem('strong',null,number),elem('small',null,title));stats.appendChild(a);
+  }
  }
+ if(detail){
+  detail.replaceChildren();
+  if(selectedId==='all')detail.textContent='Выберите птицу, чтобы подсветить районы её опубликованных наблюдений.';
+  else{
+   const b=byId.get(selectedId);
+   if(b){
+    detail.append(thumbnail(b),elem('strong',null,b.name));
+    detail.append(elem('p',null,visible.length?'Есть укрупнённые зоны исторических наблюдений.':'Для выбранных условий подтверждённых зон в выборке нет. Это не значит, что птица здесь не встречается.'));
+    const btn=elem('button','living-button','Открыть паспорт птицы');
+    btn.type='button';btn.dataset.open=b.id;detail.appendChild(btn);
+   }
+  }
+ }
+ if(!cells.length)summary.textContent='Проверенных зон нет: источник данных не был доступен при сборке. Фиктивные точки не рисуются.';
+ else if(selectedMonth&&visible.length===0)summary.textContent+=' · Недостаточно данных по выбранному месяцу, это не означает отсутствия вида.';
 }
-function zoomTo(next){
- zoom=Math.max(1,Math.min(2.4,next));stage.style.transform='scale('+zoom+')';
- $('#habitatZoomLevel').textContent=Math.round(zoom*100)+'%';
- hideTooltip();
+function zoomTo(value){
+ zoom=Math.max(1,Math.min(3,value));stage.style.transform='scale('+zoom+')';
+ $('#habitatZoomLevel').textContent=Math.round(zoom*100)+'%';hideTooltip();
 }
-$('#habitatZoomIn')?.addEventListener('click',()=>zoomTo(zoom+0.25));
-$('#habitatZoomOut')?.addEventListener('click',()=>zoomTo(zoom-0.25));
+$('#habitatZoomIn')?.addEventListener('click',()=>zoomTo(zoom+.25));
+$('#habitatZoomOut')?.addEventListener('click',()=>zoomTo(zoom-.25));
 $('#habitatReset')?.addEventListener('click',()=>zoomTo(1));
+viewport.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();zoomTo(zoom+(e.deltaY<0?.15:-.15));},{passive:false});
 chooser.addEventListener('change',()=>{selectedId=chooser.value;draw();});
 search.addEventListener('input',draw);
-$('#habitatSelectClear')?.addEventListener('click',()=>{selectedId='all';chooser.value='all';search.value='';draw();});
-$('#habitatPopupClose')?.addEventListener('click',hideTooltip);
-mapWrap.addEventListener('keydown',e=>{if(e.key==='Escape')hideTooltip();});
-document.addEventListener('click',e=>{
- if(!e.target.closest('#habitatViewport')&&!e.target.closest('#habitatSpecies'))hideTooltip();
+month?.addEventListener('change',()=>{selectedMonth=Number(month.value)||0;draw();});
+$('#habitatSelectClear')?.addEventListener('click',()=>{
+ selectedId='all';selectedMonth=0;chooser.value='all';if(month)month.value='0';search.value='';zoomTo(1);draw();
 });
+$('#habitatPopupClose')?.addEventListener('click',hideTooltip);
+viewport.addEventListener('keydown',e=>{if(e.key==='Escape')hideTooltip();});
+document.addEventListener('click',e=>{if(!e.target.closest('#habitatViewport')&&!e.target.closest('#habitatSpecies'))hideTooltip();});
 const source=$('#habitatSource');
-if(source){
- source.textContent=(dataset.generated?'Выборка обновлена '+dataset.generated+' · ':'')+
-  'просмотрено '+(dataset.sampledRecords||0)+' записей · подходящих '+(dataset.matchingRecords||0)+
-  ' · зон '+cells.length;
-}
+if(source)source.textContent=(data.generated?'Дата выборки: '+data.generated+' · ':'')+
+ 'проверено '+(data.sampledRecords||0)+' записей · принято '+(data.matchingRecords||0)+' · обобщённых зон '+cells.length+'. Источник: GBIF.org, CC-лицензии.';
 function focusSpecies(id){
- document.querySelector('[data-view="map"]')?.click();
- search.value='';
- selectedId=byId.has(id)?id:'all';
- chooser.value=selectedId;
- if(chooser.value!==selectedId){chooser.value='all';selectedId='all';}
- draw();
- document.getElementById('habitatAtlas')?.scrollIntoView({block:'start',behavior:'smooth'});
+ document.querySelector('nav [data-view="map"]')?.click();
+ selectedId=byId.has(id)?id:'all';chooser.value=selectedId;search.value='';
+ selectedMonth=0;if(month)month.value='0';draw();
+ root.scrollIntoView({block:'start',behavior:'smooth'});
 }
+function exportCSV(){
+ const header=['Широта центра укрупнённой зоны','Долгота центра укрупнённой зоны','Птица','Научное название','Число записей','С','По','Месяцы с достаточными данными'];
+ const rows=[header];
+ for(const c of visible)for(const s of species(c)){
+  const b=byId.get(s.id);
+  rows.push([c.lat,c.lon,b.name,b.latin,s.n,s.fromYear,s.toYear,(s.months||[]).join(',')]);
+ }
+ const quote=v=>'"'+String(v??'').replace(/\r|\n/g,' ').replace(/^([=+@\-\t])/,"'$1").replace(/"/g,'""')+'"';
+ const blob=new Blob(['\ufeff'+rows.map(r=>r.map(quote).join(';')).join('\r\n')],{type:'text/csv;charset=utf-8'});
+ const url=URL.createObjectURL(blob),a=elem('a');a.href=url;a.download='MoOLVa-5.0-Atlas-Aggregated.csv';
+ document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
+}
+$('#habitatExport')?.addEventListener('click',exportCSV);
 index();draw();
-window.BirdHabitat={focusSpecies,data:dataset,coords};
+window.BirdHabitat={focusSpecies,data,coords,exportCSV};
 })();
