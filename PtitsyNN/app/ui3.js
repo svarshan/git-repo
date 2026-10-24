@@ -91,7 +91,11 @@ function makeMini(b){
  const button=document.createElement('button');button.type='button';button.className='ui3-mini';button.dataset.open=b.id;
  if(b.imageFile){const img=document.createElement('img');img.src=b.imageFile;img.loading='lazy';img.alt=b.name;button.appendChild(img);}
  else{const d=document.createElement('span');d.className='ui3-missing';d.textContent='Нет фото';button.appendChild(d);}
- const t=document.createElement('strong');t.textContent=b.name;button.appendChild(t);return button;
+ const t=document.createElement('strong');t.textContent=b.name;button.appendChild(t);
+ const flag=document.createElement('span');flag.className='ui3-mini-materials';
+ flag.textContent=(b.audioFile?'♪ Есть':'♪ Нет')+' · '+(b.articleComplete?'▤ Полное':'▤ Краткое');
+ flag.title='Голос птицы: '+(b.audioFile?'есть':'нет')+'. Описание: '+(b.articleComplete?'подробное':'краткое');
+ button.appendChild(flag);return button;
 }
 function renderPreview(){
  const good=birds.filter(b=>b.imageFile);
@@ -107,7 +111,9 @@ function renderGallery(){
  const query=($('#ui3-gallery-search')?.value||'').toLocaleLowerCase('ru').replace(/ё/g,'е').trim();
  const matched=birds.filter(b=>b.imageFile&&(!query||(b.name+' '+b.latin).toLocaleLowerCase('ru').replace(/ё/g,'е').includes(query)));
  const count=$('#ui3-gallery-count');if(count)count.textContent='Фотографий с подтверждённой лицензией: '+matched.length;
- el.innerHTML=matched.slice(0,120).map(b=>'<article class="bird"><button class="photo" data-open="'+escapeHtml(b.id)+'"><img loading="lazy" src="'+escapeHtml(b.imageFile)+'" alt="'+escapeHtml(b.name)+'"></button><div class="meta"><h3>'+escapeHtml(b.name)+'</h3><div class="latin">'+escapeHtml(b.latin)+'</div></div></article>').join('')||'<p>По запросу фотографий не найдено.</p>';
+ el.innerHTML=matched.slice(0,120).map(b=>'<article class="bird"><button class="photo" data-open="'+escapeHtml(b.id)+'"><img loading="lazy" src="'+escapeHtml(b.imageFile)+'" alt="'+escapeHtml(b.name)+'"></button><div class="meta"><h3>'+escapeHtml(b.name)+'</h3><div class="latin">'+escapeHtml(b.latin)+'</div>'+
+ (window.BirdMaterialFlags?.markup(b)||'')+'<p class="materials-summary">'+escapeHtml(window.BirdMaterialFlags?.excerpt(b,105)||'')+'</p>'+
+ '<div class="actions"><button type="button" data-open="'+escapeHtml(b.id)+'">Подробнее →</button></div></div></article>').join('')||'<p>По запросу фотографий не найдено.</p>';
 }
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
 $('#ui3-gallery-search')?.addEventListener('input',renderGallery);
