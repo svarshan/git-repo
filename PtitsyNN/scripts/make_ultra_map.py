@@ -102,6 +102,7 @@ class MapExtractor(osmium.SimpleHandler):
             if old and old[0]>=priority:return
             obj={"name":name,"lat":round(lat,5),"lon":round(lon,5),"tier":tier}
             self.named[ident]=(priority,obj)
+            self.count['place'] += 1
         except (ValueError,RuntimeError):return
     def way(self,w):
         tags=w.tags
@@ -119,7 +120,7 @@ class MapExtractor(osmium.SimpleHandler):
         polygon = len(coords)>=4 and coords[0]==coords[-1]
         if (lake or forest) and polygon:
             a=area(coords)
-            if a < (5 if lake else 28):return
+            if a < (0.16 if lake else 2.0):return
             out=simplify(coords,1.6 if lake else 2.6)
             if out[0]!=out[-1]:out.append(out[0])
             if len(out)<4:return
