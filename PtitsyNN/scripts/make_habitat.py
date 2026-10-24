@@ -25,7 +25,19 @@ MAX_PAGES = 15
 LIMIT = 300
 GRID_LAT = 0.3
 GRID_LON = 0.5
-VALID_LICENSES = {"CC0_1_0", "CC_BY_4_0", "CC_BY_SA_4_0", "UNSPECIFIED"}
+VALID_LICENSES = {"cc0_1_0", "cc_by_4_0", "cc_by_sa_4_0"}
+def license_allowed(value):
+    license_value = str(value or "").strip().lower().replace("https://", "http://").rstrip("/")
+    if license_value in VALID_LICENSES:
+        return True
+    return license_value in {
+        "http://creativecommons.org/publicdomain/zero/1.0",
+        "http://creativecommons.org/publicdomain/zero/1.0/legalcode",
+        "http://creativecommons.org/licenses/by/4.0",
+        "http://creativecommons.org/licenses/by/4.0/legalcode",
+        "http://creativecommons.org/licenses/by-sa/4.0",
+        "http://creativecommons.org/licenses/by-sa/4.0/legalcode",
+    }
 REGION_TERMS = ("нижегород", "nizhegor", "nizhni", "nizhny", "nijegor", "gor'kov", "gorky")
 EXCLUDED_ISSUES = {"COUNTRY_COORDINATE_MISMATCH", "COORDINATE_INVALID", "GEODETIC_DATUM_INVALID"}
 TODAY = datetime.datetime.now(datetime.timezone.utc).date().isoformat()
@@ -83,6 +95,7 @@ def scan():
     queried=0
     accepted=0
     rejected=collections.Counter()
+    seen_licenses=collections.Counter()
     qs = dict(
         country="RU", taxonKey=212, hasCoordinate="true",
         hasGeospatialIssue="false", limit=LIMIT,
@@ -109,7 +122,8 @@ def scan():
             if r.get("occurrenceStatus") == "ABSENT":
                 rejected["absence"]+=1
                 continue
-            if str(r.get("license") or "") not in VALID_LICENSES:
+            seen_licenses[str(r.get("license") or "")]+=1
+            if not license_allowed(r.get("license")):
                 rejected["license"]+=1
                 continue
             if r.get("informationWithheld") or r.get("dataGeneralizations"):
@@ -148,6 +162,7 @@ def scan():
             break
 
     print("GBIF filtering diagnostics:", dict(rejected))
+    print("GBIF license distribution within regional catalog records:",dict(seen_licenses))
     # Mask unusual or one-off points; never ship individual source coordinates.
     by_cell=collections.defaultdict(list)
     for (row,col,b_id),n in counts.items():
