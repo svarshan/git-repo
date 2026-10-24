@@ -1,0 +1,15 @@
+/* MoOLVa 6.0 - Living Encyclopedia / Bird AI */
+.ai6-row{display:flex;align-items:end;gap:12px;flex-wrap:wrap;margin:13px 0 10px}
+.ai6-row label{display:grid;gap:8px;flex:1 1 280px;font-size:13px;color:#c7e1f1}
+.ai6-row input{padding:12px;background:#102d43;color:#e9f6ff;border:1px solid #4f7895;border-radius:9px;max-width:100%}
+.ai6-row button{min-width:175px;min-height:46px}
+.ai6-row button:disabled{opacity:.6;cursor:wait}
+.ai6-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:14px 0}
+.ai6-result{display:flex;flex-direction:column;gap:8px;background:linear-gradient(130deg,#102d45,#071d32);border:1px solid #456c87;border-radius:12px;padding:12px}
+.ai6-result img{width:100%;height:142px;object-fit:cover;border-radius:8px;border:1px solid #375977}
+.ai6-result strong{color:#eef8ff;font-size:16px}
+.ai6-result small{font-size:12px;color:#b0d6ea;line-height:1.5}
+.ai6-result button{margin-top:auto}
+.six-nav-chip{padding:5px 9px;color:#a7ecfc;background:#133e59;border-radius:8px}
+@media(max-width:650px){.ai6-results{grid-template-columns:1fr 1fr}.ai6-result img{height:100px}}
+@media(max-width:440px){.ai6-results{grid-template-columns:1fr}}
