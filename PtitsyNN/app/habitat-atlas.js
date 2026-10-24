@@ -10,17 +10,19 @@ const cells=Array.isArray(data.cells)?data.cells:[];
 const bounds=data.bounds||{west:41.60,east:47.96,north:58.19,south:54.35};
 const markerLayer=$('#habitatPins'),chooser=$('#habitatSpecies'),search=$('#habitatSearch'),
  summary=$('#habitatSummary'),tooltip=$('#habitatTooltip'),stage=$('#habitatStage'),viewport=$('#habitatViewport'),
- month=$('#habitatMonth'),stats=$('#habitatStats'),detail=$('#habitatSelection');
+ month=$('#habitatMonth'),season=$('#habitatSeason'),stats=$('#habitatStats'),detail=$('#habitatSelection');
 const yearRange=e=>e.fromYear===e.toYear?String(e.fromYear):e.fromYear+'–'+e.toYear;
 const months=['Все месяцы','Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
 const fold=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').trim();
-let selectedId='all',selectedMonth=0,zoom=1,visible=[];
+let selectedId='all',selectedMonth=0,selectedSeason='all',zoom=1,visible=[];
+const seasonMonths={winter:[12,1,2],spring:[3,4,5],summer:[6,7,8],autumn:[9,10,11]};
 function species(c){
  const q=fold(search.value);
  return (c.species||[]).filter(s=>{
   const b=byId.get(s.id);if(!b)return false;
   if(selectedId!=='all'&&s.id!==selectedId)return false;
   if(selectedMonth&&!(Array.isArray(s.months)&&s.months.includes(selectedMonth)))return false;
+  if(selectedSeason!=='all'&&!(Array.isArray(s.months)&&s.months.some(m=>(seasonMonths[selectedSeason]||[]).includes(m))))return false;
   return !q||fold(b.name+' '+b.latin+' '+(b.group||'')).includes(q);
  });
 }
@@ -89,7 +91,8 @@ function draw(){
  }
  const unique=new Set(visible.flatMap(c=>species(c).map(s=>s.id)));
  const subtitle=selectedId==='all'?'Все виды':(byId.get(selectedId)?.name||'Вид');
- summary.textContent='Зон: '+visible.length+' · видов: '+unique.size+' · '+subtitle+(selectedMonth?' · '+months[selectedMonth]:'');
+ const seasonNames={winter:'Зима',spring:'Весна',summer:'Лето',autumn:'Осень'};
+ summary.textContent='Зон: '+visible.length+' · видов: '+unique.size+' · '+subtitle+(selectedMonth?' · '+months[selectedMonth]:'')+(selectedSeason!=='all'?' · '+seasonNames[selectedSeason]:'');
  if(stats){
   stats.replaceChildren();
   for(const [number,title] of [[cells.length,'зон в базе'],[new Set(cells.flatMap(c=>(c.species||[]).map(s=>s.id))).size,'видов с зонами'],[data.matchingRecords||0,'отобранных записей']]){
@@ -122,9 +125,10 @@ $('#habitatReset')?.addEventListener('click',()=>zoomTo(1));
 viewport.addEventListener('wheel',e=>{if(!e.ctrlKey)return;e.preventDefault();zoomTo(zoom+(e.deltaY<0?.15:-.15));},{passive:false});
 chooser.addEventListener('change',()=>{selectedId=chooser.value;draw();});
 search.addEventListener('input',draw);
-month?.addEventListener('change',()=>{selectedMonth=Number(month.value)||0;draw();});
+month?.addEventListener('change',()=>{selectedMonth=Number(month.value)||0;if(selectedMonth&&season){season.value='all';selectedSeason='all';}draw();});
+season?.addEventListener('change',()=>{selectedSeason=season.value;if(selectedSeason!=='all'&&month){month.value='0';selectedMonth=0;}draw();});
 $('#habitatSelectClear')?.addEventListener('click',()=>{
- selectedId='all';selectedMonth=0;chooser.value='all';if(month)month.value='0';search.value='';zoomTo(1);draw();
+ selectedId='all';selectedMonth=0;selectedSeason='all';chooser.value='all';if(month)month.value='0';if(season)season.value='all';search.value='';zoomTo(1);draw();
 });
 $('#habitatPopupClose')?.addEventListener('click',hideTooltip);
 viewport.addEventListener('keydown',e=>{if(e.key==='Escape')hideTooltip();});
@@ -135,7 +139,7 @@ if(source)source.textContent=(data.generated?'Дата выборки: '+data.ge
 function focusSpecies(id){
  document.querySelector('nav [data-view="map"]')?.click();
  selectedId=byId.has(id)?id:'all';chooser.value=selectedId;search.value='';
- selectedMonth=0;if(month)month.value='0';draw();
+ selectedMonth=0;selectedSeason='all';if(month)month.value='0';if(season)season.value='all';draw();
  root.scrollIntoView({block:'start',behavior:'smooth'});
 }
 function exportCSV(){
