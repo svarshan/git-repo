@@ -36,8 +36,8 @@ test('7.1 Bird AI visible on home and checks live Electron inference',()=>{
 test('7.1 Windows EXEs leave 7.0 release untouched',()=>{
  const p=JSON.parse(read('package.json')),wf=read('../.github/workflows/ptitsy-nn-windows.yml');
  assert.equal(p.version,'7.1.0');
- assert.equal(p.build.portable.artifactName,'MoOLVa-7.1-Portable-\${arch}.exe');
- assert.equal(p.build.nsis.artifactName,'MoOLVa-7.1-Setup-\${arch}.exe');
+ assert.equal(p.build.portable.artifactName,'MoOLVa-7.1-Portable-${arch}.exe');
+ assert.equal(p.build.nsis.artifactName,'MoOLVa-7.1-Setup-${arch}.exe');
  assert.match(wf,/Ptitsy-NN-7\.1-Windows/);
  assert.match(wf,/gh release create \$tag/);
  assert.match(wf,/node --check app\/settlements\.js/);
