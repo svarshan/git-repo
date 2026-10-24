@@ -16,7 +16,7 @@ test('6.0 truly wires audio file decode to verified pretrained Perch model IPC',
  assert.match(main,/ipcMain\.handle\('birdai-analyze'/);
  assert.match(preload,/contextBridge\.exposeInMainWorld\('BirdAI'/);
  assert.match(script,/OfflineAudioContext\(1,160000,32000\)/);
- assert.match(script,/model\.analyze\(pcm\)/);
+ assert.match(script,/model\.analyze\(windows\[i\]\.pcm\)/);
  assert.match(script,/Модель не смогла выделить убедительные классы/);
  assert.match(main,/modelStatus\(\)/);
  new Function(script);new Function(read('app/compare6.js'));new Function(main);
@@ -29,7 +29,7 @@ test('real model and license assets are in the Windows build',()=>{
  assert.match(pkg.build.asarUnpack.join(','),/app\/models/);
  assert.match(workflow,/python -u scripts\/prepare_ai\.py/);
  assert.match(workflow,/node scripts\/test_ai\.cjs/);
- assert.match(workflow,/Ptitsy-NN-6\.0-Windows/);
+ assert.match(workflow,/Ptitsy-NN-7\.0-Windows/);
  const folder=path.join(ROOT,'app','models');
  const info=JSON.parse(fs.readFileSync(path.join(folder,'model-provenance.json'),'utf8'));
  const weights=path.join(folder,'perch-v2-eastern-europe.onnx');
