@@ -3,7 +3,7 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const fs=require('node:fs'),path=require('node:path'),vm=require('node:vm');
 const root=path.resolve(__dirname,'..');
 const read=p=>fs.readFileSync(path.join(root,p),'utf8');
-test('MoOLVa 5.0 wires seasonal map and authentic voice academy without live network calls',()=>{
+test('MoOLVa 6.0 wires seasonal map and authentic voice academy without live network calls',()=>{
  const html=read('app/index.html'),js=read('app/habitat-atlas.js'),academy=read('app/atlas5-extras.js');
  for(const id of ['habitatMonth','habitatStats','habitatSelection','habitatExport','academyAudioQuiz','academyAudioScore','atlas5Backup','atlas5Restore','atlas5BackupFile','atlas5BackupStatus']){
   assert.ok(html.includes('id="'+id+'"'),'Missing offline UI control: '+id);
@@ -41,7 +41,7 @@ test('seasonal API pipeline separates CC-licensed observations and coarse geogra
 });
 test('5.0 does not claim pretrained AI for real sounds or photos when no model is bundled',()=>{
  const p=JSON.parse(read('package.json')),html=read('app/index.html');
- assert.equal(p.version,'5.0.0');
+ assert.equal(p.version,'6.0.0');
  assert.match(p.build.nsis.artifactName,/5\.0/);
  assert.match(p.build.portable.artifactName,/5\.0/);
  assert.match(html,/Автоматического AI-распознавания/);
