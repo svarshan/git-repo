@@ -44,3 +44,16 @@ body.dialog-open{overflow:hidden}
 .voice-lab-review button:nth-child(2){background:var(--brick);color:#fff}
 .voice-lab-note{display:block;width:100%;margin-top:12px;border:1px solid var(--line);border-radius:8px;padding:12px;background:#fff}
 @media(max-width:810px){.voice-lab-layout{grid-template-columns:1fr}.voice-lab-list{max-height:210px}}
+
+/* MoOLVa 2.7 "Голоса ULTRA" — inline local import and live frequency spectrogram */
+.ultra-tracks{margin:15px 0 22px;padding:15px;background:#f1f8fa;border:1px solid #c8dfe6;border-radius:12px;min-width:0}
+.ultra-title{font-size:15px;font-weight:700;color:var(--blue);margin:0 0 10px}
+.ultra-choose{display:block;width:100%;max-width:100%;padding:10px;background:#fff;border:1px solid #bbd6df;border-radius:8px;color:var(--ink)}
+.ultra-spectrum{margin:12px 0}
+.ultra-canvas{display:block;width:100%;height:auto;max-height:165px;aspect-ratio:560/125;border:1px solid #41708a;border-radius:7px;background:#0a2233}
+.ultra-small{font-size:12px;line-height:1.45;color:var(--muted);overflow-wrap:anywhere}
+.ultra-import-label{display:flex;flex-wrap:wrap;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--blue)}
+.ultra-import-label input{max-width:100%;font-size:12px}
+.ultra-delete{border:1px solid #8e2a23!important;border-radius:7px;color:#8e2a23!important;padding:8px 12px;background:white!important;margin-top:8px}
+.ultra-tracks>audio{display:block;width:100%;margin:12px 0}
+@media(max-width:520px){.ultra-tracks{padding:10px}.ultra-import-label{display:block}.ultra-import-label input{display:block;margin:9px 0}}
