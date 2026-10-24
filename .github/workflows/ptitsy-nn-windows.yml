@@ -41,6 +41,7 @@ jobs:
           node --check app/voice-lab.js
           node --check app/ultra-audio.js
           node --check app/field-assistant.js
+          node --check app/ui3.js
       - name: Restore validated offline catalog cache
         id: media-cache
         uses: actions/cache@v4
@@ -143,7 +144,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-2.9-Windows
+          name: Ptitsy-NN-3.0-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json
