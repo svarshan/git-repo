@@ -116,7 +116,7 @@ jobs:
           Write-Host "Voices MAX: xeno-canto key configured $($r.maxVoices.xenoApiKeyConfigured) / new sources $($r.maxVoices.newSources)"
           Write-Host "Voices ULTRA: total sound tracks $($r.audioTracksTotal) | additional tracks $($r.extraAudioTracks) | multi-track species $($r.multiTrackSpecies)"
       - name: Try improving genuine voice coverage in validated cached catalog
-        if: steps.existing-catalog.outputs.ready == 'true'
+        if: steps.existing-catalog.outputs.ready == 'true' && github.event_name == 'workflow_dispatch'
         timeout-minutes: 5
         run: |
           python -u scripts/voice_max.py
@@ -130,6 +130,9 @@ jobs:
       - name: Prepare offline map of Nizhny Novgorod Oblast and coarsened sightings
         timeout-minutes: 12
         run: python -u scripts/make_habitat.py
+      - name: Fetch and SHA256 validate real Apache-2.0 Perch v2 regional ONNX model
+        timeout-minutes: 14
+        run: python -u scripts/prepare_ai.py
       - name: Verify generated JS and catalog
         run: |
           node --check app/app.js
@@ -155,9 +158,6 @@ jobs:
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
           key: ptitsy-nn-media-v10-${{ runner.os }}-${{ github.sha }}
-      - name: Fetch and SHA256 validate real Apache-2.0 Perch v2 regional ONNX model
-        timeout-minutes: 14
-        run: python -u scripts/prepare_ai.py
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
