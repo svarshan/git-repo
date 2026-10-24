@@ -60,7 +60,7 @@
     },
     "publish": null,
     "asarUnpack": [
-      "app/models/*.onnx",
+      "app/models/**/*",
       "node_modules/onnxruntime-node/**/*"
     ]
   },
