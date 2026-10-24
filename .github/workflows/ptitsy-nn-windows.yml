@@ -117,7 +117,7 @@ jobs:
           Write-Host "Voices ULTRA: total sound tracks $($r.audioTracksTotal) | additional tracks $($r.extraAudioTracks) | multi-track species $($r.multiTrackSpecies)"
       - name: Try improving genuine voice coverage in validated cached catalog
         if: steps.existing-catalog.outputs.ready == 'true'
-        timeout-minutes: 9
+        timeout-minutes: 5
         run: |
           python -u scripts/voice_max.py
           python -u scripts/ultra_tracks.py
@@ -125,8 +125,8 @@ jobs:
           python scripts/verify_cache.py
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
-          BIRDS_MAX_BUDGET_SECONDS: '220'
-          BIRDS_ULTRA_BUDGET_SECONDS: '130'
+          BIRDS_MAX_BUDGET_SECONDS: '100'
+          BIRDS_ULTRA_BUDGET_SECONDS: '65'
       - name: Prepare offline map of Nizhny Novgorod Oblast and coarsened sightings
         timeout-minutes: 12
         run: python -u scripts/make_habitat.py
