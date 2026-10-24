@@ -62,7 +62,7 @@ function render(root,birds,openBird){
  const summary=make('p','field-summary','');
  const results=make('div','field-result');
  add(intro,controls,summary,results);root.appendChild(intro);
- const compare=make('section','field-card');
+ const compare=make('section','field-card');compare.id='field-compare';
  add(compare,make('h2','field-panel-title','Сравнение двух видов по доступным материалам'),
      make('p','field-muted','Выберите птиц из результатов поиска. Фотографии, описание и ссылки на первоисточники взяты из встроенного каталога.'));
  const selectrow=make('div','field-controls');
@@ -77,7 +77,7 @@ function render(root,birds,openBird){
  const compareGrid=make('div','field-compare');
  add(compare,selectrow,compareGrid);root.appendChild(compare);
  const last=make('section','field-card'),lastTitle=make('h2','field-panel-title','Недавно просмотренные птицы'),lastList=make('div','field-actions');
- add(last,lastTitle,lastList);root.appendChild(last);
+ last.id='field-recent';add(last,lastTitle,lastList);root.appendChild(last);
  function showLast(){
   lastList.replaceChildren();
   const entries=recent().map(id=>map.get(id)).filter(Boolean);
