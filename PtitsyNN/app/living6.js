@@ -1,110 +1,155 @@
 'use strict';
-/* MoOLVa 6.0: actual pretrained ONNX predictions, local 5 s PCM, 32 kHz.
-   No model -> no fake inference. Client receives only ranked model logits. */
+/* MoOLVa 7.0: Perch v2 ONNX real offline inference across up to 12 independent 5s windows.
+ * Recorded microphone audio stays in-memory on the device. No fabricated scores. */
 (function(){
 const $=s=>document.querySelector(s);
+const root=$('#birdAI');if(!root)return;
 const birds=Array.isArray(window.BIRDS_DATA)?window.BIRDS_DATA:[];
-const normalize=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').trim();
-const root=$('#birdAI');
-if(!root)return;
-const filePicker=$('#birdAIFile'),go=$('#birdAIRun'),status=$('#birdAIStatus'),
-      results=$('#birdAIResults'),preview=$('#birdAIPreview');
-let file=null,busy=false;
-const ct=(tag,text,cls)=>{const el=document.createElement(tag);if(text!=null)el.textContent=String(text);if(cls)el.className=cls;return el;};
+const filePicker=$('#birdAIFile'),run=$('#birdAIRun'),status=$('#birdAIStatus');
+const results=$('#birdAIResults'),preview=$('#birdAIPreview');
+const mic=$('#birdAIMic'),stop=$('#birdAIStop'),duration=$('#birdAIDuration'),recStatus=$('#birdAIRecordingStatus');
 const model=window.BirdAI;
-async function verifyModel(){
- if(!model){
-  status.textContent='Механизм локального распознавания доступен только в настольном EXE с установленным модулем Perch.';
-  go.disabled=true;return;
- }
+const norm=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/_/g,' ').trim();
+const node=(tag,text,cls)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined&&text!==null)el.textContent=String(text);return el;};
+let file=null,busy=false,recording=false,recorder=null,stream=null,finishTimer=null,startAt=0,previewUrl=null;
+let modelReady=false;
+const put=(text)=>{if(status)status.textContent=text;};
+const recordingText=t=>{if(recStatus)recStatus.textContent=t;};
+function disableButtons(){
+ if(run)run.disabled=busy||recording||!file||!modelReady;
+ if(mic)mic.disabled=busy||recording||!model;
+ if(stop)stop.disabled=!recording;
+}
+function birdFor(label){
+ const t=norm(label);
+ return birds.find(b=>t===norm(b.latin)||t.startsWith(norm(b.latin)+' ')||t.includes(' '+norm(b.latin)+' '))||null;
+}
+async function verify(){
+ if(!model){put('Perch v2 доступен только в Windows EXE с установленным ONNX-модулем.');modelReady=false;disableButtons();return;}
  try{
-  const s=await model.status();
-  status.textContent=s.description+' · '+s.engine+' · лицензия '+s.license;
-  go.disabled=!s.available;
- }catch(e){
-  status.textContent='Сервис локальной модели недоступен: '+e.message;
-  go.disabled=true;
+  const s=await model.status();modelReady=Boolean(s.available);
+  put(s.description+' · '+s.engine+' · лицензия '+s.license);
+ }catch(e){modelReady=false;put('Не удаётся проверить Perch v2: '+(e.message||String(e)));}
+ disableButtons();
+}
+function setFile(next,fromMic){
+ if(busy)return;
+ file=next;results?.replaceChildren();preview?.replaceChildren();
+ if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}
+ if(!next){disableButtons();return;}
+ if(next.size>32*1024*1024){file=null;put('Максимальный размер записи 32 МБ.');disableButtons();return;}
+ if(!fromMic && !/\.(wav|mp3|ogg|flac|webm)$/i.test(next.name)){
+  file=null;put('Поддерживаются WAV, MP3, OGG и FLAC.');disableButtons();return;
  }
+ preview?.append(node('p',next.name+' · '+(next.size/1048576).toFixed(1)+' МиБ · данные останутся на компьютере','living-note'));
+ previewUrl=URL.createObjectURL(next);
+ const audio=node('audio');audio.controls=true;audio.preload='none';audio.src=previewUrl;preview?.append(audio);
+ disableButtons();verify();
 }
-function matchBird(label){
- const text=normalize(label).replace(/_/g,' ');
- const latin=birds.find(b=>text===normalize(b.latin)||text.includes(normalize(b.latin))||normalize(b.latin).includes(text));
- return latin||null;
+filePicker?.addEventListener('change',()=>setFile(filePicker.files?.[0]||null,false));
+function cleanUpRecorder(){
+ if(finishTimer){clearTimeout(finishTimer);finishTimer=null;}
+ stream?.getTracks()?.forEach(t=>t.stop());stream=null;recorder=null;recording=false;
+ disableButtons();
 }
-function render(output){
- results.replaceChildren();
- const caption=ct('p',output.model+'. '+output.caveat,'living-note');results.appendChild(caption);
- for(const row of (output.results||[]).slice(0,7)){
-  const b=matchBird(row.label),card=ct('article',null,'ai6-result');
-  const score=Number(row.score)||0;
-  const header=ct('strong',b?b.name:row.label);
-  card.appendChild(header);
-  card.appendChild(ct('small',(b?b.latin+' · ':'')+
-    'Относительная оценка модели: '+score.toFixed(2)+'%. Не подтверждённая вероятность.'));
-  if(b){
-   const photo=b.imageFile?ct('img',null):null;
-   if(photo){photo.src=b.imageFile;photo.alt='Фото '+b.name;photo.loading='lazy';card.insertBefore(photo,card.firstChild);}
-   const link=ct('button','Открыть паспорт птицы','living-button');
-   link.type='button';link.dataset.open=b.id;card.appendChild(link);
-  }else card.appendChild(ct('p','Класс отсутствует в региональном справочнике MoOLVa.','living-note'));
-  results.appendChild(card);
- }
- if(!output.results?.length)results.appendChild(ct('p','Нейросеть не выдала классов. Попробуйте другую запись.'));
+async function microphoneStart(){
+ if(recording||busy||!model)return;
+ if(!navigator.mediaDevices?.getUserMedia||!window.MediaRecorder){recordingText('Микрофон или MediaRecorder недоступен на этом компьютере.');return;}
+ try{
+  await model.enableMicrophone();
+  const newStream=await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:false,noiseSuppression:false,autoGainControl:false},video:false});
+  stream=newStream;
+  const preferred=['audio/webm;codecs=opus','audio/webm','audio/ogg;codecs=opus'].find(t=>MediaRecorder.isTypeSupported(t));
+  const r=new MediaRecorder(stream,preferred?{mimeType:preferred}:undefined),parts=[];
+  recorder=r;
+  r.ondataavailable=ev=>{if(ev.data?.size)parts.push(ev.data);};
+  r.onerror=()=>{recordingText('Ошибка записи микрофона');cleanUpRecorder();};
+  r.onstop=()=>{
+   const type=r.mimeType||parts[0]?.type||'audio/webm';
+   const output=new File(parts,['bird-recording-'+new Date().toISOString().replace(/[:.]/g,'-')+'.webm'].join(''),{type});
+   cleanUpRecorder();
+   recordingText('Запись завершена: '+Math.round((Date.now()-startAt)/1000)+' с.');
+   if(output.size)setFile(output,true);else put('Микрофон не записал звук.');
+  };
+  startAt=Date.now();recording=true;r.start(500);disableButtons();
+  recordingText('Идёт запись; остановите её кнопкой. Микрофон активен.');
+  finishTimer=setTimeout(()=>microphoneStop(),(Number(duration?.value)||30)*1000);
+ }catch(e){cleanUpRecorder();recordingText('Нет доступа к микрофону: '+(e.message||String(e)));}
 }
-async function pcmFiveSeconds(blob){
+function microphoneStop(){
+ if(!recording||!recorder)return;
+ try{if(recorder.state!=='inactive')recorder.stop();else cleanUpRecorder();}
+ catch(e){recordingText('Не удалось завершить запись: '+(e.message||String(e)));cleanUpRecorder();}
+}
+mic?.addEventListener('click',microphoneStart);
+stop?.addEventListener('click',microphoneStop);
+window.addEventListener('beforeunload',()=>{if(recorder?.state==='recording')recorder.stop();cleanUpRecorder();if(previewUrl)URL.revokeObjectURL(previewUrl);});
+async function windowsFromFile(blob){
  const context=new (window.AudioContext||window.webkitAudioContext)();
  try{
   const buffer=await context.decodeAudioData(await blob.arrayBuffer());
-  if(buffer.duration<.75)throw Error('Запись должна длиться не менее 0,75 секунды.');
-  const sourceRate=buffer.sampleRate;
-  const maxLength=Math.min(buffer.length,sourceRate*40);
-  const samples=buffer.getChannelData(0);
-  // Choose a loud non-silent 5-second region, not always the start of the file.
-  const windowLength=Math.min(maxLength,Math.floor(sourceRate*5));
-  let bestOffset=0,best=-1;
-  for(let from=0;from+windowLength<=maxLength;from+=Math.max(1,Math.floor(sourceRate*1.5))){
+  if(buffer.duration<.75)throw Error('Запись короче 0,75 секунды.');
+  const durationSeconds=Math.min(600,buffer.duration);
+  // Cover the entire first 10 minutes with at most 12 sampled 5-second windows.
+  const segment=5;
+  const count=Math.max(1,Math.min(12,Math.ceil(durationSeconds/segment)));
+  const range=Math.max(0,durationSeconds-segment);
+  const offsets=Array.from({length:count},(_,i)=>count===1?0:Math.round((range*i/(count-1))*1000)/1000);
+  const windows=[];
+  for(const offset of offsets){
+   const offline=new OfflineAudioContext(1,160000,32000),src=offline.createBufferSource();
+   src.buffer=buffer;src.connect(offline.destination);
+   src.start(0,offset,Math.max(.001,Math.min(segment,buffer.duration-offset)));
+   const raw=(await offline.startRendering()).getChannelData(0);
    let energy=0;
-   for(let i=from;i<from+windowLength;i+=Math.max(1,Math.round(sourceRate/600))){
-    const v=samples[i];energy+=v*v;
-   }
-   if(energy>best){best=energy;bestOffset=from;}
+   for(let i=0;i<raw.length;i+=320)energy+=raw[i]*raw[i];
+   if(energy/500<.0000001)continue;
+   windows.push({offset,pcm:new Float32Array(raw)});
   }
-  if(best<=1e-5)throw Error('Запись слишком тихая для распознавания.');
-  const offline=new OfflineAudioContext(1,160000,32000);
-  const src=offline.createBufferSource();src.buffer=buffer;src.connect(offline.destination);
-  src.start(0,bestOffset/sourceRate,Math.min(5,buffer.duration-bestOffset/sourceRate));
-  const rendered=await offline.startRendering();
-  const raw=rendered.getChannelData(0);
-  const copy=new Float32Array(160000);
-  copy.set(raw.subarray(0,Math.min(raw.length,copy.length)));
-  return copy;
+  if(!windows.length)throw Error('В записи не найдено достаточно слышимого сигнала.');
+  return {windows,totalSeconds:buffer.duration,truncated:buffer.duration>600};
  }finally{await context.close();}
 }
-filePicker?.addEventListener('change',()=>{
- file=filePicker.files?.[0]||null;results.replaceChildren();
- preview.replaceChildren();
- if(!file)return;
- if(!['audio/wav','audio/x-wav','audio/mpeg','audio/ogg','audio/mp3','audio/flac'].includes(file.type) &&
-    !/\.(wav|mp3|ogg|flac)$/i.test(file.name)){
-  status.textContent='Нужен WAV, MP3, OGG или FLAC. Формат должен декодироваться в Windows.';file=null;return;
+function showAnalysis(data,meta){
+ results.replaceChildren();
+ results.append(node('p','Google Perch v2 · проанализировано '+meta.windows+' фрагментов по 5 с. '+(meta.truncated?'Проанализированы первые 10 минут. ':'')+'Оценки относительны только внутри региональной модели; не являются доказанными вероятностями.','living-note'));
+ for(const prediction of data.slice(0,8)){
+  const bird=birdFor(prediction.label),card=node('article',null,'ai6-result');
+  if(bird?.imageFile){const img=node('img');img.loading='lazy';img.src=bird.imageFile;img.alt='Птица '+bird.name;card.append(img);}
+  card.append(node('strong',bird?.name||prediction.label));
+  card.append(node('small',(bird?.latin?bird.latin+' · ':'')+'Средняя относительная оценка: '+prediction.score.toFixed(2)+'%; окна: '+prediction.hits+' из '+meta.windows));
+  if(bird){
+   const row=node('div',null,'ai7-actions');
+   const passport=node('button','Открыть паспорт','living-button');passport.type='button';passport.dataset.open=bird.id;
+   const map=node('button','На карте','living-button');map.type='button';
+   map.addEventListener('click',()=>window.BirdHabitat?.focusSpecies(bird.id));
+   row.append(passport,map);card.append(row);
+  }else card.append(node('small','Название не сопоставлено с региональным каталогом.','living-note'));
+  results.append(card);
  }
- if(file.size>32_000_000){status.textContent='Максимальный размер файла 32 МБ.';file=null;return;}
- const p=ct('p',file.name+' · '+(file.size/1_000_000).toFixed(1)+' МБ. Запись будет обработана локально.','living-note');
- preview.appendChild(p);
- verifyModel();
-});
-go?.addEventListener('click',async()=>{
- if(!file||busy||!model)return;
- busy=true;go.disabled=true;results.replaceChildren();
- status.textContent='Готовлю звуковой фрагмент (5 секунд, 32 кГц), затем запускаю локальную модель…';
+ if(!data.length)results.append(node('p','Модель не смогла выделить убедительные классы из записи.','living-note'));
+}
+async function analyse(){
+ if(busy||recording||!file||!modelReady)return;
+ busy=true;disableButtons();results.replaceChildren();put('Декодирую аудио на компьютере…');
  try{
-  const pcm=await pcmFiveSeconds(file);
-  const output=await model.analyze(pcm);
-  render(output);
-  status.textContent='Анализ завершён на компьютере. Проверяйте совпадение по фотографиям и голосам.';
- }catch(e){
-  status.textContent='Модель не смогла обработать файл: '+(e.message||String(e))+'. Результаты не подменяются догадками.';
- }finally{busy=false;go.disabled=false;}
-});
-verifyModel();
+  const {windows,totalSeconds,truncated}=await windowsFromFile(file),combined=new Map();
+  for(let i=0;i<windows.length;i++){
+   put('Google Perch v2 · анализ '+(i+1)+' из '+windows.length+' (около '+windows[i].offset.toFixed(1)+' с записи)…');
+   const response=await model.analyze(windows[i].pcm);
+   for(const x of response.results||[]){
+    if(!Number.isFinite(x.score)||typeof x.label!=='string')continue;
+    const prev=combined.get(x.label)||{sum:0,hits:0};
+    prev.sum+=x.score;prev.hits++;combined.set(x.label,prev);
+   }
+  }
+  const predictions=[...combined].map(([label,p])=>({label,score:p.sum/windows.length,hits:p.hits}))
+   .sort((a,b)=>b.score-a.score).slice(0,8);
+  showAnalysis(predictions,{windows:windows.length,totalSeconds,truncated});
+  put('Локальное распознавание завершено. Сверяйте результаты с фотографиями, голосами и картой.');
+ }catch(e){put('Не удалось распознать запись: '+(e.message||String(e))+'. Результаты не подменяются догадками.');}
+ finally{busy=false;disableButtons();}
+}
+run?.addEventListener('click',analyse);
+verify();
 })();

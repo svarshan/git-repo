@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "6.3.1",
+  "version": "7.0.0",
   "private": true,
-  "description": "MoOLVa 6.3.1 Restored Living Encyclopedia — offline regional bird map and real local Perch v2 ONNX identification",
+  "description": "MoOLVa 7.0 Field Atlas PRO — licensed offline regional bird map and true Perch v2 neural sound identification",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -53,10 +53,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-6.3.1-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-7.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-6.3.1-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-7.0-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [
