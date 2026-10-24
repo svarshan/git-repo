@@ -18,7 +18,7 @@ test('4.0 is an offline regional habitat atlas, not a personal observation map',
 });
 test('habitat GIS pipeline uses sourced map and filters uncertain, sensitive, out-of-region samples',()=>{
  const py=read('scripts/make_habitat.py');
- for(const token of ['gbif.org','wikimedia','stateProvince','gadm','coordinateUncertaintyInMeters','informationWithheld','dataGeneralizations','GRID_LAT','GRID_LON','n<3','len(years','sampledRecords','hasGeospatialIssue','license']){
+ for(const token of ['gbif.org','wikimedia','stateProvince','gadm','coordinateUncertaintyInMeters','informationWithheld','dataGeneralizations','GRID_LAT','GRID_LON','n<3','len(dates','sampledRecords','hasGeospatialIssue','license']){
   assert.ok(py.includes(token),'Missing data safety gate: '+token);
  }
  const map=path.join(ROOT,'app','nn-oblast-map.svg'),data=path.join(ROOT,'app','habitat-data.js');
