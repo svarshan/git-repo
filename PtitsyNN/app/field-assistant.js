@@ -96,6 +96,7 @@ function render(root,birds,openBird){
    add(panel,photo,make('h3','field-panel-title',b.name),make('p','field-muted',b.latin+' · '+(b.group||'Прочие птицы')),
     make('p','field-muted',b.audioFile?'Есть настоящая звуковая запись':'Звуковая запись отсутствует'),
     make('p','field-muted',(b.description||'Подробных сведений пока нет.').slice(0,550)+(String(b.description||'').length>550?'…':'')));
+   panel.appendChild(window.BirdMaterialFlags?.node(b)||make('p','field-muted','Материалы в карточке'));
    const button=make('button','primary','Открыть карточку');button.type='button';button.addEventListener('click',()=>openBird(b.id));panel.appendChild(button);
    compareGrid.appendChild(panel);
   }
@@ -120,7 +121,9 @@ function render(root,birds,openBird){
    pickR.addEventListener('click',()=>{right.value=b.id;drawCompare();compare.scrollIntoView({behavior:'smooth',block:'start'});});
    add(actions,open,pickL,pickR);
    if(b.imageFile){const photo=make('div','field-photo'),img=make('img');img.src=b.imageFile;img.loading='lazy';img.alt=b.name;photo.appendChild(img);card.appendChild(photo);}
-   add(card,heading,latin,actions);results.appendChild(card);
+   add(card,heading,latin);
+   if(window.BirdMaterialFlags){card.appendChild(window.BirdMaterialFlags.node(b));card.appendChild(make('p','materials-summary',window.BirdMaterialFlags.excerpt(b,105)));}
+   card.appendChild(actions);results.appendChild(card);
   }
  }
  left.value=birds[0]?.id||'';right.value=birds[1]?.id||left.value;
