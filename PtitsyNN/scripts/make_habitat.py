@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MoOLVa 4.0. Bundle a real region map and responsibly coarsened GBIF observation cells.
+"""MoOLVa 5.0. Bundle a real region map and responsibly coarsened GBIF observation cells.
 
 No personal journal positions. Observations are not predictions and never expose raw
 coordinates or observation identifiers. GBIF search is a bounded sample, not a census.
@@ -16,12 +16,12 @@ import requests
 
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "app"
-HEADERS = {"User-Agent": "MoOLVaBirdAtlas/4.0 (desktop offline research map; source: gbif.org)"}
+HEADERS = {"User-Agent": "MoOLVaBirdAtlas/5.0 (desktop offline research map; source: gbif.org)"}
 # Wikimedia authored georeferenced map, lat/long edges from source page.
 MAP_URL = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Nizhny_Novgorod_Oblast_(location_map).svg"
 MAP_SOURCE = "https://commons.wikimedia.org/wiki/File:Nizhny_Novgorod_Oblast_(location_map).svg"
 GEO = dict(north=58.19, south=54.35, west=41.60, east=47.96)
-MAX_PAGES = 15
+MAX_PAGES = 24
 LIMIT = 300
 GRID_LAT = 0.3
 GRID_LON = 0.5
@@ -93,6 +93,8 @@ def scan():
     years = collections.defaultdict(set)
     dates = collections.defaultdict(set)
     labels = {}
+    monthly = collections.defaultdict(collections.Counter)
+    monthly_dates = collections.defaultdict(lambda: collections.defaultdict(set))
     queried=0
     accepted=0
     rejected=collections.Counter()
@@ -166,7 +168,12 @@ def scan():
             key=(row,col,b_id)
             counts[key]+=1
             years[key].add(yr)
-            dates[key].add(str(r.get("eventDate") or str(yr))[:10])
+            date_label = str(r.get("eventDate") or str(yr))[:10]
+            dates[key].add(date_label)
+            month = r.get("month")
+            if isinstance(month,int) and 1 <= month <= 12:
+                monthly[key][month] += 1
+                monthly_dates[key][month].add(date_label)
             labels[b_id]=latin
             accepted+=1
         print(f"GBIF page {page+1}: scanned {queried}; accepted {accepted}; last page {len(records)}")
@@ -180,7 +187,11 @@ def scan():
     for (row,col,b_id),n in counts.items():
         if n<3 or len(dates[(row,col,b_id)])<2:
             continue
-        by_cell[(row,col)].append(dict(id=b_id, n=n, fromYear=min(years[(row,col,b_id)]), toYear=max(years[(row,col,b_id)])))
+        # Display months only with >=3 records across multiple days per coarse cell.
+        shown_months = sorted(m for m, count in monthly[(row,col,b_id)].items()
+                              if count >= 3 and len(monthly_dates[(row,col,b_id)][m]) >= 2)
+        by_cell[(row,col)].append(dict(id=b_id, n=n, fromYear=min(years[(row,col,b_id)]),
+                                        toYear=max(years[(row,col,b_id)]), months=shown_months))
     cells=[]
     for (row,col),species in by_cell.items():
         # Grid-centre coordinates rather than occurrence positions (coarse roughly 30 km).
@@ -199,6 +210,7 @@ def scan():
         geographicLicenseUrl="https://creativecommons.org/licenses/by-sa/4.0/",
         bounds=GEO, gridSize=dict(latitudeDegrees=GRID_LAT,longitudeDegrees=GRID_LON),
         sampledRecords=queried, matchingRecords=accepted, cells=cells[:140],
+        monthEvidenceMinRecords=3, monthEvidenceMinDays=2, geographicProjection="equirectangular",
         filteredCells=len(cells), speciesWithCells=len({s["id"] for c in cells for s in c["species"]}),
         note="Ограниченная выборка открытых наблюдений, сгруппированная в крупные зоны; не карта гнёзд, не точное место и не прогноз.",
         rejections=dict(rejected),
