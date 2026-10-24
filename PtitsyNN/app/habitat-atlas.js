@@ -21,7 +21,7 @@ function index(){
  for(const c of cells)for(const s of c.species||[])if(byId.has(s.id))featured.add(s.id);
  const option=(value,label)=>{const e=document.createElement('option');e.value=value;e.textContent=label;return e;};
  chooser.replaceChildren(option('all','Все птицы с опубликованными наблюдениями'),
- ...[...featured].sort((a,b)=>(byId.get(a)?.name||'').localeCompare(byId.get(b)?.name||'','ru')).map(id=>option(id,byId.get(id).name)));
+ ...birds.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru')).map(b=>option(b.id,b.name+(featured.has(b.id)?'':' — нет подтверждённых зон'))));
 }
 function species(c){return (c.species||[]).filter(s=>byId.has(s.id)&&(selectedId==='all'||s.id===selectedId));}
 function coords(c){
