@@ -28,6 +28,7 @@ test('habitat GIS pipeline uses sourced map and filters uncertain, sensitive, ou
  const box={window:{}};vm.runInNewContext(read('app/habitat-data.js'),box);
  const record=box.window.HABITAT_DATA;
  assert.ok(Array.isArray(record.cells));
+ assert.ok(record.cells.length>0, "Do not release a map with zero verified bird encounter zones");
  assert.ok(record.bounds && record.source);
  assert.ok(record.sampledRecords>=0);
  for(const c of record.cells){
