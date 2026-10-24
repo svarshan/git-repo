@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "3.0.0",
+  "version": "4.0.0",
   "private": true,
-  "description": "Offline bird encyclopedia of Nizhny Novgorod Oblast",
+  "description": "MoOLVa 4.0 offline living nature and Nizhny Novgorod bird habitat atlas",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -52,10 +52,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "Ptitsy-NN-3.0-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-4.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "Ptitsy-NN-3.0-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-4.0-Portable-${arch}.exe"
     },
     "publish": null
   }
