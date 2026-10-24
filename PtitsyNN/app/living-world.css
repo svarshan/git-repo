@@ -77,3 +77,24 @@
 .atlas7-launch{display:flex;flex-wrap:wrap;gap:10px;margin:15px 0 5px}
 .atlas7-launch button{border:1px solid #6ac3df;border-radius:10px;background:#0d3a50e9;color:#f0faff;padding:10px 14px;font:600 13px 'Segoe UI',sans-serif;cursor:pointer;box-shadow:0 4px 13px #00172ba8}
 .atlas7-launch button:hover,.atlas7-launch button:focus-visible{background:#196584;outline:2px solid #93eaff;outline-offset:2px}
+
+/* 7.2 Map ULTRA: full offline OpenStreetMap-derived SVG layers. */
+.habitat-map-image{filter:brightness(.96) saturate(1.14)}
+.habitat-ultra-geography{position:absolute;inset:0;display:block;width:100%;height:100%;pointer-events:none;z-index:2;overflow:hidden}
+.ultra-shape{vector-effect:non-scaling-stroke;stroke-linecap:round;stroke-linejoin:round}
+.ultra-forests{fill:#2a634e;fill-opacity:.37;stroke:#398367;stroke-opacity:.27;stroke-width:.35}
+.ultra-lakes{fill:#237d9f;fill-opacity:.74;stroke:#88d8e7;stroke-opacity:.6;stroke-width:.6}
+.ultra-rivers{fill:none;stroke:#69c7e6;stroke-width:.8;stroke-opacity:.55}
+.ultra-rivers-1{stroke-width:2.1;stroke-opacity:.88}
+.ultra-roads{fill:none;stroke:#aa9f83;stroke-opacity:.56;stroke-width:.55}
+.ultra-roads-1{stroke:#ffce70;stroke-opacity:.94;stroke-width:2.4}
+.ultra-roads-2{stroke:#f3d29f;stroke-opacity:.88;stroke-width:1.65}
+.ultra-roads-3{stroke:#d7b889;stroke-opacity:.8;stroke-width:1.2}
+.ultra-roads-4{stroke:#9aafaf;stroke-opacity:.72;stroke-width:.75}
+.ultra-roads-5{stroke:#889da9;stroke-opacity:.4;stroke-width:.4}
+.ultra-shape[hidden]{display:none!important}
+.ultra-map-layers{display:flex;gap:8px;flex-wrap:wrap;margin:7px 0 10px;padding:10px;border:1px solid #426985;border-radius:9px;background:#081f33}
+.ultra-map-layers label{display:inline-flex;align-items:center;gap:5px;color:#e0f4fc;font:600 11px/1.35 "Segoe UI",sans-serif;background:#12374e;border:1px solid #315a75;border-radius:7px;padding:5px 8px;cursor:pointer}
+.ultra-map-layers input{accent-color:#2bc4df}
+.habitat-town-layer{z-index:5}.habitat-pin-layer{z-index:6}
+@media(max-width:700px){.ultra-map-layers{gap:4px;padding:6px}.ultra-map-layers label{font-size:10px;padding:4px 6px}}
