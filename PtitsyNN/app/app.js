@@ -44,14 +44,30 @@ const atlasCells=(window.HABITAT_DATA?.cells||[]).filter(c=>(c.species||[]).some
 const observedMonths=[...new Set(atlasCells.flatMap(c=>(c.species||[]).filter(x=>x.id===b.id).flatMap(x=>x.months||[])))].sort((a,b)=>a-b);
 const monthNames=['янв.','фев.','мар.','апр.','май','июн.','июл.','авг.','сен.','окт.','ноя.','дек.'];
 const monthsLabel=observedMonths.length?observedMonths.map(m=>monthNames[m-1]).join(', '):'подтверждённых месячных данных пока нет';
-const passport='<section class="passport5"><h3>Паспорт вида · Большой атлас природы</h3><div class="passport5-grid">'+
- '<div><b>Голос птицы</b><span>'+(b.audioFile?'Лицензированная запись есть':'Запись пока не найдена')+'</span></div>'+
+const articleParagraphs=String(b.description||'').split(/\n\s*\n|(?<=[.!?])\s+(?=[А-ЯЁA-Z])/).filter(x=>x.trim().length>20);
+const encyclopediaTopics=[
+ ['Питание',/(питан|корм|добыч|поедает|питается|feeds on|diet)/i],
+ ['Местообитание',/(лес|луг|болот|водо.м|побереж|обитает|встречается|habitat|forests|wetland)/i],
+ ['Размножение',/(гнезд|яйц|птенц|кладк|размнож|breeding|nest|egg)/i],
+ ['Внешний вид',/(окраск|клюв|длин. тела|оперен|самц|самк|plumage|bill|wing)/i]
+];
+const paragraphsSeen=new Set();
+const topicCards=encyclopediaTopics.map(([heading,regex])=>{
+ const paragraph=articleParagraphs.find(x=>regex.test(x)&&!paragraphsSeen.has(x));
+ if(!paragraph)return '<section><h4>'+heading+'</h4><p>Отдельные подтверждённые сведения пока не выделены.</p></section>';
+ paragraphsSeen.add(paragraph);
+ const excerpt=paragraph.trim().slice(0,420);
+ return '<section><h4>'+heading+'</h4><p>'+esc(excerpt)+(paragraph.length>420?'…':'')+'</p></section>';
+}).join('');
+const verifiedCallCount=(b.audioFile?1:0)+(Array.isArray(b.audioTracks)?b.audioTracks.filter(x=>x?.path&&x?.credit).length:0);
+const passport='<section class="passport5"><h3>Паспорт вида · Живая энциклопедия 6.0</h3><div class="passport5-grid">'+
+ '<div><b>Голос птицы</b><span>'+(verifiedCallCount?('Лицензированных записей: '+verifiedCallCount):'Запись пока не найдена')+'</span></div>'+
  '<div><b>Озвучка статьи</b><span>Системный TTS Windows (если есть голос)</span></div>'+
  '<div><b>Описание</b><span>'+(b.articleComplete?'Расширенная статья':'Краткая справка')+'</span></div>'+
  '<div><b>Фотография</b><span>'+(b.imageFile?'Проверенное офлайн-фото':'Нет проверенного фото')+'</span></div>'+
  '<div><b>Районы наблюдений</b><span>'+atlasCells.length+' обобщённых зон</span></div>'+
  '<div><b>Месяцы</b><span>'+esc(monthsLabel)+'</span></div>'+
- '</div><p class="living-note">Исторические записи GBIF не предсказывают, где находится птица сегодня. Пустая карта не доказывает её отсутствия.</p></section>';
+ '</div><div class="passport6-topics">'+topicCards+'</div><p class="living-note">Исторические записи GBIF не предсказывают, где находится птица сегодня. Пустая карта не доказывает её отсутствия.</p></section>';
 const english=b.descriptionLanguage==='en';const articleNote=english?'Подробная статья найдена на английском языке. Ниже оригинальный текст, без машинного перевода.':b.articleComplete?'Текст статьи из русской Википедии.':'Для этого вида пока доступна только краткая проверенная справка.';d.innerHTML='<div class="detailphoto">'+image(b)+'</div><div class="dialogbody"><h2>'+esc(b.name)+'</h2><div class="latin">'+esc(b.latin)+' · '+esc(b.group||'')+'</div><div class="controls"><button id="compareFrom" type="button">⇄ Сравнить голоса</button><button id="quickObserve" type="button">+ Записать наблюдение</button><button id="birdHabitat" type="button">⌖ Где можно встретить на карте</button><button id="compareSpecies6" type="button">⇄ Сравнить с другой птицей</button><button id="read">▶ Озвучить описание</button><button id="stop">■ Стоп</button><button id="dialogFav">'+(favs.has(id)?'♥ Убрать из избранного':'♡ Сохранить')+'</button></div>'+passport+'<div id="birdAudioPro"></div><h3>Описание</h3><p class="article-note">'+esc(articleNote)+'</p><div lang="'+(english?'en':'ru')+'">'+esc(b.description||'Подробное описание ещё не найдено.').split(/\n{2,}/).map(x=>'<p>'+x.replace(/\n/g,' ')+'</p>').join('')+'</div><h3>Региональный перечень</h3><p>Вид включён в опубликованный систематический список птиц Нижегородской области. Характер пребывания в конкретном районе и актуальный охранный статус требуют отдельной проверки.</p><section class="credits"><h3>Источники, авторы и лицензии</h3>'+source(b,'imageCredits','Фотография')+source(b,'audioCredits','Звукозапись')+(b.descriptionSource?'<p><b>Описание:</b> <a target="_blank" rel="noreferrer" href="'+esc(b.descriptionSource)+'">'+(english?'Английская':'Русская')+' Википедия ↗</a>, авторы — участники Википедии, CC BY-SA 4.0. Фрагмент сокращён. <a target="_blank" rel="noreferrer" href="https://creativecommons.org/licenses/by-sa/4.0/">Лицензия ↗</a>.</p>':'<p>Описание: краткая редакционная карточка либо ожидается источник.</p>')+'<p><a href="https://www.oiseaux.net/en/oiseaux/russia/famille.nizhegorodskaya.oblast.html" target="_blank" rel="noreferrer">Публикация регионального перечня ↗</a></p></section></div>';
 showDialog();window.BirdAudioPro?.mountCard($('#birdAudioPro'),b);$('#compareFrom')?.addEventListener('click',()=>{close();switchPage('compare');window.BirdAudioPro?.mountCompare($('#compareContent'),birds,b.id);});$('#quickObserve')?.addEventListener('click',()=>openForm(null,b.id));$('#birdHabitat')?.addEventListener('click',()=>{close();window.BirdHabitat?.focusSpecies(b.id);});$('#compareSpecies6')?.addEventListener('click',()=>{close();window.MoOLVaCompare6?.selectSpecies(b.id);});$('#read').addEventListener('click',()=>speak(b));$('#stop').addEventListener('click',stop);$('#dialogFav').addEventListener('click',()=>{fav(id);$('#dialogFav').textContent=favs.has(id)?'♥ Убрать из избранного':'♡ Сохранить';});}
 function openForm(existingId=null,preferredBird=null){
