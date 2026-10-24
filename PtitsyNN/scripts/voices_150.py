@@ -13,6 +13,7 @@ import hashlib
 import json
 import os
 import re
+import shutil
 import subprocess
 import tempfile
 import time
@@ -207,7 +208,7 @@ def main():
         if time.monotonic()>=deadline or started+acquired>=TARGET:break
         bird=birds[idx]
         # ~45 requests/minute: below the published <=60/min recommendation.
-        if queries:time.sleep(.95)
+        if queries:time.sleep(1.15)
         queries+=1
         for candidate in query(bird,session,deadline):
             if time.monotonic()>=deadline:break
@@ -224,7 +225,7 @@ def main():
                     if digest in originals:
                         rejected+=1;continue
                     # No existing licensed audio is replaced; only a missing species gets a new file.
-                    os.replace(out,target)
+                    shutil.copy2(out,target)
                     originals.add(digest)
                     credit={k:v for k,v in candidate.items() if k!='url'}
                     credit['audioQuality']=quality
