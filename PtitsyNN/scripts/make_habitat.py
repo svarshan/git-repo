@@ -94,6 +94,9 @@ def scan():
         if not isinstance(records,list):
             raise RuntimeError("Malformed GBIF occurrence data")
         queried+=len(records)
+        if page == 0 and records:
+            a=records[0]
+            print("GBIF first record fields:",{k:a.get(k) for k in ("species","scientificName","stateProvince","gadm","license","year","coordinateUncertaintyInMeters","issues")})
         for r in records:
             if not valid_region(r):
                 rejected["outside_region_or_unverified_province"]+=1
@@ -144,6 +147,7 @@ def scan():
         if data.get("endOfRecords") or len(records)<LIMIT:
             break
 
+    print("GBIF filtering diagnostics:", dict(rejected))
     # Mask unusual or one-off points; never ship individual source coordinates.
     by_cell=collections.defaultdict(list)
     for (row,col,b_id),n in counts.items():
