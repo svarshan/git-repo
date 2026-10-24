@@ -1,6 +1,6 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "2.9.0",
+  "version": "3.0.0",
   "private": true,
   "description": "Offline bird encyclopedia of Nizhny Novgorod Oblast",
   "main": "main.cjs",
@@ -54,7 +54,7 @@
       "runAfterFinish": false
     },
     "portable": {
-      "artifactName": "Ptitsy-NN-2.9-Portable-${arch}.exe"
+      "artifactName": "Ptitsy-NN-3.0-Portable-${arch}.exe"
     },
     "publish": null
   }
