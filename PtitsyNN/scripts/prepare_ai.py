@@ -75,6 +75,17 @@ def main():
     rows=(OUT/"perch-v2-eastern-europe-labels.txt").read_text("utf-8-sig").splitlines()
     if not 400<=len(rows)<=3500:raise RuntimeError(f"Invalid model labels count {len(rows)}")
     if len(set(rows))<len(rows)*0.8:raise RuntimeError("Labels appear corrupt or duplicated")
+    license_response = S.get("https://www.apache.org/licenses/LICENSE-2.0.txt",timeout=35)
+    license_response.raise_for_status()
+    license_bytes = license_response.content
+    if not (5000 <= len(license_bytes) <= 25000 and b"Apache License" in license_bytes):
+        raise RuntimeError("Invalid Apache-2.0 license notice")
+    (OUT/"LICENSE-Apache-2.0.txt").write_bytes(license_bytes)
+    (OUT/"THIRD-PARTY-NOTICE.txt").write_text(
+        "Google Perch v2 by Google Research. ONNX conversion: justinchuby. "
+        "Regional model: tphakala / Perch-v2-Models. Labels: cgeorgiaw.\\n"
+        "Model weights licensed Apache-2.0. See LICENSE-Apache-2.0.txt.\\n"
+        "Source: https://huggingface.co/tphakala/Perch-v2-Models\\n",encoding="utf-8")
     (OUT/"model-provenance.json").write_text(json.dumps({
         "name":"Google Perch v2 eastern Europe ONNX", "origin":"Google Research / Perch",
         "conversion":"justinchuby / tphakala", "publisher":REPO,
