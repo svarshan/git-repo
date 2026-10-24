@@ -13,7 +13,16 @@ const groups=[...new Set(birds.map(b=>b.group).filter(Boolean))].sort((a,b)=>a.l
 $('#group').innerHTML+='<option value="other">Прочие виды</option>'+groups.map(g=>'<option value="'+esc(g)+'">'+esc(g)+'</option>').join('');
 function toast(t){const el=$('#notice');el.textContent=t;el.classList.add('show');clearTimeout(toast.h);toast.h=setTimeout(()=>el.classList.remove('show'),2800);}
 function image(b){return b.imageFile?'<img loading="lazy" alt="'+esc(b.name)+'" src="'+esc(b.imageFile)+'">':'<span class="missing">Проверенная фотография отсутствует</span>';}
-function birdCard(b){return '<article class="bird"><button type="button" class="photo" data-open="'+esc(b.id)+'">'+image(b)+(b.audioFile?'<span class="playmark">♪ Есть запись</span>':'')+'</button><div class="meta"><h3>'+esc(b.name)+'</h3><div class="latin">'+esc(b.latin)+'</div><div class="minor">'+esc(b.group||'Птицы области')+'</div><div class="actions"><button data-open="'+esc(b.id)+'">Подробнее →</button><button data-fav="'+esc(b.id)+'">'+(favs.has(b.id)?'♥ В избранном':'♡ Сохранить')+'</button></div></div></article>';}
+function birdCard(b){
+ const availability=window.BirdMaterialFlags?.markup(b)||'';
+ const description=window.BirdMaterialFlags?.excerpt(b,112)||'';
+ return '<article class="bird"><button type="button" class="photo" data-open="'+esc(b.id)+'">'+image(b)+(b.audioFile?'<span class="playmark">♪ Есть запись</span>':'')+'</button>'+
+ '<div class="meta"><h3>'+esc(b.name)+'</h3><div class="latin">'+esc(b.latin)+'</div>'+
+ '<div class="minor">'+esc(b.group||'Птицы области')+'</div>'+
+ availability+'<p class="materials-summary">'+esc(description)+'</p>'+
+ '<div class="actions"><button data-open="'+esc(b.id)+'">Подробнее →</button>'+
+ '<button data-fav="'+esc(b.id)+'">'+(favs.has(b.id)?'♥ В избранном':'♡ Сохранить')+'</button></div></div></article>';
+}
 function currentList(){const q=$('#search').value.toLocaleLowerCase('ru').replace(/ё/g,'е').trim(),g=$('#group').value,type=$('#only').value;return birds.filter(b=>{
 if(q&&!(b.name+' '+b.latin).toLocaleLowerCase('ru').replace(/ё/g,'е').includes(q))return false;
 if(g==='other'&&b.group)return false;
