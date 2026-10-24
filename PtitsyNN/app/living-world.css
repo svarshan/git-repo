@@ -1,0 +1,56 @@
+
+/* MoOLVa 4.0 · Living Nature, no external runtime network requests. */
+.living-section{max-width:1320px;margin:12px auto 30px}
+.living-title{font:600 30px/1.2 "Segoe UI",Arial,sans-serif;color:#eef7ff;margin:3px 0 10px}
+.living-intro,.living-note{font-size:13px;color:#acc6da;line-height:1.7;max-width:1050px}
+.living-toolbar{display:flex;gap:11px;flex-wrap:wrap;align-items:center;margin:16px 0}
+.living-toolbar label{font-size:13px;color:#c6dfed}
+.living-toolbar input,.living-toolbar select,.living-toolbar textarea,.living-input,
+.living-select{background:#0d263b;border:1px solid #426784;border-radius:9px;padding:10px 13px;color:#e8f7ff;min-width:0;max-width:100%;font:13px "Segoe UI",Arial,sans-serif}
+.living-toolbar input[type="search"]{flex:1 1 170px}
+.living-button{border:1px solid #5188aa;border-radius:9px;background:#163956;color:#eaf8ff;padding:10px 13px;cursor:pointer;line-height:1.3}
+.living-button:hover,.living-button:focus-visible{background:#265d7c;border-color:#7fcafa;color:#fff}
+.living-button:disabled{cursor:default;opacity:.6}
+.living-two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.living-panel{background:rgba(6,21,36,.93);border:1px solid #3c607d;padding:18px;border-radius:14px;min-width:0}
+.living-panel h3{color:#e7f6ff;margin:0 0 10px;font-size:18px}
+.living-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:10px;margin:14px 0}
+.living-card{background:#0d293f;border:1px solid #375f7e;border-radius:10px;overflow:hidden}
+.living-card>img{height:142px;display:block;width:100%;object-fit:cover}
+.living-card-info{display:grid;gap:6px;padding:12px}
+.living-card-info strong{color:#f1f7ff}
+.living-card-info small{color:#97b6cc}
+.living-card-info>span{font-size:11px;color:#9ad2e8}
+.living-card-info button{font-size:11px}
+.living-preview{min-height:160px;background:#102c43;border:1px dashed #3c6684;border-radius:12px;display:grid;place-items:center;padding:10px;color:#9ebfd3;margin-top:12px}
+.living-preview img{max-height:270px;max-width:100%;object-fit:contain}
+.living-preview audio{max-width:100%}
+.living-quiz-img{display:block;width:min(420px,100%);height:230px;border-radius:12px;object-fit:cover;margin:5px 0 17px}
+.living-quiz-choices{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.living-quiz-choices button{font-size:13px}
+#livingWaveform{width:min(650px,100%);background:#0a2033;border-radius:10px;border:1px solid #406784;margin-top:12px}
+.habitat-layout{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(235px,.6fr);gap:16px;align-items:start}
+.habitat-map-wrap{padding:12px;background:linear-gradient(145deg,#0a283c,#071423);border:1px solid #426787;border-radius:15px;min-width:0}
+.habitat-viewport{position:relative;max-width:100%;border-radius:12px;overflow:hidden;background:#122c43}
+.habitat-stage{width:100%;aspect-ratio:1200/942;position:relative;transform-origin:50% 50%;transition:transform .17s ease}
+.habitat-map-image{position:absolute;inset:0;display:block;width:100%;height:100%;object-fit:fill;filter:brightness(.75) saturate(.8)}
+.habitat-pin-layer{position:absolute;inset:0}
+.habitat-pin{position:absolute;transform:translate(-50%,-50%);display:grid;place-items:center;width:27px;height:27px;border-radius:50%;border:2px solid #bceeff;background:#1378a5ee;color:white;font-size:10px;font-weight:700;cursor:pointer;box-shadow:0 0 0 4px #14aad83a,0 3px 9px #0008;z-index:2}
+.habitat-pin:hover,.habitat-pin:focus-visible{z-index:5;background:#ffaa30;color:#18263c;border-color:#fff;outline:none;box-shadow:0 0 0 6px #ffcc4a66}
+.habitat-tooltip{position:absolute;z-index:20;min-width:235px;width:min(280px,80%);max-height:260px;overflow:auto;box-shadow:0 13px 30px #000b;background:#06192bf7;color:#f2f8ff;border:1px solid #77b9df;border-radius:11px;padding:11px 12px}
+.habitat-tooltip strong{display:block;font-size:12px}
+.habitat-tooltip small{display:block;margin:7px 0;color:#bed5e7}
+.habitat-tooltip-list{display:grid;gap:5px;margin:8px 0 2px}
+.habitat-tooltip-list button{border:0;border-bottom:1px solid #304d64;padding:4px;text-align:left;color:#e8f5ff;background:none;cursor:pointer;font-size:11px}
+.habitat-tooltip-list button:hover{color:#59d1ff}
+.habitat-side p{font-size:13px;color:#adcfe0;line-height:1.65}
+.habitat-side button,.habitat-side select,.habitat-side input{width:100%;margin:4px 0 10px}
+.habitat-source{font-size:11px;color:#9cbccf;margin:10px 0;line-height:1.7}
+.habitat-legend{display:flex;flex-wrap:wrap;gap:9px;margin:8px 0;font-size:11px;color:#d2e9f5}
+.habitat-legend b{display:inline-block;height:12px;width:12px;border-radius:50%;background:#178ec6;border:1px solid #d6eafa}
+.habitat-zoom{display:flex;gap:8px;margin:10px 0}
+.habitat-zoom button{min-width:45px}
+#habitatZoomLevel{color:#bad9ec;align-self:center}
+.living-links a{color:#8cddff}
+@media(max-width:1050px){.habitat-layout,.living-two{grid-template-columns:1fr}}
+@media(max-width:650px){.living-title{font-size:25px}.living-panel{padding:13px}.habitat-map-wrap{padding:6px}.habitat-pin{height:23px;width:23px;font-size:9px}.living-quiz-choices{grid-template-columns:1fr}.habitat-tooltip{max-height:180px}}
