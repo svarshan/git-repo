@@ -124,5 +124,5 @@ test('ULTRA playback features are offline and local imports are explicitly not l
  assert.match(js,/не проверены и не включаются в распространяемый EXE/);
  assert.match(player,/window\.BirdUltra\?\.render/);
  assert.match(html,/src="ultra-audio\.js"/);
- assert.match(html,/MoOLVa 4\.0/);
+ assert.match(html,/MoOLVa 5\.0/);
 });
