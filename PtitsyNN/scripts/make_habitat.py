@@ -91,6 +91,7 @@ def scan():
     allowed_ids=set(catalog_names.values())
     counts = collections.Counter()
     years = collections.defaultdict(set)
+    dates = collections.defaultdict(set)
     labels = {}
     queried=0
     accepted=0
@@ -101,8 +102,18 @@ def scan():
         hasGeospatialIssue="false", limit=LIMIT,
         geometry="POLYGON((41.60 54.35,47.96 54.35,47.96 58.19,41.60 58.19,41.60 54.35))",
     )
+    # Stratify by permitted source license AND historic period; otherwise recent
+    # noncommercial citizen records crowd every page out of the first 4,500.
+    cohorts = [
+        ("CC_BY_4_0","2017,2020"), ("CC_BY_4_0","2021,2023"),
+        ("CC_BY_4_0","2024,2026"), ("CC0_1_0","2017,2020"),
+        ("CC0_1_0","2021,2023"), ("CC0_1_0","2024,2026"),
+    ]
     for page in range(MAX_PAGES):
-        data=get("https://api.gbif.org/v1/occurrence/search", {**qs, "offset": page*LIMIT}, timeout=30).json()
+        source_license,source_years=cohorts[page % len(cohorts)]
+        offset=(page // len(cohorts))*LIMIT
+        data=get("https://api.gbif.org/v1/occurrence/search",
+                 {**qs,"license":source_license,"year":source_years,"offset":offset},timeout=30).json()
         records=data.get("results",[])
         if not isinstance(records,list):
             raise RuntimeError("Malformed GBIF occurrence data")
@@ -155,18 +166,19 @@ def scan():
             key=(row,col,b_id)
             counts[key]+=1
             years[key].add(yr)
+            dates[key].add(str(r.get("eventDate") or str(yr))[:10])
             labels[b_id]=latin
             accepted+=1
         print(f"GBIF page {page+1}: scanned {queried}; accepted {accepted}; last page {len(records)}")
         if data.get("endOfRecords") or len(records)<LIMIT:
-            break
+            continue
 
     print("GBIF filtering diagnostics:", dict(rejected))
     print("GBIF license distribution within regional catalog records:",dict(seen_licenses))
     # Mask unusual or one-off points; never ship individual source coordinates.
     by_cell=collections.defaultdict(list)
     for (row,col,b_id),n in counts.items():
-        if n<3 or len(years[(row,col,b_id)])<2:
+        if n<3 or len(dates[(row,col,b_id)])<2:
             continue
         by_cell[(row,col)].append(dict(id=b_id, n=n, fromYear=min(years[(row,col,b_id)]), toYear=max(years[(row,col,b_id)])))
     cells=[]
