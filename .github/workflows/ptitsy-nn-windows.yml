@@ -117,7 +117,9 @@ jobs:
           node --check app/data.js
           node --check main.cjs
           npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           python -m unittest discover -s tests -p 'test_*.py'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Save downloaded media even if a later step fails
         if: always()
         uses: actions/cache/save@v4
