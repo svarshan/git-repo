@@ -1,0 +1,73 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080">
+<title>Ночной Нижний Новгород: Нижегородский кремль, Чкаловская лестница, Стрелка Оки и Волги и собор Александра Невского. Художественная панорама.</title>
+<defs>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#071329"/><stop offset=".55" stop-color="#192947"/><stop offset=".83" stop-color="#3a303e"/><stop offset="1" stop-color="#101926"/></linearGradient>
+<linearGradient id="river" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#193950"/><stop offset="1" stop-color="#071826"/></linearGradient>
+<linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#914e3c"/><stop offset="1" stop-color="#482d32"/></linearGradient>
+<linearGradient id="vignette" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#081320" stop-opacity=".9"/><stop offset=".55" stop-color="#081320" stop-opacity=".25"/><stop offset="1" stop-color="#081320" stop-opacity=".6"/></linearGradient>
+<filter id="glow"><feGaussianBlur stdDeviation="9"/></filter>
+</defs>
+<rect width="1920" height="1080" fill="url(#sky)"/>
+<path d="M0 630Q255 585 480 607Q740 577 1030 620Q1300 567 1565 628Q1740 593 1920 613V750H0Z" fill="#101e2e"/>
+<path d="M0 697Q200 677 360 703Q625 638 895 690Q1110 655 1280 705Q1640 657 1920 699V835H0Z" fill="#162b38"/>
+<path d="M0 700L175 650 280 635 490 618 730 608 915 642 955 748 0 825Z" fill="#101d27"/>
+<!-- Chkalov staircase: original geometric illustration -->
+<path d="M95 708Q205 771 300 807Q365 841 450 875" fill="none" stroke="#e9a15f" stroke-width="8" opacity=".28" filter="url(#glow)"/>
+<path d="M100 702Q205 772 300 807Q365 842 450 875" fill="none" stroke="#ba866b" stroke-width="3" opacity=".7"/>
+<path d="M140 691Q240 749 325 781Q410 801 490 827" fill="none" stroke="#d0a078" stroke-width="2" opacity=".7"/>
+<path d="M165 681Q265 744 353 778Q433 806 503 824" fill="none" stroke="#e1ad6f" stroke-width="2" opacity=".6"/>
+<!-- Kremlin walls along the upper bank -->
+<path d="M220 650 L315 610 408 600 515 560 620 576 735 566 827 585 900 594V650L820 633 731 619 624 631 523 608 418 642 317 659Z" fill="url(#wall)" stroke="#aa6244" stroke-width="3"/>
+<path d="M220 650L315 610 408 600 515 560 620 576 735 566 827 585" fill="none" stroke="#f6b16a" stroke-opacity=".55" stroke-width="5"/>
+<g fill="#f6aa66" opacity=".8">
+<rect x="265" y="638" width="5" height="8"/><rect x="338" y="608" width="5" height="7"/><rect x="405" y="601" width="5" height="7"/><rect x="470" y="575" width="5" height="7"/><rect x="565" y="569" width="5" height="7"/><rect x="655" y="574" width="5" height="7"/><rect x="750" y="572" width="5" height="7"/><rect x="830" y="591" width="5" height="7"/>
+</g>
+<!-- Kremlin towers with distinctive pointed roofs -->
+<g fill="#75443b" stroke="#c07850" stroke-width="3">
+<path d="M305 610V549H356V614Z"/><path d="M484 576V478H555V575Z"/><path d="M696 566V502H756V581Z"/><path d="M849 590V530H902V607Z"/>
+</g>
+<g fill="#263246" stroke="#b77959" stroke-width="2">
+<path d="M301 549L330 494 361 549Z"/><path d="M479 478L518 403 559 478Z"/><path d="M690 502L726 436 761 502Z"/><path d="M845 530L875 481 905 530Z"/>
+</g>
+<g fill="#f2af5c">
+<rect x="318" y="564" width="8" height="16"/><rect x="339" y="563" width="8" height="16"/>
+<rect x="502" y="498" width="10" height="16"/><rect x="527" y="498" width="10" height="16"/>
+<rect x="715" y="524" width="8" height="16"/><rect x="737" y="524" width="8" height="16"/>
+<rect x="864" y="553" width="8" height="15"/><rect x="882" y="553" width="8" height="15"/>
+</g>
+<!-- distant buildings and embankment -->
+<g fill="#1c2c3d">
+<path d="M970 681V619H1030V654H1057V601H1117V672L1180 681Z"/>
+<path d="M1250 682V642H1333V605H1371V658H1421V631H1492V681Z"/>
+<path d="M1680 678V601H1740V641H1793V595H1860V680Z"/>
+</g>
+<g fill="#efb16a" opacity=".63">
+<path d="M982 636H1011V640H982ZM982 649H1011V652H982ZM1072 616H1100V619H1072ZM1072 633H1100V636H1072ZM1272 656H1317V660H1272ZM1711 620H1726V625H1711ZM1810 616H1846V620H1810Z"/>
+</g>
+<!-- Cathedral at the confluence, five spires -->
+<g transform="translate(1450 460)">
+<path d="M0 230V154H47V113H67V230Z" fill="#564a47" stroke="#a37c57" stroke-width="3"/>
+<path d="M67 229V93H168V229Z" fill="#7c5b47" stroke="#ae8456" stroke-width="3"/>
+<path d="M168 230V145H224V230Z" fill="#6e5648" stroke="#ae8456" stroke-width="3"/>
+<path d="M67 93L116 24 168 93Z" fill="#3b4052" stroke="#bd945e" stroke-width="3"/>
+<path d="M0 154L27 100 67 154Z" fill="#39404d" stroke="#b69370" stroke-width="2"/>
+<path d="M168 145L194 90 224 145Z" fill="#384354" stroke="#b69370" stroke-width="2"/>
+<path d="M39 145L57 89 72 144Z" fill="#39404d" stroke="#b69370" stroke-width="2"/>
+<path d="M155 145L175 89 190 144Z" fill="#39404d" stroke="#b69370" stroke-width="2"/>
+<path d="M116 24V-16M27 100V67M194 90V58M57 89V57M175 89V57" stroke="#dcba82" stroke-width="3"/>
+<path d="M107 -9H125M17 75H37M184 66H204" stroke="#dcba82" stroke-width="2"/>
+<g fill="#e9b87b"><rect x="88" y="116" width="15" height="30"/><rect x="125" y="116" width="15" height="30"/><rect x="88" y="162" width="15" height="29"/><rect x="125" y="162" width="15" height="29"/><rect x="20" y="173" width="11" height="24"/><rect x="185" y="173" width="11" height="24"/></g>
+</g>
+<!-- River and elegant illuminated bridge -->
+<path d="M0 814Q420 776 800 815Q1230 763 1920 797V1080H0Z" fill="url(#river)"/>
+<path d="M925 746L1280 729 1430 718 1600 722 1920 748" fill="none" stroke="#b9a37e" stroke-width="9" opacity=".8"/>
+<path d="M925 746Q1065 815 1230 741Q1380 823 1530 723Q1690 813 1850 741" fill="none" stroke="#6c8294" stroke-width="4"/>
+<path d="M930 743L1280 726 1430 714 1600 718 1920 744" fill="none" stroke="#f3b971" stroke-width="2"/>
+<g stroke="#f4bb6e" stroke-opacity=".4" stroke-width="3">
+<path d="M1002 850l-20 140"/><path d="M1117 842l-30 160"/><path d="M1226 849l-15 115"/><path d="M1389 849l-18 165"/><path d="M1514 845l-24 135"/><path d="M1668 860l-10 140"/><path d="M1800 871l-15 150"/>
+</g>
+<g fill="#f4b469" opacity=".5">
+<ellipse cx="1117" cy="845" rx="6" ry="3"/><ellipse cx="1280" cy="852" rx="9" ry="3"/><ellipse cx="1500" cy="848" rx="13" ry="3"/><ellipse cx="1715" cy="854" rx="9" ry="3"/>
+</g>
+<rect width="1920" height="1080" fill="url(#vignette)"/>
+</svg>
