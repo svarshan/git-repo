@@ -35,10 +35,11 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
+          node --check app/ultra-audio.js
       - name: Restore validated offline catalog cache
         id: media-cache
         uses: actions/cache@v4
@@ -47,8 +48,9 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v9-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/voice_max.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/audit_audio.py', 'PtitsyNN/scripts/enrich_articles.py') }}
+          key: ptitsy-nn-media-v10-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/voice_max.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/audit_audio.py', 'PtitsyNN/scripts/ultra_tracks.py', 'PtitsyNN/scripts/enrich_articles.py') }}
           restore-keys: |
+            ptitsy-nn-media-v10-${{ runner.os }}-
             ptitsy-nn-media-v9-${{ runner.os }}-
             ptitsy-nn-media-v8-${{ runner.os }}-
             ptitsy-nn-media-v7-${{ runner.os }}-
@@ -70,19 +72,21 @@ jobs:
           python -u scripts/voice_max.py
           python -u scripts/curate_audio.py
           python -u scripts/audit_audio.py
+          python -u scripts/ultra_tracks.py
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
-          BIRDS_FETCH_BUDGET_SECONDS: '4200'
-          BIRDS_VOICE_BUDGET_SECONDS: '1400'
-          BIRDS_OPENVERSE_BUDGET_SECONDS: '550'
-          BIRDS_MAX_BUDGET_SECONDS: '600'
+          BIRDS_FETCH_BUDGET_SECONDS: '300'
+          BIRDS_VOICE_BUDGET_SECONDS: '240'
+          BIRDS_OPENVERSE_BUDGET_SECONDS: '180'
+          BIRDS_MAX_BUDGET_SECONDS: '210'
+          BIRDS_ULTRA_BUDGET_SECONDS: '360'
       - name: Enrich every bird description from Wikipedia
         timeout-minutes: 27
         run: |
           python -m py_compile scripts/enrich_articles.py
           python -u scripts/enrich_articles.py
         env:
-          BIRDS_WIKI_BUDGET_SECONDS: '1200'
+          BIRDS_WIKI_BUDGET_SECONDS: '420'
       - name: Show verified media coverage
         shell: pwsh
         run: |
@@ -90,11 +94,13 @@ jobs:
           Write-Host "Species: $($r.species) | photos: $($r.photos) | voices: $($r.birdCalls) | articles: $($r.articles)"
           Write-Host "Audio QA: accepted $($r.audioTechnicalAccepted) rejected $($r.audioTechnicalRejected)"
           Write-Host "Voices MAX: xeno-canto key configured $($r.maxVoices.xenoApiKeyConfigured) / new sources $($r.maxVoices.newSources)"
+          Write-Host "Voices ULTRA: total sound tracks $($r.audioTracksTotal) | additional tracks $($r.extraAudioTracks) | multi-track species $($r.multiTrackSpecies)"
       - name: Verify generated JS and catalog
         run: |
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
+          node --check app/ultra-audio.js
           node --check app/data.js
           node --check main.cjs
           npm test
@@ -107,7 +113,7 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v9-${{ runner.os }}-${{ github.sha }}
+          key: ptitsy-nn-media-v10-${{ runner.os }}-${{ github.sha }}
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
@@ -122,7 +128,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-2.6-Windows
+          name: Ptitsy-NN-2.7-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json
