@@ -89,3 +89,40 @@ test('Voices MAX listening lab renders and allows offline explicit human review'
   assert.ok(js.includes(piece),'Missing human-audit feature: '+piece);
  }
 });
+
+test('ULTRA supports multiple verified offline tracks without overwriting primary bird call',()=>{
+ const files=new Set();
+ for(const b of birds){
+  const tracks=b.audioTracks||[];
+  assert.ok(Array.isArray(tracks),'audioTracks must be an array');
+  assert.ok(tracks.length<=2,'At most 2 licensed secondary tracks per bird');
+  for(const t of tracks){
+   assert.ok(b.audioFile,'Secondary track without main recording for '+b.latin);
+   assert.match(t.path,/^media\/audio\/[a-z0-9_-]+\.mp3$/i);
+   const p=path.resolve(root,'app',t.path);
+   assert.ok(p.startsWith(mediaRoot));
+   assert.ok(fs.existsSync(p),'Missing secondary bird recording '+t.path);
+   assert.ok(fs.statSync(p).size>=3000);
+   assert.ok(!files.has(t.path),'Secondary file assigned twice');
+   files.add(t.path);
+   assert.ok(t.credit?.source,'Missing original audio source');
+   assert.ok(t.credit?.author,'Missing secondary audio author');
+   assert.ok(t.credit?.license,'Missing secondary audio license');
+   assert.doesNotMatch(t.credit.license,forbiddenLicense);
+   assert.match(t.credit.source,allowedMediaSource);
+   assert.ok(t.credit?.audioQuality?.meanDb!=null,'Secondary recording never passed FFT/loudness QA');
+  }
+ }
+});
+test('ULTRA playback features are offline and local imports are explicitly not licensed sounds',()=>{
+ const js=fs.readFileSync(path.join(root,'app','ultra-audio.js'),'utf8');
+ const player=fs.readFileSync(path.join(root,'app','audio-pro.js'),'utf8');
+ const html=fs.readFileSync(path.join(root,'app','index.html'),'utf8');
+ for(const token of ['indexedDB.open','createObjectStore','audio/wav','audio/ogg','audio/mpeg','getByteFrequencyData','createAnalyser','createMediaElementSource','URL.revokeObjectURL']){
+  assert.ok(js.includes(token),'Missing ULTRA audio feature '+token);
+ }
+ assert.match(js,/не проверены и не включаются в распространяемый EXE/);
+ assert.match(player,/window\.BirdUltra\?\.render/);
+ assert.match(html,/src="ultra-audio\.js"/);
+ assert.match(html,/МОOLVA|MOOLVA · ВЕРСИЯ 2\.7/);
+});
