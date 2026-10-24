@@ -107,3 +107,28 @@ body.ui3-no-motion *,body.ui3-no-motion *::before,body.ui3-no-motion *::after{sc
 @media(max-width:760px){.shell{display:block}.sidebar{position:relative;height:auto;max-height:none;overflow:auto;padding:0}.brand{display:flex;min-height:70px;padding:9px 12px;justify-content:flex-start}.brand>div:last-child{display:flex}.brand strong{font-size:20px}.sidebar nav{flex-direction:row;overflow-x:auto;padding:5px}.sidebar nav button{white-space:nowrap;width:auto;min-width:unset;gap:6px}.sidebar nav button span:not(.navico){display:inline;font-size:12px}.sidebar nav button .navico{width:19px;height:19px}.top{padding:8px 12px;min-height:58px}.top-search{height:42px}.top-tools button{width:39px;height:39px}main{padding:12px 12px 45px}.ui3-hero{margin:-12px -12px 0;padding:23px 19px 48px;min-height:260px}.ui3-dashboard{margin-top:-22px}.metrics.ui3-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ui3-links{grid-template-columns:repeat(2,minmax(0,1fr))}.ui3-feature-media{height:120px}.ui3-feature{min-height:202px}.ui3-feature-content{padding:9px}.ui3-feature-content strong{font-size:13px}.ui3-feature-content p{font-size:11px}.ui3-catalog-header .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:430px){.ui3-links{grid-template-columns:1fr 1fr;gap:7px}.ui3-metrics article{gap:7px}.ui3-metric-symbol{width:28px;height:28px}.ui3-metrics strong{font-size:20px}.ui3-metrics span{font-size:10px}.ui3-feature-media{height:105px}.ui3-feature{min-height:189px}.ui3-hero .loc{display:none}}
 @media(prefers-reduced-motion:reduce){.ui3-feature{transition:none}}
+
+
+/* Species card materials: visible on catalog, favorites, field assistant and gallery. */
+.bird .meta{display:flex;flex-direction:column;gap:0}
+.bird .meta .minor{margin:7px 0 0;padding:0}
+.material-flags{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin:11px 0 7px}
+.material-flag{display:inline-flex;align-items:center;min-height:25px;border-radius:7px;padding:4px 7px;font:600 11px/1.25 "Segoe UI",Arial,sans-serif;border:1px solid transparent;white-space:normal}
+.material-flag.voice-yes{color:#91f1c6;background:rgba(18,105,73,.25);border-color:rgba(47,188,131,.42)}
+.material-flag.voice-no{color:#b9c8d8;background:rgba(55,74,95,.3);border-color:rgba(94,116,143,.4)}
+.material-flag.article-yes{color:#a8dbff;background:rgba(40,99,155,.26);border-color:rgba(77,153,219,.43)}
+.material-flag.article-brief{color:#f1d09d;background:rgba(136,88,35,.22);border-color:rgba(194,140,77,.42)}
+.materials-summary{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;color:#c1d5e4;font-size:12px;line-height:1.48;margin:2px 0 13px;overflow-wrap:anywhere}
+.bird .meta .actions{margin-top:auto}
+.field-result .material-flags,.field-compare .material-flags{margin:8px 0}
+.field-result .materials-summary{margin:5px 0 11px}
+.field-result .field-card{min-width:0;overflow:hidden}
+.field-result .field-card .field-actions{margin-top:auto}
+.ui3-mini-materials{display:block;max-width:100%;font-size:9px;line-height:1.35;color:#b0d7ed;white-space:normal;overflow-wrap:anywhere}
+.ui3-mini{align-self:flex-start}
+.ui3-mini strong{font-size:10px}
+@media(max-width:510px){
+ .material-flag{font-size:10px;padding:4px 6px}
+ .material-flags{gap:4px}
+ .materials-summary{-webkit-line-clamp:2;font-size:11px}
+}
