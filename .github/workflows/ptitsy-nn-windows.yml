@@ -35,11 +35,12 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/verify_cache.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
           node --check app/ultra-audio.js
+          node --check app/field-assistant.js
       - name: Restore validated offline catalog cache
         id: media-cache
         uses: actions/cache@v4
@@ -53,7 +54,24 @@ jobs:
             ptitsy-nn-media-v10-${{ runner.os }}-
             ptitsy-nn-media-v9-${{ runner.os }}-
             ptitsy-nn-media-v8-${{ runner.os }}-
+      - name: Check complete offline media cache
+        id: existing-catalog
+        shell: pwsh
+        run: |
+          python scripts/verify_cache.py
+          if ($LASTEXITCODE -eq 0) {
+            "ready=true" >> $env:GITHUB_OUTPUT
+          } else {
+            Write-Host "Offline cache is incomplete; licensed materials will be fetched again."
+            "ready=false" >> $env:GITHUB_OUTPUT
+          }
+      - name: Reaudit cached audio before packaging
+        if: steps.existing-catalog.outputs.ready == 'true'
+        run: |
+          python -u scripts/audit_audio.py
+          python scripts/verify_cache.py
       - name: Generate offline catalog and download licensed real media
+        if: steps.existing-catalog.outputs.ready != 'true'
         timeout-minutes: 100
         run: |
           python -m py_compile scripts/make_catalog.py
@@ -74,6 +92,7 @@ jobs:
           BIRDS_MAX_BUDGET_SECONDS: '210'
           BIRDS_ULTRA_BUDGET_SECONDS: '360'
       - name: Enrich every bird description from Wikipedia
+        if: steps.existing-catalog.outputs.ready != 'true'
         timeout-minutes: 27
         run: |
           python -m py_compile scripts/enrich_articles.py
@@ -94,6 +113,7 @@ jobs:
           node --check app/audio-pro.js
           node --check app/voice-lab.js
           node --check app/ultra-audio.js
+          node --check app/field-assistant.js
           node --check app/data.js
           node --check main.cjs
           npm test
@@ -121,7 +141,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-2.7-Windows
+          name: Ptitsy-NN-2.9-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json
