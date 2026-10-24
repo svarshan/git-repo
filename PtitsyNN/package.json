@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "7.2.0",
+  "version": "7.3.0",
   "private": true,
-  "description": "MoOLVa 7.2 Map ULTRA — offline detailed OpenStreetMap roads, woods, lakes, rivers, settlements and licensed GBIF sightings; original Bird AI",
+  "description": "MoOLVa 7.3 Voices ULTRA MAX — preserving map ULTRA and Perch v2, target 150 scientifically attributed and technically verified species audio",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -53,10 +53,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-7.2-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-7.3-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-7.2-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-7.3-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [
