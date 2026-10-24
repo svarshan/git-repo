@@ -13,7 +13,8 @@ test('4.0 offline dashboard matches required layout and navigates to real pages'
  for(const id of ['countAll','countAudio','countImages','countArticles','ui3-top-search','ui3-season-list','ui3-photo-list','ui3-gallery','habitatAtlas','ui3-calendar-grid','catalogList']){
   assert.match(html,new RegExp('id="'+id+'"'),id);
  }
- for(const action of ['catalogList','field-recent','field-compare'])assert.ok(html.includes('data-jump="'+action+'"'));
+ for(const action of ['catalogList','field-recent'])assert.ok(html.includes('data-jump="'+action+'"'));
+ assert.match(html,/data-view="comparebirds6"/);
  assert.match(html,/href="ui3\.css"/);
  assert.match(html,/src="ui3\.js"/);
  assert.ok(html.indexOf('src="ui3.js"')>html.indexOf('src="app.js"'));
