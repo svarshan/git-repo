@@ -44,7 +44,7 @@ function candidates(logits,labels){
  return pick.map(([i,v])=>({label:labels[i],score:Math.round(Math.exp(v-max)/sum*10000)/100})).filter(x=>x.score>0);
 }
 function window(){
- const w=new BrowserWindow({title:'MoOLVa 7.0 — Полевой атлас PRO',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,
+ const w=new BrowserWindow({title:'MoOLVa 7.1 — Полевой атлас PRO',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,preload:path.join(__dirname,'preload.cjs')}});
  w.webContents.on('will-navigate',e=>e.preventDefault());
  w.webContents.setWindowOpenHandler(({url})=>{try{
@@ -56,7 +56,8 @@ function window(){
 }
 app.whenReady().then(()=>{
  session.defaultSession.setPermissionRequestHandler((wc,permission,callback,details)=>{
-  const audioOnly=Array.isArray(details?.mediaTypes)&&details.mediaTypes.includes('audio')&&!details.mediaTypes.includes('video');
+  const mediaTypes=Array.isArray(details?.mediaTypes)?details.mediaTypes:[];
+  const audioOnly=!mediaTypes.includes('video')&&(mediaTypes.length===0||mediaTypes.includes('audio'));
   callback(permission==='media'&&audioOnly&&isTrusted(wc)&&Date.now()<micAllowedUntil);
  });
  session.defaultSession.setPermissionCheckHandler((wc,permission,_origin,details)=>{
@@ -70,6 +71,26 @@ app.whenReady().then(()=>{
   return true;
  });
  ipcMain.handle('birdai-status',()=>modelStatus());
+ // Exercises the native Electron ONNX runtime, not a mocked browser result.
+ ipcMain.handle('birdai-diagnostic',async event=>{
+  if(!isTrusted(event.sender))throw Error('Недоверенный источник');
+  const started=Date.now();
+  const modelInfo=modelStatus();
+  if(!modelInfo.available)return {ok:false,description:modelInfo.description,model:'Google Perch v2 ONNX'};
+  try{
+   const {model,labels,ort}=await inferenceModel();
+   const samples=new Float32Array(160000);
+   for(let i=0;i<samples.length;i++)samples[i]=0.02*Math.sin(2*Math.PI*700*i/32000);
+   const output=await model.run({inputs:new ort.Tensor('float32',samples,[1,160000])},['label']);
+   const scores=output.label?.data;
+   if(!scores||scores.length!==labels.length||!Array.from(scores).some(Number.isFinite))
+    throw Error('Нейросеть вернула неполные или некорректные данные');
+   return {ok:true,model:'Google Perch v2 ONNX',classCount:labels.length,elapsedMs:Date.now()-started,
+    description:'Настоящая локальная модель загружена и рассчитала тестовый пятисекундный фрагмент. Это технический тест, а не проверка точности распознавания птиц.'};
+  }catch(e){
+   return {ok:false,description:'Ошибка локального ONNX-инференса: '+(e.message||String(e)),model:'Google Perch v2 ONNX',elapsedMs:Date.now()-started};
+  }
+ });
  ipcMain.handle('birdai-analyze',async(event,pcm)=>{
   if(!isTrusted(event.sender))throw Error('Недоверенный источник');
   if(running)throw Error('Предыдущая запись ещё анализируется.');

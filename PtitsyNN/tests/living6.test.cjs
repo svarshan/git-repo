@@ -23,13 +23,13 @@ test('6.0 truly wires audio file decode to verified pretrained Perch model IPC',
 });
 test('real model and license assets are in the Windows build',()=>{
  const pkg=JSON.parse(read('package.json')),workflow=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(pkg.version,'7.0.0');
+ assert.equal(pkg.version,'7.1.0');
  assert.equal(pkg.dependencies['onnxruntime-node'],'1.24.3');
  assert.ok(pkg.build.files.includes('preload.cjs'));
  assert.match(pkg.build.asarUnpack.join(','),/app\/models/);
  assert.match(workflow,/python -u scripts\/prepare_ai\.py/);
  assert.match(workflow,/node scripts\/test_ai\.cjs/);
- assert.match(workflow,/Ptitsy-NN-7\.0-Windows/);
+ assert.match(workflow,/Ptitsy-NN-7\.1-Windows/);
  const folder=path.join(ROOT,'app','models');
  const info=JSON.parse(fs.readFileSync(path.join(folder,'model-provenance.json'),'utf8'));
  const weights=path.join(folder,'perch-v2-eastern-europe.onnx');

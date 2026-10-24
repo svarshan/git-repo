@@ -2,6 +2,7 @@
 const {contextBridge,ipcRenderer}=require('electron');
 contextBridge.exposeInMainWorld('BirdAI',{
  status:()=>ipcRenderer.invoke('birdai-status'),
+ diagnostics:()=>ipcRenderer.invoke('birdai-diagnostic'),
  enableMicrophone:()=>ipcRenderer.invoke('birdai-microphone-intent'),
  analyze:(pcm)=>{
   if(!(pcm instanceof Float32Array)||pcm.length!==160000)

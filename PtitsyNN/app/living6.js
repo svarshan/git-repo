@@ -8,6 +8,7 @@ const birds=Array.isArray(window.BIRDS_DATA)?window.BIRDS_DATA:[];
 const filePicker=$('#birdAIFile'),run=$('#birdAIRun'),status=$('#birdAIStatus');
 const results=$('#birdAIResults'),preview=$('#birdAIPreview');
 const mic=$('#birdAIMic'),stop=$('#birdAIStop'),duration=$('#birdAIDuration'),recStatus=$('#birdAIRecordingStatus');
+const diagnostics=$('#birdAIDiagnostics'),diagnosticsStatus=$('#birdAIDiagnosticsStatus');
 const model=window.BirdAI;
 const norm=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/_/g,' ').trim();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined&&text!==null)el.textContent=String(text);return el;};
@@ -28,7 +29,7 @@ async function verify(){
  if(!model){put('Perch v2 доступен только в Windows EXE с установленным ONNX-модулем.');modelReady=false;disableButtons();return;}
  try{
   const s=await model.status();modelReady=Boolean(s.available);
-  put(s.description+' · '+s.engine+' · лицензия '+s.license);
+  put(s.description+' · '+s.engine+' · лицензия '+s.license+' · для проверки реальной работы нажмите «Проверить Bird AI».');
  }catch(e){modelReady=false;put('Не удаётся проверить Perch v2: '+(e.message||String(e)));}
  disableButtons();
 }
@@ -47,6 +48,25 @@ function setFile(next,fromMic){
  disableButtons();verify();
 }
 filePicker?.addEventListener('change',()=>setFile(filePicker.files?.[0]||null,false));
+diagnostics?.addEventListener('click',async()=>{
+ if(!model?.diagnostics){
+  if(diagnosticsStatus)diagnosticsStatus.textContent='Механизм проверки отсутствует: нужен новый Windows EXE MoOLVa 7.1, а не старый веб-просмотр.';
+  return;
+ }
+ diagnostics.disabled=true;
+ if(diagnosticsStatus)diagnosticsStatus.textContent='Загружаю Google Perch v2 и выполняю реальный ONNX-расчёт на процессоре Windows…';
+ try{
+  const res=await model.diagnostics();
+  if(diagnosticsStatus)diagnosticsStatus.textContent=(res.ok?'✓ Bird AI работает. ':'✕ Bird AI не готов. ')+res.description+
+   (res.ok?' · классов модели: '+res.classCount+' · время: '+res.elapsedMs+' мс':'');
+  if(res.ok){modelReady=true;disableButtons();}
+  else{modelReady=false;disableButtons();}
+ }catch(e){
+  modelReady=false;disableButtons();
+  if(diagnosticsStatus)diagnosticsStatus.textContent='Ошибка связи с модулем Bird AI: '+(e.message||String(e));
+ }finally{diagnostics.disabled=false;}
+});
+
 function cleanUpRecorder(){
  if(finishTimer){clearTimeout(finishTimer);finishTimer=null;}
  stream?.getTracks()?.forEach(t=>t.stop());stream=null;recorder=null;recording=false;
