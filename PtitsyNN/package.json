@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "7.0.0",
+  "version": "7.1.0",
   "private": true,
-  "description": "MoOLVa 7.0 Field Atlas PRO — licensed offline regional bird map and true Perch v2 neural sound identification",
+  "description": "MoOLVa 7.1 Field Atlas PRO: offline named towns and real Perch v2 runtime diagnostics",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -53,10 +53,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-7.0-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-7.1-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-7.0-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-7.1-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [
