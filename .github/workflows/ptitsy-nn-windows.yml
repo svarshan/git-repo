@@ -210,6 +210,22 @@ jobs:
           }
           Set-Content -Path dist/SHA256SUMS.txt -Value $lines -Encoding utf8
           $lines | ForEach-Object { Write-Host $_ }
+      - name: Upload Portable EXE separately for reliable single-file download
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ptitsy-NN-7.0-Portable-only
+          path: PtitsyNN/dist/MoOLVa-7.0-Portable-x64.exe
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 30
+      - name: Upload Setup EXE separately
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ptitsy-NN-7.0-Setup-only
+          path: PtitsyNN/dist/MoOLVa-7.0-Setup-x64.exe
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
