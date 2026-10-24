@@ -147,7 +147,7 @@ function refreshViews(){
 renderMetrics();renderFeatures();renderPreview();refreshViews();
 document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',e=>{
  e.preventDefault();e.stopPropagation();
- const home=document.querySelector('nav button[data-view="catalog"]');
+ const home=document.querySelector('nav button[data-view="'+(b.dataset.page||'catalog')+'"]');
  if(home)home.click();
  requestAnimationFrame(()=>document.getElementById(b.dataset.jump)?.scrollIntoView({block:'start',behavior:document.body.classList.contains('ui3-no-motion')?'auto':'smooth'}));
 },true));
