@@ -51,7 +51,8 @@
       "allowToChangeInstallationDirectory": true,
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
-      "runAfterFinish": false
+      "runAfterFinish": false,
+      "artifactName": "Ptitsy-NN-3.0-Setup-${arch}.exe"
     },
     "portable": {
       "artifactName": "Ptitsy-NN-3.0-Portable-${arch}.exe"
