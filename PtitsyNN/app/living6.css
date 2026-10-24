@@ -34,3 +34,9 @@
 .passport6-topics h4{margin:0 0 6px;color:#ace2ff;font-size:13px}
 .passport6-topics p{margin:0;color:#d2e8f4;font-size:12px;line-height:1.58;overflow-wrap:anywhere}
 @media(max-width:680px){.passport6-topics{grid-template-columns:1fr}}
+
+/* MoOLVa 7.0 microphone and real multi-window offline inference */
+.ai7-record{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:10px 0 15px;padding:12px;border:1px solid #426e8c;border-radius:12px;background:#09263a}
+.ai7-record .living-select{max-width:130px}
+.ai7-record .living-note{margin:0}
+.ai7-progress{display:block;color:#a5deef;font-size:13px;margin:8px 0}
