@@ -28,3 +28,9 @@
 .six-compare-card audio{max-width:100%;width:100%}
 .six-compare-card button{margin-top:auto}
 @media(max-width:750px){.six-compare-grid,.six-compare-toolbar{grid-template-columns:1fr}.six-compare-card>img{height:170px}}
+
+.passport6-topics{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin:14px 0 4px}
+.passport6-topics section{border:1px solid #396a88;background:#0c2a43;border-radius:9px;padding:11px}
+.passport6-topics h4{margin:0 0 6px;color:#ace2ff;font-size:13px}
+.passport6-topics p{margin:0;color:#d2e8f4;font-size:12px;line-height:1.58;overflow-wrap:anywhere}
+@media(max-width:680px){.passport6-topics{grid-template-columns:1fr}}
