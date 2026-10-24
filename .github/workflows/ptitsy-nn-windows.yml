@@ -35,7 +35,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/verify_cache.py scripts/make_habitat.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -45,6 +45,10 @@ jobs:
           node --check app/habitat-atlas.js
           node --check app/atlas5-extras.js
           node --check app/living-world.js
+          node --check app/living6.js
+          node --check preload.cjs
+          node --check main.cjs
+          node --check scripts/test_ai.cjs
       - name: Restore validated offline catalog cache
         id: media-cache
         uses: actions/cache@v4
@@ -111,6 +115,18 @@ jobs:
           Write-Host "Audio QA: accepted $($r.audioTechnicalAccepted) rejected $($r.audioTechnicalRejected)"
           Write-Host "Voices MAX: xeno-canto key configured $($r.maxVoices.xenoApiKeyConfigured) / new sources $($r.maxVoices.newSources)"
           Write-Host "Voices ULTRA: total sound tracks $($r.audioTracksTotal) | additional tracks $($r.extraAudioTracks) | multi-track species $($r.multiTrackSpecies)"
+      - name: Try improving genuine voice coverage in validated cached catalog
+        if: steps.existing-catalog.outputs.ready == 'true'
+        timeout-minutes: 9
+        run: |
+          python -u scripts/voice_max.py
+          python -u scripts/ultra_tracks.py
+          python -u scripts/audit_audio.py
+          python scripts/verify_cache.py
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+          BIRDS_MAX_BUDGET_SECONDS: '220'
+          BIRDS_ULTRA_BUDGET_SECONDS: '130'
       - name: Prepare offline map of Nizhny Novgorod Oblast and coarsened sightings
         timeout-minutes: 12
         run: python -u scripts/make_habitat.py
@@ -122,6 +138,7 @@ jobs:
           node --check app/ultra-audio.js
           node --check app/field-assistant.js
           node --check app/data.js
+          node --check app/living6.js
           node --check app/atlas5-extras.js
           node --check app/habitat-data.js
           node --check main.cjs
@@ -138,6 +155,9 @@ jobs:
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
           key: ptitsy-nn-media-v10-${{ runner.os }}-${{ github.sha }}
+      - name: Fetch and SHA256 validate real Apache-2.0 Perch v2 regional ONNX model
+        timeout-minutes: 14
+        run: python -u scripts/prepare_ai.py
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
@@ -145,6 +165,9 @@ jobs:
           key: ptitsy-nn-npm-v1-${{ runner.os }}-${{ hashFiles('PtitsyNN/package.json') }}
       - name: Install Electron builder
         run: npm install --no-audit --no-fund
+      - name: Verify native Perch v2 inference on Windows
+        timeout-minutes: 6
+        run: node scripts/test_ai.cjs
       - name: Build installer and portable EXE
         run: npm run build:win
         env:
@@ -152,7 +175,7 @@ jobs:
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-5.0-Windows
+          name: Ptitsy-NN-6.0-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/data/coverage.json
