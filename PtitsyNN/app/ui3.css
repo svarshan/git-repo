@@ -1,0 +1,109 @@
+/* MoOLVa 3.0 — dark city desktop dashboard. Self-contained offline UI layer. */
+:root{--ui3-bg:#07101d;--ui3-panel:rgba(5,15,28,.87);--ui3-border:rgba(115,161,200,.37);--ui3-blue:#46bffa}
+body{background:#07101d;color:#e8f2ff;font-family:"Segoe UI",Arial,sans-serif}
+body::before{background:linear-gradient(180deg,rgba(2,8,17,.05) 0%,rgba(2,8,17,.27) 44%,rgba(2,8,17,.91) 100%)}
+.shell{grid-template-columns:270px minmax(0,1fr);min-height:100vh}
+.workspace{min-width:0;position:relative}
+.sidebar{padding:0 0 15px;position:sticky;top:0;height:100vh;max-height:100vh;overflow:auto;background:linear-gradient(170deg,#071426 0%,#071322 72%,#0c263d 100%);border-right:1px solid #254763}
+.brand{min-height:100px;padding:18px 18px 16px;gap:13px;background:linear-gradient(90deg,rgba(10,26,45,.98),rgba(13,33,58,.85));border-bottom:1px solid #244260}
+.crest{width:53px;height:53px;flex:none;background:linear-gradient(150deg,#093450,#0c1c30);border:1px solid #44617a;border-radius:12px;overflow:hidden;display:grid;place-items:center;font:30px "Segoe UI Emoji",sans-serif}
+.crest img{display:block;width:100%;height:100%;object-fit:cover}
+.brand strong{font:600 24px/1.05 "Segoe UI",Arial,sans-serif;color:#eff7ff;white-space:nowrap}
+.brand small{font-size:12px;letter-spacing:0;color:#a7c5dd}
+.brand span{font-size:11px;color:#a5c5dc}
+.sidebar nav{display:flex;flex-direction:column;gap:1px;padding:10px 8px}
+.sidebar nav button{display:flex;align-items:center;gap:16px;padding:10px 14px;min-height:49px;font-size:14px;font-weight:500;color:#d9eafa;border-radius:8px}
+.sidebar nav button:hover,.sidebar nav button.navactive{background:linear-gradient(90deg,#0b4269,rgba(5,46,79,.6));box-shadow:inset 2px 0 #45cbff;color:#78e0ff}
+.sidebar nav button .navico{width:25px;height:25px;flex:none;color:#86bde7}
+.sidebar nav button.navactive .navico,.sidebar nav button:hover .navico{color:#42c4ff}
+.ui3-icon{width:100%;height:100%;display:block;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.sidefoot{padding:17px 19px;margin-top:auto;font-size:19px;color:#a9d1ee;border-top:1px solid #25415b}
+.sidefoot span{font-size:12px;margin-top:3px;color:#a2b9cc}
+.sidefoot small{font-size:11px;display:block;margin-top:8px;color:#9bafc2}
+.ui3-sideart{height:102px;margin:4px 8px 0;border-radius:12px;background:linear-gradient(to top,#081223aa,#07172e22),url('nizhny-night.svg') left bottom/auto 170px no-repeat;border:1px solid #27435d}
+.top{min-height:82px;height:auto;padding:12px 23px;background:linear-gradient(90deg,rgba(8,22,43,.76),rgba(10,27,50,.91));display:flex;gap:16px;letter-spacing:0}
+.top-title{font-size:14px;color:#c2e5f8;white-space:nowrap}
+.top-search{display:flex;align-items:center;gap:9px;min-width:160px;width:min(100%,510px);padding:0 14px;height:47px;background:rgba(3,12,26,.84);border:1px solid #294768;border-radius:11px}
+.top-search .navico{width:22px;height:22px;color:#88b7e3}
+.top-search input{border:0;outline:0;background:transparent;color:#eaf6ff;font:14px "Segoe UI",sans-serif;width:100%;min-width:0}
+.top-search input::placeholder{color:#b1c5d6}
+.top-search:focus-within{border-color:#5fc7ff;box-shadow:0 0 0 2px #55b7ed34}
+.top-tools{display:flex;gap:8px;margin-left:auto;align-items:center}
+.top-tools button{border:1px solid #234565;background:rgba(2,13,27,.86);border-radius:10px;color:#8bbfec;width:46px;height:46px;display:grid;place-items:center}
+.top-tools button:hover{color:#fff;background:#194c70}
+.top-tools .navico{height:22px;width:22px}
+main{max-width:none;margin:0;padding:21px 23px 65px}
+#catalog.view{max-width:1600px;margin:0 auto}
+.ui3-hero{position:relative;min-height:282px;margin:-21px -23px 0;padding:29px 35px 48px;border:0;background:linear-gradient(90deg,rgba(3,11,23,.62) 0%,rgba(4,14,24,.25) 47%,rgba(3,11,20,.17)),url('nizhny-night.svg') center 48% /cover no-repeat;box-shadow:inset 0 -40px 50px #07111c90;overflow:hidden}
+.ui3-hero h1{font:600 clamp(33px,3.6vw,48px)/1.15 "Segoe UI",sans-serif;letter-spacing:-1px;margin:0;color:#f0f1ff;text-shadow:0 3px 15px #000}
+.ui3-hero h2{font:400 clamp(20px,2.5vw,28px)/1.3 "Segoe UI",sans-serif;margin:5px 0;color:#e1eefe}
+.ui3-hero .ui3-sub{font:400 21px "Segoe UI",sans-serif;margin:2px 0 20px;color:#55c8ff}
+.ui3-hero p{font:italic 21px/1.35 "Segoe UI",sans-serif;color:#d4e1f1;margin:0;text-shadow:0 2px 12px #000}
+.ui3-hero .loc{position:absolute;right:27px;bottom:22px;font-size:11px;color:#e7f0f9;background:#081826af;border:1px solid #526b7d88;border-radius:7px;padding:6px 10px}
+.ui3-dashboard{position:relative;margin-top:-20px;z-index:1}
+.metrics.ui3-metrics{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 16px}
+.ui3-metrics article{display:flex;flex-direction:row;align-items:center;gap:16px;min-width:0;padding:17px 18px 15px;border:1px solid var(--ui3-border)!important;border-top:1px solid var(--ui3-border)!important;background:linear-gradient(115deg,rgba(7,20,34,.97),rgba(6,18,32,.9));border-radius:12px;box-shadow:0 10px 20px #0006}
+.ui3-metric-symbol{width:57px;height:57px;flex:none;color:#7ea9ec}
+.ui3-metric-body{display:flex;flex-direction:column;min-width:0;gap:2px;flex:1}
+.ui3-metrics strong{font:700 27px/1.1 "Segoe UI",sans-serif;color:#f4f7ff}
+.ui3-metrics span{font-size:12px;color:#a3c3dc;line-height:1.4}
+.ui3-bar{height:9px;border-radius:30px;margin-top:7px;overflow:hidden;background:#163149;border:1px solid #28415b}
+.ui3-bar i{display:block;height:100%;width:var(--pct,0%);background:linear-gradient(90deg,#2caff3,#58d2ff);border-radius:12px}
+.ui3-metrics article:nth-child(2) .ui3-bar i{background:linear-gradient(90deg,#12a969,#28d68b)}
+.ui3-metrics article:nth-child(3) .ui3-bar i{background:linear-gradient(90deg,#d17c1f,#ffb64b)}
+.ui3-metrics article:nth-child(4) .ui3-bar i{background:linear-gradient(90deg,#864dd5,#b86bff)}
+.ui3-links{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px;margin-bottom:14px}
+.ui3-feature{display:flex;flex-direction:column;min-width:0;overflow:hidden;border:1px solid #45617e;border-radius:13px;padding:0;min-height:245px;text-align:left;background:rgba(3,15,29,.96);color:#f3f7ff;transition:transform .16s,border-color .16s}
+.ui3-feature:hover{border-color:#7eb6e9;transform:translateY(-2px)}
+.ui3-feature-media{height:155px;background:linear-gradient(135deg,#173c5d,#081b32);overflow:hidden;position:relative;display:grid;place-items:center}
+.ui3-feature-media img{width:100%;height:100%;object-fit:cover;display:block}
+.ui3-feature-media .fallback{font-size:42px;color:#96c9f1}
+.ui3-feature-media .navico{height:82px;width:82px;color:#48b9f2}
+.ui3-feature-content{padding:12px 14px;position:relative;flex:1}
+.ui3-feature-content strong{display:block;font-size:15px;line-height:1.3}
+.ui3-feature-content p{font-size:12px;color:#b9d0e5;margin:5px 15px 0 0;line-height:1.55}
+.ui3-feature-content:after{content:'›';position:absolute;font:26px sans-serif;right:10px;bottom:10px;color:#9fc8e9}
+.ui3-feature[data-view="journal"] .ui3-feature-media{background:linear-gradient(135deg,#70523d,#13203a)}
+.ui3-two{display:grid;grid-template-columns:1.37fr 1fr;gap:14px;margin-bottom:22px}
+.ui3-panel{border:1px solid #4c6982;border-radius:13px;background:rgba(4,16,29,.95);overflow:hidden;min-width:0}
+.ui3-panel-head{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:12px 15px 9px}
+.ui3-panel-head h2{display:flex;gap:10px;align-items:center;margin:0;font:600 16px "Segoe UI",sans-serif;color:#f4f7ff}
+.ui3-panel-head .navico{height:24px;width:24px;color:#41c6ff}
+.ui3-panel-head button{background:none;border:0;color:#b6d5ed;font-size:24px}
+.ui3-panel-head button:hover{color:#fff}
+.ui3-panel-caption{display:block;color:#b9cadb;font-size:12px;margin:-6px 15px 10px}
+.ui3-mini-list{display:flex;gap:10px;overflow-x:auto;padding:0 12px 12px}
+.ui3-mini{width:88px;min-width:88px;color:#eef8ff;display:flex;flex-direction:column;gap:4px;align-items:center;text-align:center;border:0;background:transparent;padding:0}
+.ui3-mini img{display:block;height:86px;width:88px;border:1px solid #4c6580;border-radius:9px;object-fit:cover}
+.ui3-mini:hover img{border-color:#66d0ff}
+.ui3-mini strong{font-size:10px;font-weight:500;line-height:1.3}
+.ui3-mini .ui3-missing{height:86px;display:grid;place-items:center;border:1px solid #4c6580;border-radius:9px;width:88px;color:#b7c7da}
+.ui3-catalog-header{border-top:1px solid #274665;padding-top:10px}
+.ui3-catalog-header .heading{margin-top:13px}
+.ui3-catalog-header .heading h2{font:600 25px "Segoe UI",sans-serif;color:#f1f6ff}
+.ui3-catalog-header .filters{background:rgba(6,19,33,.95)}
+.ui3-catalog-header .grid{grid-template-columns:repeat(5,minmax(0,1fr))}
+.ui3-catalog-header .bird{background:#0a1c2e}
+.ui3-catalog-header .meta h3{font:600 16px "Segoe UI",sans-serif}
+.ui3-catalog-header .photo{height:155px}
+.ui3-view-panel{max-width:1200px;margin:20px auto}
+.ui3-view-title{font:600 30px "Segoe UI",sans-serif;color:#eef7ff;margin:0 0 14px}
+.ui3-view-intro{color:#b4cedf;font-size:14px;line-height:1.7;max-width:830px}
+.ui3-info-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px;margin:15px 0}
+.ui3-info-card{padding:17px;border:1px solid #345c78;border-radius:12px;background:rgba(8,25,43,.94)}
+.ui3-info-card strong{font-size:17px;color:#e6f6ff}
+.ui3-info-card p{font-size:13px;color:#bbd4e4}
+.ui3-info-card button{padding:9px 12px;border:1px solid #4b829f;border-radius:9px;background:#173c58;color:#f0f8ff}
+.ui3-settings-list{display:grid;gap:12px;margin:18px 0;max-width:650px}
+.ui3-settings-list label{display:flex;align-items:center;justify-content:space-between;gap:15px;border:1px solid #375c79;padding:15px;border-radius:10px;background:#0b263b}
+.ui3-settings-list input{width:20px;height:20px;accent-color:#34bdf5}
+body.ui3-brighter{--ui3-panel:rgba(9,34,54,.95);--muted:#e3eff9}
+body.ui3-brighter .ui3-panel,body.ui3-brighter .ui3-feature{background:#123551}
+body.ui3-compact .ui3-feature-media{height:110px}body.ui3-compact .ui3-feature{min-height:195px}
+body.ui3-compact .ui3-hero{min-height:205px}
+body.ui3-no-motion *,body.ui3-no-motion *::before,body.ui3-no-motion *::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}
+@media(max-width:1370px){.ui3-links{grid-template-columns:repeat(3,minmax(0,1fr))}.ui3-catalog-header .grid{grid-template-columns:repeat(4,minmax(0,1fr))}}
+@media(max-width:1110px){.shell{grid-template-columns:85px minmax(0,1fr)}.brand{justify-content:center;padding:15px 5px}.brand>div:last-child{display:none}.sidebar nav button{justify-content:center;padding:13px 7px}.sidebar nav button span:not(.navico){display:none}.sidebar nav button .navico{width:24px;height:24px}.sidefoot,.ui3-sideart{display:none}.top-title{display:none}.ui3-metrics article{padding:10px}.ui3-metric-symbol{width:38px;height:38px}.ui3-two{grid-template-columns:1fr}.ui3-catalog-header .grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+@media(max-width:760px){.shell{display:block}.sidebar{position:relative;height:auto;max-height:none;overflow:auto;padding:0}.brand{display:flex;min-height:70px;padding:9px 12px;justify-content:flex-start}.brand>div:last-child{display:flex}.brand strong{font-size:20px}.sidebar nav{flex-direction:row;overflow-x:auto;padding:5px}.sidebar nav button{white-space:nowrap;width:auto;min-width:unset;gap:6px}.sidebar nav button span:not(.navico){display:inline;font-size:12px}.sidebar nav button .navico{width:19px;height:19px}.top{padding:8px 12px;min-height:58px}.top-search{height:42px}.top-tools button{width:39px;height:39px}main{padding:12px 12px 45px}.ui3-hero{margin:-12px -12px 0;padding:23px 19px 48px;min-height:260px}.ui3-dashboard{margin-top:-22px}.metrics.ui3-metrics{grid-template-columns:repeat(2,minmax(0,1fr))}.ui3-links{grid-template-columns:repeat(2,minmax(0,1fr))}.ui3-feature-media{height:120px}.ui3-feature{min-height:202px}.ui3-feature-content{padding:9px}.ui3-feature-content strong{font-size:13px}.ui3-feature-content p{font-size:11px}.ui3-catalog-header .grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:430px){.ui3-links{grid-template-columns:1fr 1fr;gap:7px}.ui3-metrics article{gap:7px}.ui3-metric-symbol{width:28px;height:28px}.ui3-metrics strong{font-size:20px}.ui3-metrics span{font-size:10px}.ui3-feature-media{height:105px}.ui3-feature{min-height:189px}.ui3-hero .loc{display:none}}
+@media(prefers-reduced-motion:reduce){.ui3-feature{transition:none}}
