@@ -6,11 +6,11 @@ const path=require('node:path');
 const base=path.resolve(__dirname,'..');
 const file=x=>fs.readFileSync(path.join(base,x),'utf8');
 const html=file('app/index.html'),css=file('app/ui3.css'),js=file('app/ui3.js');
-test('3.0 offline dashboard matches required layout and navigates to real pages',()=>{
+test('4.0 offline dashboard matches required layout and navigates to real pages',()=>{
  for(const id of ['catalog','field','favorites','compare','lab','journal','map','calendar','gallery','settings','articles','about']){
   assert.match(html,new RegExp('id="'+id+'"'),id);
  }
- for(const id of ['countAll','countAudio','countImages','countArticles','ui3-top-search','ui3-season-list','ui3-photo-list','ui3-gallery','ui3-places','ui3-calendar-grid','catalogList']){
+ for(const id of ['countAll','countAudio','countImages','countArticles','ui3-top-search','ui3-season-list','ui3-photo-list','ui3-gallery','habitatAtlas','ui3-calendar-grid','catalogList']){
   assert.match(html,new RegExp('id="'+id+'"'),id);
  }
  for(const action of ['catalogList','field-recent','field-compare'])assert.ok(html.includes('data-jump="'+action+'"'));
@@ -31,12 +31,12 @@ test('dashboard relies on real species data and old user stores',()=>{
  assert.match(css,/nizhny-night\.svg/);
  assert.match(css,/prefers-reduced-motion/);
  assert.match(html,/не прогноз текущего присутствия/);
- assert.match(html,/не показываем вымышленные точки/);
+ assert.match(html,/не точные места обитания или гнёзда/);
 });
 test('version 3.0 keeps installer and portable and does not load remote media',()=>{
  const p=JSON.parse(file('package.json'));
  const workflow=file('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(p.version,'3.0.0');
+ assert.equal(p.version,'4.0.0');
  assert.ok(p.build.win.target.some(x=>x.target==='nsis'));
  assert.ok(p.build.win.target.some(x=>x.target==='portable'));
  assert.match(p.build.portable.artifactName,/4\.0/);
@@ -48,7 +48,7 @@ test('version 3.0 keeps installer and portable and does not load remote media',(
 });
 
 
-test('3.0 card badges report natural bird voice and article depth truthfully',()=>{
+test('4.0 card badges report natural bird voice and article depth truthfully',()=>{
  const vm=require('node:vm');
  const context={window:{}};
  vm.runInNewContext(file('app/material-flags.js'),context);
