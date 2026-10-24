@@ -133,13 +133,22 @@ jobs:
         env:
           BIRDS_WIKI_BUDGET_SECONDS: '420'
       - name: Grow genuine open-licensed voices toward first milestone of 150
-        timeout-minutes: 31
+        timeout-minutes: 30
+        shell: pwsh
         run: |
+          if ('${{ steps.existing-catalog.outputs.ready }}' -eq 'true') {
+            Write-Host 'Searching additional licensed Commons and optional keyed Xeno-canto recordings in preserved catalog'
+            python -u scripts/voice_max.py
+            python -u scripts/openverse_voices.py
+          }
           python -u scripts/voices_150.py
           python -u scripts/audit_audio.py
           python -u scripts/verify_cache.py
         env:
-          BIRDS_VOICES_150_BUDGET_SECONDS: '1450'
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+          BIRDS_MAX_BUDGET_SECONDS: '210'
+          BIRDS_OPENVERSE_BUDGET_SECONDS: '140'
+          BIRDS_VOICES_150_BUDGET_SECONDS: '1050'
       - name: Report true voice milestone, including shortfall (never invent results)
         shell: pwsh
         run: |
