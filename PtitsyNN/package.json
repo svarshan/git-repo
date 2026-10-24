@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "5.0.0",
+  "version": "6.0.0",
   "private": true,
-  "description": "MoOLVa 5.0 Big Nature Atlas — offline Nizhny Novgorod bird encyclopedia",
+  "description": "MoOLVa 6.0 Living Encyclopedia — offline regional bird map and real local Perch v2 ONNX identification",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -22,6 +22,7 @@
     },
     "files": [
       "main.cjs",
+      "preload.cjs",
       "app/**/*",
       "package.json",
       "data/coverage.json",
@@ -52,11 +53,18 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-5.0-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-6.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-5.0-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-6.0-Portable-${arch}.exe"
     },
-    "publish": null
+    "publish": null,
+    "asarUnpack": [
+      "app/models/*.onnx",
+      "node_modules/onnxruntime-node/**/*"
+    ]
+  },
+  "dependencies": {
+    "onnxruntime-node": "1.24.3"
   }
 }
