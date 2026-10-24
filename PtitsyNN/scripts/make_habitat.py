@@ -18,8 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "app"
 HEADERS = {"User-Agent": "MoOLVaBirdAtlas/5.0 (desktop offline research map; source: gbif.org)"}
 # Wikimedia authored georeferenced map, lat/long edges from source page.
-MAP_URL = "https://commons.wikimedia.org/wiki/Special:Redirect/file/Nizhny_Novgorod_Oblast_(location_map).svg"
-MAP_SOURCE = "https://commons.wikimedia.org/wiki/File:Nizhny_Novgorod_Oblast_(location_map).svg"
+MAP_URL = "https://github.com/antibioticbook/russian-geo-data/blob/master/geo.json"
+MAP_SOURCE = MAP_URL
+MAP_AUTHOR = "antibioticbook/russian-geo-data (CC0 repository; original GADM geographical boundaries)"
+MAP_LICENSE_URL = "https://creativecommons.org/publicdomain/zero/1.0/"
 GEO = dict(north=58.19, south=54.35, west=41.60, east=47.96)
 MAX_PAGES = 24
 LIMIT = 300
@@ -54,18 +56,18 @@ def get(url, params=None, retries=2, timeout=25):
             time.sleep(1.5 * (attempt + 1))
 
 def write_map():
-    destination = APP / "nn-oblast-map.svg"
-    response = get(MAP_URL, timeout=40)
-    content = response.content
-    if not (content.lstrip().startswith(b"<?xml") or content.lstrip().startswith(b"<svg")):
-        raise RuntimeError("Wikimedia returned no SVG file")
-    if len(content) < 12000 or len(content) > 500000:
-        raise RuntimeError("Unexpected cartographic SVG size")
-    value = content.decode("utf-8")
-    if not re.search(r"<svg[\s>]", value) or re.search(r"<script|<foreignObject", value, re.I):
-        raise RuntimeError("Invalid or unsafe cartographic SVG")
-    destination.write_text(value, encoding="utf8")
-    print("Bundled official Wikimedia map, bytes",len(content))
+    """The source-verified polygon is committed to the application itself.
+    Never hotlink Wikimedia at build time (429 rate limit) or user runtime.
+    """
+    destination=APP/"nn-oblast-map.svg"
+    if not destination.is_file():
+        raise RuntimeError("Mandatory Nizhny Novgorod Oblast geographical outline not bundled")
+    content=destination.read_bytes()
+    if not (12000<len(content)<1000000 and b"<svg" in content and b"russian-geo-data" in content):
+        raise RuntimeError("Invalid or non-attributed offline region map")
+    if re.search(rb"<script|<foreignObject",content,re.I):
+        raise RuntimeError("Unsafe SVG content detected")
+    print("Bundled open region map, bytes",len(content),"origin",MAP_URL)
 
 def valid_region(record):
     province = str(record.get("stateProvince") or "").lower()
@@ -206,8 +208,8 @@ def scan():
         generated=TODAY, source="GBIF occurrence/search", attribution="GBIF.org (aggregated records; dataset authorship retained at source)",
         sourceUrl="https://www.gbif.org/occurrence/search?country=RU&taxon_key=212",
         geographicSource=MAP_SOURCE,
-        geographicAuthor="M.Bitton / Wikimedia Commons / CC BY-SA 4.0",
-        geographicLicenseUrl="https://creativecommons.org/licenses/by-sa/4.0/",
+        geographicAuthor=MAP_AUTHOR,
+        geographicLicenseUrl=MAP_LICENSE_URL,
         bounds=GEO, gridSize=dict(latitudeDegrees=GRID_LAT,longitudeDegrees=GRID_LON),
         sampledRecords=queried, matchingRecords=accepted, cells=cells[:140],
         monthEvidenceMinRecords=3, monthEvidenceMinDays=2, geographicProjection="equirectangular",
@@ -225,7 +227,7 @@ def main():
         print("GBIF sample unavailable: "+str(exc))
         data=dict(generated=TODAY,source="GBIF occurrence/search",bounds=GEO,cells=[],
                   sampledRecords=0,matchingRecords=0,filteredCells=0,speciesWithCells=0,
-                  geographicSource=MAP_SOURCE, geographicAuthor="M.Bitton / Wikimedia Commons / CC BY-SA 4.0",
+                  geographicSource=MAP_SOURCE, geographicAuthor=MAP_AUTHOR,
                   note="Нет проверенной выборки наблюдений. Точки не нарисованы искусственно.")
     (APP/"habitat-data.js").write_text("window.HABITAT_DATA="+json.dumps(data,ensure_ascii=False,separators=(",",":"))+";\n",encoding="utf8")
     print("Habitat: cells",len(data["cells"]),"species",data.get("speciesWithCells"),"query sample",data.get("sampledRecords"))
