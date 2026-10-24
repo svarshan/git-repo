@@ -129,7 +129,7 @@ function applyView(){
  panY=Math.max(-h*(zoom-1)/2,Math.min(h*(zoom-1)/2,panY));
  stage.style.transform='translate3d('+panX+'px,'+panY+'px,0) scale('+zoom+')';
  $('#habitatZoomLevel').textContent=Math.round(zoom*100)+'%';
- townLayer?.querySelectorAll('.habitat-town--secondary').forEach(el=>{el.hidden=zoom<1.55;});
+ townLayer?.querySelectorAll('.habitat-town--minor').forEach(el=>{el.hidden=zoom<1.55;});
  hideTooltip();
 }
 function zoomTo(value){
@@ -176,11 +176,11 @@ function drawTowns(){
  for(const town of towns){
   const p=coords(town);
   if(p.left<0||p.left>100||p.top<0||p.top>100)continue;
-  const btn=elem('button','habitat-town'+(town.tier===1?' habitat-town--primary':' habitat-town--secondary'),town.name);
+  const btn=elem('button','habitat-town'+(town.tier===1?' habitat-town--primary':(town.tier===3?' habitat-town--minor':' habitat-town--secondary')),town.name);
   btn.type='button';btn.style.left=p.left+'%';btn.style.top=p.top+'%';
   btn.title='Населённый пункт '+town.name+' · поиск ближайших зон наблюдений';
   btn.setAttribute('aria-label','Показать на карте '+town.name);
-  btn.hidden=town.tier!==1&&zoom<1.55;
+  btn.hidden=town.tier===3&&zoom<1.55;
   btn.addEventListener('click',e=>{e.stopPropagation();focusTown(town);});
   townLayer.append(btn);
  }
