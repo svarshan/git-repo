@@ -13,3 +13,18 @@
 .six-nav-chip{padding:5px 9px;color:#a7ecfc;background:#133e59;border-radius:8px}
 @media(max-width:650px){.ai6-results{grid-template-columns:1fr 1fr}.ai6-result img{height:100px}}
 @media(max-width:440px){.ai6-results{grid-template-columns:1fr}}
+
+.six-compare-toolbar{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px;margin:15px 0 18px}
+.six-compare-toolbar label{display:grid;gap:6px;font-size:13px;color:#bad9ea}
+.six-compare-toolbar select{max-width:100%;min-width:0;padding:11px;border-radius:9px;border:1px solid #426b8a;background:#0d2b41;color:#eff8ff}
+.six-compare-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}
+.six-compare-card{border-radius:14px;padding:15px;background:linear-gradient(140deg,#0f304a,#061a2b);border:1px solid #426c87;display:flex;flex-direction:column;gap:9px;min-width:0}
+.six-compare-card>img{width:100%;height:225px;object-fit:cover;border:1px solid #4a7891;border-radius:11px}
+.six-compare-card h3{color:#f1f8ff;margin:5px 0 0;font-size:21px}
+.six-compare-card>em{color:#a2d4e9;font-size:13px}
+.six-compare-properties{display:grid;grid-template-columns:1fr 1.2fr;gap:7px 10px;margin:10px 0;font-size:12px}
+.six-compare-properties dt{color:#a6c9df}
+.six-compare-properties dd{margin:0;color:#edf7ff;overflow-wrap:anywhere}
+.six-compare-card audio{max-width:100%;width:100%}
+.six-compare-card button{margin-top:auto}
+@media(max-width:750px){.six-compare-grid,.six-compare-toolbar{grid-template-columns:1fr}.six-compare-card>img{height:170px}}
