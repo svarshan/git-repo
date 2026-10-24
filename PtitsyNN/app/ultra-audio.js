@@ -7,7 +7,7 @@ const DB='moolva-birds-own-recordings-v1',STORE='sounds';
 const MIN=2048,MAX=12*1024*1024,LIMIT=4;
 const txt=(tag,cls,label)=>{const e=document.createElement(tag);if(cls)e.className=cls;if(label!=null)e.textContent=String(label);return e;};
 const attach=(parent,...nodes)=>{for(const n of nodes)parent.appendChild(n);return parent;};
-let dbPromise=null,contexts=new WeakMap(),releases=new Set();
+let dbPromise=null,releases=new Set(),sessions=new Set(),userAudios=new Set();
 function openDB(){
  if(!('indexedDB' in window))return Promise.reject(Error('Локальное хранилище недоступно'));
  if(dbPromise)return dbPromise;
@@ -33,7 +33,7 @@ async function transact(mode,action){
   tx.oncomplete=()=>resolve(req?.result);tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error||Error('Транзакция прервана'));
  });
 }
-function closeAll(){for(const url of releases){URL.revokeObjectURL(url);}releases.clear();}
+function closeAll(){for(const a of userAudios){a.pause();}for(const session of sessions){session.dispose?.();}sessions.clear();for(const url of releases){URL.revokeObjectURL(url);}releases.clear();}
 function sniff(bytes){
  if(bytes.length<12)return null;
  if(bytes[0]===0x52&&bytes[1]===0x49&&bytes[2]===0x46&&bytes[3]===0x46&&
@@ -82,7 +82,7 @@ function makeSpectrogram(audio){
     if(audio.paused||audio.ended||t-last<45)return;
     last=t;
     analyser.getByteFrequencyData(frequencies);
-    g.drawImage(canvas,0,0,canvas.width-2,canvas.height,0,0,canvas.width-2,canvas.height);
+    g.drawImage(canvas,2,0,canvas.width-2,canvas.height,0,0,canvas.width-2,canvas.height);
     g.fillStyle='#0a2233';g.fillRect(canvas.width-2,0,2,canvas.height);
     const sr=ctx.sampleRate;
     for(let y=0;y<canvas.height;y++){
@@ -110,7 +110,7 @@ function render(host,bird,audio){
  const player=audio||txt('audio');
  const ownPlayer=!audio;
  if(ownPlayer){player.controls=true;player.preload='metadata';}
- const view=makeSpectrogram(player);
+ const view=makeSpectrogram(player);sessions.add(view);if(ownPlayer)userAudios.add(player);
  const importLabel=txt('label','ultra-import-label','Добавить свою запись WAV / MP3 / OGG');
  const input=txt('input','');input.type='file';input.accept='.wav,.mp3,.ogg,audio/wav,audio/mpeg,audio/ogg';input.setAttribute('aria-label','Импорт своей записи');
  const deleteBtn=txt('button','ultra-delete','Удалить выбранную свою запись');deleteBtn.type='button';deleteBtn.hidden=true;
