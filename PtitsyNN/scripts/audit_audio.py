@@ -68,13 +68,13 @@ def main():
  report['audioTechnicalAccepted']=sum(r.get('result')=='accepted' for r in rows)
  report['audioTechnicalRejected']=sum(r.get('result')=='rejected' for r in rows)
  report['audioHumanReviewed']=0
- if isinstance(report.get('milestone150'),dict):
-  # Milestone status must reflect real post-FFmpeg-audit file coverage,
-  # not optimistic preflight downloads that may fail decoding/silence QA.
-  goal=int(report['milestone150'].get('target') or 150)
-  report['milestone150']['verifiedAudioSpecies']=report['birdCalls']
-  report['milestone150']['shortfall']=max(0,goal-report['birdCalls'])
-  report['milestone150']['achieved']=report['birdCalls']>=goal
+ for milestone in ('milestone150','milestone200'):
+  if isinstance(report.get(milestone),dict):
+   # Milestone status is derived from real post-FFmpeg-audit coverage.
+   goal=int(report[milestone].get('target') or (200 if milestone=='milestone200' else 150))
+   report[milestone]['verifiedAudioSpecies']=report['birdCalls']
+   report[milestone]['shortfall']=max(0,goal-report['birdCalls'])
+   report[milestone]['achieved']=report['birdCalls']>=goal
  coverage.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
  print('AUDIO QA',json.dumps({k:report[k] for k in ('audioTechnicalAccepted','audioTechnicalRejected','audioHumanReviewed')},ensure_ascii=False),flush=True)
 if __name__=='__main__':main()
