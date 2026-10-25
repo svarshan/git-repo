@@ -1,0 +1,26 @@
+/* MoOLVa 7.5 — progressive premium desktop, all existing views preserved. */
+#m75-root,.m75-layout{min-width:0}
+.m75-panel{background:rgba(13,31,47,.88);border:1px solid rgba(115,189,207,.26);box-shadow:0 12px 35px rgba(0,0,0,.20);border-radius:18px;padding:clamp(14px,2vw,24px);margin-bottom:16px}
+.m75-panel h2{font-size:1.25rem;letter-spacing:.015em;margin:0 0 8px}
+.m75-panel p{line-height:1.6}
+.m75-layout{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:15px}
+.m75-controls{display:flex;gap:10px;flex-wrap:wrap;margin:12px 0}
+.m75-controls input,.m75-controls select,.m75-controls textarea,.m75-form input,.m75-form select,.m75-form textarea{min-width:0;background:#14293c;color:#f1f8fc;border:1px solid #416779;border-radius:11px;padding:10px;font:inherit}
+.m75-controls input{flex:1;min-width:180px}
+.m75-controls select{flex:1;min-width:130px}
+.m75-form{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.m75-form label{display:grid;gap:5px}
+.m75-form label:last-of-type{grid-column:1/-1}
+.m75-form textarea{resize:vertical}
+.m75-form button{justify-self:start}
+.m75-results{max-height:470px;overflow:auto;padding-right:4px}
+.m75-species{display:flex;align-items:center;gap:13px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.11)}
+.m75-species img{width:90px;height:78px;object-fit:cover;border-radius:10px}
+.m75-body{display:grid;align-content:center;gap:4px;min-width:0;flex:1}
+.m75-body small,.m75-body span{opacity:.79}
+.m75-body button{justify-self:start}
+.m75-quiz-options{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.m75-note{border-left:3px solid #62b6cb;padding-left:10px}
+.m75-panel :focus-visible{outline:3px solid #62b6cb;outline-offset:3px}
+@media(max-width:900px){.m75-layout{grid-template-columns:1fr}}
+@media(max-width:620px){.m75-form{grid-template-columns:1fr}.m75-form label:last-of-type{grid-column:1}.m75-controls{flex-direction:column}}
