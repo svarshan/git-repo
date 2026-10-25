@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "7.3.0",
+  "version": "7.4.0",
   "private": true,
-  "description": "MoOLVa 7.3 Voices ULTRA MAX — preserving map ULTRA and Perch v2, target 150 scientifically attributed and technically verified species audio",
+  "description": "MoOLVa 7.4 Voices & Bird AI PRO: offline real FFT spectrogram, timestamped Perch v2 inference, target 200 licensed bird calls, preserve Map ULTRA",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -53,10 +53,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-7.3-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-7.4-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-7.3-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-7.4-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [

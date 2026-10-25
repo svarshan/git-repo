@@ -1,13 +1,13 @@
 'use strict';
-/* MoOLVa 7.3 source-level regression guard. Runtime/UI and ONNX smoke tests remain separate. */
+/* MoOLVa 7.4 source-level regression guard. Runtime/UI and ONNX smoke tests remain separate. */
 const fs=require('node:fs'),path=require('node:path');
 const test=require('node:test'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
 test('7.0 Windows artifacts have independent stable names',()=>{
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'7.3.0');
- assert.equal(pkg.build.portable.artifactName,'MoOLVa-7.3-Portable-${arch}.exe');
- assert.equal(pkg.build.nsis.artifactName,'MoOLVa-7.3-Setup-${arch}.exe');
+ assert.equal(pkg.version,'7.4.0');
+ assert.equal(pkg.build.portable.artifactName,'MoOLVa-7.4-Portable-${arch}.exe');
+ assert.equal(pkg.build.nsis.artifactName,'MoOLVa-7.4-Setup-${arch}.exe');
 });
 test('original field atlas remains with authentic regional offline map',()=>{
  const html=read('app/index.html');

@@ -40,3 +40,13 @@
 .ai7-record .living-select{max-width:130px}
 .ai7-record .living-note{margin:0}
 .ai7-progress{display:block;color:#a5deef;font-size:13px;margin:8px 0}
+
+/* MoOLVa 7.4 — real locally computed FFT spectrogram and Bird AI window timeline. */
+.ai74-spectrum{border:1px solid #416d88;border-radius:12px;background:#071d30;padding:12px;margin:14px 0}
+.ai74-spectrum h3{font-size:15px;margin:0 0 9px;color:#cceaf8}
+#birdAISpectrogram{display:block;width:100%;height:auto;max-height:210px;aspect-ratio:640 / 110;background:#061220;image-rendering:auto;cursor:crosshair;border-radius:9px;border:1px solid #355c79}
+#birdAISpectrogram:focus-visible{outline:2px solid #62d6f2;outline-offset:3px}
+.ai74-spectrum .living-note{margin:8px 0 0;font-size:12px}
+.ai74-times{display:flex;gap:5px;flex-wrap:wrap;align-items:center;margin:5px 0}
+.ai74-timestamp{border:1px solid #477e9c;border-radius:7px;background:#19465e;color:#e1f4ff;padding:6px 8px;font-size:12px;cursor:pointer}
+.ai74-timestamp:hover,.ai74-timestamp:focus-visible{background:#25708f;color:#fff;outline:2px solid #78cce9;outline-offset:1px}

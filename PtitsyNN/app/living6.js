@@ -1,5 +1,5 @@
 'use strict';
-/* MoOLVa 7.0: Perch v2 ONNX real offline inference across up to 12 independent 5s windows.
+/* MoOLVa 7.4: Perch v2 ONNX real offline inference across up to 12 independent 5s windows.
  * Recorded microphone audio stays in-memory on the device. No fabricated scores. */
 (function(){
 const $=s=>document.querySelector(s);
@@ -13,7 +13,7 @@ const model=window.BirdAI;
 const norm=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/_/g,' ').trim();
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined&&text!==null)el.textContent=String(text);return el;};
 let file=null,busy=false,recording=false,recorder=null,stream=null,finishTimer=null,startAt=0,previewUrl=null;
-let modelReady=false;
+let modelReady=false,activeAudio=null,stopClip=null;
 const put=(text)=>{if(status)status.textContent=text;};
 const recordingText=t=>{if(recStatus)recStatus.textContent=t;};
 function disableButtons(){
@@ -35,7 +35,7 @@ async function verify(){
 }
 function setFile(next,fromMic){
  if(busy)return;
- file=next;results?.replaceChildren();preview?.replaceChildren();
+ file=next;results?.replaceChildren();if(stopClip){stopClip();stopClip=null;}if(activeAudio)activeAudio.pause();activeAudio=null;preview?.replaceChildren();
  if(previewUrl){URL.revokeObjectURL(previewUrl);previewUrl=null;}
  if(!next){disableButtons();return;}
  if(next.size>32*1024*1024){file=null;put('Максимальный размер записи 32 МБ.');disableButtons();return;}
@@ -44,13 +44,14 @@ function setFile(next,fromMic){
  }
  preview?.append(node('p',next.name+' · '+(next.size/1048576).toFixed(1)+' МиБ · данные останутся на компьютере','living-note'));
  previewUrl=URL.createObjectURL(next);
- const audio=node('audio');audio.controls=true;audio.preload='none';audio.src=previewUrl;preview?.append(audio);
+ const audio=node('audio');audio.controls=true;audio.preload='none';audio.src=previewUrl;preview?.append(audio);activeAudio=audio;
+ window.BirdSpectrogram74?.render(next,audio).catch(e=>{const box=$('#birdAISpectrogramStatus');if(box)box.textContent='Спектрограмма недоступна: '+(e.message||String(e));});
  disableButtons();verify();
 }
 filePicker?.addEventListener('change',()=>setFile(filePicker.files?.[0]||null,false));
 diagnostics?.addEventListener('click',async()=>{
  if(!model?.diagnostics){
-  if(diagnosticsStatus)diagnosticsStatus.textContent='Механизм проверки отсутствует: нужен новый Windows EXE MoOLVa 7.1, а не старый веб-просмотр.';
+  if(diagnosticsStatus)diagnosticsStatus.textContent='Механизм проверки отсутствует: нужен новый Windows EXE MoOLVa 7.4, а не старый веб-просмотр.';
   return;
  }
  diagnostics.disabled=true;
@@ -130,14 +131,34 @@ async function windowsFromFile(blob){
   return {windows,totalSeconds:buffer.duration,truncated:buffer.duration>600};
  }finally{await context.close();}
 }
+function playClip(offset){
+ if(!activeAudio)return;
+ if(stopClip){stopClip();stopClip=null;}
+ let stopped=false;const end=offset+5;
+ const watch=()=>{if(activeAudio && activeAudio.currentTime>=end-.05){activeAudio.pause();clean();}};
+ const clean=()=>{if(stopped)return;stopped=true;activeAudio?.removeEventListener('timeupdate',watch);};
+ activeAudio.currentTime=Math.max(0,offset);
+ activeAudio.addEventListener('timeupdate',watch);
+ stopClip=clean;
+ activeAudio.play().catch(()=>clean());
+}
 function showAnalysis(data,meta){
  results.replaceChildren();
- results.append(node('p','Google Perch v2 · проанализировано '+meta.windows+' фрагментов по 5 с. '+(meta.truncated?'Проанализированы первые 10 минут. ':'')+'Оценки относительны только внутри региональной модели; не являются доказанными вероятностями.','living-note'));
+ results.append(node('p','Google Perch v2 · '+meta.windows+' отдельных окон по 5 с. '+(meta.truncated?'Рассмотрены отдельные окна из первых 10 минут. ':'')+'Временные отметки показывают моменты, в которых модель выдала данный класс. Это не подтверждение присутствия птицы; оценки не калиброваны как вероятности.','living-note'));
  for(const prediction of data.slice(0,8)){
   const bird=birdFor(prediction.label),card=node('article',null,'ai6-result');
   if(bird?.imageFile){const img=node('img');img.loading='lazy';img.src=bird.imageFile;img.alt='Птица '+bird.name;card.append(img);}
   card.append(node('strong',bird?.name||prediction.label));
-  card.append(node('small',(bird?.latin?bird.latin+' · ':'')+'Средняя относительная оценка: '+prediction.score.toFixed(2)+'%; окна: '+prediction.hits+' из '+meta.windows));
+  card.append(node('small',(bird?.latin?bird.latin+' · ':'')+'Средняя относительная оценка модели: '+prediction.score.toFixed(2)+'%; фрагментов в топ-списке: '+prediction.hits+' из '+meta.windows));
+  const moments=node('div',null,'ai74-times');
+  for(const finding of (prediction.findings||[]).slice(0,7)){
+    const play=node('button','▶ '+finding.offset.toFixed(1)+' с','ai74-timestamp');
+    play.type='button';play.title='Прослушать 5 секунд около '+finding.offset.toFixed(1)+' с; модельная оценка '+finding.score.toFixed(1);
+    play.addEventListener('click',()=>playClip(finding.offset));
+    moments.append(play);
+  }
+  if(prediction.hits>7)moments.append(node('small','Ещё '+(prediction.hits-7)+' окон','living-note'));
+  card.append(moments);
   if(bird){
    const row=node('div',null,'ai7-actions');
    const passport=node('button','Открыть паспорт','living-button');passport.type='button';passport.dataset.open=bird.id;
@@ -159,11 +180,12 @@ async function analyse(){
    const response=await model.analyze(windows[i].pcm);
    for(const x of response.results||[]){
     if(!Number.isFinite(x.score)||typeof x.label!=='string')continue;
-    const prev=combined.get(x.label)||{sum:0,hits:0};
-    prev.sum+=x.score;prev.hits++;combined.set(x.label,prev);
+    const prev=combined.get(x.label)||{sum:0,hits:0,findings:[]};
+    prev.sum+=x.score;prev.hits++;prev.findings.push({offset:windows[i].offset,score:x.score});
+    combined.set(x.label,prev);
    }
   }
-  const predictions=[...combined].map(([label,p])=>({label,score:p.sum/windows.length,hits:p.hits}))
+  const predictions=[...combined].map(([label,p])=>({label,score:p.sum/windows.length,hits:p.hits,findings:p.findings.sort((a,b)=>a.offset-b.offset)}))
    .sort((a,b)=>b.score-a.score).slice(0,8);
   showAnalysis(predictions,{windows:windows.length,totalSeconds,truncated});
   put('Локальное распознавание завершено. Сверяйте результаты с фотографиями, голосами и картой.');
