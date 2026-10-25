@@ -37,7 +37,7 @@ test('dashboard relies on real species data and old user stores',()=>{
 test('version 3.0 keeps installer and portable and does not load remote media',()=>{
  const p=JSON.parse(file('package.json'));
  const workflow=file('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(p.version,'7.4.0');
+ assert.equal(p.version,'7.5.0');
  assert.ok(p.build.win.target.some(x=>x.target==='nsis'));
  assert.ok(p.build.win.target.some(x=>x.target==='portable'));
  assert.match(p.build.portable.artifactName,/7\.4/);

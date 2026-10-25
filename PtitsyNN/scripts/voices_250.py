@@ -185,6 +185,14 @@ def checkpoint(birds, started, queries, acquired, rejected):
         'shortfall': max(0,TARGET-count),
         'note': 'Audio file metadata and signal validated; no expert listening certification.'
     }
+    # Preserve all previous reporting milestones for fresh-cache builds as well.
+    if 'milestone200' not in report:
+        report['milestone200'] = {
+            'target': 200, 'baseline': started,
+            'verifiedAudioSpecies': count, 'achieved': count >= 200,
+            'shortfall': max(0, 200 - count),
+            'note': 'Technical/licensing audit only; not expert listening.'
+        }
     REPORT.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
     print('VOICES 250 PROGRESS',json.dumps(report['milestone250'],ensure_ascii=False),flush=True)
     return count
