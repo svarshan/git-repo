@@ -46,7 +46,7 @@ test('sound analysis uses independent five-second 32kHz frames',()=>{
  const code=read('app/living6.js');
  assert.match(code,/OfflineAudioContext\(1,160000,32000\)/);
  assert.match(code,/const segment=5/);
- assert.match(code,/Math\.min\(12/);
+ assert.match(code,/birdAIWindows/);
  assert.match(code,/model\.analyze/);
  assert.match(code,/window\.BirdHabitat\?\.focusSpecies/);
 });
