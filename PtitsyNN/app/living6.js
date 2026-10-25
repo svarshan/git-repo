@@ -51,7 +51,7 @@ function setFile(next,fromMic){
 filePicker?.addEventListener('change',()=>setFile(filePicker.files?.[0]||null,false));
 diagnostics?.addEventListener('click',async()=>{
  if(!model?.diagnostics){
-  if(diagnosticsStatus)diagnosticsStatus.textContent='Механизм проверки отсутствует: нужен новый Windows EXE MoOLVa 7.1, а не старый веб-просмотр.';
+  if(diagnosticsStatus)diagnosticsStatus.textContent='Механизм проверки отсутствует: нужен новый Windows EXE MoOLVa 7.4, а не старый веб-просмотр.';
   return;
  }
  diagnostics.disabled=true;
