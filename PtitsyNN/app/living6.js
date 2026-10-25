@@ -113,7 +113,7 @@ async function windowsFromFile(blob){
   const durationSeconds=Math.min(600,buffer.duration);
   // Cover the entire first 10 minutes with at most 12 sampled 5-second windows.
   const segment=5;
-  const count=Math.max(1,Math.min(12,Math.ceil(durationSeconds/segment)));
+  const count=Math.max(1,Math.min(Number(document.querySelector("#birdAIWindows")?.value)||12,Math.ceil(durationSeconds/segment)));
   const range=Math.max(0,durationSeconds-segment);
   const offsets=Array.from({length:count},(_,i)=>count===1?0:Math.round((range*i/(count-1))*1000)/1000);
   const windows=[];
@@ -164,7 +164,15 @@ function showAnalysis(data,meta){
    const passport=node('button','Открыть паспорт','living-button');passport.type='button';passport.dataset.open=bird.id;
    const map=node('button','На карте','living-button');map.type='button';
    map.addEventListener('click',()=>window.BirdHabitat?.focusSpecies(bird.id));
-   row.append(passport,map);card.append(row);
+   const draft=node('button','В дневник (проверить вручную)','living-button');draft.type='button';
+   draft.addEventListener('click',()=>{
+    document.querySelector('nav [data-view="pro75"]')?.click();
+    const select=document.getElementById('m75JournalBird'),notes=document.getElementById('m75JournalNotes');
+    if(select)select.value=bird.id;
+    if(notes)notes.value=('Предположение Bird AI: '+bird.name+'. Модель не подтверждает наличие вида; сравнил(а) запись вручную: ').slice(0,2000);
+    document.getElementById('m75JournalPlace')?.focus();
+   });
+   row.append(passport,map,draft);card.append(row);
   }else card.append(node('small','Название не сопоставлено с региональным каталогом.','living-note'));
   results.append(card);
  }

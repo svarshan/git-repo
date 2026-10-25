@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "7.4.0",
+  "version": "7.5.0",
   "private": true,
-  "description": "MoOLVa 7.4 Voices & Bird AI PRO: offline real FFT spectrogram, timestamped Perch v2 inference, target 200 licensed bird calls, preserve Map ULTRA",
+  "description": "MoOLVa 7.5 Field PRO MAX: real Perch v2 12/24 windows, Atlas ULTRA 3.0 nearby observations, 250 licensed audio target, academy and legacy-safe journal.",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -53,10 +53,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-7.4-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-7.5-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-7.4-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-7.5-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [

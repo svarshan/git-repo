@@ -106,6 +106,7 @@ function openForm(existingId=null,preferredBird=null){
   }
  });
 }
+window.addEventListener('moolva75-journal-changed',()=>{const next=raw('ptitsy-nn.journal.v1',[]);if(Array.isArray(next)){journal=next;renderJournal();}});
 function renderJournal(){
  const input=$('#journalSearch'),filter=$('#journalBirdFilter'),sort=$('#journalSort'),summary=$('#journalSummary');
  const previous=filter.value;
