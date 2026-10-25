@@ -44,7 +44,7 @@ function candidates(logits,labels){
  return pick.map(([i,v])=>({label:labels[i],score:Math.round(Math.exp(v-max)/sum*10000)/100})).filter(x=>x.score>0);
 }
 function window(){
- const w=new BrowserWindow({title:'MoOLVa 7.1 — Полевой атлас PRO',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,
+ const w=new BrowserWindow({title:'MoOLVa 7.4 — Полевой атлас PRO',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,preload:path.join(__dirname,'preload.cjs')}});
  w.webContents.on('will-navigate',e=>e.preventDefault());
  w.webContents.setWindowOpenHandler(({url})=>{try{
