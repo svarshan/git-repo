@@ -29,7 +29,7 @@ test('real model and license assets are in the Windows build',()=>{
  assert.match(pkg.build.asarUnpack.join(','),/app\/models/);
  assert.match(workflow,/python -u scripts\/prepare_ai\.py/);
  assert.match(workflow,/node scripts\/test_ai\.cjs/);
- assert.match(workflow,/Ptitsy-NN-7\.4-Windows/);
+ assert.match(workflow,/Ptitsy-NN-7\.5-Windows/);
  const folder=path.join(ROOT,'app','models');
  const info=JSON.parse(fs.readFileSync(path.join(folder,'model-provenance.json'),'utf8'));
  const weights=path.join(folder,'perch-v2-eastern-europe.onnx');
