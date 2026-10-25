@@ -22,7 +22,20 @@ test('only existing local media with open licenses, author and source credits',(
   assert.ok(b[credit]?.author,'Missing author credit for '+b[file]);
   assert.ok(b[credit]?.license,'Missing license for '+b[file]);
   assert.doesNotMatch(b[credit].license,forbiddenLicense);
-  if(file==='audioFile')assert.doesNotMatch(b[credit].source,/inaturalist\.org/, 'Bird audio must not come from ambient iNaturalist observation');
+  if(file==='audioFile' && /inaturalist\.org/.test(b[credit].source)){
+   // Bare ambient observation recordings remain forbidden; only an identified
+   // individual sound with licensed metadata, author and audit is admissible.
+   const c=b[credit];
+   assert.equal(c.sourcePlatform,'iNaturalist','Missing per-sound source provenance');
+   assert.match(String(c.recordingId||''),/^iNat:\d+$/,'Missing individual sound recording ID');
+   assert.ok(Number.isInteger(c.soundId)&&c.soundId>0,'Missing original sound ID');
+   assert.match(c.source,/^https:\/\/www\.inaturalist\.org\/observations\/\d+$/);
+   assert.ok(['CC0','CC-BY','CC-BY-SA'].includes(String(c.license).toUpperCase()),'Only CC0, CC BY, CC BY-SA licensed sound permitted');
+   assert.match(String(c.licenseUrl||''),/^https:\/\/creativecommons\.org\/(?:licenses\/by(?:-sa)?\/|publicdomain\/zero\/)/);
+   assert.match(String(c.speciesMatch||''),/exact scientific taxon name on research-grade/i);
+   assert.ok(c.audioQuality?.seconds>=1 && Number.isFinite(c.audioQuality?.meanDb),'Missing post-download FFmpeg QA');
+   assert.ok(c.author && c.audioProcessing,'Missing author or processing metadata');
+  }
   assert.match(b[credit]?.source||'',allowedMediaSource,'Unrecognized license source for '+b[file]);
  }
 });
