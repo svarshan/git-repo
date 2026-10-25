@@ -36,10 +36,10 @@ test('7.2 retains Bird AI model and original encyclopedia',()=>{
 });
 test('7.2 archives separate Portable and Setup',()=>{
  const pkg=JSON.parse(read('package.json')),workflow=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(pkg.version,'7.3.0');
- assert.equal(pkg.build.nsis.artifactName,'MoOLVa-7.3-Setup-${arch}.exe');
- assert.equal(pkg.build.portable.artifactName,'MoOLVa-7.3-Portable-${arch}.exe');
- assert.match(workflow,/Ptitsy-NN-7\.3-Portable-only/);
+ assert.equal(pkg.version,'7.4.0');
+ assert.equal(pkg.build.nsis.artifactName,'MoOLVa-7.4-Setup-${arch}.exe');
+ assert.equal(pkg.build.portable.artifactName,'MoOLVa-7.4-Portable-${arch}.exe');
+ assert.match(workflow,/Ptitsy-NN-7\.4-Portable-only/);
  assert.match(workflow,/gh release create \$tag/);
  assert.match(workflow,/make_ultra_map\.py/);
 });
