@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test'),assert=require('node:assert/strict'),fs=require('node:fs'),path=require('node:path');
 const base=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(base,p),'utf8');
-test('7.6 sidebar keeps main tabs visible and stores collapse locally',()=>{
+test('7.7 sidebar keeps main tabs visible and stores collapse locally',()=>{
  const html=read('app/index.html'),js=read('app/sidebar76.js'),css=read('app/sidebar76.css');
  assert.match(html,/id="m76Toggle"/);
  assert.match(html,/id="m76SidebarCompact"/);
@@ -16,7 +16,7 @@ test('7.6 sidebar keeps main tabs visible and stores collapse locally',()=>{
  assert.match(js,/aria-expanded/);
  assert.match(css,/m76-sidebar-compact/);
 });
-test('7.6 all former navigation targets remain reachable; service lives in settings',()=>{
+test('7.7 all former navigation targets remain reachable; service lives in settings',()=>{
  const html=read('app/index.html'),start=html.indexOf('<nav aria-label="Разделы приложения">'),end=html.indexOf('</nav>',start),nav=html.slice(start,end);
  for(const id of ['catalog','birdai','map','journal','pro75','field','assistant','photoid','soundid','comparebirds6','lab','favorites','gallery','articles','academy','calendar','conservation','settings']){
   assert.ok(nav.includes('data-view="'+id+'"'),'Lost navigation: '+id);
@@ -26,11 +26,11 @@ test('7.6 all former navigation targets remain reachable; service lives in setti
  assert.ok(!nav.includes('data-view="expedition"'),'Expedition must be inside Settings');
  assert.ok(html.includes('data-jump="field-recent"'));
 });
-test('7.6 keeps offline user data and both EXEs',()=>{
+test('7.7 keeps offline user data and both EXEs',()=>{
  const p=JSON.parse(read('package.json')),html=read('app/index.html'),workflow=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(p.version,'7.6.0');
- assert.equal(p.build.nsis.artifactName,'MoOLVa-7.6-Setup-${arch}.exe');
- assert.equal(p.build.portable.artifactName,'MoOLVa-7.6-Portable-${arch}.exe');
+ assert.equal(p.version,'7.7.0');
+ assert.equal(p.build.nsis.artifactName,'MoOLVa-7.7-Setup-${arch}.exe');
+ assert.equal(p.build.portable.artifactName,'MoOLVa-7.7-Portable-${arch}.exe');
  assert.ok(html.includes("connect-src 'none'"));
  assert.ok(workflow.includes('scripts/voices_298.py'));
  assert.ok(workflow.includes('scripts/fill_missing76.py'));
