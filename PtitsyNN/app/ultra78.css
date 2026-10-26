@@ -1,0 +1,30 @@
+/* MoOLVa 7.8: readable and restrained offline field experience. */
+.m78-controls{display:flex;flex-wrap:wrap;gap:11px;align-items:center;margin:12px 0}
+.m78-controls label{display:flex;align-items:center;gap:7px;color:#cde9f9;font-size:13px}
+.m78-controls select,.m78-controls input{background:#09243b;border:1px solid #467893;border-radius:8px;color:#e6f6ff;padding:7px;min-width:130px}
+.m78-panel{border:1px solid #3c6b87;background:rgba(7,30,49,.92);border-radius:13px;margin:16px 0;padding:17px;color:#d7edf9}
+.m78-panel h2{font-size:19px;margin:1px 0 10px;color:#f1f8ff}
+.m78-panel p{line-height:1.65}
+.m78-tabs{display:flex;flex-wrap:wrap;gap:6px}
+.m78-tabs button{border:1px solid #437793;border-radius:8px;background:#133c58;color:#e4f3ff;padding:9px 13px}
+.m78-tabs button[aria-pressed=true]{background:#1e6084;color:white;border-color:#68d1ff}
+.m78-article-text{white-space:pre-line;overflow-wrap:anywhere;max-height:480px;overflow:auto;font-size:14px}
+.m78-map-quality{border-left:3px solid #6ac9ed;padding:9px 14px;background:#0a2943;border-radius:5px;color:#cee6f6;line-height:1.65;font-size:12px}
+.m78-note{padding:8px 11px;border-bottom:1px solid #2d5369;display:flex;flex-direction:column;gap:2px;color:#bed8e7}
+.m78-note strong{color:#f1f9ff}
+.m78-note p{margin:0}
+.m78-sound-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.m78-sound-grid>section{min-width:0;padding:13px;border:1px solid #365c74;background:#0d263e;border-radius:11px}
+.m78-sound-grid audio,.m78-sound-grid select{display:block;width:100%;margin:10px 0;max-width:100%;color-scheme:dark}
+.m78-sound-grid canvas{width:100%;height:85px;background:#061725;border-radius:7px}
+.m78-sound-grid small{display:block;color:#b5cce2;overflow-wrap:anywhere}
+.m78-large-cards .bird .photo{height:230px}
+.m78-large-cards .grid{grid-template-columns:repeat(auto-fit,minmax(235px,1fr))}
+body{font-size:calc(14px * var(--m78-font-scale,1))}
+.view p,.view button,.view input,.view label,.view select,.sidebar nav button{font-size:calc(1em * var(--m78-font-scale,1))}
+.m78-photo-lightbox{position:fixed;inset:0;z-index:65;background:#030a12f0;display:flex;align-items:center;justify-content:center;padding:35px 20px}
+.m78-photo-lightbox[hidden]{display:none}
+.m78-photo-lightbox img{max-width:min(95vw,1400px);max-height:85vh;object-fit:contain}
+.m78-photo-lightbox button{position:absolute;top:12px;right:20px;border:1px solid #679bb4;background:#143853;color:#fff;padding:10px 17px;border-radius:8px}
+@media(max-width:680px){.m78-sound-grid{grid-template-columns:1fr}.m78-controls{align-items:flex-start;flex-direction:column}.m78-controls label{flex-wrap:wrap}}
+@media(prefers-reduced-motion:reduce){.m78-tabs button{transition:none}}

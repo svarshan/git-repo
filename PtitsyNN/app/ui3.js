@@ -106,17 +106,20 @@ function renderPreview(){
  const row=$('#ui3-season-list');if(row)row.replaceChildren(...featured.map(makeMini));
  const recent=$('#ui3-photo-list');if(recent)recent.replaceChildren(...good.slice(0,8).map(makeMini));
 }
+let m78GalleryShown=48;
 function renderGallery(){
  const el=$('#ui3-gallery');if(!el)return;
  const query=($('#ui3-gallery-search')?.value||'').toLocaleLowerCase('ru').replace(/ё/g,'е').trim();
  const matched=birds.filter(b=>b.imageFile&&(!query||(b.name+' '+b.latin).toLocaleLowerCase('ru').replace(/ё/g,'е').includes(query)));
  const count=$('#ui3-gallery-count');if(count)count.textContent='Фотографий с подтверждённой лицензией: '+matched.length;
- el.innerHTML=matched.slice(0,120).map(b=>'<article class="bird"><button class="photo" data-open="'+escapeHtml(b.id)+'"><img loading="lazy" src="'+escapeHtml(b.imageFile)+'" alt="'+escapeHtml(b.name)+'"></button><div class="meta"><h3>'+escapeHtml(b.name)+'</h3><div class="latin">'+escapeHtml(b.latin)+'</div>'+
+ el.innerHTML=matched.slice(0,m78GalleryShown).map(b=>'<article class="bird"><button class="photo" data-open="'+escapeHtml(b.id)+'"><img loading="lazy" src="'+escapeHtml(b.imageFile)+'" alt="'+escapeHtml(b.name)+'"></button><div class="meta"><h3>'+escapeHtml(b.name)+'</h3><div class="latin">'+escapeHtml(b.latin)+'</div>'+
  (window.BirdMaterialFlags?.markup(b)||'')+'<p class="materials-summary">'+escapeHtml(window.BirdMaterialFlags?.excerpt(b,105)||'')+'</p>'+
  '<div class="actions"><button type="button" data-open="'+escapeHtml(b.id)+'">Подробнее →</button></div></div></article>').join('')||'<p>По запросу фотографий не найдено.</p>';
+ const more=$('#m78GalleryMore');if(more){more.hidden=matched.length<=m78GalleryShown;more.textContent='Показать ещё · '+Math.max(0,matched.length-m78GalleryShown)+' фото';}
 }
 function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-$('#ui3-gallery-search')?.addEventListener('input',renderGallery);
+$('#ui3-gallery-search')?.addEventListener('input',()=>{m78GalleryShown=48;renderGallery();});
+$('#m78GalleryMore')?.addEventListener('click',()=>{m78GalleryShown+=48;renderGallery();});
 function renderMap(){
  const el=$('#ui3-places');if(!el)return;
  const places=new Map();
