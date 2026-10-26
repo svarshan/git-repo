@@ -10,3 +10,13 @@ contextBridge.exposeInMainWorld('BirdAI',{
   return ipcRenderer.invoke('birdai-analyze',pcm);
  }
 });
+
+contextBridge.exposeInMainWorld('BirdVision',{
+ status:()=>ipcRenderer.invoke('birdvision80-status'),
+ diagnostics:()=>ipcRenderer.invoke('birdvision80-diagnostics'),
+ predict:(bytes)=>{
+  if(!(bytes instanceof Uint8Array)&&!(bytes instanceof ArrayBuffer))return Promise.reject(Error('Нужно локальное изображение'));
+  if(bytes.byteLength>9*1024*1024)return Promise.reject(Error('Фото слишком большое'));
+  return ipcRenderer.invoke('birdvision80-predict',bytes);
+ }
+});

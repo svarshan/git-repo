@@ -1,6 +1,7 @@
 'use strict';
-const {app,BrowserWindow,shell,session,ipcMain}=require('electron');
+const {app,BrowserWindow,shell,session,ipcMain,nativeImage}=require('electron');
 const path=require('node:path'),fs=require('node:fs'),crypto=require('node:crypto');
+const {registerVision80}=require('./vision80.cjs');
 const evidenceArg=process.argv.find(a=>a.startsWith('--moolva-ci-capture-dir='));
 const evidenceMode=process.env.MOOLVA_CI_EVIDENCE==='1'&&Boolean(evidenceArg);
 if(evidenceMode)app.disableHardwareAcceleration();
@@ -47,7 +48,7 @@ function candidates(logits,labels){
  return pick.map(([i,v])=>({label:labels[i],score:Math.round(Math.exp(v-max)/sum*10000)/100})).filter(x=>x.score>0);
 }
 function window(){
- const w=new BrowserWindow({title:'MoOLVa 7.9 — Полевой атлас PRO',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,show:!evidenceMode,
+ const w=new BrowserWindow({title:'MoOLVa 8.0 — Орнитологический интеллект',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,show:!evidenceMode,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,offscreen:evidenceMode,preload:path.join(__dirname,'preload.cjs')}});
  w.webContents.on('will-navigate',e=>e.preventDefault());
  w.webContents.setWindowOpenHandler(({url})=>{try{
@@ -77,7 +78,7 @@ async function captureReleaseEvidence(win){
   const pages=[
    ['01-glavnaya.png','catalog'],['02-bird-ai.png','birdai'],
    ['03-karta-oblasti.png','map'],['04-encyclopedia.png','articles'],
-   ['05-polevoi-dnevnik.png','journal'],['06-audiolaboratoriya.png','lab']
+   ['05-polevoi-dnevnik.png','journal'],['06-audiolaboratoriya.png','lab'],['07-intelligence-center.png','intelligence80']
   ];
   const captured=[];
   for(const [name,view] of pages){
@@ -99,9 +100,11 @@ async function captureReleaseEvidence(win){
     sha256:crypto.createHash('sha256').update(bytes).digest('hex')});
    process.stdout.write('REAL PACKAGED WINDOW SCREENSHOT '+name+' '+bytes.length+' bytes\\n');
   }
+  const visionSmoke=await win.webContents.executeJavaScript('window.BirdVision?.diagnostics()');
+  if(!visionSmoke?.ok||visionSmoke.classes<200)throw Error('Real local image model did not pass native ONNX inference');
   const evidence={type:'MoOLVa-real-windows-screenshots',version:require('./package.json').version,
    runtime:'Electron packaged Windows executable',captureMethod:'Chromium webContents.capturePage (offscreen)',
-   os:process.platform,packaged:app.isPackaged,modelAvailable:modelStatus().available,catalog:data,
+   os:process.platform,packaged:app.isPackaged,modelAvailable:modelStatus().available,visionModelVerified:visionSmoke,catalog:data,
    screenshots:captured,createdAt:new Date().toISOString()};
   if(!evidence.modelAvailable)throw Error('Offline Perch v2 files absent in executable');
   fs.writeFileSync(path.join(out,'gui-smoke.json'),JSON.stringify(evidence,null,2),'utf8');
@@ -114,6 +117,7 @@ async function captureReleaseEvidence(win){
 }
 
 app.whenReady().then(()=>{
+ registerVision80({app,ipcMain,nativeImage,isTrusted});
  session.defaultSession.setPermissionRequestHandler((wc,permission,callback,details)=>{
   const mediaTypes=Array.isArray(details?.mediaTypes)?details.mediaTypes:[];
   const audioOnly=!mediaTypes.includes('video')&&(mediaTypes.length===0||mediaTypes.includes('audio'));

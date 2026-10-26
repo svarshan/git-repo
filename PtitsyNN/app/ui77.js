@@ -6,7 +6,7 @@
  const key='ptitsy-nn.ui77.v1',root=document.getElementById('m77Palette'),searchBox=document.getElementById('m77Query');
  const options=document.getElementById('m77Results'),hint=document.getElementById('m77PaletteHint'),pins=document.getElementById('m77Pins');
  const pinSettings=document.getElementById('m77PinSettings'),width=document.getElementById('m77Width'),open=document.getElementById('m77Open');
- const pages=[['catalog','Главная'],['field','Определитель'],['assistant','Умный поиск'],['birdai','Bird AI по голосу'],['map','Карта птиц'],['journal','Дневник'],['pro75','Полевой центр'],['expedition','Экспедиции'],['comparebirds6','Сравнение видов'],['gallery','Фотографии'],['lab','Аудиолаборатория'],['articles','Энциклопедия'],['academy','Академия'],['calendar','Календарь'],['conservation','Красная книга'],['favorites','Избранное'],['settings','Настройки'],['about','Источники и лицензии']];
+ const pages=[['catalog','Главная'],['intelligence80','Интеллектуальный центр'],['field','Определитель'],['assistant','Умный поиск'],['birdai','Bird AI по голосу'],['map','Карта птиц'],['journal','Дневник'],['pro75','Полевой центр'],['expedition','Экспедиции'],['comparebirds6','Сравнение видов'],['gallery','Фотографии'],['lab','Аудиолаборатория'],['articles','Энциклопедия'],['academy','Академия'],['calendar','Календарь'],['conservation','Красная книга'],['favorites','Избранное'],['settings','Настройки'],['about','Источники и лицензии']];
  const labels=new Map(pages),defaultPins=[]; // Start clean: no duplicate core buttons
  const make=(tag,txt,cls)=>{const n=document.createElement(tag);if(txt!=null)n.textContent=String(txt);if(cls)n.className=cls;return n;};
  let state={width:270,pinned:defaultPins.slice()},index=0,shown=[];

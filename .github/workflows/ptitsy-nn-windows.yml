@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 7.9
+name: Птицы НН — Windows EXE 8.0
 on:
   workflow_dispatch:
     inputs:
@@ -59,7 +59,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py scripts/release_evidence79.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -70,6 +70,8 @@ jobs:
           node --check app/core77.js
           node --check app/ui77.js
           node --check app/ultra78-core.js
+          node --check app/core80.js
+          node --check app/intelligence80.js
           node --check app/ultra78-ui.js
           node --check app/backup78.js
           node --check app/expedition77.js
@@ -82,6 +84,7 @@ jobs:
           node --check app/spectrogram74.js
           node --check app/field75-core.js
           node --check app/field75-ui.js
+          node --check vision80.cjs
           node --check preload.cjs
           node --check main.cjs
           node --check scripts/test_ai.cjs
@@ -213,6 +216,9 @@ jobs:
       - name: Fetch and SHA256 validate real Apache-2.0 Perch v2 regional ONNX model
         timeout-minutes: 14
         run: python -u scripts/prepare_ai.py
+      - name: Download actual MIT bird image classifier with pinned SHA256 and label mapping
+        timeout-minutes: 15
+        run: python -u scripts/prepare_vision80.py
       - name: Verify generated JS and catalog
         run: |
           node --check app/app.js
@@ -221,6 +227,9 @@ jobs:
           node --check app/ultra-audio.js
           node --check app/field-assistant.js
           node --check app/data.js
+          node --check app/core80.js
+          node --check app/intelligence80.js
+          node --check vision80.cjs
           node --check app/ultra78-core.js
           node --check app/ultra78-ui.js
           node --check app/backup78.js
@@ -301,23 +310,23 @@ jobs:
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.9-Portable-only
-          path: PtitsyNN/dist/MoOLVa-7.9-Portable-x64.exe
+          name: Ptitsy-NN-8.0-Portable-only
+          path: PtitsyNN/dist/MoOLVa-8.0-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.9-Setup-only
-          path: PtitsyNN/dist/MoOLVa-7.9-Setup-x64.exe
+          name: Ptitsy-NN-8.0-Setup-only
+          path: PtitsyNN/dist/MoOLVa-8.0-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.9-Windows
+          name: Ptitsy-NN-8.0-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
@@ -358,12 +367,12 @@ jobs:
           $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
           $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
           $ev = (Resolve-Path dist/release-evidence).Path
-          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png')
+          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png')
           $evidenceFiles = foreach ($name in $evidenceNames) {
             $item = Get-Item (Join-Path $ev $name) -ErrorAction Stop
             $item.FullName
           }
-          $notes = "Built by GitHub Actions from $sha. Windows Setup + Portable EXE, SHA256, catalog coverage, six real packaged Windows Electron screenshots, automatic QA report and exact missing licensed voices. Screenshots are offscreen captures from a running packaged EXE; they do not replace manual tests on user hardware. Exact source: archive/ptitsy-$version-build-$($sha.Substring(0,12))."
+          $notes = "Built by GitHub Actions from $sha. Windows Setup + Portable EXE, SHA256, catalog coverage, seven real packaged Windows Electron screenshots, automatic QA report and exact missing licensed voices. Screenshots are offscreen captures from a running packaged EXE; they do not replace manual tests on user hardware. Exact source: archive/ptitsy-$version-build-$($sha.Substring(0,12))."
           gh release create $tag $setup $portable $sums $coverage @evidenceFiles --target $sha --title "MoOLVa Птицы Нижегородской области $version" --notes $notes
           if ($LASTEXITCODE -ne 0) { throw 'Release creation failed; Actions artifacts retained separately.' }
           Write-Host "Download: https://github.com/${{ github.repository }}/releases/tag/$tag"

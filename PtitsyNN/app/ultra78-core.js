@@ -38,7 +38,7 @@
  }
  function validStateArchive(x){
   if(!x||x.type!=='moolva-backup78'||x.version!==1||!x.stores||typeof x.stores!=='object'||Array.isArray(x.stores)||!Array.isArray(x.assets)||x.assets.length>20000)return false;
-  const allowed=['ptitsy-nn.journal.v1','ptitsy-nn.favorites.v1','ptitsy-nn.recent.v1','ptitsy-nn.ui3.settings.v1','ptitsy-nn.sidebar.v76','ptitsy-nn.ui77.v1','ptitsy-nn.ui78.v1','ptitsy-nn.expedition77.v1','ptitsy-nn.ai77.history.v1','ptitsy-nn.voice-lab.v1','ptitsy-nn.academy.sound.v5','ptitsy-nn.academy.v1'];
+  const allowed=['ptitsy-nn.journal.v1','ptitsy-nn.favorites.v1','ptitsy-nn.recent.v1','ptitsy-nn.ui3.settings.v1','ptitsy-nn.sidebar.v76','ptitsy-nn.ui77.v1','ptitsy-nn.ui78.v1','ptitsy-nn.academy80.v1','ptitsy-nn.fieldmode80.v1','ptitsy-nn.expedition77.v1','ptitsy-nn.ai77.history.v1','ptitsy-nn.voice-lab.v1','ptitsy-nn.academy.sound.v5','ptitsy-nn.academy.v1'];
   return Object.keys(x.stores).every(k=>allowed.includes(k)&&typeof x.stores[k]==='string'&&x.stores[k].length<=8e6)&&
    x.assets.every(a=>a&&typeof a.id==='string'&&a.id.length<=160&&['photo','audio'].every(k=>a[k]==null||(typeof a[k]==='string'&&a[k].length<=8e6)));
  }
