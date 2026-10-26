@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "7.9.0",
+  "version": "8.0.0",
   "private": true,
-  "description": "MoOLVa 7.9 PRO MAX: verified release evidence with screenshots captured from the actual packaged Electron Windows EXE, downloadable QA report, exact missing bird voice inventory, and preserved 7.8 field features.",
+  "description": "MoOLVa 8.0 PRO MAX: real local EfficientNet image AI, Perch v2 voice AI, multi-evidence bird field center, published-sighting map, verified encyclopedia and academy, safe journals, performance, real Windows QA with screenshots.",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -23,6 +23,7 @@
     "files": [
       "main.cjs",
       "preload.cjs",
+      "vision80.cjs",
       "app/**/*",
       "package.json",
       "data/coverage.json",
@@ -53,10 +54,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-7.9-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-8.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-7.9-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-8.0-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [

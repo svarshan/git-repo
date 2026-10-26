@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MoOLVa 7.9 release evidence from authentic Windows screenshot smoke and generated bird catalog."""
+"""MoOLVa 8.0 release evidence from authentic Windows screenshot smoke and generated bird catalog."""
 from __future__ import annotations
 import argparse,csv,hashlib,json,re,struct,sys
 from pathlib import Path
@@ -50,9 +50,9 @@ def screenshots():
     smoke=json.loads((DIST/'gui-smoke.json').read_text(encoding='utf-8'))
     if smoke.get('type')!='MoOLVa-real-windows-screenshots' or smoke.get('packaged') is not True or smoke.get('os')!='win32':
         raise ValueError('Real packaged Windows Electron screenshot evidence absent')
-    if smoke.get('catalog',{}).get('species')!=298 or smoke.get('modelAvailable') is not True:
+    if smoke.get('catalog',{}).get('species')!=298 or smoke.get('modelAvailable') is not True or not smoke.get('visionModelVerified',{}).get('ok'):
         raise ValueError('Packaged screenshot runtime lacks catalog or Perch model')
-    names=['01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png']
+    names=['01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png']
     rows=smoke.get('screenshots',[])
     if [x.get('name') for x in rows]!=names:raise ValueError('Some actual application sections were not captured')
     result=[]
@@ -84,7 +84,7 @@ def finalize():
     coverage=json.loads((BASE/'data'/'coverage.json').read_text(encoding='utf-8-sig'))
     voices=json.loads((DIST/'voice-inventory.json').read_text(encoding='utf-8'))
     version=json.loads((BASE/'package.json').read_text(encoding='utf-8'))['version']
-    if smoke.get('version')!=version or version!='7.9.0':raise ValueError('Executable version differs from release')
+    if smoke.get('version')!=version or version!='8.0.0':raise ValueError('Executable version differs from release')
     if voices['withPrimaryVoice']!=coverage.get('birdCalls'):raise ValueError('Coverage changed after inventory')
     report={'version':version,'status':'PASS','automatedTests':checks,
        'gui':{'packaged':True,'system':'Windows GitHub Actions', 'screenshots':shots,'method':smoke['captureMethod'],

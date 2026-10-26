@@ -34,6 +34,6 @@ test('recent species history is capped and deduplicated offline',()=>{
 test('journal edit and filter controls and new field tab are wired',()=>{
  const js=fs.readFileSync(path.join(root,'app','app.js'),'utf8');
  const html=fs.readFileSync(path.join(root,'app','index.html'),'utf8');
- for(const a of ['data-view="field"','id="fieldContent"','id="journalSearch"','id="journalBirdFilter"','id="journalSort"','src="field-assistant.js"','MoOLVa 7.9'])assert.ok(html.includes(a),a);
+ for(const a of ['data-view="field"','id="fieldContent"','id="journalSearch"','id="journalBirdFilter"','id="journalSort"','src="field-assistant.js"','MoOLVa 8.0'])assert.ok(html.includes(a),a);
  for(const a of ['function openForm(existingId=null,preferredBird=null)','data-edit=','window.BirdFieldAssistant?.render','markRecent','function renderJournal()'])assert.ok(js.includes(a),a);
 });

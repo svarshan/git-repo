@@ -1,0 +1,29 @@
+/* MoOLVa 8.0 PRO MAX: compact field-first workflow */
+.m80-panel{margin:14px 0;border:1px solid #386984;background:#0c263e;border-radius:13px;padding:16px;min-width:0}
+.m80-panel h2{margin:0 0 8px;color:#f3faff;font-size:18px}
+.m80-panel .living-note{color:#bcd9e7;line-height:1.55;font-size:12px}
+.m80-toolbar{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.m80-toolbar label{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:13px}
+.m80-toolbar input,.m80-toolbar select,.m80-panel textarea{background:#071c2d;color:#e8f5ff;border:1px solid #527d99;padding:9px;border-radius:8px}
+.m80-panel textarea{width:100%;min-height:80px;max-height:160px}
+.m80-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.m80-preview{max-width:400px;max-height:190px;overflow:hidden}
+.m80-preview img{max-width:100%;max-height:190px;border-radius:8px;object-fit:contain}
+.m80-species{display:flex;gap:13px;padding:11px;margin:7px 0;border:1px solid #335b75;background:#0b2a40;border-radius:11px}
+.m80-species>img{width:100px;height:86px;object-fit:cover;border-radius:8px}
+.m80-species-info{min-width:0;flex:1;display:flex;flex-direction:column;gap:5px}
+.m80-species-info strong{font-size:16px}.m80-species-info small{color:#aecbe2}.m80-species-info p{margin:0}
+.m80-actions{display:flex;flex-wrap:wrap;gap:7px}
+.m80-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px;border-top:1px solid #2e506a;padding:9px 2px}
+.m80-line small{flex:1;min-width:200px;color:#aaccdf}
+.m80-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:7px}
+.m80-stat{display:flex;flex-direction:column;gap:5px;padding:10px;border:1px solid #325777;border-radius:8px}
+.m80-academy-img{max-width:360px;max-height:190px;object-fit:contain;border-radius:8px}
+.m80-choices{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0}
+.m80-label{font-size:12px;color:#a9cce2}
+.m80-panel button,.m80-toolbar button{cursor:pointer}
+.m80-field-mode #intelligence80 button{min-height:52px;min-width:105px;font-size:16px}
+.m80-field-mode #intelligence80 input,.m80-field-mode #intelligence80 select{min-height:52px;font-size:16px}
+.m80-field-mode #intelligence80 .m80-panel{padding:20px}
+@media(max-width:850px){.m80-grid{grid-template-columns:1fr}.m80-species>img{width:84px;height:76px}}
+@media(max-width:510px){.m80-toolbar{flex-direction:column;align-items:stretch}.m80-toolbar label{flex-direction:column;align-items:flex-start}.m80-panel input,.m80-panel select{max-width:100%}.m80-species{flex-wrap:wrap}}
