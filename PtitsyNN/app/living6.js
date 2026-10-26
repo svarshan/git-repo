@@ -173,6 +173,8 @@ function playClip(offset){
 }
 function showAnalysis(data,meta){
  results.replaceChildren();
+ const quality=window.MoOLVa78Core?.evidence(data)||null;
+ if(quality)results.append(node('p','Bird AI 5.0 · '+quality.message,'living-note'));
  results.append(node('p','Google Perch v2 · '+meta.windows+' отдельных окон по 5 с. '+(meta.truncated?'Рассмотрены отдельные окна из первых 10 минут. ':'')+'Временные отметки показывают моменты, в которых модель выдала данный класс. Это не подтверждение присутствия птицы; оценки не калиброваны как вероятности.','living-note'));
  for(const [rank,prediction] of data.slice(0,8).entries()){
   const bird=birdFor(prediction.label),card=node('article',null,'ai6-result'+(rank<3?' m77-ai-top':''));
@@ -206,6 +208,10 @@ function showAnalysis(data,meta){
   results.append(card);
  }
  if(!data.length)results.append(node('p','Модель не смогла выделить убедительные классы из записи.','living-note'));
+ else if(data.length>1){
+  const separate=new Set(data.slice(0,3).flatMap(x=>(x.findings||[]).filter(z=>z.score>0).map(z=>z.offset)));
+  results.append(node('p','Временных точек с кандидатами: '+separate.size+'. Несколько меток не означают подтверждённое одновременное пение нескольких птиц.','living-note'));
+ }
 }
 async function analyse(){
  if(busy||recording||!file||!modelReady)return;
@@ -226,7 +232,7 @@ async function analyse(){
    .sort((a,b)=>b.score-a.score).slice(0,8);
   showAnalysis(predictions,{windows:windows.length,totalSeconds,truncated});
   saveHistory(predictions,windows.length);
-  put('Локальное распознавание завершено. Сверяйте результаты с фотографиями, голосами и картой.');
+  put('Bird AI 5.0: анализ нескольких фрагментов завершён. При близких оценках могут присутствовать разные птицы либо фоновые звуки; проверяйте результаты на слух.');
  }catch(e){put('Не удалось распознать запись: '+(e.message||String(e))+'. Результаты не подменяются догадками.');}
  finally{busy=false;disableButtons();}
 }
