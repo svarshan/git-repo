@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 7.8
+name: Птицы НН — Windows EXE 7.9
 on:
   workflow_dispatch:
     inputs:
@@ -59,7 +59,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py scripts/release_evidence79.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -197,6 +197,8 @@ jobs:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
           BIRDS_MAX_BUDGET_SECONDS: '100'
           BIRDS_ULTRA_BUDGET_SECONDS: '65'
+      - name: Inventory every missing licensed bird voice from the actual generated catalog
+        run: python scripts/release_evidence79.py inventory
       - name: Prepare offline map of Nizhny Novgorod Oblast and coarsened sightings
         timeout-minutes: 12
         run: python -u scripts/make_habitat.py
@@ -232,9 +234,10 @@ jobs:
           node --check app/habitat-data.js
           node --check app/atlas-ultra-data.js
           node --check main.cjs
-          npm test
+          New-Item -ItemType Directory -Force -Path dist/release-evidence | Out-Null
+          npm test 2>&1 | Tee-Object -FilePath dist/release-evidence/node-tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python -m unittest discover -s tests -p 'test_*.py'
+          python -m unittest discover -s tests -p 'test_*.py' 2>&1 | Tee-Object -FilePath dist/release-evidence/python-tests.log
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Save downloaded media even if a later step fails
         if: always()
@@ -259,6 +262,23 @@ jobs:
         run: npm run build:win
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Capture real screenshots from packaged Windows Electron EXE
+        timeout-minutes: 8
+        shell: pwsh
+        env:
+          MOOLVA_CI_EVIDENCE: '1'
+        run: |
+          $exe = Get-ChildItem -Path dist/win-unpacked -Filter '*.exe' | Where-Object { $_.Name -notmatch 'uninstall|unins|update' } | Select-Object -First 1
+          if (-not $exe) { throw 'Packaged Windows application executable not found; no mock screenshots allowed' }
+          $dir = (Resolve-Path dist/release-evidence).Path
+          Write-Host "Capturing actual packaged Electron window from $($exe.FullName)"
+          $arg = "--moolva-ci-capture-dir=$dir"
+          $process = Start-Process -FilePath $exe.FullName -ArgumentList $arg -PassThru -Wait
+          if ($process.ExitCode -ne 0) {
+            Get-Content -Path dist/release-evidence/gui-smoke-error.txt -ErrorAction SilentlyContinue
+            throw "Real packaged Electron GUI smoke failed: exit $($process.ExitCode)"
+          }
+          if (-not (Test-Path dist/release-evidence/gui-smoke.json)) { throw 'Missing packaged Electron screenshot proof' }
       - name: Check Setup and Portable EXE and produce standard SHA256SUMS
         shell: pwsh
         run: |
@@ -273,32 +293,38 @@ jobs:
           }
           Set-Content -Path dist/SHA256SUMS.txt -Value $lines -Encoding utf8
           $lines | ForEach-Object { Write-Host $_ }
+      - name: Validate real screenshots and generate QA report and missing voice appendix
+        shell: pwsh
+        run: |
+          python scripts/release_evidence79.py finalize
+          if ($LASTEXITCODE -ne 0) { throw 'Release evidence check failed' }
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.8-Portable-only
-          path: PtitsyNN/dist/MoOLVa-7.8-Portable-x64.exe
+          name: Ptitsy-NN-7.9-Portable-only
+          path: PtitsyNN/dist/MoOLVa-7.9-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.8-Setup-only
-          path: PtitsyNN/dist/MoOLVa-7.8-Setup-x64.exe
+          name: Ptitsy-NN-7.9-Setup-only
+          path: PtitsyNN/dist/MoOLVa-7.9-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.8-Windows
+          name: Ptitsy-NN-7.9-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
             PtitsyNN/data/coverage.json
             PtitsyNN/data/audio-audit.csv
             PtitsyNN/data/audio-audit.json
+            PtitsyNN/dist/release-evidence/**/*
           if-no-files-found: error
           retention-days: 30
       - name: Upload coverage even when packaging fails
@@ -331,7 +357,13 @@ jobs:
           $portable = (Get-Item "dist/MoOLVa-$artifactVersion-Portable-x64.exe" -ErrorAction Stop).FullName
           $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
           $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
-          $notes = "Built by GitHub Actions from $sha. Contains Windows Setup and Portable EXE, SHA256 checksums and media coverage report. Exact source snapshot: archive/ptitsy-$version-build-$($sha.Substring(0,12)). Please verify on Windows before relying on it."
-          gh release create $tag $setup $portable $sums $coverage --target $sha --title "MoOLVa Птицы Нижегородской области $version" --notes $notes
+          $ev = (Resolve-Path dist/release-evidence).Path
+          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png')
+          $evidenceFiles = foreach ($name in $evidenceNames) {
+            $item = Get-Item (Join-Path $ev $name) -ErrorAction Stop
+            $item.FullName
+          }
+          $notes = "Built by GitHub Actions from $sha. Windows Setup + Portable EXE, SHA256, catalog coverage, six real packaged Windows Electron screenshots, automatic QA report and exact missing licensed voices. Screenshots are offscreen captures from a running packaged EXE; they do not replace manual tests on user hardware. Exact source: archive/ptitsy-$version-build-$($sha.Substring(0,12))."
+          gh release create $tag $setup $portable $sums $coverage @evidenceFiles --target $sha --title "MoOLVa Птицы Нижегородской области $version" --notes $notes
           if ($LASTEXITCODE -ne 0) { throw 'Release creation failed; Actions artifacts retained separately.' }
           Write-Host "Download: https://github.com/${{ github.repository }}/releases/tag/$tag"
