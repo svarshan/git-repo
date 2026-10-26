@@ -67,6 +67,7 @@ jobs:
           node --check app/field-assistant.js
           node --check app/ui3.js
           node --check app/sidebar76.js
+          node --check app/expedition76.js
           node --check app/habitat-atlas.js
           node --check app/settlements.js
           node --check app/atlas5-extras.js

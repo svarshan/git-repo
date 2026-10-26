@@ -47,7 +47,7 @@
  .sidebar nav .m76-nav-core{flex-direction:row;gap:3px;align-items:center}
  .sidebar nav .m76-nav-group{flex:none}
  .sidebar nav .m76-nav-group>summary{white-space:nowrap;min-height:39px;padding:7px;font-size:12px}
- .sidebar nav .m76-nav-group[open] .m76-nav-sub{display:flex;position:absolute;top:100%;left:0;right:0;z-index:9;background:#081b30;padding:9px;border:1px solid #3b6179;margin:0;flex-direction:row;flex-wrap:wrap;max-height:180px;overflow:auto}
+ .sidebar nav .m76-nav-group[open] .m76-nav-sub{display:flex;position:static;z-index:1;background:#081b30;padding:9px;border:1px solid #3b6179;margin:0;flex-direction:row;flex-wrap:wrap;max-height:none;overflow:visible}
  .sidebar nav{position:relative;overflow:visible;flex-wrap:wrap}
 }
 @media(prefers-reduced-motion:reduce){.sidebar nav .m76-chevron{transition:none}}

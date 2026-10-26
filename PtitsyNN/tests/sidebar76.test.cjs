@@ -9,6 +9,8 @@ test('7.6 sidebar keeps main tabs visible and stores collapse locally',()=>{
  assert.match(html,/id="m76-library"/);
  assert.match(html,/src="sidebar76.js"/);
  assert.match(html,/href="sidebar76.css"/);
+ assert.match(html,/id="m76ExpeditionStats"/);
+ assert.match(html,/src="expedition76.js"/);
  assert.match(js,/ptitsy-nn.sidebar.v76/);
  assert.match(js,/localStorage.setItem/);
  assert.match(js,/aria-expanded/);
