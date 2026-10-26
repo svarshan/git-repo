@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 7.5
+name: Птицы НН — Windows EXE 7.6
 on:
   workflow_dispatch:
     inputs:
@@ -59,13 +59,15 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_250.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
           node --check app/ultra-audio.js
           node --check app/field-assistant.js
           node --check app/ui3.js
+          node --check app/sidebar76.js
+          node --check app/expedition76.js
           node --check app/habitat-atlas.js
           node --check app/settlements.js
           node --check app/atlas5-extras.js
@@ -135,7 +137,7 @@ jobs:
           python -u scripts/enrich_articles.py
         env:
           BIRDS_WIKI_BUDGET_SECONDS: '420'
-      - name: Grow genuine open-licensed voices toward 250 licensed species
+      - name: Grow genuine open-licensed voices toward 298 licensed species
         timeout-minutes: 42
         shell: pwsh
         run: |
@@ -144,23 +146,31 @@ jobs:
             python -u scripts/voice_max.py
             python -u scripts/openverse_voices.py
           }
-          python -u scripts/voices_250.py
+          python -u scripts/voices_298.py
           python -u scripts/audit_audio.py
           python -u scripts/verify_cache.py
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
           BIRDS_MAX_BUDGET_SECONDS: '210'
           BIRDS_OPENVERSE_BUDGET_SECONDS: '140'
-          BIRDS_VOICES_250_BUDGET_SECONDS: '1650'
-      - name: Report true 250-species milestone, including shortfall
+          BIRDS_VOICES_298_BUDGET_SECONDS: '1600'
+      - name: Report true 298-species milestone, including shortfall
         shell: pwsh
         run: |
           $c = Get-Content data/coverage.json -Raw | ConvertFrom-Json
-          if (-not $c.milestone250) { throw 'Missing genuine voices 200 progress report' }
+          if (-not $c.milestone298) { throw 'Missing genuine voices 298 progress report' }
           Write-Host "Genuine primary calls: $($c.birdCalls) / 298"
-          Write-Host "Milestone 250: $($c.milestone250.achieved)"
-          Write-Host "Remaining to goal: $($c.milestone250.shortfall)"
-          if ($c.birdCalls -lt 200) { throw 'Previously verified 200-species audio baseline was lost' }
+          Write-Host "Milestone 298: $($c.milestone298.achieved)"
+          Write-Host "Remaining to goal: $($c.milestone298.shortfall)"
+          if ($c.birdCalls -lt 250) { throw 'Previously verified 250-species audio baseline was lost' }
+      - name: Recheck incomplete photos and articles from licensed sources
+        timeout-minutes: 12
+        shell: pwsh
+        run: |
+          python -u scripts/fill_missing76.py
+          python -u scripts/verify_cache.py
+        env:
+          BIRDS_FILL_76_BUDGET_SECONDS: '300'
       - name: Show verified media coverage
         shell: pwsh
         run: |
@@ -254,23 +264,23 @@ jobs:
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.5-Portable-only
-          path: PtitsyNN/dist/MoOLVa-7.5-Portable-x64.exe
+          name: Ptitsy-NN-7.6-Portable-only
+          path: PtitsyNN/dist/MoOLVa-7.6-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.5-Setup-only
-          path: PtitsyNN/dist/MoOLVa-7.5-Setup-x64.exe
+          name: Ptitsy-NN-7.6-Setup-only
+          path: PtitsyNN/dist/MoOLVa-7.6-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.5-Windows
+          name: Ptitsy-NN-7.6-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt

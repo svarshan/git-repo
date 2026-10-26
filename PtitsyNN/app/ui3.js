@@ -148,7 +148,9 @@ function renderCalendar(){
  }));
 }
 function refreshViews(){
- renderMap();renderCalendar();renderGallery();
+ renderMap();
+ if(!document.getElementById("calendar")?.hidden)renderCalendar();
+ if(!document.getElementById("gallery")?.hidden)renderGallery();
 }
 renderMetrics();renderFeatures();renderPreview();refreshViews();
 document.querySelectorAll('[data-jump]').forEach(b=>b.addEventListener('click',e=>{

@@ -68,10 +68,10 @@ def main():
  report['audioTechnicalAccepted']=sum(r.get('result')=='accepted' for r in rows)
  report['audioTechnicalRejected']=sum(r.get('result')=='rejected' for r in rows)
  report['audioHumanReviewed']=0
- for milestone in ('milestone150','milestone200'):
+ for milestone in ('milestone150','milestone200','milestone250','milestone298'):
   if isinstance(report.get(milestone),dict):
    # Milestone status is derived from real post-FFmpeg-audit coverage.
-   goal=int(report[milestone].get('target') or (200 if milestone=='milestone200' else 150))
+   goal=int(report[milestone].get('target') or int(milestone.replace('milestone','')))
    report[milestone]['verifiedAudioSpecies']=report['birdCalls']
    report[milestone]['shortfall']=max(0,goal-report['birdCalls'])
    report[milestone]['achieved']=report['birdCalls']>=goal
