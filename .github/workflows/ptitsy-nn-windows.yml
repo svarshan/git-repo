@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 7.6
+name: Птицы НН — Windows EXE 7.7
 on:
   workflow_dispatch:
     inputs:
@@ -67,6 +67,9 @@ jobs:
           node --check app/field-assistant.js
           node --check app/ui3.js
           node --check app/sidebar76.js
+          node --check app/core77.js
+          node --check app/ui77.js
+          node --check app/expedition77.js
           node --check app/expedition76.js
           node --check app/habitat-atlas.js
           node --check app/settlements.js
@@ -213,6 +216,9 @@ jobs:
           node --check app/ultra-audio.js
           node --check app/field-assistant.js
           node --check app/data.js
+          node --check app/core77.js
+          node --check app/ui77.js
+          node --check app/expedition77.js
           node --check app/living6.js
           node --check app/atlas5-extras.js
           node --check app/field75-core.js
@@ -264,23 +270,23 @@ jobs:
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.6-Portable-only
-          path: PtitsyNN/dist/MoOLVa-7.6-Portable-x64.exe
+          name: Ptitsy-NN-7.7-Portable-only
+          path: PtitsyNN/dist/MoOLVa-7.7-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.6-Setup-only
-          path: PtitsyNN/dist/MoOLVa-7.6-Setup-x64.exe
+          name: Ptitsy-NN-7.7-Setup-only
+          path: PtitsyNN/dist/MoOLVa-7.7-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-7.6-Windows
+          name: Ptitsy-NN-7.7-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt

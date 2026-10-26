@@ -25,11 +25,14 @@ const townSearch=$('#habitatTownSearch'),ultraSvg=$('#habitatUltraVector'),ultra
 
 const townLayer=$('#habitatTowns'),place=$('#habitatPlace'),placeSummary=$('#habitatPlaceSummary');
 const seasonMonths={winter:[12,1,2],spring:[3,4,5],summer:[6,7,8],autumn:[9,10,11]};
+const group77=$('#m77HabitatGroup'),presets77=$('#m77SeasonPresets');
+function syncPresets77(){for(const btn of presets77?.querySelectorAll('[data-season]')||[])btn.setAttribute('aria-pressed',String(btn.dataset.season===selectedSeason));}
 function species(c){
  const q=fold(search.value);
  return (c.species||[]).filter(s=>{
   const b=byId.get(s.id);if(!b)return false;
   if(selectedId!=='all'&&s.id!==selectedId)return false;
+  if(group77&&group77.value!=='all'&&b.group!==group77.value)return false;
   if(selectedMonth&&!(Array.isArray(s.months)&&s.months.includes(selectedMonth)))return false;
   if(selectedSeason!=='all'&&!(Array.isArray(s.months)&&s.months.some(m=>(seasonMonths[selectedSeason]||[]).includes(m))))return false;
   return !q||fold(b.name+' '+b.latin+' '+(b.group||'')).includes(q);
@@ -47,6 +50,7 @@ function index(){
  addOpts(chooser,[['all','Все виды с наблюдениями'],...birds.slice().sort((a,b)=>a.name.localeCompare(b.name,'ru'))
    .map(b=>[b.id,b.name+(featured.has(b.id)?'':' — нет проверенных зон')])]);
  if(month)addOpts(month,months.map((t,i)=>[i,t]));
+ if(group77)addOpts(group77,[['all','Все группы'],...[...new Set(birds.map(x=>x.group||'Без группы'))].sort((a,b)=>a.localeCompare(b,'ru')).map(x=>[x,x])]);
 }
 function hideTooltip(){tooltip.hidden=true;tooltip.replaceChildren();}
 function thumbnail(b){
@@ -237,10 +241,16 @@ viewport.addEventListener('pointerup',stopDrag);
 viewport.addEventListener('pointercancel',stopDrag);
 chooser.addEventListener('change',()=>{selectedId=chooser.value;draw();});
 search.addEventListener('input',draw);
+group77?.addEventListener('change',draw);
 month?.addEventListener('change',()=>{selectedMonth=Number(month.value)||0;if(selectedMonth&&season){season.value='all';selectedSeason='all';}draw();});
-season?.addEventListener('change',()=>{selectedSeason=season.value;if(selectedSeason!=='all'&&month){month.value='0';selectedMonth=0;}draw();});
+season?.addEventListener('change',()=>{selectedSeason=season.value;if(selectedSeason!=='all'&&month){month.value='0';selectedMonth=0;}syncPresets77();draw();});
+presets77?.addEventListener('click',e=>{
+ const button=e.target.closest?.('[data-season]');if(!button||!season)return;
+ season.value=button.dataset.season;
+ season.dispatchEvent(new Event('change',{bubbles:true}));
+});
 $('#habitatSelectClear')?.addEventListener('click',()=>{
- selectedId='all';selectedMonth=0;selectedSeason='all';if(place)place.value='';if(placeSummary)placeSummary.textContent='Выберите населённый пункт — покажем ближайшие обобщённые зоны наблюдений.';chooser.value='all';if(month)month.value='0';if(season)season.value='all';search.value='';zoomTo(1);draw();
+ selectedId='all';selectedMonth=0;selectedSeason='all';if(place)place.value='';if(placeSummary)placeSummary.textContent='Выберите населённый пункт — покажем ближайшие обобщённые зоны наблюдений.';chooser.value='all';if(month)month.value='0';if(season)season.value='all';if(group77)group77.value='all';syncPresets77();search.value='';zoomTo(1);draw();
 });
 $('#habitatPopupClose')?.addEventListener('click',hideTooltip);
 viewport.addEventListener('keydown',e=>{if(e.key==='Escape')hideTooltip();});
@@ -251,7 +261,7 @@ if(source)source.textContent=(data.generated?'Дата выборки: '+data.ge
 function focusSpecies(id){
  document.querySelector('nav [data-view="map"]')?.click();
  selectedId=byId.has(id)?id:'all';chooser.value=selectedId;search.value='';
- selectedMonth=0;selectedSeason='all';if(month)month.value='0';if(season)season.value='all';draw();
+ selectedMonth=0;selectedSeason='all';if(month)month.value='0';if(season)season.value='all';if(group77)group77.value='all';syncPresets77();draw();
  root.scrollIntoView({block:'start',behavior:'smooth'});
 }
 /* Detailed OSM geometry is a separate ODbL layer, not invented bird observations.
@@ -326,6 +336,6 @@ function exportCSV(){
  document.body.appendChild(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);
 }
 $('#habitatExport')?.addEventListener('click',exportCSV);
-index();draw();drawTowns();buildUltraLayers();applyView();
+index();syncPresets77();draw();drawTowns();buildUltraLayers();applyView();
 window.BirdHabitat={focusSpecies,focusTown,data,coords,exportCSV,towns,ultra,buildUltraLayers};
 })();

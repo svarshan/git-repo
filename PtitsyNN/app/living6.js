@@ -14,6 +14,27 @@ const norm=s=>String(s||'').toLocaleLowerCase('ru').replace(/ё/g,'е').replace(
 const node=(tag,text,cls)=>{const el=document.createElement(tag);if(cls)el.className=cls;if(text!==undefined&&text!==null)el.textContent=String(text);return el;};
 let file=null,busy=false,recording=false,recorder=null,stream=null,finishTimer=null,startAt=0,previewUrl=null;
 let modelReady=false,activeAudio=null,stopClip=null;
+const historyKey='ptitsy-nn.ai77.history.v1',historyUI=$('#m77AIHistoryList');
+function storedHistory(){
+ try{const a=JSON.parse(localStorage.getItem(historyKey)||'[]');return Array.isArray(a)?a.slice(0,25):[];}catch{return[];}
+}
+function renderHistory(){
+ if(!historyUI)return;historyUI.replaceChildren();
+ for(const record of storedHistory()){
+  const item=node('article'),date=node('strong',String(record.at||'').replace('T',' ').slice(0,19)),body=node('small',Array.isArray(record.top)?record.top.map(x=>String(x.label||'')+': '+(Number.isFinite(x.score)?x.score.toFixed(1):'?')).join(' · '):'Нет кандидатов');
+  item.append(date,node('br'),body);historyUI.append(item);
+ }
+ if(!historyUI.children.length)historyUI.append(node('p','История пока пуста.','living-note'));
+}
+function saveHistory(predictions,count){
+ try{
+  const entry={at:new Date().toISOString(),windows:count,top:predictions.slice(0,3).map(x=>({label:String(x.label).slice(0,100),score:Number(x.score)}))};
+  localStorage.setItem(historyKey,JSON.stringify([entry,...storedHistory()].slice(0,25)));
+ }catch{}
+ renderHistory();
+}
+$('#m77AIClearHistory')?.addEventListener('click',()=>{try{localStorage.removeItem(historyKey);}catch{}renderHistory();});
+renderHistory();
 const put=(text)=>{if(status)status.textContent=text;};
 const recordingText=t=>{if(recStatus)recStatus.textContent=t;};
 function disableButtons(){
@@ -119,7 +140,15 @@ async function windowsFromFile(blob){
   const windows=[];
   for(const offset of offsets){
    const offline=new OfflineAudioContext(1,160000,32000),src=offline.createBufferSource();
-   src.buffer=buffer;src.connect(offline.destination);
+   src.buffer=buffer;
+   // Optional experimental band-pass for low-frequency hum and high-frequency hiss.
+   // Unfiltered Perch inference remains the default because preprocessing can change scores.
+   if($('#m77AIFilter')?.checked){
+    const hp=offline.createBiquadFilter(),lp=offline.createBiquadFilter();
+    hp.type='highpass';hp.frequency.value=160;hp.Q.value=0.707;
+    lp.type='lowpass';lp.frequency.value=9000;lp.Q.value=0.707;
+    src.connect(hp);hp.connect(lp);lp.connect(offline.destination);
+   }else src.connect(offline.destination);
    src.start(0,offset,Math.max(.001,Math.min(segment,buffer.duration-offset)));
    const raw=(await offline.startRendering()).getChannelData(0);
    let energy=0;
@@ -145,10 +174,10 @@ function playClip(offset){
 function showAnalysis(data,meta){
  results.replaceChildren();
  results.append(node('p','Google Perch v2 · '+meta.windows+' отдельных окон по 5 с. '+(meta.truncated?'Рассмотрены отдельные окна из первых 10 минут. ':'')+'Временные отметки показывают моменты, в которых модель выдала данный класс. Это не подтверждение присутствия птицы; оценки не калиброваны как вероятности.','living-note'));
- for(const prediction of data.slice(0,8)){
-  const bird=birdFor(prediction.label),card=node('article',null,'ai6-result');
+ for(const [rank,prediction] of data.slice(0,8).entries()){
+  const bird=birdFor(prediction.label),card=node('article',null,'ai6-result'+(rank<3?' m77-ai-top':''));
   if(bird?.imageFile){const img=node('img');img.loading='lazy';img.src=bird.imageFile;img.alt='Птица '+bird.name;card.append(img);}
-  card.append(node('strong',bird?.name||prediction.label));
+  card.append(node('strong',(rank<3?'Топ-'+(rank+1)+' · ':'')+(bird?.name||prediction.label)));
   card.append(node('small',(bird?.latin?bird.latin+' · ':'')+'Средняя относительная оценка модели: '+prediction.score.toFixed(2)+'%; фрагментов в топ-списке: '+prediction.hits+' из '+meta.windows));
   const moments=node('div',null,'ai74-times');
   for(const finding of (prediction.findings||[]).slice(0,7)){
@@ -196,6 +225,7 @@ async function analyse(){
   const predictions=[...combined].map(([label,p])=>({label,score:p.sum/windows.length,hits:p.hits,findings:p.findings.sort((a,b)=>a.offset-b.offset)}))
    .sort((a,b)=>b.score-a.score).slice(0,8);
   showAnalysis(predictions,{windows:windows.length,totalSeconds,truncated});
+  saveHistory(predictions,windows.length);
   put('Локальное распознавание завершено. Сверяйте результаты с фотографиями, голосами и картой.');
  }catch(e){put('Не удалось распознать запись: '+(e.message||String(e))+'. Результаты не подменяются догадками.');}
  finally{busy=false;disableButtons();}

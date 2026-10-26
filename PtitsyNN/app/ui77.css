@@ -1,0 +1,48 @@
+/* MoOLVa 7.7 PRO MAX — nonintrusive dark desktop controls */
+.m77-palette{position:fixed;inset:0;z-index:35;display:flex;align-items:flex-start;justify-content:center;padding:clamp(25px,9vh,90px) 14px 20px}
+.m77-palette[hidden]{display:none!important}
+.m77-shade{position:absolute;inset:0;background:rgba(1,8,16,.82)}
+.m77-dialog{position:relative;width:min(650px,100%);max-height:min(75vh,720px);background:#0c2135;border:1px solid #527c9e;box-shadow:0 25px 80px #000b;border-radius:15px;padding:15px;display:flex;flex-direction:column;gap:9px;color:#e7f6ff}
+.m77-dialog h2{font-size:18px;margin:4px 0 0}
+.m77-query{width:100%;padding:14px 13px;border-radius:10px;background:#051421;border:1px solid #467da0;color:#fff;outline-color:#56c0ef}
+.m77-results{display:flex;flex-direction:column;overflow:auto;gap:4px;min-height:0}
+.m77-item{border:1px solid transparent;background:#102d46;color:#e2f4ff;border-radius:9px;padding:9px 12px;display:flex;align-items:center;justify-content:space-between;gap:10px;text-align:left;min-height:48px}
+.m77-item:hover,.m77-item.m77-selected{background:#184c6e;border-color:#61bfef}
+.m77-item small{color:#a7cadf;font-size:11px}
+.m77-palette-actions{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.m77-palette-actions p{margin:0;color:#9cbbce;font-size:12px}
+.m77-palette-actions button,.m77-launch{background:#123853;border:1px solid #4a83a4;color:#dcf4ff;border-radius:9px;padding:9px 12px}
+.m77-launch{font-size:13px;white-space:nowrap}
+.m77-pins{display:flex;flex-direction:column;margin:6px 8px;padding:5px;border:1px solid #2c4c64;border-radius:11px;gap:3px}
+.m77-pins[hidden]{display:none}
+.m77-pins-title{font-size:10px;letter-spacing:.08em;color:#96c2dd;padding:3px 8px}
+.m77-pin-choice{display:flex;align-items:center;gap:9px;border:1px solid #3a5871;border-radius:9px;padding:7px 9px;color:#daebf9;font-size:12px;min-height:33px}
+.m77-pin-choice input{width:16px;height:16px}
+.m77-settings{border:1px solid #315b75;background:#0d263c;padding:14px;border-radius:12px;margin:14px 0}
+.m77-settings h2{font-size:18px;margin:0 0 7px}
+.m77-settings label{color:#d6f0ff;font-size:13px}
+.m77-settings input[type=range]{width:min(320px,100%);accent-color:#43baff}
+.m77-settings-pins{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:5px;margin-top:10px}
+.m77-season-presets{display:flex;flex-wrap:wrap;gap:5px;margin:10px 0}
+.m77-season-presets button{background:#143752;color:#e8f8ff;border:1px solid #497997;border-radius:8px;padding:7px 10px}
+.m77-season-presets button[aria-pressed=true]{background:#1d6484;border-color:#77ddff}
+.m77-ai-history{margin:12px 0;padding:10px;background:#102941;border:1px solid #39647d;border-radius:10px}
+.m77-ai-history article{margin:8px 0;padding:9px;border-top:1px solid #2f4b61;font-size:12px}
+.m77-ai-history small{color:#b7d1e7}
+.m77-ai-top{border:2px solid #37a9e6!important;background:rgba(11,76,112,.25)}
+.m77-journal-panel{border:1px solid #3d6b83;border-radius:12px;padding:15px;margin:15px 0;background:#0e263c}
+.m77-journal-panel h2{font-size:19px}
+.m77-journal-groups{display:grid;gap:9px;margin:12px 0}
+.m77-journal-groups details{padding:9px 12px;border:1px solid #39566e;background:#0d2034;border-radius:9px}
+.m77-journal-groups summary{font-weight:600;cursor:pointer}
+.m77-meta-row{display:flex;align-items:center;flex-wrap:wrap;gap:9px;padding:8px 5px;border-bottom:1px solid #2d4861}
+.m77-meta-row select{min-width:160px;max-width:280px;background:#102b43;color:#eaf8ff;border:1px solid #4b7790;border-radius:7px;padding:7px}
+.m77-meta-row input{max-width:230px;background:#102b43;color:#eaf8ff;border:1px solid #4b7790;border-radius:7px;padding:7px}
+.m77-panel-controls{display:flex;gap:9px;flex-wrap:wrap;align-items:center}
+.m77-panel-controls button{background:#15425f;color:#e8f8ff;border:1px solid #4c83a2;border-radius:8px;padding:8px 11px}
+@media(min-width:761px){body:not(.m76-sidebar-compact) .shell{grid-template-columns:var(--m77-sidebar-width,270px) minmax(0,1fr)}}
+@media(min-width:761px) and (max-width:1110px){body:not(.m76-sidebar-compact) .shell{grid-template-columns:var(--m77-sidebar-width,270px) minmax(0,1fr)}}
+@media(min-width:761px){body.m76-sidebar-compact .m77-pins button{justify-content:center;padding:9px 5px}body.m76-sidebar-compact .m77-pins button>span:not(.navico),body.m76-sidebar-compact .m77-pins-title{display:none}}
+@media(max-width:760px){.m77-launch{font-size:12px;padding:7px}.m77-dialog{max-height:85vh}.m77-item{flex-wrap:wrap}.m77-pins{display:none}.m77-settings-pins{grid-template-columns:repeat(2,minmax(0,1fr))}}
+
+.top-tools button.m77-launch{width:auto;min-width:138px;height:44px;display:inline-flex;align-items:center;justify-content:center;padding:8px 12px;font-size:13px;white-space:nowrap}
