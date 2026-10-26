@@ -29,8 +29,8 @@ test('7.6 all former navigation targets remain reachable; service lives in setti
 test('7.6 keeps offline user data and both EXEs',()=>{
  const p=JSON.parse(read('package.json')),html=read('app/index.html'),workflow=read('../.github/workflows/ptitsy-nn-windows.yml');
  assert.equal(p.version,'7.6.0');
- assert.match(p.build.nsis.artifactName,/7\\.6/);
- assert.match(p.build.portable.artifactName,/7\\.6/);
+ assert.equal(p.build.nsis.artifactName,'MoOLVa-7.6-Setup-${arch}.exe');
+ assert.equal(p.build.portable.artifactName,'MoOLVa-7.6-Portable-${arch}.exe');
  assert.ok(html.includes("connect-src 'none'"));
  assert.ok(workflow.includes('scripts/voices_298.py'));
  assert.ok(workflow.includes('scripts/fill_missing76.py'));
