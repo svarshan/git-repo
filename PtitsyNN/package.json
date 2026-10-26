@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "7.5.0",
+  "version": "7.6.0",
   "private": true,
-  "description": "MoOLVa 7.5 Field PRO MAX: real Perch v2 12/24 windows, Atlas ULTRA 3.0 nearby observations, 250 licensed audio target, academy and legacy-safe journal.",
+  "description": "MoOLVa 7.6 PRO MAX: compact grouped sidebar with persisted collapse and Settings tools, historic licenses, 298 audio target, photo/article fill, Bird AI and offline map, Windows QA.",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -53,10 +53,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-7.5-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-7.6-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-7.5-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-7.6-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [

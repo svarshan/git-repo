@@ -1,0 +1,53 @@
+/* MoOLVa 7.6 PRO MAX: compact, keyboard-accessible desktop navigation. */
+.sidebar .m76-nav-core,.sidebar .m76-nav-sub,.sidebar .m76-nav-bottom{display:flex;flex-direction:column;gap:2px}
+.sidebar nav .m76-nav-group{min-width:0;margin:3px 0}
+.sidebar nav .m76-nav-group>summary{list-style:none;display:flex;align-items:center;gap:16px;min-height:44px;margin:0 2px;padding:9px 12px;border:1px solid transparent;border-radius:9px;color:#bbd6e9;font:600 13px "Segoe UI",Arial,sans-serif;cursor:pointer}
+.sidebar nav .m76-nav-group>summary::-webkit-details-marker{display:none}
+.sidebar nav .m76-nav-group>summary:hover,.sidebar nav .m76-nav-group[open]>summary{background:rgba(53,116,149,.28);color:#f2faff}
+.sidebar nav .m76-nav-group>summary .navico{display:block;width:25px;height:25px;flex:none;color:#86bde7}
+.sidebar nav .m76-chevron{margin-left:auto;transition:transform .18s}
+.sidebar nav .m76-nav-group[open] .m76-chevron{transform:rotate(180deg)}
+.sidebar nav .m76-nav-sub{margin:3px 1px 5px 14px;padding-left:5px;border-left:1px solid #305b77}
+.sidebar nav .m76-nav-sub button{font-size:12px;min-height:40px;padding:8px 10px;gap:11px}
+.sidebar nav .m76-nav-sub button .navico{width:19px;height:19px}
+.sidebar .m76-nav-bottom{margin-top:5px;padding-top:9px;border-top:1px solid #284a63}
+.m76-collapse{display:flex;align-items:center;justify-content:center;margin:6px 12px 3px auto;width:34px;height:31px;border:1px solid #3a647c;border-radius:8px;color:#d4ebfa;background:#102a41;cursor:pointer}
+.m76-collapse:hover{background:#23506c}
+.sidebar .m76-nav-group:has(.navactive)>summary{color:#64d9ff;background:rgba(18,91,127,.29)}
+.sidebar nav button:focus-visible,.sidebar nav summary:focus-visible,.m76-collapse:focus-visible{outline:3px solid #68d5ff;outline-offset:2px}
+.m76-settings-shortcuts{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin:14px 0}
+.m76-settings-shortcuts button{text-align:left;background:#12314b;color:#e0f6ff;border:1px solid #446b81;border-radius:10px;padding:12px;cursor:pointer}
+.m76-settings-shortcuts button:hover{background:#205376}
+.m76-settings-hint{font-size:12px;color:#aecde1;line-height:1.6}
+@media(min-width:761px){
+ body.m76-sidebar-compact .shell{grid-template-columns:76px minmax(0,1fr)}
+ body.m76-sidebar-compact .sidebar{overflow-x:hidden}
+ body.m76-sidebar-compact .sidebar .brand{padding:10px;min-height:80px;justify-content:center}
+ body.m76-sidebar-compact .sidebar .brand>div:last-child{display:none}
+ body.m76-sidebar-compact .sidebar .m76-collapse{margin:3px auto 8px}
+ body.m76-sidebar-compact .sidebar nav{padding:4px 5px}
+ body.m76-sidebar-compact .sidebar nav .m76-nav-core button,body.m76-sidebar-compact .sidebar nav .m76-nav-bottom button{justify-content:center;min-height:47px;padding:9px 5px}
+ body.m76-sidebar-compact .sidebar nav button>span:not(.navico),body.m76-sidebar-compact .sidebar nav summary>span:not(.navico){display:none}
+ body.m76-sidebar-compact .sidebar nav .m76-nav-group>summary{justify-content:center;padding:8px 5px}
+ body.m76-sidebar-compact .sidebar nav .m76-nav-sub{display:none}
+ body.m76-sidebar-compact .ui3-sideart,body.m76-sidebar-compact .sidefoot{display:none}
+ .sidebar nav button:not(.m76-collapse) .navico{flex:none}
+}
+@media(min-width:761px) and (max-width:1110px){
+ body:not(.m76-sidebar-compact) .shell{grid-template-columns:250px minmax(0,1fr)}
+ body:not(.m76-sidebar-compact) .brand{justify-content:flex-start;padding:14px}
+ body:not(.m76-sidebar-compact) .brand>div:last-child{display:flex}
+ body:not(.m76-sidebar-compact) .sidebar nav button{justify-content:flex-start;padding:10px 12px}
+ body:not(.m76-sidebar-compact) .sidebar nav button span:not(.navico){display:inline}
+ body:not(.m76-sidebar-compact) .sidebar nav .m76-nav-group>summary span:not(.navico){display:inline}
+ body:not(.m76-sidebar-compact) .sidebar .ui3-sideart{display:block}
+}
+@media(max-width:760px){
+ .sidebar .m76-collapse{display:none}
+ .sidebar nav .m76-nav-core{flex-direction:row;gap:3px;align-items:center}
+ .sidebar nav .m76-nav-group{flex:none}
+ .sidebar nav .m76-nav-group>summary{white-space:nowrap;min-height:39px;padding:7px;font-size:12px}
+ .sidebar nav .m76-nav-group[open] .m76-nav-sub{display:flex;position:absolute;top:100%;left:0;right:0;z-index:9;background:#081b30;padding:9px;border:1px solid #3b6179;margin:0;flex-direction:row;flex-wrap:wrap;max-height:180px;overflow:auto}
+ .sidebar nav{position:relative;overflow:visible;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){.sidebar nav .m76-chevron{transition:none}}
