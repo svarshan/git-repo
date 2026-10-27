@@ -1,0 +1,21 @@
+/* MoOLVa 8.1 — offline source-grounded field tools */
+.m81-panel{background:#0c2a41;border:1px solid #426783;border-radius:14px;padding:17px;margin:15px 0;color:#dfedf5}
+.m81-panel h2{font-size:19px;color:#f5fbff;margin:0 0 7px}
+.m81-duo{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:13px}
+.m81-card{background:#092038;border:1px solid #335a74;border-radius:10px;padding:13px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.m81-card h3{margin:0;font-size:17px}
+.m81-card small{color:#b1d0e3}
+.m81-card img{height:175px;width:100%;object-fit:contain;background:#061625;border-radius:8px}
+.m81-card audio{width:100%}
+.m81-excerpt{white-space:pre-line;line-height:1.45;color:#d7e7ef;max-height:230px;overflow:auto}
+.m81-line{display:flex;flex-wrap:wrap;align-items:center;gap:8px;border-top:1px solid #2b4e68;padding:9px 0}
+.m81-line span{flex:1;min-width:125px}
+.m81-toolbar{display:flex;flex-wrap:wrap;align-items:center;gap:10px;margin:9px 0}
+.m81-toolbar label{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.m81-toolbar select,.m81-toolbar input{max-width:290px;padding:8px;color:#eef8ff;background:#092238;border:1px solid #4e7893;border-radius:8px}
+.m81-quick{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:9px}
+.m81-quick button{font-size:15px;min-height:64px;border-radius:10px;border:1px solid #5c8398;background:#15445d;color:#fff;cursor:pointer}
+.m81-quick button:hover{background:#236887}
+.m81-note{font-size:12px;line-height:1.6;color:#bcd7e6}
+@media(max-width:800px){.m81-quick{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:650px){.m81-duo{grid-template-columns:1fr}}

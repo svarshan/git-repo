@@ -5,6 +5,16 @@
  if(!core||!exportBtn||!importBtn||!picker)return;
  const keys=['ptitsy-nn.journal.v1','ptitsy-nn.favorites.v1','ptitsy-nn.recent.v1','ptitsy-nn.ui3.settings.v1','ptitsy-nn.sidebar.v76','ptitsy-nn.ui77.v1','ptitsy-nn.ui78.v1','ptitsy-nn.academy80.v1','ptitsy-nn.fieldmode80.v1','ptitsy-nn.expedition77.v1','ptitsy-nn.ai77.history.v1','ptitsy-nn.voice-lab.v1','ptitsy-nn.academy.sound.v5','ptitsy-nn.academy.v1'];
  const say=t=>{if(status)status.textContent=t;};
+ async function fingerprint(value){
+  if(!globalThis.crypto?.subtle)throw Error('Нет защищённого SHA-256 в этом браузерном движке');
+  const bytes=new TextEncoder().encode(JSON.stringify(value));
+  const hash=await globalThis.crypto.subtle.digest('SHA-256',bytes);
+  return [...new Uint8Array(hash)].map(x=>x.toString(16).padStart(2,'0')).join('');
+ }
+ function unsigned(archive){
+  return {type:archive.type,version:archive.version,createdAt:archive.createdAt,stores:archive.stores,assets:archive.assets};
+ }
+
  function openDb(){
   return new Promise((resolve,reject)=>{
    const req=indexedDB.open('ptitsy-nn-media77',1);
@@ -49,10 +59,11 @@
    }
    const archive={type:'moolva-backup78',version:1,createdAt:new Date().toISOString(),stores,assets};
    if(!core.validStateArchive(archive))throw Error('Содержимое архива не прошло проверку');
+   archive.integrity={algorithm:'SHA-256',value:await fingerprint(unsigned(archive))};
    const u=URL.createObjectURL(new Blob([JSON.stringify(archive)],{type:'application/json;charset=utf-8'}));
-   const a=document.createElement('a');a.href=u;a.download='MoOLVa-7.8-Backup-'+new Date().toISOString().slice(0,10)+'.json';
+   const a=document.createElement('a');a.href=u;a.download='MoOLVa-8.1-Verified-Backup-'+new Date().toISOString().slice(0,10)+'.json';
    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
-   say('Архив готов: '+Object.keys(stores).length+' наборов данных, '+assets.length+' записей с вложениями. Сохраните файл в надёжном месте.');
+   say('Архив SHA-256 готов: '+Object.keys(stores).length+' наборов данных, '+assets.length+' записей с вложениями. Сохраните файл в надёжном месте.');
   }catch(error){say('Не удалось создать архив: '+(error.message||error));}
   finally{exportBtn.disabled=false;}
  }
@@ -62,6 +73,15 @@
   try{
    const archive=JSON.parse(await file.text());
    if(!core.validStateArchive(archive))throw Error('Формат, версия или размеры данных не прошли проверку');
+   if(archive.integrity){
+    if(archive.integrity.algorithm!=='SHA-256'||!/^([a-f0-9]{64})$/.test(archive.integrity.value)||await fingerprint(unsigned(archive))!==archive.integrity.value)
+     throw Error('Контрольная сумма резервного архива повреждена. Восстановление запрещено.');
+   }else say('Это старый архив без SHA-256; выполнена проверка структуры, но целостность по хешу подтвердить нельзя.');
+   const entryIDs=new Set();
+   for(const entry of archive.assets){
+    if(entryIDs.has(entry.id))throw Error('Дублирующийся идентификатор вложения');
+    entryIDs.add(entry.id);
+   }
    const known=new Set((window.BIRDS_DATA||[]).map(b=>b.id));
    if(archive.stores['ptitsy-nn.journal.v1']){
     const journal=JSON.parse(archive.stores['ptitsy-nn.journal.v1']);
@@ -78,21 +98,32 @@
     assets.push(obj);
    }
    if(!confirm('Резервная копия проверена. Восстановить '+Object.keys(archive.stores).length+' групп настроек/данных и '+assets.length+' наборов вложений? Существующие значения этих ключей будут заменены.')){say('Восстановление отменено.');return;}
-   // Write attachments first, preserving any absent original attachment fields.
-   const db=await openDb();
+   // 8.1: snapshot original localStorage, commit values, then use ONE atomic IDB transaction.
+   // On IDB abort, restore old localStorage. A process crash between stores cannot be perfectly atomic;
+   // the user keeps the original archive as the recovery source.
+   const snapshot={};for(const k of Object.keys(archive.stores))snapshot[k]=localStorage.getItem(k);
+   const revert=()=>{for(const [k,v] of Object.entries(snapshot)){
+    try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch{}
+   }};
+   try{for(const [k,v] of Object.entries(archive.stores))localStorage.setItem(k,v);}
+   catch(e){revert();throw Error('Недостаточно места в localStorage: старые ключи восстановлены.');}
+   let db=null;
    try{
-    for(const item of assets){
+    db=await openDb();
+    if(assets.length){
      await new Promise((resolve,reject)=>{
-      const tx=db.transaction('assets','readwrite'),store=tx.objectStore('assets'),get=store.get(item.id);
-      get.onsuccess=()=>store.put({...get.result,...item});
-      get.onerror=()=>reject(get.error);
-      tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);
+      const tx=db.transaction('assets','readwrite'),store=tx.objectStore('assets');
+      tx.oncomplete=resolve;
+      tx.onabort=()=>reject(tx.error||Error('IndexedDB transaction aborted'));
+      tx.onerror=()=>{};
+      for(const item of assets){
+       const get=store.get(item.id);
+       get.onsuccess=()=>store.put({...get.result,...item});
+      }
      });
     }
-   }finally{db.close();}
-   const snapshot={};for(const k of Object.keys(archive.stores))snapshot[k]=localStorage.getItem(k);
-   try{for(const [k,v] of Object.entries(archive.stores))localStorage.setItem(k,v);}
-   catch(e){for(const [k,v] of Object.entries(snapshot)){try{if(v===null)localStorage.removeItem(k);else localStorage.setItem(k,v);}catch{}}throw Error('Недостаточно места в localStorage. Изменения основных записей откатаны.');}
+   }catch(e){revert();throw Error('Вложения не восстановлены, прежние настройки возвращены: '+(e.message||e));}
+   finally{db?.close();}
    say('Данные восстановлены. Перезапустите приложение, чтобы разделы перечитали настройки. Старые ключи не удалялись.');
   }catch(error){say('Архив отклонён: '+(error.message||error));}
   finally{importBtn.disabled=false;picker.value='';}

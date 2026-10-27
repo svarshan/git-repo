@@ -27,6 +27,7 @@
   try{
    const r=await window.BirdVision.predict(new Uint8Array(await f.arrayBuffer()));vision=Array.isArray(r.top)?r.top:[];
    if(!vision.length)throw Error('Модель не выдала классы');
+   document.dispatchEvent(new CustomEvent('moolva-vision-predictions',{detail:{top:vision,crops:r.imageCrops||1,model:r.model}}));
    status.textContent='Распознавание завершено · классификатор обучен на внешних 525 видах. Логиты не являются вероятностями.';
    visionBox.replaceChildren();
    for(const item of vision.slice(0,5)){
@@ -112,7 +113,9 @@
  function practice(){
   if(playing){playing.pause();playing=null;}academy.replaceChildren();
   const type=$('#m80AcademyMode').value,hard=$('#m80AcademyLevel').value==='hard';
-  const valid=birds.filter(x=>type==='photo'?x.imageFile:x.audioFile),answer=random(valid);
+  const valid=birds.filter(x=>type==='photo'?x.imageFile:x.audioFile);
+  const missed=valid.filter(x=>(score.mistakes?.[x.id]||0)>0);
+  const answer=missed.length&&Math.random()<0.55?random(missed):random(valid);
   if(!answer)return;
   let pool=valid.filter(x=>x.id!==answer.id&&(!hard||x.group===answer.group));
   if(pool.length<3)pool=valid.filter(x=>x.id!==answer.id);
@@ -124,6 +127,9 @@
   for(const b of options){const btn=node('button',b.name,'living-button');btns.append(btn);
    btn.addEventListener('click',()=>{
     const correct=b.id===answer.id;score.asked++;if(correct)score.correct++;
+    score.mistakes=score.mistakes&&typeof score.mistakes==='object'?score.mistakes:{};
+    if(correct)delete score.mistakes[answer.id];
+    else score.mistakes[answer.id]=Math.min(99,(Number(score.mistakes[answer.id])||0)+1);
     score.streak=correct?score.streak+1:0;score.best=Math.max(score.best,score.streak);
     try{localStorage.setItem('ptitsy-nn.academy80.v1',JSON.stringify(score));}catch{}
     [...btns.children].forEach(c=>c.disabled=true);

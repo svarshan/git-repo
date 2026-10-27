@@ -231,12 +231,12 @@ async function analyse(){
   const predictions=[...combined].map(([label,p])=>({label,score:p.sum/windows.length,hits:p.hits,findings:p.findings.sort((a,b)=>a.offset-b.offset)}))
    .sort((a,b)=>b.score-a.score).slice(0,8);
   showAnalysis(predictions,{windows:windows.length,totalSeconds,truncated});
-  document.dispatchEvent(new CustomEvent('moolva-voice-predictions',{detail:predictions.map(x=>({label:x.label,score:x.score,hits:x.hits}))}));
+  document.dispatchEvent(new CustomEvent('moolva-voice-predictions',{detail:predictions.map(x=>({label:x.label,score:x.score,hits:x.hits,findings:x.findings}))}));
   const assessments=windows.map(x=>window.MoOLVa80Core?.quality(x.pcm)).filter(Boolean);
   const distorted=assessments.filter(x=>!x.ok).length;
   if(distorted>0)results.prepend(node('p','Bird AI 7.0: '+distorted+' из '+assessments.length+' фрагментов слишком тихие или имеют признаки клиппинга. Оценки могут быть ненадёжными.','living-note'));
   saveHistory(predictions,windows.length);
-  put('Bird AI 5.0: анализ нескольких фрагментов завершён. При близких оценках могут присутствовать разные птицы либо фоновые звуки; проверяйте результаты на слух.');
+  put('Bird AI 8.0: анализ нескольких фрагментов завершён. При близких оценках могут присутствовать разные птицы либо фоновые звуки; проверяйте результаты на слух.');
  }catch(e){put('Не удалось распознать запись: '+(e.message||String(e))+'. Результаты не подменяются догадками.');}
  finally{busy=false;disableButtons();}
 }

@@ -12,9 +12,9 @@ test('native Perch windows preserve audio times and clickable snippets',()=>{
 });
 test('new 298 voice target and both old and new audit milestones',()=>{
  const p=JSON.parse(read('package.json')),wf=read('../.github/workflows/ptitsy-nn-windows.yml'),py=read('scripts/voices_298.py'),qa=read('scripts/audit_audio.py');
- assert.equal(p.version,'8.0.0');
- assert.ok(p.build.nsis.artifactName.startsWith('MoOLVa-8.0-Setup-'));
- assert.ok(p.build.portable.artifactName.startsWith('MoOLVa-8.0-Portable-'));
+ assert.equal(p.version,'8.1.0');
+ assert.ok(p.build.nsis.artifactName.startsWith('MoOLVa-8.1-Setup-'));
+ assert.ok(p.build.portable.artifactName.startsWith('MoOLVa-8.1-Portable-'));
  assert.ok(py.includes('TARGET = 298')&&py.includes('milestone298'));
  assert.ok(wf.includes('python -u scripts/voices_298.py'));
  assert.ok(qa.includes('milestone150')&&qa.includes('milestone200'));

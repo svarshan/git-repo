@@ -48,7 +48,7 @@ function candidates(logits,labels){
  return pick.map(([i,v])=>({label:labels[i],score:Math.round(Math.exp(v-max)/sum*10000)/100})).filter(x=>x.score>0);
 }
 function window(){
- const w=new BrowserWindow({title:'MoOLVa 8.0 — Орнитологический интеллект',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,show:!evidenceMode,
+ const w=new BrowserWindow({title:'MoOLVa 8.1 — Орнитологический интеллект',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,show:!evidenceMode,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,offscreen:evidenceMode,preload:path.join(__dirname,'preload.cjs')}});
  w.webContents.on('will-navigate',e=>e.preventDefault());
  w.webContents.setWindowOpenHandler(({url})=>{try{
@@ -100,11 +100,61 @@ async function captureReleaseEvidence(win){
     sha256:crypto.createHash('sha256').update(bytes).digest('hex')});
    process.stdout.write('REAL PACKAGED WINDOW SCREENSHOT '+name+' '+bytes.length+' bytes\\n');
   }
+  // 8.1 real Windows GUI interactions: change species, check comparison cards, atlas data and performance.
+  const guiInteractions=await win.webContents.executeJavaScript(`(async()=>{
+   const a=document.getElementById('m81CompareA'),b=document.getElementById('m81CompareB');
+   const cmp=document.getElementById('m81Comparison'),atlas=document.getElementById('m81AtlasMin');
+   if(!a||!b||!cmp||!atlas||a.options.length<280||b.options.length<280)throw Error('8.1 compare/atlas controls missing');
+   b.value=b.options[b.options.length-1].value;
+   b.dispatchEvent(new Event('change'));
+   if(cmp.querySelectorAll('.m81-card').length!==2)throw Error('8.1 comparison did not render 2 real species');
+   atlas.value='10';atlas.dispatchEvent(new Event('change'));
+   if(!document.getElementById('m81AtlasSummary').textContent.includes('наблюдений'))throw Error('8.1 atlas filter did not update');
+   const report=document.getElementById('m81Performance');
+   if(!report?.textContent.includes('DOMContentLoaded'))throw Error('8.1 real performance metrics missing');
+   const quick=document.getElementById('m81QuickDiary');
+   if(!quick)throw Error('8.1 field controls absent');
+   const notebook=window.MoOLVa81Core?.summarize([],{});
+   if(notebook?.total!==0)throw Error('8.1 original journal helper missing');
+   return {compareCards:2,atlasFilter:'10',performanceReported:true,fieldButtons:4};
+  })()`);
+  // End-to-end real image preprocessing + 3 independently executed native ONNX passes.
+  // The screenshot is an arbitrary test image; test checks pipeline, NOT bird identification accuracy.
+  const sample=fs.readFileSync(path.join(out,'01-glavnaya.png')).toString('base64');
+  const photoPipeline=await win.webContents.executeJavaScript(`window.BirdVision.predict(Uint8Array.from(atob('${sample}'),c=>c.charCodeAt(0)))`);
+  if(!Array.isArray(photoPipeline?.top)||photoPipeline.top.length<5||photoPipeline.imageCrops!==3)throw Error('Real photo image-to-ONNX pipeline failure');
+  // Actual backup UI import and checksum verification on throwaway Windows CI profile.
+  const backupSmoke=await win.webContents.executeJavaScript(`(async()=>{
+   const key='ptitsy-nn.favorites.v1',previous=localStorage.getItem(key),status=document.getElementById('m78BackupStatus'),picker=document.getElementById('m78BackupFile');
+   const originalConfirm=window.confirm;window.confirm=()=>true;
+   async function checksum(x){const buf=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(JSON.stringify(x)));
+    return [...new Uint8Array(buf)].map(v=>v.toString(16).padStart(2,'0')).join('');}
+   async function submit(obj){
+    const transfer=new DataTransfer();transfer.items.add(new File([JSON.stringify(obj)],'test-backup.json',{type:'application/json'}));
+    picker.files=transfer.files;picker.dispatchEvent(new Event('change'));
+    for(let i=0;i<160;i++){await new Promise(r=>setTimeout(r,60));if(!picker.files.length&&status.textContent)return status.textContent;}
+    throw Error('Backup UI restore timed out');
+   }
+   try{
+    const original={type:'moolva-backup78',version:1,createdAt:'2026-01-01T00:00:00.000Z',
+       stores:{[key]:'["moolva-ci-verification"]'},assets:[]};
+    const good={...original,integrity:{algorithm:'SHA-256',value:await checksum(original)}};
+    const result=await submit(good);
+    if(!result.includes('Данные восстановлены')||localStorage.getItem(key)!=='["moolva-ci-verification"]')throw Error('Valid SHA256 verified backup did not restore');
+    const damaged={...good,stores:{[key]:'["damaged"]'}};
+    const rejected=await submit(damaged);
+    if(!rejected.includes('Архив отклонён')||localStorage.getItem(key)!=='["moolva-ci-verification"]')throw Error('Tampered SHA256 backup not rejected safely');
+    return {validArchive:'restored',alteredArchive:'rejected',originalKeyUnmodifiedAfterRejection:true};
+   }finally{
+    if(previous===null)localStorage.removeItem(key);else localStorage.setItem(key,previous);
+    window.confirm=originalConfirm;
+   }
+  })()`);
   const visionSmoke=await win.webContents.executeJavaScript('window.BirdVision?.diagnostics()');
   if(!visionSmoke?.ok||visionSmoke.classes<200)throw Error('Real local image model did not pass native ONNX inference');
   const evidence={type:'MoOLVa-real-windows-screenshots',version:require('./package.json').version,
    runtime:'Electron packaged Windows executable',captureMethod:'Chromium webContents.capturePage (offscreen)',
-   os:process.platform,packaged:app.isPackaged,modelAvailable:modelStatus().available,visionModelVerified:visionSmoke,catalog:data,
+   os:process.platform,packaged:app.isPackaged,modelAvailable:modelStatus().available,visionModelVerified:visionSmoke,photoPipelineVerified:{passes:photoPipeline.imageCrops,candidates:photoPipeline.top.length},guiInteractions,backupSmoke,catalog:data,
    screenshots:captured,createdAt:new Date().toISOString()};
   if(!evidence.modelAvailable)throw Error('Offline Perch v2 files absent in executable');
   fs.writeFileSync(path.join(out,'gui-smoke.json'),JSON.stringify(evidence,null,2),'utf8');

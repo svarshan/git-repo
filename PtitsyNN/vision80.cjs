@@ -30,20 +30,25 @@ function registerVision80({app,ipcMain,nativeImage,isTrusted}){
   })().catch(err=>{sessionPromise=null;throw err;});
   return sessionPromise;
  }
- function pixelTensor(image,metadata,ort){
+ function pixelTensor(image,metadata,ort,position=0.5){
   const target=224,original=nativeImage.createFromBuffer(Buffer.from(image));
   if(original.isEmpty())throw Error('Не удалось декодировать настоящее изображение.');
   const dims=original.getSize();
   if(Math.max(dims.width,dims.height)>7000||Math.min(dims.width,dims.height)<20)throw Error('Фото слишком большое или слишком маленькое.');
-  const bitmap=original.resize({width:target,height:target,quality:'best'}).toBitmap();
+  // 8.1: preserve image aspect ratio and crop 224x224, instead of distorting wide/tall birds.
+  const scale=Math.max(target/dims.width,target/dims.height);
+  const width=Math.max(target,Math.round(dims.width*scale)),height=Math.max(target,Math.round(dims.height*scale));
+  const resized=original.resize({width,height,quality:'best'});
+  const crop=resized.crop({x:Math.round((width-target)*position),y:Math.round((height-target)*position),width:target,height:target});
+  const bitmap=crop.toBitmap();
   if(bitmap.length!==target*target*4)throw Error('Неверный формат BGRA изображения.');
   const processor=metadata.processor||{};
   const means=processor.image_mean,stdev=processor.image_std;
-  if(!Array.isArray(means)||!Array.isArray(stdev)||means.length!==3||stdev.length!==3||stdev.some(x=>!(x>0)))throw Error('Отсутствуют проверенные коэффициенты обработки изображения.');
+  if(!Array.isArray(means)||!Array.isArray(stdev)||means.length!==3||stdev.length!==3||stdev.some(x=>!(x>0)))throw Error('Нет проверенных коэффициентов обработки изображения.');
   const rescale=processor.do_rescale===false?1:Number(processor.rescale_factor??(1/255));
   const vals=new Float32Array(3*target*target),area=target*target;
   for(let p=0;p<area;p++){
-   const k=p*4; // Electron toBitmap uses BGRA
+   const k=p*4;
    vals[p]=(bitmap[k+2]*rescale-means[0])/stdev[0];
    vals[area+p]=(bitmap[k+1]*rescale-means[1])/stdev[1];
    vals[area*2+p]=(bitmap[k]*rescale-means[2])/stdev[2];
@@ -53,14 +58,24 @@ function registerVision80({app,ipcMain,nativeImage,isTrusted}){
  async function predict(bytes){
   if(!(bytes instanceof Uint8Array||bytes instanceof ArrayBuffer)||bytes.byteLength>9*1024*1024||bytes.byteLength<128)throw Error('Нужно локальное изображение до 9 МБ.');
   const {session,ort,m}=await model();
-  const input=pixelTensor(bytes,m,ort);
-  const outputs=await session.run({[session.inputNames[0]]:input});
-  const tensor=outputs[session.outputNames[0]],values=tensor?.data;
-  if(!values||values.length!==m.labels.length)throw Error('Модель вернула неправильное число классов: '+(values?.length??0));
-  const data=Array.from(values,(score,index)=>({score:Number(score),index})).filter(x=>Number.isFinite(x.score));
+  // Center crop has the largest weight; additional real ONNX passes test adjacent framing.
+  // This is genuine repeated image inference, not synthetic confidence amplification.
+  const positions=[0.5,0.2,0.8],weights=[0.6,0.2,0.2];
+  const combined=new Float64Array(m.labels.length);
+  for(let pass=0;pass<positions.length;pass++){
+   const input=pixelTensor(bytes,m,ort,positions[pass]);
+   const outputs=await session.run({[session.inputNames[0]]:input});
+   const values=outputs[session.outputNames[0]]?.data;
+   if(!values||values.length!==m.labels.length)throw Error('Модель вернула неправильное число классов: '+(values?.length??0));
+   for(let i=0;i<values.length;i++){
+    if(!Number.isFinite(Number(values[i])))throw Error('Некорректный логит модели');
+    combined[i]+=Number(values[i])*weights[pass];
+   }
+  }
+  const data=Array.from(combined,(score,index)=>({score:Number(score),index})).filter(x=>Number.isFinite(x.score));
   if(data.length!==m.labels.length)throw Error('Некорректные оценки модели.');
   data.sort((a,b)=>b.score-a.score);
-  return {model:m.model,classes:m.labels.length,source:m.source,top:data.slice(0,8).map(x=>({label:m.labels[x.index],score:x.score})),
+  return {model:m.model,classes:m.labels.length,source:m.source,imageCrops:3,top:data.slice(0,8).map(x=>({label:m.labels[x.index],score:x.score})),
    caveat:'Это относительные логиты модели из внешнего набора 525 видов, не калиброванные вероятности; многие региональные виды модель может не знать.'};
  }
  ipcMain.handle('birdvision80-status',event=>{if(!isTrusted(event.sender))throw Error('Недоверенная вкладка');return status();});
