@@ -1,0 +1,3873 @@
+{
+  "version": "3.0",
+  "items": [
+    {
+      "text": "Мама. Мама улыбается.",
+      "category": "cards"
+    },
+    {
+      "text": "Мама",
+      "category": "words"
+    },
+    {
+      "text": "Мама улыбается.",
+      "category": "phrases"
+    },
+    {
+      "text": "Папа. Папа читает книгу.",
+      "category": "cards"
+    },
+    {
+      "text": "Папа",
+      "category": "words"
+    },
+    {
+      "text": "Папа читает книгу.",
+      "category": "phrases"
+    },
+    {
+      "text": "Бабушка. Бабушка печёт пирог.",
+      "category": "cards"
+    },
+    {
+      "text": "Бабушка",
+      "category": "words"
+    },
+    {
+      "text": "Бабушка печёт пирог.",
+      "category": "phrases"
+    },
+    {
+      "text": "Дедушка. Дедушка гуляет.",
+      "category": "cards"
+    },
+    {
+      "text": "Дедушка",
+      "category": "words"
+    },
+    {
+      "text": "Дедушка гуляет.",
+      "category": "phrases"
+    },
+    {
+      "text": "Брат. Брат играет.",
+      "category": "cards"
+    },
+    {
+      "text": "Брат",
+      "category": "words"
+    },
+    {
+      "text": "Брат играет.",
+      "category": "phrases"
+    },
+    {
+      "text": "Сестра. Сестра поёт песню.",
+      "category": "cards"
+    },
+    {
+      "text": "Сестра",
+      "category": "words"
+    },
+    {
+      "text": "Сестра поёт песню.",
+      "category": "phrases"
+    },
+    {
+      "text": "Ребёнок. Ребёнок смеётся.",
+      "category": "cards"
+    },
+    {
+      "text": "Ребёнок",
+      "category": "words"
+    },
+    {
+      "text": "Ребёнок смеётся.",
+      "category": "phrases"
+    },
+    {
+      "text": "Малыш. Малыш спит.",
+      "category": "cards"
+    },
+    {
+      "text": "Малыш",
+      "category": "words"
+    },
+    {
+      "text": "Малыш спит.",
+      "category": "phrases"
+    },
+    {
+      "text": "Сын. Сын обнимает папу.",
+      "category": "cards"
+    },
+    {
+      "text": "Сын",
+      "category": "words"
+    },
+    {
+      "text": "Сын обнимает папу.",
+      "category": "phrases"
+    },
+    {
+      "text": "Дочь. Дочь машет рукой.",
+      "category": "cards"
+    },
+    {
+      "text": "Дочь",
+      "category": "words"
+    },
+    {
+      "text": "Дочь машет рукой.",
+      "category": "phrases"
+    },
+    {
+      "text": "Тётя. Тётя пришла в гости.",
+      "category": "cards"
+    },
+    {
+      "text": "Тётя",
+      "category": "words"
+    },
+    {
+      "text": "Тётя пришла в гости.",
+      "category": "phrases"
+    },
+    {
+      "text": "Дядя. Дядя принёс подарок.",
+      "category": "cards"
+    },
+    {
+      "text": "Дядя",
+      "category": "words"
+    },
+    {
+      "text": "Дядя принёс подарок.",
+      "category": "phrases"
+    },
+    {
+      "text": "Внук. Внук обнял бабушку.",
+      "category": "cards"
+    },
+    {
+      "text": "Внук",
+      "category": "words"
+    },
+    {
+      "text": "Внук обнял бабушку.",
+      "category": "phrases"
+    },
+    {
+      "text": "Внучка. Внучка рисует цветок.",
+      "category": "cards"
+    },
+    {
+      "text": "Внучка",
+      "category": "words"
+    },
+    {
+      "text": "Внучка рисует цветок.",
+      "category": "phrases"
+    },
+    {
+      "text": "Семья. Семья гуляет вместе.",
+      "category": "cards"
+    },
+    {
+      "text": "Семья",
+      "category": "words"
+    },
+    {
+      "text": "Семья гуляет вместе.",
+      "category": "phrases"
+    },
+    {
+      "text": "Родители. Родители заботятся о ребёнке.",
+      "category": "cards"
+    },
+    {
+      "text": "Родители",
+      "category": "words"
+    },
+    {
+      "text": "Родители заботятся о ребёнке.",
+      "category": "phrases"
+    },
+    {
+      "text": "Девочка. Девочка танцует.",
+      "category": "cards"
+    },
+    {
+      "text": "Девочка",
+      "category": "words"
+    },
+    {
+      "text": "Девочка танцует.",
+      "category": "phrases"
+    },
+    {
+      "text": "Мальчик. Мальчик строит башню.",
+      "category": "cards"
+    },
+    {
+      "text": "Мальчик",
+      "category": "words"
+    },
+    {
+      "text": "Мальчик строит башню.",
+      "category": "phrases"
+    },
+    {
+      "text": "Друг. Друг играет рядом.",
+      "category": "cards"
+    },
+    {
+      "text": "Друг",
+      "category": "words"
+    },
+    {
+      "text": "Друг играет рядом.",
+      "category": "phrases"
+    },
+    {
+      "text": "Подруга. Подруга улыбается.",
+      "category": "cards"
+    },
+    {
+      "text": "Подруга",
+      "category": "words"
+    },
+    {
+      "text": "Подруга улыбается.",
+      "category": "phrases"
+    },
+    {
+      "text": "Сосед. Сосед здоровается.",
+      "category": "cards"
+    },
+    {
+      "text": "Сосед",
+      "category": "words"
+    },
+    {
+      "text": "Сосед здоровается.",
+      "category": "phrases"
+    },
+    {
+      "text": "Соседка. Соседка машет рукой.",
+      "category": "cards"
+    },
+    {
+      "text": "Соседка",
+      "category": "words"
+    },
+    {
+      "text": "Соседка машет рукой.",
+      "category": "phrases"
+    },
+    {
+      "text": "Гость. Гость пришёл к нам.",
+      "category": "cards"
+    },
+    {
+      "text": "Гость",
+      "category": "words"
+    },
+    {
+      "text": "Гость пришёл к нам.",
+      "category": "phrases"
+    },
+    {
+      "text": "Подружка. Подружка зовёт играть.",
+      "category": "cards"
+    },
+    {
+      "text": "Подружка",
+      "category": "words"
+    },
+    {
+      "text": "Подружка зовёт играть.",
+      "category": "phrases"
+    },
+    {
+      "text": "Родня. Родня собралась за столом.",
+      "category": "cards"
+    },
+    {
+      "text": "Родня",
+      "category": "words"
+    },
+    {
+      "text": "Родня собралась за столом.",
+      "category": "phrases"
+    },
+    {
+      "text": "Кот. Кот спит на ковре.",
+      "category": "cards"
+    },
+    {
+      "text": "Кот",
+      "category": "words"
+    },
+    {
+      "text": "Кот спит на ковре.",
+      "category": "phrases"
+    },
+    {
+      "text": "Собака. Собака играет с мячом.",
+      "category": "cards"
+    },
+    {
+      "text": "Собака",
+      "category": "words"
+    },
+    {
+      "text": "Собака играет с мячом.",
+      "category": "phrases"
+    },
+    {
+      "text": "Заяц. Заяц прыгает.",
+      "category": "cards"
+    },
+    {
+      "text": "Заяц",
+      "category": "words"
+    },
+    {
+      "text": "Заяц прыгает.",
+      "category": "phrases"
+    },
+    {
+      "text": "Лиса. Лиса идёт по лесу.",
+      "category": "cards"
+    },
+    {
+      "text": "Лиса",
+      "category": "words"
+    },
+    {
+      "text": "Лиса идёт по лесу.",
+      "category": "phrases"
+    },
+    {
+      "text": "Волк. Волк живёт в лесу.",
+      "category": "cards"
+    },
+    {
+      "text": "Волк",
+      "category": "words"
+    },
+    {
+      "text": "Волк живёт в лесу.",
+      "category": "phrases"
+    },
+    {
+      "text": "Медведь. Медведь ест ягоды.",
+      "category": "cards"
+    },
+    {
+      "text": "Медведь",
+      "category": "words"
+    },
+    {
+      "text": "Медведь ест ягоды.",
+      "category": "phrases"
+    },
+    {
+      "text": "Белка. Белка грызёт орех.",
+      "category": "cards"
+    },
+    {
+      "text": "Белка",
+      "category": "words"
+    },
+    {
+      "text": "Белка грызёт орех.",
+      "category": "phrases"
+    },
+    {
+      "text": "Ёж. Ёж несёт листочек.",
+      "category": "cards"
+    },
+    {
+      "text": "Ёж",
+      "category": "words"
+    },
+    {
+      "text": "Ёж несёт листочек.",
+      "category": "phrases"
+    },
+    {
+      "text": "Лев. Лев отдыхает.",
+      "category": "cards"
+    },
+    {
+      "text": "Лев",
+      "category": "words"
+    },
+    {
+      "text": "Лев отдыхает.",
+      "category": "phrases"
+    },
+    {
+      "text": "Тигр. Тигр полосатый.",
+      "category": "cards"
+    },
+    {
+      "text": "Тигр",
+      "category": "words"
+    },
+    {
+      "text": "Тигр полосатый.",
+      "category": "phrases"
+    },
+    {
+      "text": "Слон. Слон большой.",
+      "category": "cards"
+    },
+    {
+      "text": "Слон",
+      "category": "words"
+    },
+    {
+      "text": "Слон большой.",
+      "category": "phrases"
+    },
+    {
+      "text": "Жираф. У жирафа длинная шея.",
+      "category": "cards"
+    },
+    {
+      "text": "Жираф",
+      "category": "words"
+    },
+    {
+      "text": "У жирафа длинная шея.",
+      "category": "phrases"
+    },
+    {
+      "text": "Обезьяна. Обезьяна лазает.",
+      "category": "cards"
+    },
+    {
+      "text": "Обезьяна",
+      "category": "words"
+    },
+    {
+      "text": "Обезьяна лазает.",
+      "category": "phrases"
+    },
+    {
+      "text": "Зебра. Зебра в полоску.",
+      "category": "cards"
+    },
+    {
+      "text": "Зебра",
+      "category": "words"
+    },
+    {
+      "text": "Зебра в полоску.",
+      "category": "phrases"
+    },
+    {
+      "text": "Корова. Корова жуёт траву.",
+      "category": "cards"
+    },
+    {
+      "text": "Корова",
+      "category": "words"
+    },
+    {
+      "text": "Корова жуёт траву.",
+      "category": "phrases"
+    },
+    {
+      "text": "Лошадь. Лошадь бежит.",
+      "category": "cards"
+    },
+    {
+      "text": "Лошадь",
+      "category": "words"
+    },
+    {
+      "text": "Лошадь бежит.",
+      "category": "phrases"
+    },
+    {
+      "text": "Овца. Овца пасётся.",
+      "category": "cards"
+    },
+    {
+      "text": "Овца",
+      "category": "words"
+    },
+    {
+      "text": "Овца пасётся.",
+      "category": "phrases"
+    },
+    {
+      "text": "Коза. Коза прыгает.",
+      "category": "cards"
+    },
+    {
+      "text": "Коза",
+      "category": "words"
+    },
+    {
+      "text": "Коза прыгает.",
+      "category": "phrases"
+    },
+    {
+      "text": "Свинья. Свинья хрюкает.",
+      "category": "cards"
+    },
+    {
+      "text": "Свинья",
+      "category": "words"
+    },
+    {
+      "text": "Свинья хрюкает.",
+      "category": "phrases"
+    },
+    {
+      "text": "Утка. Утка плавает.",
+      "category": "cards"
+    },
+    {
+      "text": "Утка",
+      "category": "words"
+    },
+    {
+      "text": "Утка плавает.",
+      "category": "phrases"
+    },
+    {
+      "text": "Гусь. Гусь гуляет.",
+      "category": "cards"
+    },
+    {
+      "text": "Гусь",
+      "category": "words"
+    },
+    {
+      "text": "Гусь гуляет.",
+      "category": "phrases"
+    },
+    {
+      "text": "Курица. Курица клюёт зерно.",
+      "category": "cards"
+    },
+    {
+      "text": "Курица",
+      "category": "words"
+    },
+    {
+      "text": "Курица клюёт зерно.",
+      "category": "phrases"
+    },
+    {
+      "text": "Петух. Петух поёт утром.",
+      "category": "cards"
+    },
+    {
+      "text": "Петух",
+      "category": "words"
+    },
+    {
+      "text": "Петух поёт утром.",
+      "category": "phrases"
+    },
+    {
+      "text": "Рыба. Рыба плывёт.",
+      "category": "cards"
+    },
+    {
+      "text": "Рыба",
+      "category": "words"
+    },
+    {
+      "text": "Рыба плывёт.",
+      "category": "phrases"
+    },
+    {
+      "text": "Лягушка. Лягушка сидит у пруда.",
+      "category": "cards"
+    },
+    {
+      "text": "Лягушка",
+      "category": "words"
+    },
+    {
+      "text": "Лягушка сидит у пруда.",
+      "category": "phrases"
+    },
+    {
+      "text": "Яблоко. Яблоко красное.",
+      "category": "cards"
+    },
+    {
+      "text": "Яблоко",
+      "category": "words"
+    },
+    {
+      "text": "Яблоко красное.",
+      "category": "phrases"
+    },
+    {
+      "text": "Груша. Груша сладкая.",
+      "category": "cards"
+    },
+    {
+      "text": "Груша",
+      "category": "words"
+    },
+    {
+      "text": "Груша сладкая.",
+      "category": "phrases"
+    },
+    {
+      "text": "Банан. Банан жёлтый.",
+      "category": "cards"
+    },
+    {
+      "text": "Банан",
+      "category": "words"
+    },
+    {
+      "text": "Банан жёлтый.",
+      "category": "phrases"
+    },
+    {
+      "text": "Апельсин. Апельсин сочный.",
+      "category": "cards"
+    },
+    {
+      "text": "Апельсин",
+      "category": "words"
+    },
+    {
+      "text": "Апельсин сочный.",
+      "category": "phrases"
+    },
+    {
+      "text": "Лимон. Лимон кислый.",
+      "category": "cards"
+    },
+    {
+      "text": "Лимон",
+      "category": "words"
+    },
+    {
+      "text": "Лимон кислый.",
+      "category": "phrases"
+    },
+    {
+      "text": "Виноград. Виноград растёт гроздьями.",
+      "category": "cards"
+    },
+    {
+      "text": "Виноград",
+      "category": "words"
+    },
+    {
+      "text": "Виноград растёт гроздьями.",
+      "category": "phrases"
+    },
+    {
+      "text": "Клубника. Клубника красная.",
+      "category": "cards"
+    },
+    {
+      "text": "Клубника",
+      "category": "words"
+    },
+    {
+      "text": "Клубника красная.",
+      "category": "phrases"
+    },
+    {
+      "text": "Арбуз. Арбуз большой.",
+      "category": "cards"
+    },
+    {
+      "text": "Арбуз",
+      "category": "words"
+    },
+    {
+      "text": "Арбуз большой.",
+      "category": "phrases"
+    },
+    {
+      "text": "Вишня. Вишня спелая.",
+      "category": "cards"
+    },
+    {
+      "text": "Вишня",
+      "category": "words"
+    },
+    {
+      "text": "Вишня спелая.",
+      "category": "phrases"
+    },
+    {
+      "text": "Морковь. Заяц ест морковь.",
+      "category": "cards"
+    },
+    {
+      "text": "Морковь",
+      "category": "words"
+    },
+    {
+      "text": "Заяц ест морковь.",
+      "category": "phrases"
+    },
+    {
+      "text": "Помидор. Помидор красный.",
+      "category": "cards"
+    },
+    {
+      "text": "Помидор",
+      "category": "words"
+    },
+    {
+      "text": "Помидор красный.",
+      "category": "phrases"
+    },
+    {
+      "text": "Огурец. Огурец хрустит.",
+      "category": "cards"
+    },
+    {
+      "text": "Огурец",
+      "category": "words"
+    },
+    {
+      "text": "Огурец хрустит.",
+      "category": "phrases"
+    },
+    {
+      "text": "Картофель. Картофель растёт в земле.",
+      "category": "cards"
+    },
+    {
+      "text": "Картофель",
+      "category": "words"
+    },
+    {
+      "text": "Картофель растёт в земле.",
+      "category": "phrases"
+    },
+    {
+      "text": "Капуста. Капуста растёт на грядке.",
+      "category": "cards"
+    },
+    {
+      "text": "Капуста",
+      "category": "words"
+    },
+    {
+      "text": "Капуста растёт на грядке.",
+      "category": "phrases"
+    },
+    {
+      "text": "Брокколи. Брокколи зелёная.",
+      "category": "cards"
+    },
+    {
+      "text": "Брокколи",
+      "category": "words"
+    },
+    {
+      "text": "Брокколи зелёная.",
+      "category": "phrases"
+    },
+    {
+      "text": "Хлеб. Хлеб лежит на столе.",
+      "category": "cards"
+    },
+    {
+      "text": "Хлеб",
+      "category": "words"
+    },
+    {
+      "text": "Хлеб лежит на столе.",
+      "category": "phrases"
+    },
+    {
+      "text": "Булочка. Булочка мягкая.",
+      "category": "cards"
+    },
+    {
+      "text": "Булочка",
+      "category": "words"
+    },
+    {
+      "text": "Булочка мягкая.",
+      "category": "phrases"
+    },
+    {
+      "text": "Сыр. Сыр лежит на тарелке.",
+      "category": "cards"
+    },
+    {
+      "text": "Сыр",
+      "category": "words"
+    },
+    {
+      "text": "Сыр лежит на тарелке.",
+      "category": "phrases"
+    },
+    {
+      "text": "Яйцо. Яйцо сварили.",
+      "category": "cards"
+    },
+    {
+      "text": "Яйцо",
+      "category": "words"
+    },
+    {
+      "text": "Яйцо сварили.",
+      "category": "phrases"
+    },
+    {
+      "text": "Молоко. Молоко наливают в стакан.",
+      "category": "cards"
+    },
+    {
+      "text": "Молоко",
+      "category": "words"
+    },
+    {
+      "text": "Молоко наливают в стакан.",
+      "category": "phrases"
+    },
+    {
+      "text": "Каша. Каша тёплая.",
+      "category": "cards"
+    },
+    {
+      "text": "Каша",
+      "category": "words"
+    },
+    {
+      "text": "Каша тёплая.",
+      "category": "phrases"
+    },
+    {
+      "text": "Суп. Суп едят ложкой.",
+      "category": "cards"
+    },
+    {
+      "text": "Суп",
+      "category": "words"
+    },
+    {
+      "text": "Суп едят ложкой.",
+      "category": "phrases"
+    },
+    {
+      "text": "Пирог. Пирог вкусный.",
+      "category": "cards"
+    },
+    {
+      "text": "Пирог",
+      "category": "words"
+    },
+    {
+      "text": "Пирог вкусный.",
+      "category": "phrases"
+    },
+    {
+      "text": "Мёд. Мёд сладкий.",
+      "category": "cards"
+    },
+    {
+      "text": "Мёд",
+      "category": "words"
+    },
+    {
+      "text": "Мёд сладкий.",
+      "category": "phrases"
+    },
+    {
+      "text": "Печенье. Печенье хрустит.",
+      "category": "cards"
+    },
+    {
+      "text": "Печенье",
+      "category": "words"
+    },
+    {
+      "text": "Печенье хрустит.",
+      "category": "phrases"
+    },
+    {
+      "text": "Шапка. Шапку надевают на голову.",
+      "category": "cards"
+    },
+    {
+      "text": "Шапка",
+      "category": "words"
+    },
+    {
+      "text": "Шапку надевают на голову.",
+      "category": "phrases"
+    },
+    {
+      "text": "Шарф. Шарф греет шею.",
+      "category": "cards"
+    },
+    {
+      "text": "Шарф",
+      "category": "words"
+    },
+    {
+      "text": "Шарф греет шею.",
+      "category": "phrases"
+    },
+    {
+      "text": "Перчатки. Перчатки согревают руки.",
+      "category": "cards"
+    },
+    {
+      "text": "Перчатки",
+      "category": "words"
+    },
+    {
+      "text": "Перчатки согревают руки.",
+      "category": "phrases"
+    },
+    {
+      "text": "Варежки. Варежки тёплые.",
+      "category": "cards"
+    },
+    {
+      "text": "Варежки",
+      "category": "words"
+    },
+    {
+      "text": "Варежки тёплые.",
+      "category": "phrases"
+    },
+    {
+      "text": "Куртка. Куртка защищает от ветра.",
+      "category": "cards"
+    },
+    {
+      "text": "Куртка",
+      "category": "words"
+    },
+    {
+      "text": "Куртка защищает от ветра.",
+      "category": "phrases"
+    },
+    {
+      "text": "Пальто. Пальто надевают осенью.",
+      "category": "cards"
+    },
+    {
+      "text": "Пальто",
+      "category": "words"
+    },
+    {
+      "text": "Пальто надевают осенью.",
+      "category": "phrases"
+    },
+    {
+      "text": "Платье. Платье красивое.",
+      "category": "cards"
+    },
+    {
+      "text": "Платье",
+      "category": "words"
+    },
+    {
+      "text": "Платье красивое.",
+      "category": "phrases"
+    },
+    {
+      "text": "Юбка. Юбка синяя.",
+      "category": "cards"
+    },
+    {
+      "text": "Юбка",
+      "category": "words"
+    },
+    {
+      "text": "Юбка синяя.",
+      "category": "phrases"
+    },
+    {
+      "text": "Брюки. Брюки висят в шкафу.",
+      "category": "cards"
+    },
+    {
+      "text": "Брюки",
+      "category": "words"
+    },
+    {
+      "text": "Брюки висят в шкафу.",
+      "category": "phrases"
+    },
+    {
+      "text": "Джинсы. Джинсы удобные.",
+      "category": "cards"
+    },
+    {
+      "text": "Джинсы",
+      "category": "words"
+    },
+    {
+      "text": "Джинсы удобные.",
+      "category": "phrases"
+    },
+    {
+      "text": "Футболка. Футболка зелёная.",
+      "category": "cards"
+    },
+    {
+      "text": "Футболка",
+      "category": "words"
+    },
+    {
+      "text": "Футболка зелёная.",
+      "category": "phrases"
+    },
+    {
+      "text": "Рубашка. Рубашка чистая.",
+      "category": "cards"
+    },
+    {
+      "text": "Рубашка",
+      "category": "words"
+    },
+    {
+      "text": "Рубашка чистая.",
+      "category": "phrases"
+    },
+    {
+      "text": "Свитер. Свитер тёплый.",
+      "category": "cards"
+    },
+    {
+      "text": "Свитер",
+      "category": "words"
+    },
+    {
+      "text": "Свитер тёплый.",
+      "category": "phrases"
+    },
+    {
+      "text": "Кофта. Кофта мягкая.",
+      "category": "cards"
+    },
+    {
+      "text": "Кофта",
+      "category": "words"
+    },
+    {
+      "text": "Кофта мягкая.",
+      "category": "phrases"
+    },
+    {
+      "text": "Носки. Носки надевают на ноги.",
+      "category": "cards"
+    },
+    {
+      "text": "Носки",
+      "category": "words"
+    },
+    {
+      "text": "Носки надевают на ноги.",
+      "category": "phrases"
+    },
+    {
+      "text": "Колготки. Колготки надевают под платье.",
+      "category": "cards"
+    },
+    {
+      "text": "Колготки",
+      "category": "words"
+    },
+    {
+      "text": "Колготки надевают под платье.",
+      "category": "phrases"
+    },
+    {
+      "text": "Ботинки. Ботинки стоят у двери.",
+      "category": "cards"
+    },
+    {
+      "text": "Ботинки",
+      "category": "words"
+    },
+    {
+      "text": "Ботинки стоят у двери.",
+      "category": "phrases"
+    },
+    {
+      "text": "Сапоги. Сапоги пригодятся в дождь.",
+      "category": "cards"
+    },
+    {
+      "text": "Сапоги",
+      "category": "words"
+    },
+    {
+      "text": "Сапоги пригодятся в дождь.",
+      "category": "phrases"
+    },
+    {
+      "text": "Туфли. Туфли стоят на полке.",
+      "category": "cards"
+    },
+    {
+      "text": "Туфли",
+      "category": "words"
+    },
+    {
+      "text": "Туфли стоят на полке.",
+      "category": "phrases"
+    },
+    {
+      "text": "Кроссовки. Кроссовки удобны для бега.",
+      "category": "cards"
+    },
+    {
+      "text": "Кроссовки",
+      "category": "words"
+    },
+    {
+      "text": "Кроссовки удобны для бега.",
+      "category": "phrases"
+    },
+    {
+      "text": "Сандалии. Сандалии надевают летом.",
+      "category": "cards"
+    },
+    {
+      "text": "Сандалии",
+      "category": "words"
+    },
+    {
+      "text": "Сандалии надевают летом.",
+      "category": "phrases"
+    },
+    {
+      "text": "Пижама. В пижаме спят.",
+      "category": "cards"
+    },
+    {
+      "text": "Пижама",
+      "category": "words"
+    },
+    {
+      "text": "В пижаме спят.",
+      "category": "phrases"
+    },
+    {
+      "text": "Халат. Халат надевают после душа.",
+      "category": "cards"
+    },
+    {
+      "text": "Халат",
+      "category": "words"
+    },
+    {
+      "text": "Халат надевают после душа.",
+      "category": "phrases"
+    },
+    {
+      "text": "Кепка. Кепка защищает от солнца.",
+      "category": "cards"
+    },
+    {
+      "text": "Кепка",
+      "category": "words"
+    },
+    {
+      "text": "Кепка защищает от солнца.",
+      "category": "phrases"
+    },
+    {
+      "text": "Рукавицы. Рукавицы согревают руки.",
+      "category": "cards"
+    },
+    {
+      "text": "Рукавицы",
+      "category": "words"
+    },
+    {
+      "text": "Рукавицы согревают руки.",
+      "category": "phrases"
+    },
+    {
+      "text": "Мяч. Мяч катится.",
+      "category": "cards"
+    },
+    {
+      "text": "Мяч",
+      "category": "words"
+    },
+    {
+      "text": "Мяч катится.",
+      "category": "phrases"
+    },
+    {
+      "text": "Кукла. Кукла сидит на стуле.",
+      "category": "cards"
+    },
+    {
+      "text": "Кукла",
+      "category": "words"
+    },
+    {
+      "text": "Кукла сидит на стуле.",
+      "category": "phrases"
+    },
+    {
+      "text": "Мишка. Мишка мягкий.",
+      "category": "cards"
+    },
+    {
+      "text": "Мишка",
+      "category": "words"
+    },
+    {
+      "text": "Мишка мягкий.",
+      "category": "phrases"
+    },
+    {
+      "text": "Зайчик. Зайчик плюшевый.",
+      "category": "cards"
+    },
+    {
+      "text": "Зайчик",
+      "category": "words"
+    },
+    {
+      "text": "Зайчик плюшевый.",
+      "category": "phrases"
+    },
+    {
+      "text": "Кубик. Кубик кладут на кубик.",
+      "category": "cards"
+    },
+    {
+      "text": "Кубик",
+      "category": "words"
+    },
+    {
+      "text": "Кубик кладут на кубик.",
+      "category": "phrases"
+    },
+    {
+      "text": "Пирамидка. Пирамидку собирают из колец.",
+      "category": "cards"
+    },
+    {
+      "text": "Пирамидка",
+      "category": "words"
+    },
+    {
+      "text": "Пирамидку собирают из колец.",
+      "category": "phrases"
+    },
+    {
+      "text": "Машинка. Машинка едет.",
+      "category": "cards"
+    },
+    {
+      "text": "Машинка",
+      "category": "words"
+    },
+    {
+      "text": "Машинка едет.",
+      "category": "phrases"
+    },
+    {
+      "text": "Паровозик. Паровозик везёт вагончики.",
+      "category": "cards"
+    },
+    {
+      "text": "Паровозик",
+      "category": "words"
+    },
+    {
+      "text": "Паровозик везёт вагончики.",
+      "category": "phrases"
+    },
+    {
+      "text": "Конструктор. Из конструктора строят дом.",
+      "category": "cards"
+    },
+    {
+      "text": "Конструктор",
+      "category": "words"
+    },
+    {
+      "text": "Из конструктора строят дом.",
+      "category": "phrases"
+    },
+    {
+      "text": "Пазл. Пазл собирают по кусочкам.",
+      "category": "cards"
+    },
+    {
+      "text": "Пазл",
+      "category": "words"
+    },
+    {
+      "text": "Пазл собирают по кусочкам.",
+      "category": "phrases"
+    },
+    {
+      "text": "Мозаика. Из мозаики складывают узор.",
+      "category": "cards"
+    },
+    {
+      "text": "Мозаика",
+      "category": "words"
+    },
+    {
+      "text": "Из мозаики складывают узор.",
+      "category": "phrases"
+    },
+    {
+      "text": "Барабан. В барабан стучат.",
+      "category": "cards"
+    },
+    {
+      "text": "Барабан",
+      "category": "words"
+    },
+    {
+      "text": "В барабан стучат.",
+      "category": "phrases"
+    },
+    {
+      "text": "Дудочка. Дудочка звучит.",
+      "category": "cards"
+    },
+    {
+      "text": "Дудочка",
+      "category": "words"
+    },
+    {
+      "text": "Дудочка звучит.",
+      "category": "phrases"
+    },
+    {
+      "text": "Погремушка. Погремушка гремит.",
+      "category": "cards"
+    },
+    {
+      "text": "Погремушка",
+      "category": "words"
+    },
+    {
+      "text": "Погремушка гремит.",
+      "category": "phrases"
+    },
+    {
+      "text": "Юла. Юла крутится.",
+      "category": "cards"
+    },
+    {
+      "text": "Юла",
+      "category": "words"
+    },
+    {
+      "text": "Юла крутится.",
+      "category": "phrases"
+    },
+    {
+      "text": "Качели. На качелях качаются.",
+      "category": "cards"
+    },
+    {
+      "text": "Качели",
+      "category": "words"
+    },
+    {
+      "text": "На качелях качаются.",
+      "category": "phrases"
+    },
+    {
+      "text": "Самокат. Самокат катится.",
+      "category": "cards"
+    },
+    {
+      "text": "Самокат",
+      "category": "words"
+    },
+    {
+      "text": "Самокат катится.",
+      "category": "phrases"
+    },
+    {
+      "text": "Ведёрко. В ведёрко насыпают песок.",
+      "category": "cards"
+    },
+    {
+      "text": "Ведёрко",
+      "category": "words"
+    },
+    {
+      "text": "В ведёрко насыпают песок.",
+      "category": "phrases"
+    },
+    {
+      "text": "Лопатка. Лопаткой копают песок.",
+      "category": "cards"
+    },
+    {
+      "text": "Лопатка",
+      "category": "words"
+    },
+    {
+      "text": "Лопаткой копают песок.",
+      "category": "phrases"
+    },
+    {
+      "text": "Формочка. Формочкой делают звезду из песка.",
+      "category": "cards"
+    },
+    {
+      "text": "Формочка",
+      "category": "words"
+    },
+    {
+      "text": "Формочкой делают звезду из песка.",
+      "category": "phrases"
+    },
+    {
+      "text": "Шарик. Шарик летает.",
+      "category": "cards"
+    },
+    {
+      "text": "Шарик",
+      "category": "words"
+    },
+    {
+      "text": "Шарик летает.",
+      "category": "phrases"
+    },
+    {
+      "text": "Робот. Робот шагает.",
+      "category": "cards"
+    },
+    {
+      "text": "Робот",
+      "category": "words"
+    },
+    {
+      "text": "Робот шагает.",
+      "category": "phrases"
+    },
+    {
+      "text": "Вагончики. Игрушечные вагончики едут.",
+      "category": "cards"
+    },
+    {
+      "text": "Вагончики",
+      "category": "words"
+    },
+    {
+      "text": "Игрушечные вагончики едут.",
+      "category": "phrases"
+    },
+    {
+      "text": "Самолётик. Самолётик летит.",
+      "category": "cards"
+    },
+    {
+      "text": "Самолётик",
+      "category": "words"
+    },
+    {
+      "text": "Самолётик летит.",
+      "category": "phrases"
+    },
+    {
+      "text": "Домик. В домике живут игрушки.",
+      "category": "cards"
+    },
+    {
+      "text": "Домик",
+      "category": "words"
+    },
+    {
+      "text": "В домике живут игрушки.",
+      "category": "phrases"
+    },
+    {
+      "text": "Автомобиль. Автомобиль едет по дороге.",
+      "category": "cards"
+    },
+    {
+      "text": "Автомобиль",
+      "category": "words"
+    },
+    {
+      "text": "Автомобиль едет по дороге.",
+      "category": "phrases"
+    },
+    {
+      "text": "Автобус. Автобус везёт пассажиров.",
+      "category": "cards"
+    },
+    {
+      "text": "Автобус",
+      "category": "words"
+    },
+    {
+      "text": "Автобус везёт пассажиров.",
+      "category": "phrases"
+    },
+    {
+      "text": "Троллейбус. Троллейбус едет по улице.",
+      "category": "cards"
+    },
+    {
+      "text": "Троллейбус",
+      "category": "words"
+    },
+    {
+      "text": "Троллейбус едет по улице.",
+      "category": "phrases"
+    },
+    {
+      "text": "Трамвай. Трамвай останавливается.",
+      "category": "cards"
+    },
+    {
+      "text": "Трамвай",
+      "category": "words"
+    },
+    {
+      "text": "Трамвай останавливается.",
+      "category": "phrases"
+    },
+    {
+      "text": "Метро. Метро едет под землёй.",
+      "category": "cards"
+    },
+    {
+      "text": "Метро",
+      "category": "words"
+    },
+    {
+      "text": "Метро едет под землёй.",
+      "category": "phrases"
+    },
+    {
+      "text": "Поезд. Поезд едет по рельсам.",
+      "category": "cards"
+    },
+    {
+      "text": "Поезд",
+      "category": "words"
+    },
+    {
+      "text": "Поезд едет по рельсам.",
+      "category": "phrases"
+    },
+    {
+      "text": "Электричка. Электричка приехала на станцию.",
+      "category": "cards"
+    },
+    {
+      "text": "Электричка",
+      "category": "words"
+    },
+    {
+      "text": "Электричка приехала на станцию.",
+      "category": "phrases"
+    },
+    {
+      "text": "Локомотив. Локомотив тянет вагоны.",
+      "category": "cards"
+    },
+    {
+      "text": "Локомотив",
+      "category": "words"
+    },
+    {
+      "text": "Локомотив тянет вагоны.",
+      "category": "phrases"
+    },
+    {
+      "text": "Вагон. Вагон едет за локомотивом.",
+      "category": "cards"
+    },
+    {
+      "text": "Вагон",
+      "category": "words"
+    },
+    {
+      "text": "Вагон едет за локомотивом.",
+      "category": "phrases"
+    },
+    {
+      "text": "Самолёт. Самолёт летит высоко.",
+      "category": "cards"
+    },
+    {
+      "text": "Самолёт",
+      "category": "words"
+    },
+    {
+      "text": "Самолёт летит высоко.",
+      "category": "phrases"
+    },
+    {
+      "text": "Вертолёт. Вертолёт поднимается в небо.",
+      "category": "cards"
+    },
+    {
+      "text": "Вертолёт",
+      "category": "words"
+    },
+    {
+      "text": "Вертолёт поднимается в небо.",
+      "category": "phrases"
+    },
+    {
+      "text": "Ракета. Ракета стартует.",
+      "category": "cards"
+    },
+    {
+      "text": "Ракета",
+      "category": "words"
+    },
+    {
+      "text": "Ракета стартует.",
+      "category": "phrases"
+    },
+    {
+      "text": "Корабль. Корабль плывёт по морю.",
+      "category": "cards"
+    },
+    {
+      "text": "Корабль",
+      "category": "words"
+    },
+    {
+      "text": "Корабль плывёт по морю.",
+      "category": "phrases"
+    },
+    {
+      "text": "Лодка. Лодка плывёт по реке.",
+      "category": "cards"
+    },
+    {
+      "text": "Лодка",
+      "category": "words"
+    },
+    {
+      "text": "Лодка плывёт по реке.",
+      "category": "phrases"
+    },
+    {
+      "text": "Катер. Катер быстро плывёт.",
+      "category": "cards"
+    },
+    {
+      "text": "Катер",
+      "category": "words"
+    },
+    {
+      "text": "Катер быстро плывёт.",
+      "category": "phrases"
+    },
+    {
+      "text": "Парусник. Парусник идёт под парусом.",
+      "category": "cards"
+    },
+    {
+      "text": "Парусник",
+      "category": "words"
+    },
+    {
+      "text": "Парусник идёт под парусом.",
+      "category": "phrases"
+    },
+    {
+      "text": "Велосипед. Велосипед едет по дорожке.",
+      "category": "cards"
+    },
+    {
+      "text": "Велосипед",
+      "category": "words"
+    },
+    {
+      "text": "Велосипед едет по дорожке.",
+      "category": "phrases"
+    },
+    {
+      "text": "Мотоцикл. Мотоцикл едет.",
+      "category": "cards"
+    },
+    {
+      "text": "Мотоцикл",
+      "category": "words"
+    },
+    {
+      "text": "Мотоцикл едет.",
+      "category": "phrases"
+    },
+    {
+      "text": "Мопед. Мопед маленький.",
+      "category": "cards"
+    },
+    {
+      "text": "Мопед",
+      "category": "words"
+    },
+    {
+      "text": "Мопед маленький.",
+      "category": "phrases"
+    },
+    {
+      "text": "Грузовик. Грузовик везёт коробки.",
+      "category": "cards"
+    },
+    {
+      "text": "Грузовик",
+      "category": "words"
+    },
+    {
+      "text": "Грузовик везёт коробки.",
+      "category": "phrases"
+    },
+    {
+      "text": "Трактор. Трактор работает в поле.",
+      "category": "cards"
+    },
+    {
+      "text": "Трактор",
+      "category": "words"
+    },
+    {
+      "text": "Трактор работает в поле.",
+      "category": "phrases"
+    },
+    {
+      "text": "Экскаватор. Экскаватор копает землю.",
+      "category": "cards"
+    },
+    {
+      "text": "Экскаватор",
+      "category": "words"
+    },
+    {
+      "text": "Экскаватор копает землю.",
+      "category": "phrases"
+    },
+    {
+      "text": "Такси. Такси везёт пассажира.",
+      "category": "cards"
+    },
+    {
+      "text": "Такси",
+      "category": "words"
+    },
+    {
+      "text": "Такси везёт пассажира.",
+      "category": "phrases"
+    },
+    {
+      "text": "Скорая помощь. Скорая помощь едет к больному.",
+      "category": "cards"
+    },
+    {
+      "text": "Скорая помощь",
+      "category": "words"
+    },
+    {
+      "text": "Скорая помощь едет к больному.",
+      "category": "phrases"
+    },
+    {
+      "text": "Пожарная машина. Пожарная машина спешит на помощь.",
+      "category": "cards"
+    },
+    {
+      "text": "Пожарная машина",
+      "category": "words"
+    },
+    {
+      "text": "Пожарная машина спешит на помощь.",
+      "category": "phrases"
+    },
+    {
+      "text": "Буква а. Арбуз. Арбуз сладкий и сочный.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква бэ. Бабочка. Бабочка летит.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква вэ. Велосипед. Велосипед едет по дорожке.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква гэ. Гриб. Гриб растёт в лесу.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква дэ. Дом. В доме живёт семья.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква е. Енот. Енот моет лапки.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква ё. Ёжик. Ёжик маленький и колючий.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква жэ. Жук. Жук сидит на листочке.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква зэ. Заяц. Заяц прыгает.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква и. Индюк. Индюк — большая птица.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква и краткое. Йогурт. Йогурт едят ложкой.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква ка. Кот. Кот говорит: мяу.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква эль. Лиса. Лиса живёт в лесу.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква эм. Мяч. Мяч круглый.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква эн. Нос. Нос помогает чувствовать запахи.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква о. Облако. Облако плывёт по небу.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква пэ. Петух. Петух говорит: ку-ка-ре-ку.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква эр. Рыба. Рыба плавает в воде.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква эс. Солнце. Солнце светит.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква тэ. Тигр. У тигра полоски.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква у. Утка. Утка говорит: кря-кря.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква эф. Филин. Филин — большая сова.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква ха. Хлеб. Хлеб испекли в печи.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква цэ. Цыплёнок. Цыплёнок говорит: пи-пи.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква че. Часы. Часы показывают время.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква ша. Шар. Шар летит вверх.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква ща. Щётка. Щёткой чистят зубы.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква твёрдый знак. Подъезд. Твёрдый знак не обозначает звука. Он есть в слове подъезд.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква ы. Сыр. Буква ы — в середине слова сыр.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква мягкий знак. Конь. Мягкий знак не обозначает звука. Он есть в слове конь.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква э. Экскаватор. Экскаватор копает землю.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква ю. Юла. Юла быстро крутится.",
+      "category": "alphabet"
+    },
+    {
+      "text": "Буква я. Яблоко. Яблоко растёт на яблоне.",
+      "category": "alphabet"
+    },
+    {
+      "text": "ноль",
+      "category": "numbers"
+    },
+    {
+      "text": "один",
+      "category": "numbers"
+    },
+    {
+      "text": "два",
+      "category": "numbers"
+    },
+    {
+      "text": "три",
+      "category": "numbers"
+    },
+    {
+      "text": "четыре",
+      "category": "numbers"
+    },
+    {
+      "text": "пять",
+      "category": "numbers"
+    },
+    {
+      "text": "шесть",
+      "category": "numbers"
+    },
+    {
+      "text": "семь",
+      "category": "numbers"
+    },
+    {
+      "text": "восемь",
+      "category": "numbers"
+    },
+    {
+      "text": "девять",
+      "category": "numbers"
+    },
+    {
+      "text": "десять",
+      "category": "numbers"
+    },
+    {
+      "text": "Ноль. Здесь нет яблок.",
+      "category": "numbers"
+    },
+    {
+      "text": "один. 1 яблоко. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "два. 2 яблока. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "три. 3 яблока. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "четыре. 4 яблока. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "пять. 5 яблок. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "шесть. 6 яблок. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "семь. 7 яблок. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "восемь. 8 яблок. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "девять. 9 яблок. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "десять. 10 яблок. Нажми на каждое яблоко и посчитай.",
+      "category": "numbers"
+    },
+    {
+      "text": "Кот спит.",
+      "category": "activities"
+    },
+    {
+      "text": "Мальчик ест кашу.",
+      "category": "activities"
+    },
+    {
+      "text": "Девочка умывается.",
+      "category": "activities"
+    },
+    {
+      "text": "Птица летает.",
+      "category": "activities"
+    },
+    {
+      "text": "Мама читает книгу.",
+      "category": "activities"
+    },
+    {
+      "text": "Кот под столом.",
+      "category": "activities"
+    },
+    {
+      "text": "Мяч в коробке.",
+      "category": "activities"
+    },
+    {
+      "text": "Птица на дереве.",
+      "category": "activities"
+    },
+    {
+      "text": "Зайчик за кустом.",
+      "category": "activities"
+    },
+    {
+      "text": "Яблоко на тарелке.",
+      "category": "activities"
+    },
+    {
+      "text": "Игрушка под кроватью.",
+      "category": "activities"
+    },
+    {
+      "text": "мячи",
+      "category": "activities"
+    },
+    {
+      "text": "яблоки",
+      "category": "activities"
+    },
+    {
+      "text": "коты",
+      "category": "activities"
+    },
+    {
+      "text": "машина",
+      "category": "activities"
+    },
+    {
+      "text": "машины",
+      "category": "activities"
+    },
+    {
+      "text": "дом",
+      "category": "activities"
+    },
+    {
+      "text": "дома",
+      "category": "activities"
+    },
+    {
+      "text": "цветок",
+      "category": "activities"
+    },
+    {
+      "text": "цветы",
+      "category": "activities"
+    },
+    {
+      "text": "гриб",
+      "category": "activities"
+    },
+    {
+      "text": "грибы",
+      "category": "activities"
+    },
+    {
+      "text": "книга",
+      "category": "activities"
+    },
+    {
+      "text": "книги",
+      "category": "activities"
+    },
+    {
+      "text": "дерево",
+      "category": "activities"
+    },
+    {
+      "text": "деревья",
+      "category": "activities"
+    },
+    {
+      "text": "куклы",
+      "category": "activities"
+    },
+    {
+      "text": "большой",
+      "category": "activities"
+    },
+    {
+      "text": "маленький",
+      "category": "activities"
+    },
+    {
+      "text": "высокий",
+      "category": "activities"
+    },
+    {
+      "text": "низкий",
+      "category": "activities"
+    },
+    {
+      "text": "чистый",
+      "category": "activities"
+    },
+    {
+      "text": "грязный",
+      "category": "activities"
+    },
+    {
+      "text": "горячий",
+      "category": "activities"
+    },
+    {
+      "text": "холодный",
+      "category": "activities"
+    },
+    {
+      "text": "длинный",
+      "category": "activities"
+    },
+    {
+      "text": "короткий",
+      "category": "activities"
+    },
+    {
+      "text": "день",
+      "category": "activities"
+    },
+    {
+      "text": "ночь",
+      "category": "activities"
+    },
+    {
+      "text": "быстрый",
+      "category": "activities"
+    },
+    {
+      "text": "медленный",
+      "category": "activities"
+    },
+    {
+      "text": "сухой",
+      "category": "activities"
+    },
+    {
+      "text": "мокрый",
+      "category": "activities"
+    },
+    {
+      "text": "весёлый",
+      "category": "activities"
+    },
+    {
+      "text": "грустный",
+      "category": "activities"
+    },
+    {
+      "text": "открытый",
+      "category": "activities"
+    },
+    {
+      "text": "закрытый",
+      "category": "activities"
+    },
+    {
+      "text": "Сначала посадили семечко. Потом полили землю. Наконец вырос цветок.",
+      "category": "stories"
+    },
+    {
+      "text": "Посадили семечко",
+      "category": "stories"
+    },
+    {
+      "text": "Полили землю",
+      "category": "stories"
+    },
+    {
+      "text": "Вырос цветок",
+      "category": "stories"
+    },
+    {
+      "text": "Сначала налили молоко. Потом сварили кашу. Затем съели кашу.",
+      "category": "stories"
+    },
+    {
+      "text": "Налили молоко",
+      "category": "stories"
+    },
+    {
+      "text": "Сварили кашу",
+      "category": "stories"
+    },
+    {
+      "text": "Съели кашу",
+      "category": "stories"
+    },
+    {
+      "text": "Сначала появилась туча. Потом пошёл дождь. После дождя появилась радуга.",
+      "category": "stories"
+    },
+    {
+      "text": "Появилась туча",
+      "category": "stories"
+    },
+    {
+      "text": "Пошёл дождь",
+      "category": "stories"
+    },
+    {
+      "text": "Появилась радуга",
+      "category": "stories"
+    },
+    {
+      "text": "Сначала намылили руки. Потом смыли мыло водой. Затем вытерли руки.",
+      "category": "stories"
+    },
+    {
+      "text": "Намылили руки",
+      "category": "stories"
+    },
+    {
+      "text": "Смыли мыло водой",
+      "category": "stories"
+    },
+    {
+      "text": "Вытерли руки",
+      "category": "stories"
+    },
+    {
+      "text": "Сначала приготовили подарок. Потом пришли в гости. После этого подарили подарок.",
+      "category": "stories"
+    },
+    {
+      "text": "Приготовили подарок",
+      "category": "stories"
+    },
+    {
+      "text": "Пришли в гости",
+      "category": "stories"
+    },
+    {
+      "text": "Подарили подарок",
+      "category": "stories"
+    },
+    {
+      "text": "Сначала выпал снег. Потом мы тепло оделись. Затем слепили снеговика.",
+      "category": "stories"
+    },
+    {
+      "text": "Выпал снег",
+      "category": "stories"
+    },
+    {
+      "text": "Оделись тепло",
+      "category": "stories"
+    },
+    {
+      "text": "Слепили снеговика",
+      "category": "stories"
+    },
+    {
+      "text": "Что ты хочешь купить?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Я хочу купить яблоко.",
+      "category": "dialogues"
+    },
+    {
+      "text": "Как попросить продавца?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Дайте, пожалуйста, яблоко.",
+      "category": "dialogues"
+    },
+    {
+      "text": "Что скажешь после покупки?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Спасибо!",
+      "category": "dialogues"
+    },
+    {
+      "text": "Что будем готовить?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Давай приготовим суп.",
+      "category": "dialogues"
+    },
+    {
+      "text": "Как попросишь о помощи?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Помоги мне, пожалуйста.",
+      "category": "dialogues"
+    },
+    {
+      "text": "Что скажешь за вкусный обед?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Спасибо, очень вкусно!",
+      "category": "dialogues"
+    },
+    {
+      "text": "Кого мы встретили?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Мы встретили собаку.",
+      "category": "dialogues"
+    },
+    {
+      "text": "Как поздороваться?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Здравствуйте!",
+      "category": "dialogues"
+    },
+    {
+      "text": "Что предложишь другу?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Давай поиграем вместе!",
+      "category": "dialogues"
+    },
+    {
+      "text": "Как поздороваешься?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Привет! Рад тебя видеть.",
+      "category": "dialogues"
+    },
+    {
+      "text": "Как предложишь поиграть?",
+      "category": "dialogues"
+    },
+    {
+      "text": "Давай играть вместе.",
+      "category": "dialogues"
+    },
+    {
+      "text": "Как попрощаешься?",
+      "category": "dialogues"
+    },
+    {
+      "text": "До свидания!",
+      "category": "dialogues"
+    },
+    {
+      "text": "На солнечной полянке зайчик нашёл морковь. Рядом летает бабочка.",
+      "category": "stories"
+    },
+    {
+      "text": "Кто пришёл на полянку?",
+      "category": "stories"
+    },
+    {
+      "text": "На полянку пришёл заяц.",
+      "category": "stories"
+    },
+    {
+      "text": "Что нашёл заяц?",
+      "category": "stories"
+    },
+    {
+      "text": "Заяц нашёл морковь.",
+      "category": "stories"
+    },
+    {
+      "text": "Кто летает рядом?",
+      "category": "stories"
+    },
+    {
+      "text": "Рядом летает бабочка.",
+      "category": "stories"
+    },
+    {
+      "text": "Как ты думаешь, что заяц сделает дальше?",
+      "category": "stories"
+    },
+    {
+      "text": "Например: заяц съест морковь и пойдёт домой.",
+      "category": "stories"
+    },
+    {
+      "text": "Девочка вышла гулять с собакой. Начался дождь. Девочка раскрыла зонт.",
+      "category": "stories"
+    },
+    {
+      "text": "Кто пошёл гулять?",
+      "category": "stories"
+    },
+    {
+      "text": "Девочка и собака пошли гулять.",
+      "category": "stories"
+    },
+    {
+      "text": "Какая погода на улице?",
+      "category": "stories"
+    },
+    {
+      "text": "На улице идёт дождь.",
+      "category": "stories"
+    },
+    {
+      "text": "Что девочка держит в руке?",
+      "category": "stories"
+    },
+    {
+      "text": "Девочка держит зонт.",
+      "category": "stories"
+    },
+    {
+      "text": "Куда они могут пойти после прогулки?",
+      "category": "stories"
+    },
+    {
+      "text": "Например: они пойдут домой пить тёплый чай.",
+      "category": "stories"
+    },
+    {
+      "text": "Мальчик играет на пляже. Он принёс ведёрко и построил замок из песка.",
+      "category": "stories"
+    },
+    {
+      "text": "Где играет мальчик?",
+      "category": "stories"
+    },
+    {
+      "text": "Мальчик играет на пляже.",
+      "category": "stories"
+    },
+    {
+      "text": "Что мальчик принёс с собой?",
+      "category": "stories"
+    },
+    {
+      "text": "Мальчик принёс ведёрко.",
+      "category": "stories"
+    },
+    {
+      "text": "Что он построил?",
+      "category": "stories"
+    },
+    {
+      "text": "Он построил замок из песка.",
+      "category": "stories"
+    },
+    {
+      "text": "Кого ты пригласишь в этот замок?",
+      "category": "stories"
+    },
+    {
+      "text": "Например: я приглашу в замок друзей.",
+      "category": "stories"
+    },
+    {
+      "text": "Мама и девочка готовят пирог. Они моют яблоки и замешивают тесто.",
+      "category": "stories"
+    },
+    {
+      "text": "Кто готовит пирог?",
+      "category": "stories"
+    },
+    {
+      "text": "Мама и девочка готовят пирог.",
+      "category": "stories"
+    },
+    {
+      "text": "Из чего будет начинка?",
+      "category": "stories"
+    },
+    {
+      "text": "Начинка будет из яблок.",
+      "category": "stories"
+    },
+    {
+      "text": "Как девочка может помочь маме?",
+      "category": "stories"
+    },
+    {
+      "text": "Девочка может помыть яблоки.",
+      "category": "stories"
+    },
+    {
+      "text": "Кого вы угостите пирогом?",
+      "category": "stories"
+    },
+    {
+      "text": "Например: мы угостим пирогом бабушку.",
+      "category": "stories"
+    },
+    {
+      "text": "Кот пьёт молоко.",
+      "category": "activities"
+    },
+    {
+      "text": "Мальчик катает мяч.",
+      "category": "activities"
+    },
+    {
+      "text": "Девочка рисует солнце.",
+      "category": "activities"
+    },
+    {
+      "text": "Птица строит гнездо.",
+      "category": "activities"
+    },
+    {
+      "text": "Папа ведёт машину.",
+      "category": "activities"
+    },
+    {
+      "text": "Мама моет яблоко.",
+      "category": "activities"
+    },
+    {
+      "text": "Медведь любит мёд.",
+      "category": "activities"
+    },
+    {
+      "text": "Ма-ма-ма",
+      "category": "activities"
+    },
+    {
+      "text": "Позови маму: мама!",
+      "category": "activities"
+    },
+    {
+      "text": "Па-па-па",
+      "category": "activities"
+    },
+    {
+      "text": "Позови папу: папа!",
+      "category": "activities"
+    },
+    {
+      "text": "Му-му-му",
+      "category": "activities"
+    },
+    {
+      "text": "Корова говорит: му!",
+      "category": "activities"
+    },
+    {
+      "text": "Ту-ту-ту",
+      "category": "activities"
+    },
+    {
+      "text": "Поезд едет: ту-ту!",
+      "category": "activities"
+    },
+    {
+      "text": "Би-би-би",
+      "category": "activities"
+    },
+    {
+      "text": "Машина сигналит: би-би!",
+      "category": "activities"
+    },
+    {
+      "text": "Ко-ко-ко",
+      "category": "activities"
+    },
+    {
+      "text": "Курочка говорит: ко-ко!",
+      "category": "activities"
+    },
+    {
+      "text": "Ма-мо-му",
+      "category": "activities"
+    },
+    {
+      "text": "Мама моет мяч.",
+      "category": "activities"
+    },
+    {
+      "text": "Ба-бо-бу",
+      "category": "activities"
+    },
+    {
+      "text": "Барабан гремит: бум-бум.",
+      "category": "activities"
+    },
+    {
+      "text": "Па-по-пу",
+      "category": "activities"
+    },
+    {
+      "text": "Папа купил банан.",
+      "category": "activities"
+    },
+    {
+      "text": "Та-то-ту",
+      "category": "activities"
+    },
+    {
+      "text": "Тут едет поезд.",
+      "category": "activities"
+    },
+    {
+      "text": "Да-до-ду",
+      "category": "activities"
+    },
+    {
+      "text": "Дома тепло.",
+      "category": "activities"
+    },
+    {
+      "text": "Ка-ко-ку",
+      "category": "activities"
+    },
+    {
+      "text": "Котик пьёт молоко.",
+      "category": "activities"
+    },
+    {
+      "text": "Са-со-су",
+      "category": "activities"
+    },
+    {
+      "text": "Соня рисует солнце.",
+      "category": "activities"
+    },
+    {
+      "text": "Ша-шо-шу",
+      "category": "activities"
+    },
+    {
+      "text": "У Саши воздушный шар.",
+      "category": "activities"
+    },
+    {
+      "text": "Ла-ло-лу",
+      "category": "activities"
+    },
+    {
+      "text": "Лиса гуляет по лесу.",
+      "category": "activities"
+    },
+    {
+      "text": "Ра-ро-ру",
+      "category": "activities"
+    },
+    {
+      "text": "Рыба плавает в реке.",
+      "category": "activities"
+    },
+    {
+      "text": "Жа-жо-жу",
+      "category": "activities"
+    },
+    {
+      "text": "Жук жужжит над лужайкой.",
+      "category": "activities"
+    },
+    {
+      "text": "Ча-чо-чу",
+      "category": "activities"
+    },
+    {
+      "text": "Чашка чая на столе.",
+      "category": "activities"
+    },
+    {
+      "text": "Меня зовут…",
+      "category": "activities"
+    },
+    {
+      "text": "Мой любимый зверёк — кот.",
+      "category": "activities"
+    },
+    {
+      "text": "Сначала посадили семечко, потом вырос цветок.",
+      "category": "activities"
+    },
+    {
+      "text": "Я хочу купить яблоко, пожалуйста.",
+      "category": "activities"
+    },
+    {
+      "text": "Заяц прыгает, а птица летает.",
+      "category": "activities"
+    },
+    {
+      "text": "Найди кота.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди собаку.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди корову.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди лису.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди зайца.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди утку.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди лягушку.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди льва.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди мяч.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди машину.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди самолёт.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди поезд.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди яблоко.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди банан.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди морковь.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди клубнику.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди дом.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди солнце.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди дерево.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди цветок.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди медведя.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди рыбу.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди птицу.",
+      "category": "prompts"
+    },
+    {
+      "text": "Найди бабочку.",
+      "category": "prompts"
+    },
+    {
+      "text": "Ма-мо-му. Мама моет мяч. Повтори за мной.",
+      "category": "prompts"
+    },
+    {
+      "text": "Ба-бо-бу. Барабан гремит: бум-бум. Повтори за мной.",
+      "category": "prompts"
+    },
+    {
+      "text": "Па-по-пу. Папа купил банан. Повтори за мной.",
+      "category": "prompts"
+    },
+    {
+      "text": "Та-то-ту. Тут едет поезд. Повтори за мной.",
+      "category": "prompts"
+    },
+    {
+      "text": "Да-до-ду. Дома тепло. Повтори за мной.",
+      "category": "prompts"
+    },
+    {
+      "text": "Ка-ко-ку. Котик пьёт молоко. Повтори за мной.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что делает кот? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что ест заяц? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что делает мама? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что делает мальчик? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что рисует девочка? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что строит птица? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что делает папа? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что грызёт белка? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что моет мама? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Что любит медведь? Собери фразу из слов.",
+      "category": "prompts"
+    },
+    {
+      "text": "Кто говорит: Мяу-мяу?",
+      "category": "prompts"
+    },
+    {
+      "text": "Кто говорит: Гав-гав?",
+      "category": "prompts"
+    },
+    {
+      "text": "Кто говорит: Му-у?",
+      "category": "prompts"
+    },
+    {
+      "text": "Кто говорит: Кря-кря?",
+      "category": "prompts"
+    },
+    {
+      "text": "Кто говорит: Ква-ква?",
+      "category": "prompts"
+    },
+    {
+      "text": "Кто говорит: Бе-е?",
+      "category": "prompts"
+    },
+    {
+      "text": "Кто говорит: Ку-ка-ре-ку?",
+      "category": "prompts"
+    },
+    {
+      "text": "Кто говорит: Пи-пи-пи?",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Мяч. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Кот. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Дом. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Лиса. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Сова. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Мама. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Рыба. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Машина. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Собака. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Корова. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Молоко. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Произнеси слово Бабочка. Хлопни по слогам. Нажимай на ладошки.",
+      "category": "prompts"
+    },
+    {
+      "text": "На солнечной полянке зайчик нашёл морковь. Рядом летает бабочка. Кто пришёл на полянку?",
+      "category": "prompts"
+    },
+    {
+      "text": "Девочка вышла гулять с собакой. Начался дождь. Девочка раскрыла зонт. Кто пошёл гулять?",
+      "category": "prompts"
+    },
+    {
+      "text": "Мальчик играет на пляже. Он принёс ведёрко и построил замок из песка. Где играет мальчик?",
+      "category": "prompts"
+    },
+    {
+      "text": "Мама и девочка готовят пирог. Они моют яблоки и замешивают тесто. Кто готовит пирог?",
+      "category": "prompts"
+    },
+    {
+      "text": "Посмотри на героя. Что делает заяц?",
+      "category": "prompts"
+    },
+    {
+      "text": "Посмотри на героя. Что делает кот?",
+      "category": "prompts"
+    },
+    {
+      "text": "Посмотри на героя. Что делает мальчик?",
+      "category": "prompts"
+    },
+    {
+      "text": "Посмотри на героя. Что делает девочка?",
+      "category": "prompts"
+    },
+    {
+      "text": "Посмотри на героя. Что делает птица?",
+      "category": "prompts"
+    },
+    {
+      "text": "Посмотри на героя. Что делает собака?",
+      "category": "prompts"
+    },
+    {
+      "text": "Посмотри на героя. Что делает мама?",
+      "category": "prompts"
+    },
+    {
+      "text": "Посмотри на героя. Что делает белка?",
+      "category": "prompts"
+    },
+    {
+      "text": "Где кот? Выбери ответ.",
+      "category": "prompts"
+    },
+    {
+      "text": "Где мяч? Выбери ответ.",
+      "category": "prompts"
+    },
+    {
+      "text": "Где птица? Выбери ответ.",
+      "category": "prompts"
+    },
+    {
+      "text": "Где зайчик? Выбери ответ.",
+      "category": "prompts"
+    },
+    {
+      "text": "Где яблоко? Выбери ответ.",
+      "category": "prompts"
+    },
+    {
+      "text": "Где игрушка? Выбери ответ.",
+      "category": "prompts"
+    },
+    {
+      "text": "Один мяч. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один яблоко. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один кот. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один машина. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один дом. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один цветок. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один гриб. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один книга. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один дерево. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Один кукла. А как сказать, когда их много?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову большой?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову высокий?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову чистый?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову горячий?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову длинный?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову день?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову быстрый?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову сухой?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову весёлый?",
+      "category": "prompts"
+    },
+    {
+      "text": "Как сказать наоборот слову открытый?",
+      "category": "prompts"
+    },
+    {
+      "text": "Расставь три картинки по порядку. Как вырос цветок.",
+      "category": "prompts"
+    },
+    {
+      "text": "Расставь три картинки по порядку. Готовим кашу.",
+      "category": "prompts"
+    },
+    {
+      "text": "Расставь три картинки по порядку. После дождя.",
+      "category": "prompts"
+    },
+    {
+      "text": "Расставь три картинки по порядку. Моем руки.",
+      "category": "prompts"
+    },
+    {
+      "text": "Расставь три картинки по порядку. Подарок другу.",
+      "category": "prompts"
+    },
+    {
+      "text": "Расставь три картинки по порядку. Снежная прогулка.",
+      "category": "prompts"
+    },
+    {
+      "text": "Привет! Я Финик. Давай играть вместе!",
+      "category": "system"
+    },
+    {
+      "text": "Привет! Я лисёнок Финик. Давай играть, слушать и говорить вместе.",
+      "category": "system"
+    },
+    {
+      "text": "Послушай мой голос. Давай говорить вместе!",
+      "category": "system"
+    },
+    {
+      "text": "Посчитаем ещё раз.",
+      "category": "system"
+    },
+    {
+      "text": "Здорово! Попробуй ещё!",
+      "category": "system"
+    },
+    {
+      "text": "Ма́.ма.",
+      "category": "syllables"
+    },
+    {
+      "text": "Па́.па.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ба́.буш.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Де.душ.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Брат.",
+      "category": "syllables"
+    },
+    {
+      "text": "Сест.ра́.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ре.бё.нок.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ма.лыш.",
+      "category": "syllables"
+    },
+    {
+      "text": "Сын.",
+      "category": "syllables"
+    },
+    {
+      "text": "Дочь.",
+      "category": "syllables"
+    },
+    {
+      "text": "Тё.тя.",
+      "category": "syllables"
+    },
+    {
+      "text": "Дя.дя.",
+      "category": "syllables"
+    },
+    {
+      "text": "Внук.",
+      "category": "syllables"
+    },
+    {
+      "text": "Внуч.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Се.мья.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ро.ди.те.ли.",
+      "category": "syllables"
+    },
+    {
+      "text": "Де.воч.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Маль.чик.",
+      "category": "syllables"
+    },
+    {
+      "text": "Друг.",
+      "category": "syllables"
+    },
+    {
+      "text": "По.дру.га.",
+      "category": "syllables"
+    },
+    {
+      "text": "Со.сед.",
+      "category": "syllables"
+    },
+    {
+      "text": "Со.сед.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Гость.",
+      "category": "syllables"
+    },
+    {
+      "text": "По.друж.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Род.ня.",
+      "category": "syllables"
+    },
+    {
+      "text": "Кот.",
+      "category": "syllables"
+    },
+    {
+      "text": "Со.ба́.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "За.яц.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ли.са.",
+      "category": "syllables"
+    },
+    {
+      "text": "Волк.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мед.ведь.",
+      "category": "syllables"
+    },
+    {
+      "text": "Бел.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ёж.",
+      "category": "syllables"
+    },
+    {
+      "text": "Лев.",
+      "category": "syllables"
+    },
+    {
+      "text": "Тигр.",
+      "category": "syllables"
+    },
+    {
+      "text": "Слон.",
+      "category": "syllables"
+    },
+    {
+      "text": "Жи.раф.",
+      "category": "syllables"
+    },
+    {
+      "text": "О.бе.зья́.на.",
+      "category": "syllables"
+    },
+    {
+      "text": "Зе.бра.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ко.ро.ва.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ло.шадь.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ов.ца.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ко.за.",
+      "category": "syllables"
+    },
+    {
+      "text": "Сви.нья.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ут.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Гусь.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ку.ри.ца.",
+      "category": "syllables"
+    },
+    {
+      "text": "Пе.тух.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ры.ба.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ля.гу́ш.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Я́б.ло.ко.",
+      "category": "syllables"
+    },
+    {
+      "text": "Гру.ша.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ба.нан.",
+      "category": "syllables"
+    },
+    {
+      "text": "А.пель.си́н.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ли.мон.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ви.но.град.",
+      "category": "syllables"
+    },
+    {
+      "text": "Клуб.ни́.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ар.буз.",
+      "category": "syllables"
+    },
+    {
+      "text": "Виш.ня.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мор.ковь.",
+      "category": "syllables"
+    },
+    {
+      "text": "По.ми.дор.",
+      "category": "syllables"
+    },
+    {
+      "text": "О.гу.ре́ц.",
+      "category": "syllables"
+    },
+    {
+      "text": "Кар.то.фель.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ка.пу.ста.",
+      "category": "syllables"
+    },
+    {
+      "text": "Брок.ко.ли.",
+      "category": "syllables"
+    },
+    {
+      "text": "Хлеб.",
+      "category": "syllables"
+    },
+    {
+      "text": "Бу.лоч.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Сыр.",
+      "category": "syllables"
+    },
+    {
+      "text": "Яй.цо.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мо.ло.ко́.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ка.ша.",
+      "category": "syllables"
+    },
+    {
+      "text": "Суп.",
+      "category": "syllables"
+    },
+    {
+      "text": "Пи.рог.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мёд.",
+      "category": "syllables"
+    },
+    {
+      "text": "Пе.че.нье.",
+      "category": "syllables"
+    },
+    {
+      "text": "Шап.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Шарф.",
+      "category": "syllables"
+    },
+    {
+      "text": "Пер.чат.ки.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ва.реж.ки.",
+      "category": "syllables"
+    },
+    {
+      "text": "Курт.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Паль.то.",
+      "category": "syllables"
+    },
+    {
+      "text": "Пла.тье.",
+      "category": "syllables"
+    },
+    {
+      "text": "Юб.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Брю.ки.",
+      "category": "syllables"
+    },
+    {
+      "text": "Джин.сы.",
+      "category": "syllables"
+    },
+    {
+      "text": "Фут.бол.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ру.баш.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Сви.тер.",
+      "category": "syllables"
+    },
+    {
+      "text": "Коф.та.",
+      "category": "syllables"
+    },
+    {
+      "text": "Нос.ки.",
+      "category": "syllables"
+    },
+    {
+      "text": "Кол.гот.ки.",
+      "category": "syllables"
+    },
+    {
+      "text": "Бо.тин.ки.",
+      "category": "syllables"
+    },
+    {
+      "text": "Са.по.ги.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ту.фли.",
+      "category": "syllables"
+    },
+    {
+      "text": "Крос.сов.ки.",
+      "category": "syllables"
+    },
+    {
+      "text": "Сан.да́.ли.и.",
+      "category": "syllables"
+    },
+    {
+      "text": "Пи.жа.ма.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ха.лат.",
+      "category": "syllables"
+    },
+    {
+      "text": "Кеп.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ру.ка.ви.цы.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мяч.",
+      "category": "syllables"
+    },
+    {
+      "text": "Кук.ла.",
+      "category": "syllables"
+    },
+    {
+      "text": "Миш.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Зай.чик.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ку.бик.",
+      "category": "syllables"
+    },
+    {
+      "text": "Пи.ра.мид.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ма.ши́н.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Па.ро.во.зик.",
+      "category": "syllables"
+    },
+    {
+      "text": "Кон.струк.тор.",
+      "category": "syllables"
+    },
+    {
+      "text": "Пазл.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мо.за.и.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ба.ра.бан.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ду.доч.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "По.гре.муш.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ю.ла́.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ка.че.ли.",
+      "category": "syllables"
+    },
+    {
+      "text": "Са.мо.кат.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ве.дёр.ко.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ло.пат.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Фор.моч.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ша.рик.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ро.бот.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ва.гон.чи.ки.",
+      "category": "syllables"
+    },
+    {
+      "text": "Са.мо.лё.тик.",
+      "category": "syllables"
+    },
+    {
+      "text": "До.мик.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ав.то.мо.биль.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ав.то.бус.",
+      "category": "syllables"
+    },
+    {
+      "text": "Трол.лей.бус.",
+      "category": "syllables"
+    },
+    {
+      "text": "Трам.вай.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мет.ро́.",
+      "category": "syllables"
+    },
+    {
+      "text": "По.езд.",
+      "category": "syllables"
+    },
+    {
+      "text": "Э.лек.три́ч.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ло.ко.мо.тив.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ва.гон.",
+      "category": "syllables"
+    },
+    {
+      "text": "Са.мо.лёт.",
+      "category": "syllables"
+    },
+    {
+      "text": "Вер.то.лёт.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ра.ке.та.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ко.рабль.",
+      "category": "syllables"
+    },
+    {
+      "text": "Лод.ка.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ка.тер.",
+      "category": "syllables"
+    },
+    {
+      "text": "Па.рус.ник.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ве.ло.си.пед.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мо.то.цикл.",
+      "category": "syllables"
+    },
+    {
+      "text": "Мо.пед.",
+      "category": "syllables"
+    },
+    {
+      "text": "Гру.зо.вик.",
+      "category": "syllables"
+    },
+    {
+      "text": "Трак.тор.",
+      "category": "syllables"
+    },
+    {
+      "text": "Экс.ка.ва.тор.",
+      "category": "syllables"
+    },
+    {
+      "text": "Так.си.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ско.ра.я.по.мощь.",
+      "category": "syllables"
+    },
+    {
+      "text": "По.жа́р.на.я ма.ши́.на.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ма. ма. ма.",
+      "category": "syllables"
+    },
+    {
+      "text": "Па. па. па.",
+      "category": "syllables"
+    },
+    {
+      "text": "Му. му. му.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ту. ту. ту.",
+      "category": "syllables"
+    },
+    {
+      "text": "Би. би. би.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ко. ко. ко.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ма. мо. му.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ба. бо. бу.",
+      "category": "syllables"
+    },
+    {
+      "text": "Па. по. пу.",
+      "category": "syllables"
+    },
+    {
+      "text": "Та. то. ту.",
+      "category": "syllables"
+    },
+    {
+      "text": "Да. до. ду.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ка. ко. ку.",
+      "category": "syllables"
+    },
+    {
+      "text": "Са. со. су.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ша. шо. шу.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ла. ло. лу.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ра. ро. ру.",
+      "category": "syllables"
+    },
+    {
+      "text": "Жа. жо. жу.",
+      "category": "syllables"
+    },
+    {
+      "text": "Ча. чо. чу.",
+      "category": "syllables"
+    },
+    {
+      "text": "Привет! Я помогу тебе отвечать на вопросы.",
+      "category": "system"
+    },
+    {
+      "text": "Ура! Ты попробовал!",
+      "category": "system"
+    },
+    {
+      "text": "Попробуем ещё раз. Я рядом.",
+      "category": "system"
+    },
+    {
+      "text": "Слушай внимательно. А теперь твоя очередь!",
+      "category": "system"
+    }
+  ],
+  "helper_prompts": [
+    "Кто пришёл на полянку?",
+    "Что нашёл заяц?",
+    "Где находится мяч?",
+    "Что было сначала?",
+    "Что случилось потом?",
+    "Что ты хочешь купить?"
+  ]
+}
