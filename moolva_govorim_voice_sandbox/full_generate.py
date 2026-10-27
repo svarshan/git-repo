@@ -6,7 +6,7 @@ CAT=json.loads((ROOT/'catalog_full.json').read_text(encoding='utf-8'))
 VOICES=['baya','kseniya','xenia','aidar','eugene']
 def normalized(t):
     import unicodedata,re
-    return re.sub(r'\\s+',' ',unicodedata.normalize('NFC',t).replace(chr(0x301),'').strip()).lower()
+    return re.sub(r'\s+',' ',unicodedata.normalize('NFC',t).replace(chr(0x301),'').strip()).lower()
 def corpus():
     seen=set();out=[]
     for x in CAT['items']:
