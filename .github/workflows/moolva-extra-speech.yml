@@ -1,0 +1,43 @@
+name: MoOLVa — remaining spoken phrases for 5 voices
+on:
+  pull_request:
+    paths:
+      - moolva_extra_speech/**
+      - .github/workflows/moolva-extra-speech.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  extra:
+    strategy:
+      fail-fast: false
+      max-parallel: 3
+      matrix:
+        voice: [baya, kseniya, xenia, aidar, eugene]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+      MOO_VOICE: ${{ matrix.voice }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install neural runtime
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install numpy omegaconf
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Generate missing game speeches
+        run: python moolva_extra_speech/generate.py
+      - name: Preserve recordings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-extra-${{ matrix.voice }}
+          path: moolva_extra_speech/output/
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 0
