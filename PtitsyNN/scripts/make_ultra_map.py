@@ -20,6 +20,7 @@ import osmium
 ROOT = Path(__file__).resolve().parents[1]
 APP = ROOT / "app"
 URLS = [
+ "https://www.osmlab.ru/regions/RU-NIZ.pbf",
  "https://geo2day.com/russia/volga_federal_district/nizhny_novgorod_oblast.pbf",
  "https://osmtoday.com/russia/volga_federal_district/nizhny_novgorod_oblast.pbf",
 ]
