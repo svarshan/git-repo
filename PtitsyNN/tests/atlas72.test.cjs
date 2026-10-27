@@ -9,7 +9,14 @@ test('7.2 bundles authentic offline OSM roads forests lakes waterways and settle
  const scope={window:{}};vm.runInNewContext(fs.readFileSync(file,'utf8'),scope,{timeout:7500});
  const map=scope.window.MOOLVA_ULTRA_MAP;
  assert.equal(map.license,'ODbL 1.0');
- assert.match(map.sourceUrl,/nizhny_novgorod_oblast\.pbf/);
+ // Accept only configured, region-specific OSM PBF sources; the previous
+ // single-filename assertion incorrectly rejected the verified RU-NIZ source.
+ const allowedSources=[
+  'https://www.osmlab.ru/regions/RU-NIZ.pbf',
+  'https://geo2day.com/russia/volga_federal_district/nizhny_novgorod_oblast.pbf',
+  'https://osmtoday.com/russia/volga_federal_district/nizhny_novgorod_oblast.pbf'
+ ];
+ assert.ok(allowedSources.includes(map.sourceUrl),'Unexpected regional OSM PBF source: '+map.sourceUrl);
  assert.match(map.sourceSha256,/^[0-9a-f]{64}$/);
  for(const [key,name] of [['roads','road'],['rivers','river'],['lakes','lake'],['forests','forest'],['places','place']]){
   assert.ok(map.selectedCounts[name]>=50,'Missing true OSM feature: '+key);
