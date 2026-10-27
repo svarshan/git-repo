@@ -4,7 +4,7 @@ OUT=ROOT/'release_audio'
 DEST=ROOT/'final_site'
 CAT=json.loads((ROOT/'catalog_full.json').read_text('utf8'))
 VOICES=['baya','kseniya','xenia','aidar','eugene']
-def norm(s):return re.sub(r'\\s+',' ',s.replace('\\u0301','').strip()).lower()
+def norm(s):return re.sub(r'\\s+',' ',s.replace(chr(0x301),'').strip()).lower()
 texts=[]; seen=set()
 for obj in CAT['items']:
  t=obj['text'];k=norm(t)
