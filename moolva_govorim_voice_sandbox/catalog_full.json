@@ -3860,14 +3860,136 @@
     {
       "text": "Слушай внимательно. А теперь твоя очередь!",
       "category": "system"
+    },
+    {
+      "text": "ма́ма",
+      "category": "practice"
+    },
+    {
+      "text": "ма́. ма.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "па́па",
+      "category": "practice"
+    },
+    {
+      "text": "па́. па.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "соба́ка",
+      "category": "practice"
+    },
+    {
+      "text": "со. ба́. ка.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "котёнок",
+      "category": "practice"
+    },
+    {
+      "text": "ко. тё. нок.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "маши́на",
+      "category": "practice"
+    },
+    {
+      "text": "ма. ши́. на.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "молоко́",
+      "category": "practice"
+    },
+    {
+      "text": "мо. ло. ко́.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "я́блоко",
+      "category": "practice"
+    },
+    {
+      "text": "я́б. ло. ко.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "за́яц",
+      "category": "practice"
+    },
+    {
+      "text": "за́. яц.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "лиса́",
+      "category": "practice"
+    },
+    {
+      "text": "ли. са́.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "де́рево",
+      "category": "practice"
+    },
+    {
+      "text": "де́. ре. во.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "ба́бочка",
+      "category": "practice"
+    },
+    {
+      "text": "ба́. боч. ка.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "пожа́рная маши́на",
+      "category": "practice"
+    },
+    {
+      "text": "по. жа́р. на. я. ма. ши́. на.",
+      "category": "practice-syllables"
+    },
+    {
+      "text": "Привет! Я Финик. Давай вместе говорить.",
+      "category": "system"
     }
   ],
   "helper_prompts": [
     "Кто пришёл на полянку?",
     "Что нашёл заяц?",
+    "Кто летает рядом?",
+    "Как ты думаешь, что заяц сделает дальше?",
+    "Куда пошла девочка?",
+    "Кто спрятался под столом?",
+    "Кто спит?",
+    "Кто прыгает?",
+    "Что делает кот?",
+    "Что делает заяц?",
+    "Что ест заяц?",
+    "Что делает мама?",
+    "Что делает папа?",
     "Где находится мяч?",
+    "Где спрятался кот?",
     "Что было сначала?",
     "Что случилось потом?",
-    "Что ты хочешь купить?"
+    "Что ты хочешь купить?",
+    "Как попросить яблоко?",
+    "Кого мы встретили?",
+    "Что это?",
+    "Назови предмет.",
+    "Повтори слово.",
+    "Попробуем вместе.",
+    "Какой предмет большой?",
+    "Где маленький мяч?",
+    "Кто живёт в лесу?",
+    "Что нарисовала девочка?"
   ]
 }
