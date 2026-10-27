@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""MoOLVa 8.0 release evidence from authentic Windows screenshot smoke and generated bird catalog."""
+"""MoOLVa 8.1 release evidence from authentic Windows screenshot smoke and generated bird catalog."""
 from __future__ import annotations
 import argparse,csv,hashlib,json,re,struct,sys
 from pathlib import Path
@@ -84,13 +84,21 @@ def finalize():
     coverage=json.loads((BASE/'data'/'coverage.json').read_text(encoding='utf-8-sig'))
     voices=json.loads((DIST/'voice-inventory.json').read_text(encoding='utf-8'))
     version=json.loads((BASE/'package.json').read_text(encoding='utf-8'))['version']
-    if smoke.get('version')!=version or version!='8.0.0':raise ValueError('Executable version differs from release')
+    if smoke.get('version')!=version or version!='8.1.0':raise ValueError('Executable version differs from release')
     if voices['withPrimaryVoice']!=coverage.get('birdCalls'):raise ValueError('Coverage changed after inventory')
+    guard=json.loads((DIST/'voice-regression.json').read_text(encoding='utf-8'))
+    if guard['newlyMissingPreviouslyPresent'] or guard['currentBirdCalls']<261:raise ValueError('Audio nonregression certificate invalid')
+    if smoke.get('photoPipelineVerified',{}).get('passes')!=3:raise ValueError('Three real crop ONNX passes not completed')
+    if smoke.get('guiInteractions',{}).get('compareCards')!=2:raise ValueError('Compare GUI control smoke failed')
+    backup=smoke.get('backupSmoke') or {}
+    if backup.get('validArchive')!='restored' or backup.get('alteredArchive')!='rejected':
+        raise ValueError('Validated backup restore/tamper rejection smoke missing')
+
     report={'version':version,'status':'PASS','automatedTests':checks,
-       'gui':{'packaged':True,'system':'Windows GitHub Actions', 'screenshots':shots,'method':smoke['captureMethod'],
+       'gui':{'packaged':True,'system':'Windows GitHub Actions','photoPipeline':smoke['photoPipelineVerified'],'controls':smoke['guiInteractions'],'backupSmoke':backup,'screenshots':shots,'method':smoke['captureMethod'],
               'limitations':'Actual packaged Electron captured with offscreen Chromium; not an interactive user desktop test.'},
        'catalog':{'species':coverage.get('species'),'photos':coverage.get('photos'),'voices':coverage.get('birdCalls'),
-                  'articles':coverage.get('articles'),'missingVoices':voices['missingPrimaryVoice']},
+                  'articles':coverage.get('articles'),'missingVoices':voices['missingPrimaryVoice'],'baseline79Voices':guard['baselineBirdCalls'],'lostPriorSpecies':guard['newlyMissingPreviouslyPresent']},
        'notTested':['User microphone and sound hardware','Restore operation on personal datasets','Independent model accuracy']}
     (DIST/'test-report.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf-8')
     md=['# MoOLVa '+version+' — отчёт проверки Windows','',
@@ -100,12 +108,13 @@ def finalize():
        f"- Реальные скриншоты упакованного Electron на Windows: {len(shots)}.",
        '- Скриншоты сняты Chromium webContents.capturePage из работающего EXE в offscreen-режиме. Это не нарисованные макеты.',
        '- Проверены формат PNG, размеры и SHA-256 снимков.',
+       '- Подтверждены три настоящих прохода Bird Vision ONNX по PNG, работа сравнения, фильтра карты и импорт корректного / отклонение испорченного резервного архива.',
        '- Основной Windows workflow дополнительно тестирует Perch v2 ONNX, оба EXE и SHA256SUMS.','',
        '## Медиа и недостающие голоса','',
        f"- Видов: {coverage.get('species')}, фотографий: {coverage.get('photos')}, статей: {coverage.get('articles')}.",
        f"- Основных голосов: {coverage.get('birdCalls')}. Без голосов: {voices['missingPrimaryVoice']}.",
        '- Имена отсутствующих видов находятся в файле missing-voices.csv.','',
-       '## Скриншоты и контрольные суммы','',
+       '## Сертификат сохранения голосов\n\n- Эталон 7.9: **'+str(guard['baselineBirdCalls'])+'** проверенных голосов.\n- Утеряно видов из эталона: **'+str(len(guard['newlyMissingPreviouslyPresent']))+'**.\n- Полный акт: voice-regression.md и voice-regression.json.\n\n## Скриншоты и контрольные суммы','',
        '| Файл | Раздел | Размер | SHA-256 |','|---|---|---|---|']
     for shot in shots:md.append(f"| {shot['name']} | {shot['screen']} | {shot['width']}×{shot['height']} | {shot['sha256']} |")
     md+=['','## Не проверено вручную','',

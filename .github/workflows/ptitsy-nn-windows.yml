@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 8.0
+name: Птицы НН — Windows EXE 8.1
 on:
   workflow_dispatch:
     inputs:
@@ -59,7 +59,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -71,7 +71,11 @@ jobs:
           node --check app/ui77.js
           node --check app/ultra78-core.js
           node --check app/core80.js
+          node --check app/core81.js
+          node --check app/upgrade81.js
           node --check app/intelligence80.js
+          node --check app/core81.js
+          node --check app/upgrade81.js
           node --check app/ultra78-ui.js
           node --check app/backup78.js
           node --check app/expedition77.js
@@ -96,7 +100,7 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v10-${{ runner.os }}-${{ hashFiles('PtitsyNN/data/species.b64', 'PtitsyNN/scripts/make_catalog.py', 'PtitsyNN/scripts/harvest_voices.py', 'PtitsyNN/scripts/openverse_voices.py', 'PtitsyNN/scripts/voice_max.py', 'PtitsyNN/scripts/curate_audio.py', 'PtitsyNN/scripts/audit_audio.py', 'PtitsyNN/scripts/ultra_tracks.py', 'PtitsyNN/scripts/enrich_articles.py') }}
+          key: ptitsy-nn-media-v10-${{ runner.os }}-8f98e67b8904a87bf0940f05e84692aabeefe293
           restore-keys: |
             ptitsy-nn-media-v10-${{ runner.os }}-
             ptitsy-nn-media-v9-${{ runner.os }}-
@@ -171,7 +175,7 @@ jobs:
           Write-Host "Genuine primary calls: $($c.birdCalls) / 298"
           Write-Host "Milestone 298: $($c.milestone298.achieved)"
           Write-Host "Remaining to goal: $($c.milestone298.shortfall)"
-          if ($c.birdCalls -lt 250) { throw 'Previously verified 250-species audio baseline was lost' }
+          if ($c.birdCalls -lt 261) { throw '7.9 proved 261 species; cannot regress below this audited baseline' }
       - name: Recheck incomplete photos and articles from licensed sources
         timeout-minutes: 12
         shell: pwsh
@@ -202,6 +206,17 @@ jobs:
           BIRDS_ULTRA_BUDGET_SECONDS: '65'
       - name: Inventory every missing licensed bird voice from the actual generated catalog
         run: python scripts/release_evidence79.py inventory
+      - name: Compare exact species coverage with immutable 7.9 release and block regressions
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          New-Item -ItemType Directory -Force -Path data/baseline79 | Out-Null
+          gh release download ptitsy-v7.9.0 -p 'coverage.json' -p 'missing-voices.csv' -D data/baseline79 --clobber
+          if ($LASTEXITCODE -ne 0) { throw 'Previous known-good 7.9 evidence unavailable; do not publish' }
+          python scripts/voice_guard81.py
+          if ($LASTEXITCODE -ne 0) { throw 'Media regression: lost a previously verified species' }
+
       - name: Prepare offline map of Nizhny Novgorod Oblast and coarsened sightings
         timeout-minutes: 12
         run: python -u scripts/make_habitat.py
@@ -310,23 +325,23 @@ jobs:
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.0-Portable-only
-          path: PtitsyNN/dist/MoOLVa-8.0-Portable-x64.exe
+          name: Ptitsy-NN-8.1-Portable-only
+          path: PtitsyNN/dist/MoOLVa-8.1-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.0-Setup-only
-          path: PtitsyNN/dist/MoOLVa-8.0-Setup-x64.exe
+          name: Ptitsy-NN-8.1-Setup-only
+          path: PtitsyNN/dist/MoOLVa-8.1-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.0-Windows
+          name: Ptitsy-NN-8.1-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
@@ -367,7 +382,7 @@ jobs:
           $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
           $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
           $ev = (Resolve-Path dist/release-evidence).Path
-          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png')
+          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','voice-regression.json','voice-regression.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png')
           $evidenceFiles = foreach ($name in $evidenceNames) {
             $item = Get-Item (Join-Path $ev $name) -ErrorAction Stop
             $item.FullName

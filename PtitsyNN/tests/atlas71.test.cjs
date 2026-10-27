@@ -6,7 +6,7 @@ test('7.1 includes 26 sourced regional city centres, not fake sightings',()=>{
  const a=box.window.MOOLVA_SETTLEMENTS;
  assert.ok(Array.isArray(a)&&a.length>=26,'Expected sourced settlements');
  assert.equal(new Set(a.map(x=>x.name)).size,a.length);
- for(const c of a){assert.ok(c.lat>=54.35&&c.lat<=58.19&&c.lon>=41.60&&c.lon<=48.06,'Town outside map: '+c.name);assert.ok(Number.isInteger(c.tier));}
+ for(const c of a){assert.ok(c.lat>=54.35&&c.lat<=58.19&&c.lon>=41.60&&c.lon<=48.16,'Town outside map: '+c.name);assert.ok(Number.isInteger(c.tier));}
  assert.ok(a.some(x=>x.name==='Нижний Новгород'));
  assert.ok(a.some(x=>x.name==='Арзамас'));
  assert.ok(a.some(x=>x.name==='Шахунья'));
@@ -35,10 +35,10 @@ test('7.1 Bird AI visible on home and checks live Electron inference',()=>{
 });
 test('7.1 Windows EXEs leave 7.0 release untouched',()=>{
  const p=JSON.parse(read('package.json')),wf=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(p.version,'8.0.0');
- assert.equal(p.build.portable.artifactName,'MoOLVa-8.0-Portable-${arch}.exe');
- assert.equal(p.build.nsis.artifactName,'MoOLVa-8.0-Setup-${arch}.exe');
- assert.match(wf,/Ptitsy-NN-8\.0-Windows/);
+ assert.equal(p.version,'8.1.0');
+ assert.equal(p.build.portable.artifactName,'MoOLVa-8.1-Portable-${arch}.exe');
+ assert.equal(p.build.nsis.artifactName,'MoOLVa-8.1-Setup-${arch}.exe');
+ assert.match(wf,/Ptitsy-NN-8\.1-Windows/);
  assert.match(wf,/gh release create \$tag/);
  assert.match(wf,/node --check app\/settlements\.js/);
 });

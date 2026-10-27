@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "8.0.0",
+  "version": "8.1.0",
   "private": true,
-  "description": "MoOLVa 8.0 PRO MAX: real local EfficientNet image AI, Perch v2 voice AI, multi-evidence bird field center, published-sighting map, verified encyclopedia and academy, safe journals, performance, real Windows QA with screenshots.",
+  "description": "MoOLVa 8.1 PRO MAX: three-crop genuine Bird Vision ONNX, grounded bird comparisons, audio timeline, seasonal atlas, printable expedition report, repeated-error academy, SHA256 backup, strict 261-voice species nonregression, Windows GUI and real screenshot QA.",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -54,10 +54,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-8.0-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-8.1-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-8.0-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-8.1-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [
