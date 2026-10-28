@@ -6,7 +6,7 @@ BASE=ROOT.parent/'moolva_govorim_voice_sandbox'
 OUT=ROOT/'out'
 OUT.mkdir(parents=True,exist_ok=True)
 base=(BASE/'base_app.html').read_text('utf8')
-arr=ast.literal_eval(re.search(r'const ALPHABET=(\\[.*?\\]);',base,re.S).group(1))
+arr=ast.literal_eval(re.search(r'const ALPHABET=(\[.*?\]);',base,re.S).group(1))
 catalog=json.loads((BASE/'catalog_full.json').read_text('utf8'))
 def norm(t):return re.sub(r'\s+',' ',t.replace(chr(0x301),'').strip()).lower()
 seen={norm(x['text']) for x in catalog['items']}
@@ -24,7 +24,7 @@ for i,num in enumerate(nums):
  if i<10:add(f'Это цифра {num}.','number-digits')
 for t in ['Сначала послушай, потом повтори.','Это название буквы. А теперь послушай слово.','Названия букв и звуки речи не всегда совпадают.','У твёрдого и мягкого знаков нет отдельного звука.','Послушай название буквы ещё раз.','А теперь послушай слово с этой буквой.','Сначала назовём число, потом посчитаем предметы.','Повтори название числа.','Повтори слово спокойно, не торопись.','Не спеши. Сначала послушай вопрос.','Слушай внимательно, потом отвечай.','У тебя получилось! Попробуем следующее задание.','Если хочешь, нажми на кнопку и послушай ещё раз.','Твоя очередь ответить. Я послушаю.','Посчитаем вместе от одного до десяти.','А сейчас назовём буквы по порядку.']:
  add(t,'instructions')
-for t in re.findall(r"\\bspeak\\(['\\\"]([^'\\\"\\n]{5,200})['\\\"]",base):
+for t in ['Посмотри, кто на картинке. Поставь это слово первым.','Привет! Я Финик. Давай вместе говорить и играть!']:
  if '${' not in t:add(t,'direct-responses')
 (OUT/'extras.json').write_text(json.dumps(phrases,ensure_ascii=False,indent=2),encoding='utf8')
 voices=['baya','kseniya','xenia','aidar','eugene']
