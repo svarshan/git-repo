@@ -1,0 +1,66 @@
+name: MoOLVa Говорим — FULL 5 Silero voices
+on:
+  pull_request:
+    paths:
+      - "moolva_govorim_voice_sandbox/**"
+      - ".github/workflows/moolva-five-voices-full.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  voice:
+    strategy:
+      fail-fast: false
+      max-parallel: 20
+      matrix:
+        voice: [baya, kseniya, xenia, aidar, eugene]
+        shard: [0, 1, 2, 3, 4, 5, 6, 7]
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Silero CPU and MP3 encoder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install numpy omegaconf
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Render assigned Russian speech
+        run: python moolva_govorim_voice_sandbox/full_generate.py --voice ${{ matrix.voice }} --shard ${{ matrix.shard }} --shards 8
+      - name: Preserve audio even if errors
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: moolva-silero-${{ matrix.voice }}-${{ matrix.shard }}
+          path: moolva_govorim_voice_sandbox/release_audio/
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 0
+  package:
+    needs: [voice]
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Download every recorded audio shard
+        uses: actions/download-artifact@v4
+        with:
+          pattern: moolva-silero-*
+          path: moolva_govorim_voice_sandbox/release_audio
+          merge-multiple: true
+      - name: Assemble selectable browser app (all recordings required)
+        run: python moolva_govorim_voice_sandbox/assemble_full.py
+      - name: Upload complete MoOLVa web application
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Govorim-ALL-5-VOICES-WEB-COMPLETE
+          path: moolva_govorim_voice_sandbox/MoOLVa_Govorim_FULL_5_VOICES_WEB.zip
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0

@@ -1,0 +1,53 @@
+name: MoOLVa — repair 7 remaining neural voice shards
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/moolva-silero-repair.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  repair:
+    strategy:
+      fail-fast: false
+      matrix:
+        group: [0, 1, 2]
+    runs-on: ubuntu-latest
+    timeout-minutes: 55
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install runtime once per 2-3 shards
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install numpy omegaconf
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Produce remaining 7 shards only
+        shell: bash
+        run: |
+          set -e
+          if [ "${{ matrix.group }}" = "0" ]; then
+            python moolva_govorim_voice_sandbox/full_generate.py --voice baya --shard 1 --shards 8
+            python moolva_govorim_voice_sandbox/full_generate.py --voice kseniya --shard 3 --shards 8
+          elif [ "${{ matrix.group }}" = "1" ]; then
+            python moolva_govorim_voice_sandbox/full_generate.py --voice kseniya --shard 7 --shards 8
+            python moolva_govorim_voice_sandbox/full_generate.py --voice xenia --shard 1 --shards 8
+          else
+            python moolva_govorim_voice_sandbox/full_generate.py --voice xenia --shard 2 --shards 8
+            python moolva_govorim_voice_sandbox/full_generate.py --voice eugene --shard 3 --shards 8
+            python moolva_govorim_voice_sandbox/full_generate.py --voice eugene --shard 6 --shards 8
+          fi
+      - name: Upload repair recordings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Silero-Repair-${{ matrix.group }}
+          path: moolva_govorim_voice_sandbox/release_audio/
+          if-no-files-found: warn
+          retention-days: 14
+          compression-level: 0

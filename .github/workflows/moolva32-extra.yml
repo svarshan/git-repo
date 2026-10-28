@@ -1,0 +1,38 @@
+name: MoOLVa 3.2 extra clear letter and number voices
+on:
+  pull_request:
+    paths:
+      - "moolva_govorim_audio32/**"
+      - ".github/workflows/moolva32-extra.yml"
+  workflow_dispatch:
+permissions: 
+  contents: read
+jobs:
+  synth:
+    strategy:
+      fail-fast: false
+      matrix:
+        voice: [baya, kseniya, xenia, aidar, eugene]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Setup
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install numpy omegaconf
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Generate new short Russian phrases
+        run: python moolva_govorim_audio32/generate.py ${{ matrix.voice }}
+      - name: Store generated voice recordings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-3-2-${{ matrix.voice }}
+          path: moolva_govorim_audio32/out/
+          if-no-files-found: warn
+          compression-level: 0
