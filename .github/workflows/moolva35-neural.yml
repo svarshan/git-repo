@@ -1,0 +1,41 @@
+name: MoOLVa 3.5 - Neural letter stories and counting
+on:
+  pull_request:
+    paths:
+      - "moolva35/**"
+      - ".github/workflows/moolva35-neural.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  synthesize:
+    strategy:
+      fail-fast: false
+      matrix:
+        voice: [baya, kseniya, xenia, aidar, eugene]
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install sound tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install numpy omegaconf
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Generate 153 narrated examples with real Silero speech
+        run: python moolva35/generate.py ${{ matrix.voice }}
+      - name: Upload actual neural MP3 files
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa35-${{ matrix.voice }}
+          path: moolva35/out/
+          if-no-files-found: error
+          retention-days: 30
+          compression-level: 0
