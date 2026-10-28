@@ -3,6 +3,7 @@ import numpy as np
 import torch
 R=pathlib.Path(__file__).resolve().parent
 D=json.loads((R/'narratives.json').read_text('utf-8'))
+D=[r for r in D if r['kind']=='number' and r['number']==0 and r['item'] in ['груша','машинка']]
 voices=['baya','kseniya','xenia','aidar','eugene']
 voice=sys.argv[1] if len(sys.argv)>1 else 'baya'
 if voice not in voices:raise ValueError('Invalid voice')
