@@ -1,0 +1,41 @@
+name: MoOLVa 3.7 - segment voices for adjustable pauses
+on:
+  pull_request:
+    paths:
+      - "moolva37/**"
+      - ".github/workflows/moolva37-voices.yml"
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  render:
+    strategy:
+      fail-fast: false
+      matrix:
+        voice: [baya, kseniya, xenia, aidar, eugene]
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    env:
+      GITHUB_TOKEN: ${{ github.token }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install Silero and MP3 encoder
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y ffmpeg
+          python -m pip install numpy omegaconf
+          python -m pip install torch --index-url https://download.pytorch.org/whl/cpu
+      - name: Render every short pronunciation segment
+        run: python moolva37/render_segments.py ${{ matrix.voice }}
+      - name: Save verified MP3s
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa37-${{ matrix.voice }}
+          path: moolva37/out/
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 30
