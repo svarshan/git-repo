@@ -178,8 +178,11 @@ jobs:
         timeout-minutes: 14
         run: |
           python -u scripts/voices_82.py
+          if ($LASTEXITCODE -ne 0) { throw '8.2 voice discovery failed; do not report success' }
           python -u scripts/audit_audio.py
+          if ($LASTEXITCODE -ne 0) { throw '8.2 audio audit failed' }
           python scripts/audio_review82.py
+          if ($LASTEXITCODE -ne 0) { throw '8.2 listening report generation failed' }
         env:
           BIRDS_VOICES82_BUDGET_SECONDS: '540'
       - name: Report true 298-species milestone, including shortfall
@@ -380,6 +383,9 @@ jobs:
           name: Ptitsy-NN-Diagnostics
           path: |
             PtitsyNN/data/coverage.json
+            PtitsyNN/data/voices82-added.json
+            PtitsyNN/dist/release-evidence/photo-review/**
+            PtitsyNN/dist/release-evidence/audio-review82.*
           if-no-files-found: ignore
           retention-days: 14
       # Immutable published binaries stay available beyond temporary Actions artifacts.
