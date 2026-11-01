@@ -61,7 +61,7 @@
    if(!core.validStateArchive(archive))throw Error('Содержимое архива не прошло проверку');
    archive.integrity={algorithm:'SHA-256',value:await fingerprint(unsigned(archive))};
    const u=URL.createObjectURL(new Blob([JSON.stringify(archive)],{type:'application/json;charset=utf-8'}));
-   const a=document.createElement('a');a.href=u;a.download='MoOLVa-8.1-Verified-Backup-'+new Date().toISOString().slice(0,10)+'.json';
+   const a=document.createElement('a');a.href=u;a.download='MoOLVa-8.2-Verified-Backup-'+new Date().toISOString().slice(0,10)+'.json';
    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
    say('Архив SHA-256 готов: '+Object.keys(stores).length+' наборов данных, '+assets.length+' записей с вложениями. Сохраните файл в надёжном месте.');
   }catch(error){say('Не удалось создать архив: '+(error.message||error));}
