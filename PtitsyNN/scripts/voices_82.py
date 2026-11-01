@@ -33,7 +33,7 @@ def main():
    seen.add(url)
    ext=v.AUDIO[mime]
    dest=M/'audio'/(b['id']+'-82.'+ext)
-   if v.download(url,dest):
+   if v.download(url,dest,8_000_000):
     b['audioFile']='media/audio/'+dest.name
     credit['audioReview']='taxon and license metadata verified, no listening certification'
     b['audioCredits']=credit
