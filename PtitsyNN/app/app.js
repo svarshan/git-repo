@@ -23,7 +23,7 @@ function birdCard(b){
  '<div class="actions"><button data-open="'+esc(b.id)+'">Подробнее →</button>'+
  '<button data-fav="'+esc(b.id)+'">'+(favs.has(b.id)?'♥ В избранном':'♡ Сохранить')+'</button></div></div></article>';
 }
-function currentList(){const q=$('#search').value.toLocaleLowerCase('ru').replace(/ё/g,'е').trim(),g=$('#group').value,type=$('#only').value;return birds.filter(b=>{
+function currentList(){const q=$('#search').value,g=$('#group').value,type=$('#only').value;if(window.MoOLVa83Core?.search)return window.MoOLVa83Core.search(birds,q,{group:g,only:type});return birds.filter(b=>{
 if(q&&!(b.name+' '+b.latin).toLocaleLowerCase('ru').replace(/ё/g,'е').includes(q))return false;
 if(g==='other'&&b.group)return false;
 if(g!=='all'&&g!=='other'&&g!==b.group)return false;
