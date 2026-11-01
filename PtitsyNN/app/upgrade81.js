@@ -27,6 +27,9 @@
     card.append(el('h3',x.name),el('small',x.latin+' · '+x.group));
     if(x.imageFile){const img=el('img');img.src=x.imageFile;img.loading='lazy';img.alt=x.name;card.append(img);}
     if(x.audioFile){const sound=el('audio');sound.src=x.audioFile;sound.controls=true;sound.preload='none';card.append(sound);}
+    const credit=(label,info)=>{if(!info)return;const p=el('p',label+': '+(info.author||'автор не указан')+' · '+(info.license||'лицензия не указана'),'m81-note');card.append(p);
+     if(/^https:\/\/[a-z0-9.-]+\//i.test(info.source||'')){const link=el('a','Первоисточник '+label);link.href=info.source;link.target='_blank';link.rel='noopener noreferrer';card.append(link);}};
+    credit('Фото',x.imageCredits);credit('Голос',x.audioCredits);
     card.append(el('p',x.excerpt||'Определительные сведения отсутствуют в этом описании.','m81-excerpt'));
     if(x.source){const anchor=el('a','Источник статьи');anchor.href=x.source;anchor.target='_blank';anchor.rel='noopener noreferrer';card.append(anchor);}
     card.append(btn('Открыть паспорт',()=>passport(x.id)));cols.append(card);
