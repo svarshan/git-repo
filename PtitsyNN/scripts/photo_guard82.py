@@ -38,15 +38,41 @@ def image_issue(bird):
  if suspicious(bird.get('imageCredits')):return 'egg-or-nest-metadata'
  return inspect_image(APP/bird['imageFile'])
 
+def commons_category_choices(bird):
+ """Search exact scientific-species Commons categories, not ambiguous bird names."""
+ latin=bird['latin']
+ for category in (latin,latin+' in Russia'):
+  if core.deadline_reached():return
+  pages=core.query(core.COMMONS,{
+   'generator':'categorymembers','gcmtitle':'Category:'+category,
+   'gcmtype':'file','gcmlimit':'100','prop':'imageinfo',
+   'iiprop':'url|size|mime|extmetadata','iiurlwidth':'780'
+  }).get('pages',[])
+  picks=[]
+  for page in pages:
+   name=str(page.get('title') or '')
+   if BAD.search(name):continue
+   info=(page.get('imageinfo') or [{}])[0]
+   mime=info.get('mime')
+   if mime not in ('image/jpeg','image/png','image/webp'):continue
+   if int(info.get('width') or 0)<160 or int(info.get('height') or 0)<160:continue
+   credit=core.lic(info)
+   url=info.get('thumburl') or info.get('url')
+   if not credit or not url:continue
+   picks.append((0 if BIRD.search(name) else 1,0 if latin.casefold() in name.casefold() else 1,url,credit,mime))
+  for _,__,url,credit,mime in sorted(picks,key=lambda x:x[:2]):
+   yield url,credit,mime
+
 def choices(bird):
  # Get only strict scientific species matches and open-license media via curated
  # Wikimedia and iNaturalist integration. Unknown visual content remains flagged.
  yielded=set()
- for item in core.photo_choices(bird,None):
-  url,credit,mime=item
-  if url in yielded or suspicious(credit):continue
-  yielded.add(url)
-  yield item
+ for pool in (commons_category_choices(bird),core.photo_choices(bird,None)):
+  for item in pool:
+   url,credit,mime=item
+   if url in yielded or suspicious(credit):continue
+   yielded.add(url)
+   yield item
 
 def read():
  raw=DATA.read_text('utf8').strip()
