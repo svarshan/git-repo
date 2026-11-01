@@ -22,6 +22,22 @@ def source_title(credit):
 def suspicious(credit):
  return bool(BAD.search(source_title(credit)))
 
+def inspect_image(path):
+ """Decode the full image rather than trusting its filename or JPEG signature."""
+ try:
+  with Image.open(path) as raw:
+   raw.load()
+   w,h=ImageOps.exif_transpose(raw).size
+   if w<160 or h<160:return 'too-small'
+   if raw.format not in ('JPEG','PNG','WEBP'):return 'unsupported-format'
+  return ''
+ except (OSError,ValueError,SyntaxError):return 'cannot-decode'
+
+def image_issue(bird):
+ if not core.valid_existing_media(bird,'imageFile'):return 'missing'
+ if suspicious(bird.get('imageCredits')):return 'egg-or-nest-metadata'
+ return inspect_image(APP/bird['imageFile'])
+
 def choices(bird):
  # Get only strict scientific species matches and open-license media via curated
  # Wikimedia and iNaturalist integration. Unknown visual content remains flagged.
@@ -59,6 +75,7 @@ def sheets(birds):
        'license':credit.get('license') or '',
        'metadataProblem':int(suspicious(credit)),
        'decodeError':0,
+       'qualityIssue':image_issue(bird),
        'needsHumanVisualReview':int(not BIRD.search(source_title(credit)))}
   entries.append(row)
  for page in range(0,len(birds),60):
@@ -86,8 +103,9 @@ def sheets(birds):
 
 def main():
  birds=read()
- old=[b for b in birds if suspicious(b.get('imageCredits')) or not core.valid_existing_media(b,'imageFile')]
- print('PHOTO 8.2 suspect metadata or missing image:',len(old),flush=True)
+ old=[b for b in birds if image_issue(b)]
+ print('PHOTO 8.2 suspected metadata/failed decode/low resolution:',len(old),flush=True)
+ print('PHOTO 8.2 target list:',[(b['latin'],image_issue(b)) for b in old],flush=True)
  core.FETCH_DEADLINE=time.monotonic()+max(45,min(900,int(os.getenv('BIRDS_PHOTO82_BUDGET_SECONDS','360'))))
  replaced=[]
  for bird in old:
@@ -97,9 +115,11 @@ def main():
    ext={'image/jpeg':'jpg','image/png':'png','image/webp':'webp'}.get(mime)
    if not ext:continue
    dest=MEDIA/'image'/(bird['id']+'-82.'+ext)
-   if core.download(url,dest,2_500_000):
+   if core.download(url,dest,2_500_000) and not inspect_image(dest):
+    # Keep the existing file and source metadata untouched until the new one
+    # has passed full decoding and minimum resolution checks.
     bird['imageFile']='media/image/'+dest.name
-    bird['imageCredits']={**credit,'photoReview':'metadata-licensed; contact sheet requires manual visual review'}
+    bird['imageCredits']={**credit,'photoReview':'metadata-licensed; full image decoded; manual ornithological inspection pending'}
     replaced.append({'latin':bird['latin'],'previous':previous,'replacement':bird['imageFile'],'source':credit['source']})
     break
    dest.unlink(missing_ok=True)
@@ -107,7 +127,7 @@ def main():
  OUT.mkdir(parents=True,exist_ok=True)
  (OUT/'photo-replacements.json').write_text(json.dumps(replaced,ensure_ascii=False,indent=2),encoding='utf8')
  entries=sheets(birds)
- invalid=[r['latin'] for r in entries if r['metadataProblem'] or r['decodeError'] or not r['image']]
+ invalid=[r['latin']+' ('+(r['qualityIssue'] or 'contact-sheet-error')+')' for r in entries if r['metadataProblem'] or r['decodeError'] or r['qualityIssue'] or not r['image']]
  print('PHOTO 8.2 replaced',len(replaced),'invalid',len(invalid),'visual-review',sum(r['needsHumanVisualReview'] for r in entries),flush=True)
  if invalid:raise RuntimeError('Egg/nest or missing photos remain: '+', '.join(invalid))
  print('PHOTO 8.2 META QA PASS. 298 photos must STILL be visually inspected using contact sheets.',flush=True)
