@@ -84,7 +84,7 @@ def finalize():
     coverage=json.loads((BASE/'data'/'coverage.json').read_text(encoding='utf-8-sig'))
     voices=json.loads((DIST/'voice-inventory.json').read_text(encoding='utf-8'))
     version=json.loads((BASE/'package.json').read_text(encoding='utf-8'))['version']
-    if smoke.get('version')!=version or version!='8.1.0':raise ValueError('Executable version differs from release')
+    if smoke.get('version')!=version or version!='8.2.0':raise ValueError('Executable version differs from release')
     if voices['withPrimaryVoice']!=coverage.get('birdCalls'):raise ValueError('Coverage changed after inventory')
     guard=json.loads((DIST/'voice-regression.json').read_text(encoding='utf-8'))
     if guard['newlyMissingPreviouslyPresent'] or guard['currentBirdCalls']<261:raise ValueError('Audio nonregression certificate invalid')
