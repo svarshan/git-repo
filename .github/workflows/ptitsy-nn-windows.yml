@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 8.2
+name: Птицы НН — Windows EXE 8.3
 on:
   workflow_dispatch:
     inputs:
@@ -64,7 +64,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/make_icon82.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/make_icon82.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -178,11 +178,13 @@ jobs:
         timeout-minutes: 14
         run: |
           python -u scripts/voices_82.py
-          if ($LASTEXITCODE -ne 0) { throw '8.2 voice discovery failed; do not report success' }
+          if ($LASTEXITCODE -ne 0) { throw '8.3 voice discovery failed; do not report success' }
           python -u scripts/audit_audio.py
-          if ($LASTEXITCODE -ne 0) { throw '8.2 audio audit failed' }
+          if ($LASTEXITCODE -ne 0) { throw '8.3 audio audit failed' }
           python scripts/audio_review82.py
-          if ($LASTEXITCODE -ne 0) { throw '8.2 listening report generation failed' }
+          if ($LASTEXITCODE -ne 0) { throw '8.3 listening report generation failed' }
+          python scripts/audio_review83.py
+          if ($LASTEXITCODE -ne 0) { throw '8.3 cross-species media QA failed' }
         env:
           BIRDS_VOICES82_BUDGET_SECONDS: '540'
       - name: Report true 298-species milestone, including shortfall
@@ -350,23 +352,23 @@ jobs:
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.2-Portable-only
-          path: PtitsyNN/dist/MoOLVa-8.2-Portable-x64.exe
+          name: Ptitsy-NN-8.3-Portable-only
+          path: PtitsyNN/dist/MoOLVa-8.3-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.2-Setup-only
-          path: PtitsyNN/dist/MoOLVa-8.2-Setup-x64.exe
+          name: Ptitsy-NN-8.3-Setup-only
+          path: PtitsyNN/dist/MoOLVa-8.3-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.2-Windows
+          name: Ptitsy-NN-8.3-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
@@ -386,6 +388,7 @@ jobs:
             PtitsyNN/data/voices82-added.json
             PtitsyNN/dist/release-evidence/photo-review/**
             PtitsyNN/dist/release-evidence/audio-review82.*
+            PtitsyNN/dist/release-evidence/audio-review83.*
           if-no-files-found: ignore
           retention-days: 14
       # Immutable published binaries stay available beyond temporary Actions artifacts.
@@ -411,7 +414,7 @@ jobs:
           $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
           $ev = (Resolve-Path dist/release-evidence).Path
           $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','voice-regression.json','voice-regression.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png')
-          $evidenceNames += @('audio-review82.csv','audio-review82.md')
+          $evidenceNames += @('audio-review82.csv','audio-review82.md','audio-review83.csv','audio-review83.md')
           $evidenceFiles = foreach ($name in $evidenceNames) {
             $item = Get-Item (Join-Path $ev $name) -ErrorAction Stop
             $item.FullName

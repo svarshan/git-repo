@@ -84,8 +84,14 @@ def finalize():
     coverage=json.loads((BASE/'data'/'coverage.json').read_text(encoding='utf-8-sig'))
     voices=json.loads((DIST/'voice-inventory.json').read_text(encoding='utf-8'))
     version=json.loads((BASE/'package.json').read_text(encoding='utf-8'))['version']
-    if smoke.get('version')!=version or version!='8.2.0':raise ValueError('Executable version differs from release')
+    if smoke.get('version')!=version or version!='8.3.0':raise ValueError('Executable version differs from release')
     if voices['withPrimaryVoice']!=coverage.get('birdCalls'):raise ValueError('Coverage changed after inventory')
+    if coverage.get('species')!=298 or coverage.get('photos')!=298 or coverage.get('articles')!=298:
+        raise ValueError('8.3 integrity gate: missing species, real photos, or articles')
+    for required in ['audio-review83.csv','audio-review83.md','audio-review82.csv','audio-review82.md']:
+        if not (DIST/required).is_file():raise ValueError('8.3 mandatory audio QA appendix missing: '+required)
+    review=coverage.get('photo82') or {}
+    if int(review.get('suspectedEggs',-1))!=0:raise ValueError('8.3 detected unresolved egg/nest image metadata')
     guard=json.loads((DIST/'voice-regression.json').read_text(encoding='utf-8'))
     if guard['newlyMissingPreviouslyPresent'] or guard['currentBirdCalls']<261:raise ValueError('Audio nonregression certificate invalid')
     if smoke.get('photoPipelineVerified',{}).get('passes')!=3:raise ValueError('Three real crop ONNX passes not completed')
