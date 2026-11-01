@@ -19,7 +19,7 @@
    const translit=latinize(b.name);
    let score=0;
    for(const term of terms){
-    const q=latinize(term),match= name.includes(term)?12:latin.includes(term)?12:aliases.some(x=>x.includes(term))?9:translit.includes(q)?8:group.includes(term)?3:desc.includes(term)?1:0;
+    const q=latinize(term).replace(/c/g,'ts'),match= name.includes(term)?12:latin.includes(term)?12:aliases.some(x=>x.includes(term))?9:translit.includes(q)?8:group.includes(term)?3:desc.includes(term)?1:0;
     if(!match)return null;score+=match;
    }
    if(terms.length&&name===terms.join(' '))score+=20;
