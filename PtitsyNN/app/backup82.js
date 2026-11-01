@@ -3,7 +3,7 @@
 (()=>{
  const bridge=window.MoOLVaBackup;
  if(!bridge?.save)return;
- const keys=['ptitsy-nn.journal.v1','ptitsy-nn.favorites.v1','ptitsy-nn.recent.v1','ptitsy-nn.ui3.settings.v1','ptitsy-nn.sidebar.v76','ptitsy-nn.ui77.v1','ptitsy-nn.ui78.v1','ptitsy-nn.academy80.v1','ptitsy-nn.fieldmode80.v1','ptitsy-nn.expedition77.v1','ptitsy-nn.ai77.history.v1','ptitsy-nn.voice-lab.v1','ptitsy-nn.academy.sound.v5','ptitsy-nn.academy.v1','ptitsy-nn.media83.review.v1'];
+ const keys=['ptitsy-nn.journal.v1','ptitsy-nn.favorites.v1','ptitsy-nn.recent.v1','ptitsy-nn.ui3.settings.v1','ptitsy-nn.sidebar.v76','ptitsy-nn.ui77.v1','ptitsy-nn.ui78.v1','ptitsy-nn.academy80.v1','ptitsy-nn.fieldmode80.v1','ptitsy-nn.expedition77.v1','ptitsy-nn.ai77.history.v1','ptitsy-nn.voice-lab.v1','ptitsy-nn.academy.sound.v5','ptitsy-nn.academy.v1','ptitsy-nn.media83.review.v1','ptitsy-nn.installed-version.v1'];
  const sha=async obj=>{
   const bytes=new TextEncoder().encode(JSON.stringify(obj));
   const buf=await crypto.subtle.digest('SHA-256',bytes);
@@ -60,7 +60,15 @@
  window.MoOLVaAutoBackup={create:snapshot};
  const status=document.getElementById('m78BackupStatus');
  const report=error=>{if(status)status.textContent='Автоматическое резервирование: '+(error.message||error);};
- setTimeout(()=>snapshot('startup').catch(report),3000);
+ setTimeout(async()=>{
+  try{
+   const previous=localStorage.getItem('ptitsy-nn.installed-version.v1');
+   const hadUserData=keys.some(k=>k!=='ptitsy-nn.installed-version.v1'&&localStorage.getItem(k)!==null);
+   const reason=(previous!=='8.3.0'&&(previous!==null||hadUserData))?'before-update':'startup';
+   await snapshot(reason);
+   localStorage.setItem('ptitsy-nn.installed-version.v1','8.3.0');
+  }catch(error){report(error);}
+ },3000);
  setInterval(()=>snapshot('periodic').catch(report),5*60*1000);
  document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')snapshot('periodic').catch(report);});
 })();

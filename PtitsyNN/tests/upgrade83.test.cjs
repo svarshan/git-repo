@@ -33,4 +33,5 @@ test('8.3 branded version, backup inclusion, and genuine release controls stay w
  assert.match(html,/id="media83"/);assert.match(html,/src="core83.js"/);assert.match(html,/src="upgrade83.js"/);
  assert.match(backup,/ptitsy-nn\.media83\.review\.v1/);assert.match(core78,/ptitsy-nn\.media83\.review\.v1/);
  assert.match(wf,/Ptitsy-NN-8\.3-Windows/);assert.match(wf,/release_evidence79\.py finalize/);
+ assert.match(html,/id="m83PreUpdate"/);assert.match(backup,/before-update/);
 });

@@ -94,6 +94,16 @@
   try{await window.MoOLVaBackup.openFolder();say('Папка локальных резервных копий открыта. Для переноса используйте экспорт полного архива в настройках.');}
   catch(error){say('Папка недоступна: '+error.message);}
  });
+ $('#m83PreUpdate').addEventListener('click',async()=>{
+  const control=$('#m83PreUpdate');control.disabled=true;
+  try{
+   const result=await window.MoOLVaAutoBackup?.create('before-update');
+   if(!result?.saved)throw Error('Не получено подтверждение сохранения');
+   say('Перед обновлением создан проверяемый локальный архив: '+result.file+'. Теперь можно закрыть программу и запустить новый установщик поверх прежней версии.');
+   await inspectBackups();
+  }catch(e){say('Обновление пока не безопасно: '+(e.message||e));}
+  finally{control.disabled=false;}
+ });
  $('#m83Search').addEventListener('input',()=>{offset=0;render();});
  $('#m83Filter').addEventListener('change',()=>{offset=0;render();});
  $('#m83Prev').addEventListener('click',()=>{offset=Math.max(0,offset-18);render();});

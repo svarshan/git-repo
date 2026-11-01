@@ -27,6 +27,13 @@ def main():
     if time.monotonic()>=v.STOP:break
     candidates.extend(v.category(title,names,True))
    if candidates:break
+  if not candidates and time.monotonic()<v.STOP:
+   candidates.extend(v.direct_file_titles(names))
+  if not candidates:
+   for name in names[:2]:
+    if time.monotonic()>=v.STOP:break
+    candidates.extend(v.filename_search(name,names))
+    if candidates:break
   seen=set()
   for url,credit,mime in candidates:
    if url in seen or time.monotonic()>=v.STOP:continue

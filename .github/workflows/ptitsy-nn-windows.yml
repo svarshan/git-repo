@@ -78,6 +78,8 @@ jobs:
           node --check app/core80.js
           node --check app/core81.js
           node --check app/upgrade81.js
+          node --check app/core83.js
+          node --check app/upgrade83.js
           node --check app/intelligence80.js
           node --check app/core81.js
           node --check app/upgrade81.js
