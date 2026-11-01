@@ -61,9 +61,6 @@ def sheets(birds):
        'decodeError':0,
        'needsHumanVisualReview':int(not BIRD.search(source_title(credit)))}
   entries.append(row)
- with (OUT/'photo-review.csv').open('w',encoding='utf-8-sig',newline='') as out:
-  w=csv.DictWriter(out,fieldnames=list(entries[0]))
-  w.writeheader();w.writerows(entries)
  for page in range(0,len(birds),60):
   image=Image.new('RGB',(1200,1530),'#e8eff0')
   draw=ImageDraw.Draw(image)
@@ -82,6 +79,9 @@ def sheets(birds):
    draw.text((x+4,y+120),bird['latin'][:27],fill='#182632')
    if suspicious(bird.get('imageCredits')):draw.text((x+4,y+136),'EGG/NEST SUSPECT',fill='#9a182a')
   image.save(OUT/('contact-%02d.png'%(page//60+1)),optimize=True)
+ with (OUT/'photo-review.csv').open('w',encoding='utf-8-sig',newline='') as out:
+  w=csv.DictWriter(out,fieldnames=list(entries[0]))
+  w.writeheader();w.writerows(entries)
  return entries
 
 def main():
