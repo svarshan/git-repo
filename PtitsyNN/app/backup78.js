@@ -36,7 +36,7 @@
  function decode(url,kind){
   if(typeof url!=='string'||url.length>8e6)return null;
   const match=url.match(/^data:(image\/(?:jpeg|png|webp)|audio\/(?:mpeg|wav|ogg|webm|mp4));base64,([A-Za-z0-9+/=]+)$/);
-  if(!match||!match[1].startsWith(kind+'/'))return null;
+  if(!match||!match[1].startsWith((kind==='photo'?'image':'audio')+'/'))return null;
   const raw=atob(match[2]);if(raw.length>(kind==='photo'?3:5)*1024*1024)return null;
   const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
   return new Blob([bytes],{type:match[1]});

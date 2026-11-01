@@ -3,6 +3,11 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const os=require('node:os'),fs=require('node:fs'),path=require('node:path'),crypto=require('node:crypto');
 const {saveBackup}=require('../backup82.cjs');
 const hash=x=>crypto.createHash('sha256').update(JSON.stringify(x)).digest('hex');
+test('8.2 restoration distinguishes image/photo MIME from audio, preserving media attachments',()=>{
+ const src=fs.readFileSync(path.join(__dirname,'../app/backup78.js'),'utf8');
+ assert.match(src,/kind===\x27photo\x27\?\x27image\x27:\x27audio\x27/);
+ assert.match(src,/await window\.MoOLVaAutoBackup\.create\(\x27before-restore\x27\)/);
+});
 test('8.2 creates real SHA256 auto backup and rejects corrupted archives before changes',()=>{
  const dir=fs.mkdtempSync(path.join(os.tmpdir(),'moolva-auto-'));
  try{
