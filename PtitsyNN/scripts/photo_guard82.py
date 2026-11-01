@@ -58,6 +58,7 @@ def sheets(birds):
        'source':credit.get('source') or '','author':credit.get('author') or '',
        'license':credit.get('license') or '',
        'metadataProblem':int(suspicious(credit)),
+       'decodeError':0,
        'needsHumanVisualReview':int(not BIRD.search(source_title(credit)))}
   entries.append(row)
  with (OUT/'photo-review.csv').open('w',encoding='utf-8-sig',newline='') as out:
@@ -72,9 +73,12 @@ def sheets(birds):
     try:
      with Image.open(APP/bird['imageFile']) as photo:
       photo=ImageOps.exif_transpose(photo.convert('RGB'))
+      if photo.width<160 or photo.height<160:raise ValueError('Low-resolution photograph')
       photo.thumbnail((190,118))
       image.paste(photo,(x+(200-photo.width)//2,y+2))
-    except (OSError,ValueError):pass
+    except (OSError,ValueError):
+     entries[page+idx]['decodeError']=1
+     draw.text((x+4,y+30),'BROKEN IMAGE',fill='#9a182a')
    draw.text((x+4,y+120),bird['latin'][:27],fill='#182632')
    if suspicious(bird.get('imageCredits')):draw.text((x+4,y+136),'EGG/NEST SUSPECT',fill='#9a182a')
   image.save(OUT/('contact-%02d.png'%(page//60+1)),optimize=True)
@@ -103,7 +107,7 @@ def main():
  OUT.mkdir(parents=True,exist_ok=True)
  (OUT/'photo-replacements.json').write_text(json.dumps(replaced,ensure_ascii=False,indent=2),encoding='utf8')
  entries=sheets(birds)
- invalid=[r['latin'] for r in entries if r['metadataProblem'] or not r['image']]
+ invalid=[r['latin'] for r in entries if r['metadataProblem'] or r['decodeError'] or not r['image']]
  print('PHOTO 8.2 replaced',len(replaced),'invalid',len(invalid),'visual-review',sum(r['needsHumanVisualReview'] for r in entries),flush=True)
  if invalid:raise RuntimeError('Egg/nest or missing photos remain: '+', '.join(invalid))
  print('PHOTO 8.2 META QA PASS. 298 photos must STILL be visually inspected using contact sheets.',flush=True)
