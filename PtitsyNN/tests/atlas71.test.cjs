@@ -38,7 +38,7 @@ test('7.1 Windows EXEs leave 7.0 release untouched',()=>{
  assert.equal(p.version,'8.2.0');
  assert.equal(p.build.portable.artifactName,'MoOLVa-8.2-Portable-${arch}.exe');
  assert.equal(p.build.nsis.artifactName,'MoOLVa-8.2-Setup-${arch}.exe');
- assert.match(wf,/Ptitsy-NN-8\.1-Windows/);
+ assert.match(wf,/Ptitsy-NN-8\.2-Windows/);
  assert.match(wf,/gh release create \$tag/);
  assert.match(wf,/node --check app\/settlements\.js/);
 });

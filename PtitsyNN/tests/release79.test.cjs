@@ -32,5 +32,5 @@ test('8.1 preserves setup, portable and legacy field records',()=>{
  assert.ok(pkg.build.portable.artifactName.startsWith('MoOLVa-8.2-Portable-'));
  assert.match(read('app/app.js'),/ptitsy-nn\.journal\.v1/);
  assert.match(read('app/expedition77.js'),/ptitsy-nn\.expedition77/);
- assert.match(wf,/Ptitsy-NN-8\.1-Windows/);
+ assert.match(wf,/Ptitsy-NN-8\.2-Windows/);
 });
