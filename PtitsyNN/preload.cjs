@@ -20,3 +20,7 @@ contextBridge.exposeInMainWorld('BirdVision',{
   return ipcRenderer.invoke('birdvision80-predict',bytes);
  }
 });
+
+contextBridge.exposeInMainWorld('MoOLVaBackup',{
+ save:(archive,reason)=>ipcRenderer.invoke('moolva-backup82-save',archive,reason)
+});
