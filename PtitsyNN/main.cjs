@@ -150,11 +150,15 @@ async function captureReleaseEvidence(win){
     window.confirm=originalConfirm;
    }
   })()`);
+  const autoDir=path.join(app.getPath('userData'),'MoOLVa-AutoBackups');
+  const savedCopies=fs.existsSync(autoDir)?fs.readdirSync(autoDir).filter(n=>/^MoOLVa-.*\.json$/.test(n)):[];
+  if(!savedCopies.length)throw Error('8.2 local automatic backup was not created on the real Windows EXE');
+  const autoBackupEvidence={files:savedCopies.length,local:true,verified:true};
   const visionSmoke=await win.webContents.executeJavaScript('window.BirdVision?.diagnostics()');
   if(!visionSmoke?.ok||visionSmoke.classes<200)throw Error('Real local image model did not pass native ONNX inference');
   const evidence={type:'MoOLVa-real-windows-screenshots',version:require('./package.json').version,
    runtime:'Electron packaged Windows executable',captureMethod:'Chromium webContents.capturePage (offscreen)',
-   os:process.platform,packaged:app.isPackaged,modelAvailable:modelStatus().available,visionModelVerified:visionSmoke,photoPipelineVerified:{passes:photoPipeline.imageCrops,candidates:photoPipeline.top.length},guiInteractions,backupSmoke,catalog:data,
+   os:process.platform,packaged:app.isPackaged,autoBackup:autoBackupEvidence,modelAvailable:modelStatus().available,visionModelVerified:visionSmoke,photoPipelineVerified:{passes:photoPipeline.imageCrops,candidates:photoPipeline.top.length},guiInteractions,backupSmoke,catalog:data,
    screenshots:captured,createdAt:new Date().toISOString()};
   if(!evidence.modelAvailable)throw Error('Offline Perch v2 files absent in executable');
   fs.writeFileSync(path.join(out,'gui-smoke.json'),JSON.stringify(evidence,null,2),'utf8');
