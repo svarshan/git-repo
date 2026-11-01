@@ -98,6 +98,10 @@
     assets.push(obj);
    }
    if(!confirm('Резервная копия проверена. Восстановить '+Object.keys(archive.stores).length+' групп настроек/данных и '+assets.length+' наборов вложений? Существующие значения этих ключей будут заменены.')){say('Восстановление отменено.');return;}
+   // Mandatory pre-restore copy of the current data, including media attachments.
+   if(!window.MoOLVaAutoBackup?.create)throw Error('Автоматическое резервирование недоступно. Восстановление запрещено.');
+   try{await window.MoOLVaAutoBackup.create('before-restore');}
+   catch(e){throw Error('Не удалось сохранить старые данные перед восстановлением: '+(e.message||e));}
    // 8.1: snapshot original localStorage, commit values, then use ONE atomic IDB transaction.
    // On IDB abort, restore old localStorage. A process crash between stores cannot be perfectly atomic;
    // the user keeps the original archive as the recovery source.
