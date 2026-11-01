@@ -84,11 +84,13 @@ def finalize():
     coverage=json.loads((BASE/'data'/'coverage.json').read_text(encoding='utf-8-sig'))
     voices=json.loads((DIST/'voice-inventory.json').read_text(encoding='utf-8'))
     version=json.loads((BASE/'package.json').read_text(encoding='utf-8'))['version']
-    if smoke.get('version')!=version or version!='8.1.0':raise ValueError('Executable version differs from release')
+    if smoke.get('version')!=version or version!='8.2.0':raise ValueError('Executable version differs from release')
     if voices['withPrimaryVoice']!=coverage.get('birdCalls'):raise ValueError('Coverage changed after inventory')
     guard=json.loads((DIST/'voice-regression.json').read_text(encoding='utf-8'))
     if guard['newlyMissingPreviouslyPresent'] or guard['currentBirdCalls']<261:raise ValueError('Audio nonregression certificate invalid')
     if smoke.get('photoPipelineVerified',{}).get('passes')!=3:raise ValueError('Three real crop ONNX passes not completed')
+    if not smoke.get('autoBackup',{}).get('verified') or smoke['autoBackup'].get('files',0)<1:
+        raise ValueError('Real packaged Windows app did not save an automatic local backup')
     if smoke.get('guiInteractions',{}).get('compareCards')!=2:raise ValueError('Compare GUI control smoke failed')
     backup=smoke.get('backupSmoke') or {}
     if backup.get('validArchive')!='restored' or backup.get('alteredArchive')!='rejected':
