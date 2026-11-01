@@ -19,8 +19,10 @@ function saveBackup(dir,archive,reason='periodic'){
  try{fs.writeFileSync(temp,data,{flag:'wx',mode:0o600});fs.renameSync(temp,dest);}
  catch(e){try{fs.unlinkSync(temp);}catch{}throw e;}
  // Retain last 12 backups, never remove an external/manual export.
- const all=fs.readdirSync(dir).filter(x=>/^MoOLVa-.*\.json$/.test(x)).sort().reverse();
- for(const old of all.slice(12))fs.unlinkSync(path.join(dir,old));
+ const all=fs.readdirSync(dir).filter(x=>/^MoOLVa-.*\.json$/.test(x))
+  .map(name=>({name,time:fs.statSync(path.join(dir,name)).mtimeMs}))
+  .sort((a,b)=>b.time-a.time||b.name.localeCompare(a.name));
+ for(const old of all.slice(12))fs.unlinkSync(path.join(dir,old.name));
  return {saved:true,file:name,folder:dir,reason,sha256:crypto.createHash('sha256').update(data).digest('hex')};
 }
 module.exports={saveBackup};
