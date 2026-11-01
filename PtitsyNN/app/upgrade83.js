@@ -76,6 +76,24 @@
   $('#m83Page').textContent=rows.length?(offset+1)+'–'+Math.min(offset+18,rows.length)+' из '+rows.length:'0 видов';
   $('#m83Prev').disabled=offset===0;$('#m83Next').disabled=offset+18>=rows.length;
  }
+ async function inspectBackups(){
+  const target=$('#m83BackupList');target.replaceChildren();
+  if(!window.MoOLVaBackup?.list){say('Проверка резервных копий недоступна');return;}
+  try{
+   const rows=await window.MoOLVaBackup.list();
+   const ok=rows.filter(x=>x.valid).length;
+   target.append(div('p','m83-muted','Найдено резервных архивов: '+rows.length+' · прошли проверку SHA-256: '+ok+'. Хранятся только локально.'));
+   for(const row of rows.slice(0,12)){
+    target.append(div('p','m83-small',(row.valid?'✓ ':'⚠ ')+row.name+(row.valid?' · '+Math.round(row.bytes/1024)+' КБ':' · повреждён или неподдерживаемый')));
+   }
+   if(!rows.length)target.append(div('p','m83-muted','Архивов пока нет. Нажмите «Сделать резервную копию».'));
+  }catch(error){say('Не удалось проверить копии: '+error.message);}
+ }
+ $('#m83CheckBackups').addEventListener('click',inspectBackups);
+ $('#m83OpenFolder').addEventListener('click',async()=>{
+  try{await window.MoOLVaBackup.openFolder();say('Папка локальных резервных копий открыта. Для переноса используйте экспорт полного архива в настройках.');}
+  catch(error){say('Папка недоступна: '+error.message);}
+ });
  $('#m83Search').addEventListener('input',()=>{offset=0;render();});
  $('#m83Filter').addEventListener('change',()=>{offset=0;render();});
  $('#m83Prev').addEventListener('click',()=>{offset=Math.max(0,offset-18);render();});
@@ -88,7 +106,7 @@
  });
  $('#m83Backup').addEventListener('click',async()=>{
   const b=$('#m83Backup');b.disabled=true;
-  try{const result=await window.MoOLVaAutoBackup?.create('manual');if(!result?.saved)throw Error('Локальный архив не подтверждён');say('Резервная копия создана: '+result.file);}
+  try{const result=await window.MoOLVaAutoBackup?.create('manual');if(!result?.saved)throw Error('Локальный архив не подтверждён');say('Резервная копия создана: '+result.file);await inspectBackups();}
   catch(e){say('Ошибка резервирования: '+(e.message||e));}
   finally{b.disabled=false;}
  });

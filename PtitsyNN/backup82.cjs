@@ -25,4 +25,19 @@ function saveBackup(dir,archive,reason='periodic'){
  for(const old of all.slice(12))fs.unlinkSync(path.join(dir,old.name));
  return {saved:true,file:name,folder:dir,reason,sha256:crypto.createHash('sha256').update(data).digest('hex')};
 }
-module.exports={saveBackup};
+function listBackups(dir){
+ if(!fs.existsSync(dir))return [];
+ return fs.readdirSync(dir).filter(name=>/^MoOLVa-.*\.json$/.test(name)).sort().reverse().slice(0,30).map(name=>{
+  const file=path.join(dir,name);
+  try{
+   const stat=fs.lstatSync(file);
+   if(!stat.isFile()||stat.size>MAX)throw Error('Недопустимый файл');
+   const record=JSON.parse(fs.readFileSync(file,'utf8'));
+   const unsigned={type:record.type,version:record.version,createdAt:record.createdAt,stores:record.stores,assets:record.assets};
+   if(record.type!=='moolva-backup78'||record.version!==1||!record.stores||!Array.isArray(record.assets))throw Error('Структура архива повреждена');
+   if(record.integrity?.value!==digest(unsigned))throw Error('SHA-256 не совпадает');
+   return {name,bytes:stat.size,createdAt:record.createdAt,valid:true};
+  }catch(error){return {name,valid:false,error:'Архив не прошёл контроль целостности'};}
+ });
+}
+module.exports={saveBackup,listBackups};

@@ -172,6 +172,18 @@ async function captureReleaseEvidence(win){
 
 app.whenReady().then(()=>{
  registerVision80({app,ipcMain,nativeImage,isTrusted});
+ ipcMain.handle('moolva-backup82-list',event=>{
+  if(!isTrusted(event.sender))throw Error('Недоверенный источник резервирования');
+  return require('./backup82.cjs').listBackups(path.join(app.getPath('userData'),'MoOLVa-AutoBackups'));
+ });
+ ipcMain.handle('moolva-backup82-folder',async event=>{
+  if(!isTrusted(event.sender))throw Error('Недоверенный источник резервирования');
+  const folder=path.join(app.getPath('userData'),'MoOLVa-AutoBackups');
+  fs.mkdirSync(folder,{recursive:true});
+  const result=await shell.openPath(folder);
+  if(result)throw Error('Не удалось открыть папку резервных копий');
+  return {opened:true};
+ });
  ipcMain.handle('moolva-backup82-save',(event,archive,reason)=>{
   if(!isTrusted(event.sender))throw Error('Недоверенный источник резервирования');
   return require('./backup82.cjs').saveBackup(path.join(app.getPath('userData'),'MoOLVa-AutoBackups'),archive,reason);

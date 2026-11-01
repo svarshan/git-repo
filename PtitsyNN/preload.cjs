@@ -22,5 +22,7 @@ contextBridge.exposeInMainWorld('BirdVision',{
 });
 
 contextBridge.exposeInMainWorld('MoOLVaBackup',{
- save:(archive,reason)=>ipcRenderer.invoke('moolva-backup82-save',archive,reason)
+ save:(archive,reason)=>ipcRenderer.invoke('moolva-backup82-save',archive,reason),
+ list:()=>ipcRenderer.invoke('moolva-backup82-list'),
+ openFolder:()=>ipcRenderer.invoke('moolva-backup82-folder')
 });
