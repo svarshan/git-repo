@@ -3,6 +3,7 @@
 Only exact-species freely licensed recordings. Never create synthesized replacements.
 """
 import csv,json,os,time
+from audit_audio import inspect as inspect_sound
 from pathlib import Path
 import voice_max as vx
 import harvest_voices as hv
@@ -19,6 +20,25 @@ def recover_one(b):
  if valid_existing_media(b,'audioFile'):return 'already-preserved'
  names=list(dict.fromkeys([b['latin']]+hv.SYNONYMS.get(b['latin'],[])))
  candidates=vx.xeno_choices(b)+vx.commons_choices(b)
+ # Directly request known scientific-name files on Wikimedia Commons. Generic
+ # title searches missed the Pica pica category although Commons has 39 files.
+ # The API still determines file URL, license, authorship, size and MIME.
+ pinned={
+  'Pica pica':[
+   'File:Pica pica.ogg',
+   'File:Eurasian Magpie (Pica pica) (W1CDR0001537 BD28).ogg',
+   'File:Pica pica - Eurasian Magpie XC537413.mp3',
+   'File:Pica pica - Eurasian Magpie XC432921.mp3',
+   'File:Pica pica - Eurasian Magpie XC475651.mp3'
+  ]
+ }
+ files=pinned.get(b['latin'],[])+['File:'+name+'.ogg' for name in names]
+ if files:
+  response=hv.myquery({'titles':'|'.join(files[:20]),'prop':'imageinfo',
+    'iiprop':'url|size|mime|extmetadata'})
+  for url,credit,mime in hv.candidates_from_pages(response.get('pages',[]),names):
+   candidates.insert(0,((0,0,0),url,hv.AUDIO[mime],credit))
+
  # Wikimedia categories are exact scientific taxon, not search results for a common name.
  for name in names[:3]:
   if time.monotonic()>=vx.STOP:break
@@ -36,6 +56,11 @@ def recover_one(b):
   seen.add(url)
   dest=M/'audio'/(b['id']+'-84.'+ext)
   if vx.download(url,dest):
+   try:inspect_sound(dest)
+   except Exception as ex:
+    print('RECOVER84 rejected low-quality candidate',b['latin'],str(ex)[:100],flush=True)
+    dest.unlink(missing_ok=True)
+    continue
    b['audioFile']='media/audio/'+dest.name
    b['audioCredits']={**credit,'audioReview':'species/rights metadata checked; human review pending'}
    return 'found-real-licensed'

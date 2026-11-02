@@ -4,6 +4,7 @@ Never use a different species or an unclear license. Xeno v3 remains optional
 via a user-provided XENO_CANTO_API_KEY in GitHub Actions Secrets.
 """
 import json,os,time
+from audit_audio import inspect as inspect_sound
 from pathlib import Path
 import harvest_voices as v
 from make_catalog import APP,ROOT,M,valid_existing_media
@@ -41,6 +42,11 @@ def main():
    ext=v.AUDIO[mime]
    dest=M/'audio'/(b['id']+'-82.'+ext)
    if v.download(url,dest,8_000_000):
+    try:inspect_sound(dest)
+    except Exception as ex:
+     print('VOICES 8.4 rejected weak licensed candidate',b['latin'],str(ex)[:100],flush=True)
+     dest.unlink(missing_ok=True)
+     continue
     b['audioFile']='media/audio/'+dest.name
     credit['audioReview']='taxon and license metadata verified, no listening certification'
     b['audioCredits']=credit

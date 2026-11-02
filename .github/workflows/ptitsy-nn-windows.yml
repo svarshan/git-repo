@@ -186,8 +186,12 @@ jobs:
         run: |
           python -u scripts/voices_82.py
           if ($LASTEXITCODE -ne 0) { throw '8.4 voice discovery failed; do not report success' }
+          python -u scripts/voice_recover84.py
+          if ($LASTEXITCODE -ne 0) { throw '8.4 retry missing historical voices failed' }
           python -u scripts/audit_audio.py
           if ($LASTEXITCODE -ne 0) { throw '8.4 audio audit failed' }
+          python scripts/verify_cache.py
+          if ($LASTEXITCODE -ne 0) { throw '8.4 post-audit media cache integrity failed' }
           python scripts/audio_review82.py
           if ($LASTEXITCODE -ne 0) { throw '8.4 listening report generation failed' }
           python scripts/audio_review83.py
@@ -196,6 +200,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw '8.4 provenance and SHA256 manifest failed' }
         env:
           BIRDS_VOICES82_BUDGET_SECONDS: '540'
+          BIRDS_84_RECOVERY_SECONDS: '320'
       - name: Report true 298-species milestone, including shortfall
         shell: pwsh
         run: |
