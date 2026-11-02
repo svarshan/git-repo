@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
     private JSONObject stored(String key){try{return new JSONObject(val(key).isEmpty()?"{}":val(key));}catch(Exception e){return new JSONObject();}}
     private void writeObj(String key,JSONObject obj){prefs.edit().putString(key,obj.toString()).apply();}
     private void details(JSONObject item){current=()->details(item);String name=item.optString("Name",item.optString("title",item.optString("name","Без названия")));shell(name);String type=item.optString("Type","");String desc=item.optString("Overview",item.optString("overview",""));if(!desc.isEmpty()){TextView d=text(desc,18);d.setLineSpacing(dp(4),1);content.addView(d);space();}String itemid=id(item);JSONObject fav=stored("favorites");boolean isFav=fav.has(itemid);addButton(content,isFav?"Убрать из избранного":"Добавить в избранное",()->{try{if(isFav)fav.remove(itemid);else fav.put(itemid,item);writeObj("favorites",fav);details(item);}catch(Exception ignored){}});
-        if(item.optString("_origin").equals("jellyfin")){String jid=item.optString("Id");if(type.equals("Movie")||type.equals("Episode")||type.equals("Video")){addButton(content,"▶ Смотреть",()->play(item));}else{addButton(content,"Открыть раздел / серии",()->navigate(()->library(jid,name)));}}else if(item.optString("_origin").equals("torrent")){String hash=item.optString("hash");int index=item.optInt("fileIndex");addButton(content,"▶ Продолжить просмотр",()->playTorrent(hash,index,name));note("Торрент должен оставаться доступным в локальном TorrServer.");}else{addButton(content,"Найти источники фильма",()->navigate(()->publicTorrentForm(name)));addButton(content,"Ввести magnet-ссылку",()->navigate(()->torrentInput(name)));note("Каталог TMDB не является источником видео. Поиск выполняется через сторонний сервис.");}
+        if(item.optString("_origin").equals("jellyfin")){String jid=item.optString("Id");if(type.equals("Movie")||type.equals("Episode")||type.equals("Video")){addButton(content,"▶ Смотреть",()->play(item));}else{addButton(content,"Открыть раздел / серии",()->navigate(()->library(jid,name)));}}else if(item.optString("_origin").equals("torrent")){String hash=item.optString("hash");int index=item.optInt("fileIndex");addButton(content,"▶ Продолжить просмотр",()->playTorrent(hash,index,name));note("Торрент должен оставаться доступным в локальном TorrServer.");}else{addButton(content,"Найти источники фильма",()->navigate(()->publicTorrentForm(name)));addButton(content,"Ввести magnet-ссылку",()->navigate(()->torrentInput(name)));note("Каталог TMDB не является источником видео. Подключите источник для поиска раздач.");}
     }
     private void favorites(){current=this::favorites;shell("Избранное");JSONObject f=stored("favorites");if(f.length()==0){note("Здесь появятся сохранённые фильмы и сериалы.");return;}JSONArray a=new JSONArray();Iterator<String> keys=f.keys();while(keys.hasNext()){JSONObject o=f.optJSONObject(keys.next());if(o!=null)a.put(o);}renderStored(a);}
     private void renderStored(JSONArray a){for(int i=0;i<a.length();i++){JSONObject o=a.optJSONObject(i);if(o==null)continue;String n=o.optString("Name",o.optString("title",o.optString("name","Без названия")));addButton(content,n,()->navigate(()->details(o)));}}
@@ -110,7 +110,7 @@ public class MainActivity extends Activity {
         addButton(content,"Ввести magnet или ссылку на .torrent",()->navigate(()->torrentInput("")));
         addButton(content,"Поиск RuTracker и других источников",()->navigate(()->publicTorrentForm("")));
         addButton(content,"Найти через настроенный Torznab",()->navigate(()->torrentSearchForm("")));
-        note("Поиск RuTracker и других источников использует сторонний TorAPI. Можно также подключить свой Torznab или вставить magnet-ссылку.");
+        note("RuTracker работает напрямую; RuTor — через индекс TorrServer. Другие источники доступны через настроенный Torznab или экспериментальный TorAPI.");
     }
     private void torrentList(){current=this::torrentList;shell("Мои раздачи");tsAsync("Загрузка списка…",()->tsRequest("/torrents",new JSONObject().put("action","list")),result->{if(!(result instanceof JSONArray)){note("Не удалось прочитать список.");return;}JSONArray a=(JSONArray)result;if(a.length()==0){note("Пока нет сохранённых раздач.");return;}for(int i=0;i<a.length();i++){JSONObject t=a.optJSONObject(i);if(t==null)continue;String hash=t.optString("hash");if(!hash.matches("(?i)[a-f0-9]{40}"))continue;String title=t.optString("title",t.optString("name",hash));addButton(content,title,()->navigate(()->refreshTorrent(hash)));}});}
     private void checkTorrentServer(){tsAsync("Проверка сервера…",()->{Object r=tsRequest("/torrents",new JSONObject().put("action","list"));if(!(r instanceof JSONArray))throw new IOException("unexpected response");return r;},r->note("TorrServer отвечает. Найдено добавленных раздач: "+((JSONArray)r).length()+"."));}
@@ -130,12 +130,56 @@ public class MainActivity extends Activity {
         LinearLayout target=content;TextView status=text(message,17);target.addView(status);pool.execute(()->{try{Object obj=task.call();runOnUiThread(()->{if(target!=content)return;target.removeView(status);onSuccess.accept(obj);});}catch(Exception ex){runOnUiThread(()->{if(target!=content)return;String m=ex.getMessage();String detail=m!=null&&m.matches("HTTP [0-9]{3}")?" ("+m+")":"";status.setText("Поисковый сервис TorAPI недоступен или вернул ошибку"+detail+". Попробуйте позже, используйте Torznab или введите magnet-ссылку вручную.");});}});
     }
     private String sourceLabel(String provider){switch(provider){case "rutracker":return "RuTracker";case "rutor":return "RuTor";case "kinozal":return "Kinozal";case "nonameclub":return "NoNameClub";default:return "Все источники";}}
+    private void openRuTrackerLogin(String returnQuery){
+        current=()->publicTorrentForm(returnQuery);shell("Вход в RuTracker");
+        note("Войдите на официальном сайте. Пароль вводится только на сайте, в чат его передавать не нужно. После входа нажмите кнопку ниже.");
+        addButton(content,"Я вошёл · вернуться к поиску",()->{android.webkit.CookieManager.getInstance().flush();publicTorrentForm(returnQuery);});
+        android.webkit.WebView browser=new android.webkit.WebView(this);browser.getSettings().setJavaScriptEnabled(true);browser.getSettings().setDomStorageEnabled(true);browser.getSettings().setAllowFileAccess(false);browser.getSettings().setAllowContentAccess(false);browser.getSettings().setMixedContentMode(android.webkit.WebSettings.MIXED_CONTENT_NEVER_ALLOW);
+        android.webkit.CookieManager.getInstance().setAcceptCookie(true);browser.setWebViewClient(new android.webkit.WebViewClient(){
+            @Override public boolean shouldOverrideUrlLoading(android.webkit.WebView v,android.webkit.WebResourceRequest req){Uri u=req.getUrl();String host=u.getHost();return !"https".equalsIgnoreCase(u.getScheme())||host==null||!(host.equalsIgnoreCase("rutracker.org")||host.toLowerCase(Locale.ROOT).endsWith(".rutracker.org"));}
+        });content.addView(browser,new LinearLayout.LayoutParams(-1,dp(390)));browser.loadUrl("https://rutracker.org/forum/login.php");
+    }
+    private String ruRequest(String path,String cookie,String postBody)throws Exception {
+        if(!path.startsWith("/forum/"))throw new IOException("Invalid path");
+        HttpURLConnection c=(HttpURLConnection)new URL("https://rutracker.org"+path).openConnection();c.setConnectTimeout(12000);c.setReadTimeout(30000);c.setInstanceFollowRedirects(false);c.setRequestProperty("User-Agent","Mozilla/5.0 (Linux; Android 12; TV) AppleWebKit/537.36 Chrome/120.0 Safari/537.36");
+        if(cookie!=null&&!cookie.isEmpty())c.setRequestProperty("Cookie",cookie);
+        if(postBody!=null){c.setRequestMethod("POST");c.setDoOutput(true);c.setRequestProperty("Content-Type","application/x-www-form-urlencoded; charset=windows-1251");try(OutputStream out=c.getOutputStream()){out.write(postBody.getBytes(StandardCharsets.US_ASCII));}}
+        try{int status=c.getResponseCode();if(status>=300&&status<400)throw new IOException("LOGIN_REQUIRED");if(status<200||status>=300)throw new IOException("HTTP "+status);try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] b=new byte[8192];int n;while((n=in.read(b))!=-1){out.write(b,0,n);if(out.size()>4000000)throw new IOException("TOO_LARGE");}return out.toString("windows-1251");}}finally{c.disconnect();}
+    }
+    private void directAsync(String message,Callable<Object> task,java.util.function.Consumer<Object> success){
+        LinearLayout target=content;TextView status=text(message,17);target.addView(status);pool.execute(()->{try{Object o=task.call();runOnUiThread(()->{if(target!=content)return;target.removeView(status);success.accept(o);});}catch(Exception ex){runOnUiThread(()->{if(target!=content)return;String m=ex.getMessage();if("LOGIN_REQUIRED".equals(m))status.setText("RuTracker просит войти. Вернитесь назад и откройте «Войти в RuTracker».");else if("SEARCH_PAGE_UNAVAILABLE".equals(m))status.setText("RuTracker вернул страницу без результатов поиска. Проверьте доступ к сайту и вход в аккаунт.");else if(m!=null&&m.contains("HTTP 403"))status.setText("RuTracker отклонил запрос (HTTP 403). Проверьте доступ к сайту на телевизоре и вход в аккаунт.");else status.setText("Источник недоступен или соединение прервано. Проверьте интернет, запуск TorrServe и настройки поиска.");});}});
+    }
+    private void ruSearch(String query){
+        current=()->ruSearch(query);shell("RuTracker · "+query);note("Прямой поиск на rutracker.org. Проверьте совпадение и права на просмотр материала.");
+        final String cookie=android.webkit.CookieManager.getInstance().getCookie("https://rutracker.org");
+        directAsync("Поиск на RuTracker…",()->RuTrackerSearch.parse(ruRequest("/forum/tracker.php",cookie,"nm="+java.net.URLEncoder.encode(query,"windows-1251"))),value->{
+            @SuppressWarnings("unchecked") List<TorrentResults.Item> items=(List<TorrentResults.Item>)value;
+            if(items.isEmpty()){note("Ничего не найдено. Попробуйте другое название.");return;}for(TorrentResults.Item item:items){String label=item.name+(item.size.isEmpty()?"":" · "+item.size)+(item.seeds.isEmpty()?"":" · раздают: "+item.seeds);addButton(content,label,()->navigate(()->ruOpen(item)));}
+        });
+    }
+    private void ruOpen(TorrentResults.Item item){
+        current=()->ruSearch(item.name);shell("RuTracker · раздача");note(item.name);if(!item.id.matches("[0-9]{1,16}")){note("Некорректный идентификатор.");return;}
+        final String cookie=android.webkit.CookieManager.getInstance().getCookie("https://rutracker.org");
+        directAsync("Получение ссылки…",()->RuTrackerSearch.magnet(ruRequest("/forum/viewtopic.php?t="+item.id,cookie,null)),value->{String magnet=(String)value;if(magnet.isEmpty()){note("Сайт не вернул magnet-ссылку. Возможно, нужна авторизация или доступ к раздаче ограничен.");return;}addButton(content,"Открыть файлы в TorrServer",()->navigate(()->addTorrent(magnet,item.name)));});
+    }
+    private void rutorSearch(String query){
+        current=()->rutorSearch(query);shell("RuTor · "+query);note("Поиск выполняется встроенным индексом TorrServer. Включите поиск RuTor в настройках TorrServe и дождитесь загрузки индекса.");
+        directAsync("Поиск в локальном TorrServer…",()->tsRequest("/search/?query="+enc(query),null),value->{if(!(value instanceof JSONArray)){note("Неожиданный ответ TorrServer.");return;}JSONArray a=(JSONArray)value;if(a.length()==0){note("Нет результатов. Индекс может ещё загружаться или поиск RuTor отключён.");return;}int count=0;for(int i=0;i<Math.min(a.length(),100);i++){JSONObject o=a.optJSONObject(i);if(o==null)continue;String name=o.optString("Title",o.optString("Name","Без названия"));String magnet=o.optString("Magnet","");String hash=o.optString("Hash","");String link=o.optString("Link","");if(!validTorrentLink(magnet)&&hash.matches("(?i)[a-f0-9]{40}"))magnet="magnet:?xt=urn:btih:"+hash;final String chosen=validTorrentLink(magnet)?magnet:link;if(!validTorrentLink(chosen))continue;count++;String size=o.optString("Size","");String seed=o.optString("Seed","");addButton(content,name+(size.isEmpty()?"":" · "+size)+(seed.isEmpty()?"":" · раздают: "+seed),()->navigate(()->addTorrent(chosen,name)));}if(count==0)note("Источники найдены, но ссылка на торрент не получена.");});
+    }
     private void publicTorrentForm(String initial){
         current=()->publicTorrentForm(initial);shell("Поиск источников");
-        note("Поиск выполняет сторонний сервис TorAPI. Ему передаются название и IP-адрес. Результаты, доступность и права на распространение проверяйте самостоятельно.");
+        note("RuTracker: прямой доступ и вход в аккаунт. RuTor: поиск через локальный TorrServer. Для дополнительных источников можно настроить свой Torznab.");
         EditText q=input("Название фильма или сериала",false);q.setText(initial);content.addView(q);
-        for(String provider:new String[]{"all","rutracker","rutor","kinozal","nonameclub"}){String label=sourceLabel(provider);addButton(content,"Искать: "+label,()->{String query=q.getText().toString().trim();if(query.isEmpty()){toast("Введите название");return;}if(query.length()>150){toast("Название слишком длинное");return;}navigate(()->publicTorrentSearch(query,provider));});}
-        addButton(content,"Поиск в своём Torznab",()->navigate(()->torrentSearchForm(initial)));
+        addButton(content,"Войти в RuTracker",()->navigate(()->openRuTrackerLogin(q.getText().toString().trim())));
+        addButton(content,"Искать на RuTracker",()->{String v=q.getText().toString().trim();if(!v.isEmpty()&&v.length()<=150)navigate(()->ruSearch(v));else toast("Введите название до 150 символов");});
+        addButton(content,"Искать RuTor через TorrServer",()->{String v=q.getText().toString().trim();if(!v.isEmpty()&&v.length()<=150)navigate(()->rutorSearch(v));else toast("Введите название до 150 символов");});
+        addButton(content,"Другие источники: TorAPI (экспериментально)",()->navigate(()->publicTorrentExtra(q.getText().toString().trim())));
+        addButton(content,"Поиск в своём Torznab",()->navigate(()->torrentSearchForm(q.getText().toString().trim())));
+    }
+    private void publicTorrentExtra(String initial){
+        current=()->publicTorrentExtra(initial);shell("Дополнительные источники");note("Сторонний TorAPI может быть недоступен. Название и IP-адрес получит оператор этого сервиса. Используйте только разрешённые материалы.");
+        EditText q=input("Название фильма или сериала",false);q.setText(initial);content.addView(q);
+        for(String provider:new String[]{"all","rutracker","rutor","kinozal","nonameclub"}){String label=sourceLabel(provider);addButton(content,"Искать: "+label,()->{String query=q.getText().toString().trim();if(query.isEmpty()||query.length()>150){toast("Введите название до 150 символов");return;}navigate(()->publicTorrentSearch(query,provider));});}
     }
     private void publicTorrentSearch(String query,String provider){
         if(!provider.equals("all")&&TorrentResults.canonical(provider).isEmpty()){toast("Неизвестный источник");return;}

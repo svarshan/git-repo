@@ -44,6 +44,8 @@ jobs:
           PY
       - name: Probe public TorAPI availability (informational)
         run: python3 tests/torapi_probe.py
+      - name: Probe direct tracker connection (informational)
+        run: python3 tests/source_probe.py
       - name: Test TorrServer API contract
         shell: bash
         run: |
