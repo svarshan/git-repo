@@ -2,7 +2,7 @@
 """Prioritize the three authentic sounds recovered in 8.2 but missing in 8.3.
 Only exact-species freely licensed recordings. Never create synthesized replacements.
 """
-import csv,json,os,time
+import csv,json,os,time,hashlib
 from audit_audio import inspect as inspect_sound
 from pathlib import Path
 import voice_max as vx
@@ -49,6 +49,24 @@ def recover_one(b):
     if mime in hv.AUDIO:
      candidates.append(((0,0,0),url,hv.AUDIO[mime],credit))
   if len(candidates)>15:break
+ # Exact original Commons files were independently checked for species and rights.
+ # Fallback is useful when MediaWiki API search is rate limited or returns no pages.
+ # Audit their original SHA-1 to guard against unexpected upstream replacement.
+ if b['latin']=='Pica pica':
+  originals=[
+   ('https://upload.wikimedia.org/wikipedia/commons/f/f6/Eurasian_Magpie_%28Pica_pica%29_%28W1CDR0001537_BD28%29.ogg',
+    '452fbbad335ab203b935cd97da9a0a9030f84fa9',
+    {'source':'https://commons.wikimedia.org/wiki/File:Eurasian_Magpie_(Pica_pica)_(W1CDR0001537_BD28).ogg',
+     'author':'Aubrey John Williams / The British Library Board','license':'CC BY-SA 4.0',
+     'licenseUrl':'https://creativecommons.org/licenses/by-sa/4.0/'}),
+   ('https://upload.wikimedia.org/wikipedia/commons/b/b6/Pica_pica.ogg',
+    'fc5f48e6431ad47f859aaba386bffaa58ba0dcf4',
+    {'source':'https://commons.wikimedia.org/wiki/File:Pica_pica.ogg',
+     'author':'Oona Räisänen (Mysid)','license':'Public domain',
+     'recordingNote':'A House Sparrow is also audible in the background.'})
+  ]
+  for url,sha1,credit in reversed(originals):
+   candidates.insert(0,((0,0,0),url,'ogg',{**credit,'originalSha1':sha1}))
  seen=set()
  for _,url,ext,credit in candidates:
   if time.monotonic()>=vx.STOP:break
@@ -56,6 +74,10 @@ def recover_one(b):
   seen.add(url)
   dest=M/'audio'/(b['id']+'-84.'+ext)
   if vx.download(url,dest):
+   if credit.get('originalSha1') and hashlib.sha1(dest.read_bytes()).hexdigest()!=credit['originalSha1']:
+    print('RECOVER84 SHA1 mismatch: source bytes changed',b['latin'],flush=True)
+    dest.unlink(missing_ok=True)
+    continue
    try:inspect_sound(dest)
    except Exception as ex:
     print('RECOVER84 rejected low-quality candidate',b['latin'],str(ex)[:100],flush=True)
