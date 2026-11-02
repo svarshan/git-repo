@@ -55,7 +55,7 @@ test('8.1 release blocks missing 7.9 species, retains 261+ voices and QA screens
 });
 test('8.1 center contains twelve additions and old 8.0 modules without changing journal keys',()=>{
  const html=read('app/index.html'),js=read('app/upgrade81.js'),pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'8.1.0');
+ assert.equal(pkg.version,'8.4.0');
  for(const id of ['m81Tools','m81CompareA','m81CompareB','m81AtlasSummary','m81AudioWindows','m81QuickPhoto','m81PrintReport','m81Performance']){
   assert.ok(html.includes('id="'+id+'"'),id);
  }
