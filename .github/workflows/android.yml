@@ -1,10 +1,15 @@
-name: Build MoOLVa Kino APK
+name: Build MoOLVa Kino APK (encrypted)
 on:
   push:
+    branches: [moolva-kino-android-tv]
   workflow_dispatch:
+permissions:
+  contents: read
 jobs:
   build:
     runs-on: ubuntu-latest
+    env:
+      TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
@@ -14,10 +19,41 @@ jobs:
       - uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
+      - name: Check TMDB key and connection
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json, os, re, sys, urllib.request, urllib.error
+          key = os.environ.get("TMDB_API_KEY", "")
+          if not re.fullmatch(r"[0-9a-fA-F]{32}", key):
+              print("TMDB_API_KEY is missing or is not a 32-character v3 API key.")
+              sys.exit(1)
+          try:
+              url = "https://api.themoviedb.org/3/movie/popular?language=ru-RU&api_key=" + key
+              with urllib.request.urlopen(url, timeout=20) as response:
+                  data = json.load(response)
+              if not isinstance(data.get("results"), list):
+                  raise ValueError("Unexpected response")
+              print("TMDB returned a valid movie catalogue.")
+          except urllib.error.HTTPError as error:
+              print("TMDB request failed with HTTP status", error.code)
+              sys.exit(1)
+          except Exception:
+              print("TMDB request failed: network error or unexpected response.")
+              sys.exit(1)
+          PY
       - name: Assemble and lint
         run: gradle --no-daemon :app:assembleDebug :app:lintDebug
+      - name: Encrypt and test archive
+        shell: bash
+        run: |
+          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/MoOLVa-Kino-1.1.apk"
+          cd "$RUNNER_TEMP"
+          7z a -t7z -mhe=on "-p$TMDB_API_KEY" MoOLVa-Kino-1.1.7z MoOLVa-Kino-1.1.apk >/dev/null
+          7z t "-p$TMDB_API_KEY" MoOLVa-Kino-1.1.7z >/dev/null
+          rm -f MoOLVa-Kino-1.1.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Kino-1.0-debug
-          path: app/build/outputs/apk/debug/app-debug.apk
+          name: MoOLVa-Kino-1.1-encrypted
+          path: ${{ runner.temp }}/MoOLVa-Kino-1.1.7z
           if-no-files-found: error
