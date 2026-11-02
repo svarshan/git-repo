@@ -42,6 +42,8 @@ jobs:
               print("TMDB request failed: network error or unexpected response.")
               sys.exit(1)
           PY
+      - name: Probe public TorAPI availability (informational)
+        run: python3 tests/torapi_probe.py
       - name: Test TorrServer API contract
         shell: bash
         run: |
@@ -50,18 +52,18 @@ jobs:
           chmod +x "$RUNNER_TEMP/torrserver"
           TORRSERVER_BIN="$RUNNER_TEMP/torrserver" python3 tests/torrserver_smoke.py
       - name: Assemble and lint
-        run: gradle --no-daemon :app:assembleDebug :app:lintDebug
+        run: gradle --no-daemon :app:assembleDebug :app:lintDebug :app:testDebugUnitTest
       - name: Encrypt and test archive
         shell: bash
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/MoOLVa-Kino-1.2.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/MoOLVa-Kino-1.3.apk"
           cd "$RUNNER_TEMP"
-          7z a -t7z -mhe=on "-p$TMDB_API_KEY" MoOLVa-Kino-1.2.7z MoOLVa-Kino-1.2.apk >/dev/null
-          7z t "-p$TMDB_API_KEY" MoOLVa-Kino-1.2.7z >/dev/null
-          rm -f MoOLVa-Kino-1.2.apk
+          7z a -t7z -mhe=on "-p$TMDB_API_KEY" MoOLVa-Kino-1.3.7z MoOLVa-Kino-1.3.apk >/dev/null
+          7z t "-p$TMDB_API_KEY" MoOLVa-Kino-1.3.7z >/dev/null
+          rm -f MoOLVa-Kino-1.3.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Kino-1.2-encrypted
-          path: ${{ runner.temp }}/MoOLVa-Kino-1.2.7z
+          name: MoOLVa-Kino-1.3-encrypted
+          path: ${{ runner.temp }}/MoOLVa-Kino-1.3.7z
           if-no-files-found: error
 

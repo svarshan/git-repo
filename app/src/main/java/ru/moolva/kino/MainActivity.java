@@ -82,7 +82,7 @@ public class MainActivity extends Activity {
     private JSONObject stored(String key){try{return new JSONObject(val(key).isEmpty()?"{}":val(key));}catch(Exception e){return new JSONObject();}}
     private void writeObj(String key,JSONObject obj){prefs.edit().putString(key,obj.toString()).apply();}
     private void details(JSONObject item){current=()->details(item);String name=item.optString("Name",item.optString("title",item.optString("name","Без названия")));shell(name);String type=item.optString("Type","");String desc=item.optString("Overview",item.optString("overview",""));if(!desc.isEmpty()){TextView d=text(desc,18);d.setLineSpacing(dp(4),1);content.addView(d);space();}String itemid=id(item);JSONObject fav=stored("favorites");boolean isFav=fav.has(itemid);addButton(content,isFav?"Убрать из избранного":"Добавить в избранное",()->{try{if(isFav)fav.remove(itemid);else fav.put(itemid,item);writeObj("favorites",fav);details(item);}catch(Exception ignored){}});
-        if(item.optString("_origin").equals("jellyfin")){String jid=item.optString("Id");if(type.equals("Movie")||type.equals("Episode")||type.equals("Video")){addButton(content,"▶ Смотреть",()->play(item));}else{addButton(content,"Открыть раздел / серии",()->navigate(()->library(jid,name)));}}else if(item.optString("_origin").equals("torrent")){String hash=item.optString("hash");int index=item.optInt("fileIndex");addButton(content,"▶ Продолжить просмотр",()->playTorrent(hash,index,name));note("Торрент должен оставаться доступным в локальном TorrServer.");}else{addButton(content,"Найти торренты для этого названия",()->navigate(()->torrentSearchForm(name)));addButton(content,"Ввести magnet-ссылку",()->navigate(()->torrentInput(name)));note("Каталог TMDB не является источником видео. Для поиска настройте Torznab в TorrServer.");}
+        if(item.optString("_origin").equals("jellyfin")){String jid=item.optString("Id");if(type.equals("Movie")||type.equals("Episode")||type.equals("Video")){addButton(content,"▶ Смотреть",()->play(item));}else{addButton(content,"Открыть раздел / серии",()->navigate(()->library(jid,name)));}}else if(item.optString("_origin").equals("torrent")){String hash=item.optString("hash");int index=item.optInt("fileIndex");addButton(content,"▶ Продолжить просмотр",()->playTorrent(hash,index,name));note("Торрент должен оставаться доступным в локальном TorrServer.");}else{addButton(content,"Найти источники фильма",()->navigate(()->publicTorrentForm(name)));addButton(content,"Ввести magnet-ссылку",()->navigate(()->torrentInput(name)));note("Каталог TMDB не является источником видео. Поиск выполняется через сторонний сервис.");}
     }
     private void favorites(){current=this::favorites;shell("Избранное");JSONObject f=stored("favorites");if(f.length()==0){note("Здесь появятся сохранённые фильмы и сериалы.");return;}JSONArray a=new JSONArray();Iterator<String> keys=f.keys();while(keys.hasNext()){JSONObject o=f.optJSONObject(keys.next());if(o!=null)a.put(o);}renderStored(a);}
     private void renderStored(JSONArray a){for(int i=0;i<a.length();i++){JSONObject o=a.optJSONObject(i);if(o==null)continue;String n=o.optString("Name",o.optString("title",o.optString("name","Без названия")));addButton(content,n,()->navigate(()->details(o)));}}
@@ -108,8 +108,9 @@ public class MainActivity extends Activity {
         addButton(content,"Проверить локальный сервер",this::checkTorrentServer);
         addButton(content,"Мои добавленные раздачи",()->navigate(this::torrentList));
         addButton(content,"Ввести magnet или ссылку на .torrent",()->navigate(()->torrentInput("")));
+        addButton(content,"Поиск RuTracker и других источников",()->navigate(()->publicTorrentForm("")));
         addButton(content,"Найти через настроенный Torznab",()->navigate(()->torrentSearchForm("")));
-        note("Для поиска нужно включить и настроить Torznab в TorrServer. Без поискового источника можно вставить готовую magnet-ссылку.");
+        note("Поиск RuTracker и других источников использует сторонний TorAPI. Можно также подключить свой Torznab или вставить magnet-ссылку.");
     }
     private void torrentList(){current=this::torrentList;shell("Мои раздачи");tsAsync("Загрузка списка…",()->tsRequest("/torrents",new JSONObject().put("action","list")),result->{if(!(result instanceof JSONArray)){note("Не удалось прочитать список.");return;}JSONArray a=(JSONArray)result;if(a.length()==0){note("Пока нет сохранённых раздач.");return;}for(int i=0;i<a.length();i++){JSONObject t=a.optJSONObject(i);if(t==null)continue;String hash=t.optString("hash");if(!hash.matches("(?i)[a-f0-9]{40}"))continue;String title=t.optString("title",t.optString("name",hash));addButton(content,title,()->navigate(()->refreshTorrent(hash)));}});}
     private void checkTorrentServer(){tsAsync("Проверка сервера…",()->{Object r=tsRequest("/torrents",new JSONObject().put("action","list"));if(!(r instanceof JSONArray))throw new IOException("unexpected response");return r;},r->note("TorrServer отвечает. Найдено добавленных раздач: "+((JSONArray)r).length()+"."));}
@@ -118,6 +119,39 @@ public class MainActivity extends Activity {
         note("Вставьте magnet-ссылку или прямую ссылку на файл .torrent из доступного вам источника.");
         EditText link=input("magnet:?xt=urn:btih:… или https://…",false);content.addView(link);
         addButton(content,"Открыть список файлов",()->{String s=link.getText().toString().trim();if(!validTorrentLink(s)){toast("Введите magnet-ссылку или ссылку http(s)");return;}navigate(()->addTorrent(s,title));});
+    }
+    private static final String TORAPI="https://torapi.vercel.app";
+    private String torapiGet(String path)throws Exception {
+        // Do not forward TMDB keys, Jellyfin credentials, cookies or authentication headers.
+        HttpURLConnection c=(HttpURLConnection)new URL(TORAPI+path).openConnection();c.setConnectTimeout(12000);c.setReadTimeout(30000);c.setInstanceFollowRedirects(false);c.setRequestProperty("Accept","application/json");c.setRequestProperty("User-Agent","MoOLVaKino/1.3");
+        try{int status=c.getResponseCode();if(status<200||status>=300)throw new IOException("HTTP "+status);try(InputStream in=c.getInputStream();ByteArrayOutputStream out=new ByteArrayOutputStream()){byte[] buf=new byte[8192];int n;while((n=in.read(buf))!=-1){out.write(buf,0,n);if(out.size()>4000000)throw new IOException("response too large");}return out.toString("UTF-8");}}finally{c.disconnect();}
+    }
+    private void indexAsync(String message,Callable<Object> task,java.util.function.Consumer<Object> onSuccess){
+        LinearLayout target=content;TextView status=text(message,17);target.addView(status);pool.execute(()->{try{Object obj=task.call();runOnUiThread(()->{if(target!=content)return;target.removeView(status);onSuccess.accept(obj);});}catch(Exception ex){runOnUiThread(()->{if(target!=content)return;String m=ex.getMessage();String detail=m!=null&&m.matches("HTTP [0-9]{3}")?" ("+m+")":"";status.setText("Поисковый сервис TorAPI недоступен или вернул ошибку"+detail+". Попробуйте позже, используйте Torznab или введите magnet-ссылку вручную.");});}});
+    }
+    private String sourceLabel(String provider){switch(provider){case "rutracker":return "RuTracker";case "rutor":return "RuTor";case "kinozal":return "Kinozal";case "nonameclub":return "NoNameClub";default:return "Все источники";}}
+    private void publicTorrentForm(String initial){
+        current=()->publicTorrentForm(initial);shell("Поиск источников");
+        note("Поиск выполняет сторонний сервис TorAPI. Ему передаются название и IP-адрес. Результаты, доступность и права на распространение проверяйте самостоятельно.");
+        EditText q=input("Название фильма или сериала",false);q.setText(initial);content.addView(q);
+        for(String provider:new String[]{"all","rutracker","rutor","kinozal","nonameclub"}){String label=sourceLabel(provider);addButton(content,"Искать: "+label,()->{String query=q.getText().toString().trim();if(query.isEmpty()){toast("Введите название");return;}if(query.length()>150){toast("Название слишком длинное");return;}navigate(()->publicTorrentSearch(query,provider));});}
+        addButton(content,"Поиск в своём Torznab",()->navigate(()->torrentSearchForm(initial)));
+    }
+    private void publicTorrentSearch(String query,String provider){
+        if(!provider.equals("all")&&TorrentResults.canonical(provider).isEmpty()){toast("Неизвестный источник");return;}
+        current=()->publicTorrentSearch(query,provider);shell(sourceLabel(provider)+" · "+query);
+        note("Результаты TorAPI могут не соответствовать выбранному фильму. Выбирайте материалы, на которые у вас есть права.");
+        indexAsync("Поиск…",()->TorrentResults.parse(torapiGet("/api/search/title/"+provider+"?query="+enc(query)+"&page=0&year=0"),provider),value->{
+            TorrentResults.Search result=(TorrentResults.Search)value;
+            if(!result.unavailable.isEmpty()){StringBuilder s=new StringBuilder();for(String p:result.unavailable){if(s.length()>0)s.append(", ");s.append(sourceLabel(p));}note("Нет результатов или ответа: "+s+".");}
+            if(result.items.isEmpty()){note("Подходящих результатов не найдено. Попробуйте другое название или источник.");return;}
+            for(TorrentResults.Item item:result.items){String label=sourceLabel(item.provider)+" · "+item.name+(item.size.isEmpty()?"":" · "+item.size)+(item.seeds.isEmpty()?"":" · раздают: "+item.seeds);addButton(content,label,()->navigate(()->openPublicTorrent(item)));}
+        });
+    }
+    private void openPublicTorrent(TorrentResults.Item item){
+        current=()->publicTorrentSearch(item.name,item.provider);shell("Подготовка раздачи");note(sourceLabel(item.provider)+" · "+item.name);
+        if(TorrentResults.canonical(item.provider).isEmpty()||!item.id.matches("[0-9]{1,16}")){note("Некорректный результат источника.");return;}
+        indexAsync("Получение magnet-ссылки…",()->TorrentResults.magnet(torapiGet("/api/search/id/"+item.provider+"?query="+item.id)),value->{String magnet=(String)value;if(magnet.isEmpty()){note("Источник не вернул magnet-ссылку. Попробуйте другой результат.");return;}addButton(content,"Открыть файлы в TorrServer",()->navigate(()->addTorrent(magnet,item.name)));});
     }
     private void torrentSearchForm(String initial){
         current=()->torrentSearchForm(initial);shell("Поиск торрентов");note("Поиск работает через Torznab, заранее настроенный в TorrServer. Проверяйте название и доступность найденного материала.");
