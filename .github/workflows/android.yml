@@ -42,18 +42,26 @@ jobs:
               print("TMDB request failed: network error or unexpected response.")
               sys.exit(1)
           PY
+      - name: Test TorrServer API contract
+        shell: bash
+        run: |
+          curl -fsSL --retry 3 https://github.com/YouROK/TorrServer/releases/download/MatriX.148/TorrServer-linux-amd64 -o "$RUNNER_TEMP/torrserver"
+          echo "050fa49b90fb47a7a60dbbbaee96de6e072701b996b1f23eb3e3dc67d723fac1  $RUNNER_TEMP/torrserver" | sha256sum -c -
+          chmod +x "$RUNNER_TEMP/torrserver"
+          TORRSERVER_BIN="$RUNNER_TEMP/torrserver" python3 tests/torrserver_smoke.py
       - name: Assemble and lint
         run: gradle --no-daemon :app:assembleDebug :app:lintDebug
       - name: Encrypt and test archive
         shell: bash
         run: |
-          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/MoOLVa-Kino-1.1.apk"
+          cp app/build/outputs/apk/debug/app-debug.apk "$RUNNER_TEMP/MoOLVa-Kino-1.2.apk"
           cd "$RUNNER_TEMP"
-          7z a -t7z -mhe=on "-p$TMDB_API_KEY" MoOLVa-Kino-1.1.7z MoOLVa-Kino-1.1.apk >/dev/null
-          7z t "-p$TMDB_API_KEY" MoOLVa-Kino-1.1.7z >/dev/null
-          rm -f MoOLVa-Kino-1.1.apk
+          7z a -t7z -mhe=on "-p$TMDB_API_KEY" MoOLVa-Kino-1.2.7z MoOLVa-Kino-1.2.apk >/dev/null
+          7z t "-p$TMDB_API_KEY" MoOLVa-Kino-1.2.7z >/dev/null
+          rm -f MoOLVa-Kino-1.2.apk
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Kino-1.1-encrypted
-          path: ${{ runner.temp }}/MoOLVa-Kino-1.1.7z
+          name: MoOLVa-Kino-1.2-encrypted
+          path: ${{ runner.temp }}/MoOLVa-Kino-1.2.7z
           if-no-files-found: error
+
