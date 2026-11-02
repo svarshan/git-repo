@@ -28,11 +28,12 @@ with tempfile.TemporaryDirectory() as d:
     (d/'sample.torrent').write_bytes(bencode({b'info':info}))
     handler=lambda *a,**kw: Quiet(*a,directory=str(d),**kw)
     httpd=http.server.ThreadingHTTPServer(('127.0.0.1',0),handler);threading.Thread(target=httpd.serve_forever,daemon=True).start()
-    port=freeport(); server=subprocess.Popen([os.environ['TORRSERVER_BIN'],'--port',str(port),'--ip','127.0.0.1','--path',str(d/'state')],stdout=subprocess.DEVNULL,stderr=subprocess.DEVNULL)
+    port=freeport(); (d/'state').mkdir(); log=(d/'server.log').open('w+'); server=subprocess.Popen([os.environ['TORRSERVER_BIN'],'--port',str(port),'--ip','127.0.0.1','--path',str(d/'state')],stdout=log,stderr=subprocess.STDOUT)
     base='http://127.0.0.1:'+str(port)
     try:
         for _ in range(60):
-            if server.poll() is not None: raise RuntimeError('TorrServer exited unexpectedly')
+            if server.poll() is not None:
+                log.flush(); log.seek(0); raise RuntimeError('TorrServer exited: '+log.read()[-4000:])
             try:
                 result=post(base+'/torrents',{'action':'list'});break
             except (OSError,urllib.error.URLError): time.sleep(.5)
