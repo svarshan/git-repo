@@ -329,10 +329,26 @@ jobs:
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
-          path: ~/.npm
+          path: |
+            ~/.npm
+            C:\npm\cache
           key: ptitsy-nn-npm-v1-${{ runner.os }}-${{ hashFiles('PtitsyNN/package.json') }}
+          restore-keys: |
+            ptitsy-nn-npm-v1-${{ runner.os }}-
       - name: Install Electron builder
-        run: npm install --no-audit --no-fund
+        shell: pwsh
+        run: |
+          npm config set fetch-retries 5
+          npm config set fetch-retry-mintimeout 20000
+          npm config set fetch-retry-maxtimeout 120000
+          for ($attempt = 1; $attempt -le 4; $attempt++) {
+            Write-Host "Installing Electron dependencies: attempt $attempt / 4"
+            npm install --no-audit --no-fund --prefer-offline
+            if ($LASTEXITCODE -eq 0) { break }
+            Write-Warning "npm install network failure; preserving npm cache and retrying."
+            Start-Sleep -Seconds ([Math]::Min(40, 10 * $attempt))
+          }
+          if ($LASTEXITCODE -ne 0) { throw 'npm install failed after four retries' }
       - name: Verify native Perch v2 inference on Windows
         timeout-minutes: 6
         run: node scripts/test_ai.cjs
