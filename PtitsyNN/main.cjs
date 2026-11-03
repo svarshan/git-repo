@@ -48,7 +48,7 @@ function candidates(logits,labels){
  return pick.map(([i,v])=>({label:labels[i],score:Math.round(Math.exp(v-max)/sum*10000)/100})).filter(x=>x.score>0);
 }
 function window(){
- const w=new BrowserWindow({title:'MoOLVa 8.2 — Орнитологический интеллект',icon:path.join(__dirname,'build','moolva.png'),width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,show:!evidenceMode,
+ const w=new BrowserWindow({title:'MoOLVa 8.6 — Орнитологический интеллект',icon:path.join(__dirname,'build','moolva.png'),width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,show:!evidenceMode,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,offscreen:evidenceMode,preload:path.join(__dirname,'preload.cjs')}});
  w.webContents.on('will-navigate',e=>e.preventDefault());
  w.webContents.setWindowOpenHandler(({url})=>{try{
@@ -78,7 +78,7 @@ async function captureReleaseEvidence(win){
   const pages=[
    ['01-glavnaya.png','catalog'],['02-bird-ai.png','birdai'],
    ['03-karta-oblasti.png','map'],['04-encyclopedia.png','articles'],
-   ['05-polevoi-dnevnik.png','journal'],['06-audiolaboratoriya.png','lab'],['07-intelligence-center.png','intelligence80']
+   ['05-polevoi-dnevnik.png','journal'],['06-audiolaboratoriya.png','lab'],['07-intelligence-center.png','intelligence80'],['08-pro-max-8.6.png','media86']
   ];
   const captured=[];
   for(const [name,view] of pages){

@@ -52,7 +52,7 @@ def screenshots():
         raise ValueError('Real packaged Windows Electron screenshot evidence absent')
     if smoke.get('catalog',{}).get('species')!=298 or smoke.get('modelAvailable') is not True or not smoke.get('visionModelVerified',{}).get('ok'):
         raise ValueError('Packaged screenshot runtime lacks catalog or Perch model')
-    names=['01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png']
+    names=['01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png','08-pro-max-8.6.png']
     rows=smoke.get('screenshots',[])
     if [x.get('name') for x in rows]!=names:raise ValueError('Some actual application sections were not captured')
     result=[]
@@ -84,7 +84,7 @@ def finalize():
     coverage=json.loads((BASE/'data'/'coverage.json').read_text(encoding='utf-8-sig'))
     voices=json.loads((DIST/'voice-inventory.json').read_text(encoding='utf-8'))
     version=json.loads((BASE/'package.json').read_text(encoding='utf-8'))['version']
-    if smoke.get('version')!=version or version!='8.5.0':raise ValueError('Executable version differs from release')
+    if smoke.get('version')!=version or version!='8.6.0':raise ValueError('Executable version differs from release')
     if voices['withPrimaryVoice']!=coverage.get('birdCalls'):raise ValueError('Coverage changed after inventory')
     if coverage.get('species')!=298 or coverage.get('photos')!=298 or coverage.get('articles')!=298:
         raise ValueError('8.4 integrity gate: missing species, real photos, or articles')
@@ -95,7 +95,7 @@ def finalize():
     guard=json.loads((DIST/'voice-regression.json').read_text(encoding='utf-8'))
     if guard['newlyMissingPreviouslyPresent'] or guard['currentBirdCalls']<261:raise ValueError('Audio nonregression certificate invalid')
     if guard['currentBirdCalls']<265:raise ValueError('8.5 voice count below 8.4 benchmark of 265')
-    for required in ['audio-audit85.csv','audio-audit85.json','clean-variants85.json']:
+    for required in ['audio-audit85.csv','audio-audit85.json','clean-variants85.json','candidate-review86.csv','candidate-review86.json']:
         if not (DIST/required).is_file():raise ValueError('8.5 mandatory audio appendix missing: '+required)
     if not (DIST/'voice-sources84.csv').is_file() or not (DIST/'voice-goal84.json').is_file():
         raise ValueError('8.4 source audit absent')

@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 8.5
+name: Птицы НН — Windows EXE 8.6
 on:
   workflow_dispatch:
     inputs:
@@ -65,7 +65,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -83,6 +83,8 @@ jobs:
           node --check app/upgrade83.js
           node --check app/core84.js
           node --check app/upgrade84.js
+          node --check app/core86.js
+          node --check app/upgrade86.js
           node --check app/intelligence80.js
           node --check app/core81.js
           node --check app/upgrade81.js
@@ -103,6 +105,8 @@ jobs:
           node --check main.cjs
           node --check backup82.cjs
           node --check app/backup82.js
+          node --check app/core86.js
+          node --check app/upgrade86.js
           node --check scripts/test_ai.cjs
       - name: Restore validated offline catalog cache
         id: media-cache
@@ -203,6 +207,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw '8.5 source manifest failed' }
           python -u scripts/find_voice_candidates85.py
           if ($LASTEXITCODE -ne 0) { throw '8.5 candidate search failed' }
+      - name: Export 8.6 unreviewed licensed candidate report
+        run: |
+          python scripts/candidate_review86.py
+          if ($LASTEXITCODE -ne 0) { throw '8.6 candidate review appendix failed' }
       - name: Report true 298-species milestone, including shortfall
         shell: pwsh
         run: |
@@ -373,30 +381,30 @@ jobs:
       - name: Upload screenshots and QA evidence separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.5-Evidence
+          name: Ptitsy-NN-8.6-Evidence
           path: PtitsyNN/dist/release-evidence/**/*
           if-no-files-found: error
           retention-days: 30
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.5-Portable-only
-          path: PtitsyNN/dist/MoOLVa-8.5-Portable-x64.exe
+          name: Ptitsy-NN-8.6-Portable-only
+          path: PtitsyNN/dist/MoOLVa-8.6-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.5-Setup-only
-          path: PtitsyNN/dist/MoOLVa-8.5-Setup-x64.exe
+          name: Ptitsy-NN-8.6-Setup-only
+          path: PtitsyNN/dist/MoOLVa-8.6-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Preserve authentic media and source manifest as independent recovery artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.5-Media-Snapshot
+          name: Ptitsy-NN-8.6-Media-Snapshot
           path: |
             PtitsyNN/app/media/audio/**
             PtitsyNN/app/data.js
@@ -405,12 +413,13 @@ jobs:
             PtitsyNN/dist/release-evidence/voice-goal84.json
             PtitsyNN/dist/release-evidence/clean-variants85.json
             PtitsyNN/dist/release-evidence/audio-audit85.*
+            PtitsyNN/dist/release-evidence/candidate-review86.*
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.5-Windows
+          name: Ptitsy-NN-8.6-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
@@ -458,8 +467,8 @@ jobs:
           $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
           $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
           $ev = (Resolve-Path dist/release-evidence).Path
-          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','voice-regression.json','voice-regression.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png')
-          $evidenceNames += @('audio-review82.csv','audio-review82.md','audio-review83.csv','audio-review83.md','voice-goal84.json','voice-sources84.csv','audio-audit85.csv','audio-audit85.json','clean-variants85.json')
+          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','voice-regression.json','voice-regression.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png','08-pro-max-8.6.png')
+          $evidenceNames += @('audio-review82.csv','audio-review82.md','audio-review83.csv','audio-review83.md','voice-goal84.json','voice-sources84.csv','audio-audit85.csv','audio-audit85.json','clean-variants85.json','candidate-review86.csv','candidate-review86.json')
           $evidenceFiles = foreach ($name in $evidenceNames) {
             $item = Get-Item (Join-Path $ev $name) -ErrorAction Stop
             $item.FullName
