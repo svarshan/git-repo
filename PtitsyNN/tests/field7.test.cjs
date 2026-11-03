@@ -5,9 +5,9 @@ const test=require('node:test'),assert=require('node:assert/strict');
 const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p),'utf8');
 test('7.0 Windows artifacts have independent stable names',()=>{
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'8.5.0');
- assert.equal(pkg.build.portable.artifactName,'MoOLVa-8.5-Portable-${arch}.exe');
- assert.equal(pkg.build.nsis.artifactName,'MoOLVa-8.5-Setup-${arch}.exe');
+ assert.equal(pkg.version,'8.6.0');
+ assert.equal(pkg.build.portable.artifactName,'MoOLVa-8.6-Portable-${arch}.exe');
+ assert.equal(pkg.build.nsis.artifactName,'MoOLVa-8.6-Setup-${arch}.exe');
 });
 test('original field atlas remains with authentic regional offline map',()=>{
  const html=read('app/index.html');
