@@ -31,7 +31,7 @@
    ['Недостаёт',s.missing.length],['Фото',s.photos+'/'+s.target],
    ['Статей',s.articles+'/'+s.target],['Прослушано человеком',s.audioHuman],
    ['Фото подтверждено',s.photoHuman],['Сомнительных отметок',s.audioQuestioned+s.photoQuestioned],
-   ['Новых голосов для прослушивания',previewByLatin.size]];
+   ['Новых голосов для самостоятельной проверки',birds.filter(b=>b.audioCredits?.reviewStatus==='awaiting-user-review').length]];
   const host=$('m86Stats');host.replaceChildren();
   for(const [label,value] of items){const x=node('div',null,'m86-stat');x.append(node('strong',value),node('small',label));host.append(x);}
   $('m86Scope').textContent='Наличие файла не означает подтверждение вида. Отметки ручной проверки независимы от технического аудита.';
@@ -46,7 +46,16 @@
    const x=node('article',null,'m86-media-card');
    if(b.imageFile){const img=node('img');img.src=b.imageFile;img.alt='Фотография '+b.name;img.loading='lazy';x.append(img);}
    x.append(node('strong',b.name),node('small',b.latin));
-   if(kind==='audio'&&b.audioFile){const player=node('audio');player.src=b.audioFile;player.controls=true;player.preload='none';x.append(player);}
+   if(kind==='audio'&&b.audioFile){const player=node('audio');player.src=b.audioFile;player.controls=true;player.preload='none';x.append(player);
+    if(b.audioCredits?.reviewStatus==='awaiting-user-review'){
+      x.append(node('strong','Новый голос — добавлен без ручного прослушивания'));
+      x.append(node('small','Проверьте запись самостоятельно. Совпадение вида по метаданным не доказывает подлинность голоса.'));
+      const mark=candidateReviews()[b.latin],recId=b.audioCredits.recordingId;
+      x.append(node('small',mark?.recordingId===recId?('Моя отметка: '+(mark.verdict==='plausible'?'похоже на вид':'есть сомнения')):'Вы ещё не отметили результат прослушивания'));
+      x.append(btn('Проверил: похоже на вид',()=>markCandidateVoice(b.latin,recId,'plausible')));
+      x.append(btn('Есть сомнения / другой голос',()=>markCandidateVoice(b.latin,recId,'questioned')));
+    }
+   }
    const candidate=kind==='audio'&&!b.audioFile?previewByLatin.get(b.latin):null;
    if(candidate){
     x.append(node('strong','Новый голос Xeno-canto — НЕ проверен экспертом'));

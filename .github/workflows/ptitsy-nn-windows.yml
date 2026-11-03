@@ -65,7 +65,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py scripts/stage_xeno87.py scripts/xeno_candidates87.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py scripts/stage_xeno87.py scripts/xeno_candidates87.py scripts/attach_voices88.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -226,6 +226,26 @@ jobs:
           $preview = Get-Content dist/release-evidence/voice-candidates87.json -Raw | ConvertFrom-Json
           if ($preview.baselinePrimaryVoices -ne 265 -or $preview.manualVerified -ne 0 -or $preview.previewFiles -lt 1) {
             throw 'Invalid preview provenance/count or misleading review verification'
+          }
+      - name: Add licensed recordings to the main bird catalog without pre-listening
+        timeout-minutes: 20
+        shell: pwsh
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+        run: |
+          python -u scripts/attach_voices88.py --min 7
+          if ($LASTEXITCODE -ne 0) { throw 'No safe voice expansion: preserving old 265 recordings' }
+          python -u scripts/audit_audio.py
+          if ($LASTEXITCODE -ne 0) { throw 'Audio QA rejected the new catalog' }
+          python scripts/voice_guard85.py
+          if ($LASTEXITCODE -ne 0) { throw 'Baseline 265 audio regression' }
+          python scripts/verify_cache.py
+          if ($LASTEXITCODE -ne 0) { throw 'Expanded offline catalog is incomplete' }
+          python scripts/candidate_review86.py
+          if ($LASTEXITCODE -ne 0) { throw 'Candidate report cannot reflect expanded catalog' }
+          $import = Get-Content dist/release-evidence/imported-voices88.json -Raw | ConvertFrom-Json
+          if ($import.newMainVoices -lt 7 -or $import.humanReviewedNew -ne 0 -or !$import.baseline265Preserved) {
+            throw 'Import evidence missing or incorrect; refusing release'
           }
       - name: Report true 298-species milestone, including shortfall
         shell: pwsh
