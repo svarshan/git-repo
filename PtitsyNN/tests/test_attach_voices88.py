@@ -43,6 +43,27 @@ class AttachBirdVoicesTests(unittest.TestCase):
             self.assertIs(bird['audioCredits']['speciesHumanVerified'],False)
             self.assertEqual(record['recordingId'],'XC123456')
 
+    def test_inaturalist_audio_has_exact_media_sound_provenance(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root=Path(tmp)
+            (root/'media'/'audio').mkdir(parents=True)
+            source=root/'candidate.mp3'
+            source.write_bytes(b'a sample audio fixture')
+            item={'recordingId':'iNat:98765','source':'https://www.inaturalist.org/observations/12345',
+                  'soundId':98765,'sourceTaxon':'Gavia arctica','sourcePlatform':'iNaturalist',
+                  'author':'Observer','licenseCode':'CC-BY',
+                  'license':'https://creativecommons.org/licenses/by/4.0/',
+                  'quality':'research-grade observation','type':'call'}
+            bird={'latin':'Gavia arctica','name':'Чернозобая гагара'}
+            with patch.object(m,'APP',root):
+                m.promote(bird,item,source,set(),{'seconds':8,'meanDb':-18})
+            credit=bird['audioCredits']
+            self.assertEqual(credit['soundId'],98765)
+            self.assertEqual(credit['recordingId'],'iNat:98765')
+            self.assertEqual(credit['license'],'CC-BY')
+            self.assertRegex(credit['speciesMatch'],r'exact scientific taxon name on research-grade')
+            self.assertIn('FFmpeg',credit['audioProcessing'])
+
     def test_reject_duplicate_or_existing_primary_audio(self):
         with tempfile.TemporaryDirectory() as tmp:
             root=Path(tmp)
