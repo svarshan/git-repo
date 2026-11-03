@@ -74,3 +74,30 @@ jobs:
             except Exception as err:
               print('PAGE',ident,'ERROR',type(err).__name__,str(err)[:130])
           PY
+
+      - name: Investigate public taxonomic search parameters
+        run: |
+          python - <<'PY'
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          from html.parser import HTMLParser
+          import re
+          class Fields(HTMLParser):
+            def handle_starttag(self,tag,attrs):
+              if tag not in ('input','select','form'):return
+              d=dict(attrs)
+              if any(w in (' '.join(str(x) for x in d.values())).lower() for w in ('taxon','species','latin','wissenschaft','artname')):
+                print('FORM FIELD',tag,{k:v for k,v in d.items() if k in ('id','name','action','placeholder','class')})
+          ua={'User-Agent':'MoOLVaBirdAtlas/8.6 public species recording research'}
+          base='https://suche.tierstimmenarchiv.de/'
+          page=urlopen(Request(base,headers=ua),timeout=15).read(180000).decode('utf-8','replace')
+          Fields().feed(page)
+          for param in ['species','species_name','taxon','scientific_name']:
+            q=urlencode({param:'Aquila heliaca','requested':'species,duration,usage_permission'})
+            try:
+              r=urlopen(Request(base+'search/query.html?'+q,headers=ua),timeout=15)
+              body=r.read(150000).decode('utf-8','replace')
+              print('QUERY',param,'url',r.geturl()[:140],'mentions',body.count('Aquila heliaca'),'len',len(body))
+            except Exception as e:
+              print('QUERY',param,type(e).__name__,str(e)[:90])
+          PY
