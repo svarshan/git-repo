@@ -3,7 +3,7 @@
 (function(){
  const core=window.MoOLVa78Core,exportBtn=document.getElementById('m78BackupExport'),importBtn=document.getElementById('m78BackupImport'),picker=document.getElementById('m78BackupFile'),status=document.getElementById('m78BackupStatus');
  if(!core||!exportBtn||!importBtn||!picker)return;
- const keys=['ptitsy-nn.journal.v1','ptitsy-nn.favorites.v1','ptitsy-nn.recent.v1','ptitsy-nn.ui3.settings.v1','ptitsy-nn.sidebar.v76','ptitsy-nn.ui77.v1','ptitsy-nn.ui78.v1','ptitsy-nn.academy80.v1','ptitsy-nn.fieldmode80.v1','ptitsy-nn.expedition77.v1','ptitsy-nn.ai77.history.v1','ptitsy-nn.voice-lab.v1','ptitsy-nn.academy.sound.v5','ptitsy-nn.academy.v1','ptitsy-nn.media83.review.v1','ptitsy-nn.installed-version.v1'];
+ const keys=['ptitsy-nn.journal.v1','ptitsy-nn.favorites.v1','ptitsy-nn.recent.v1','ptitsy-nn.ui3.settings.v1','ptitsy-nn.sidebar.v76','ptitsy-nn.ui77.v1','ptitsy-nn.ui78.v1','ptitsy-nn.academy80.v1','ptitsy-nn.fieldmode80.v1','ptitsy-nn.expedition77.v1','ptitsy-nn.ai77.history.v1','ptitsy-nn.voice-lab.v1','ptitsy-nn.academy.sound.v5','ptitsy-nn.academy.v1','ptitsy-nn.media83.review.v1','ptitsy-nn.voice-candidates87.review.v1','ptitsy-nn.installed-version.v1'];
  const say=t=>{if(status)status.textContent=t;};
  async function fingerprint(value){
   if(!globalThis.crypto?.subtle)throw Error('Нет защищённого SHA-256 в этом браузерном движке');
