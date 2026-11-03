@@ -117,3 +117,30 @@ jobs:
               pos=body.find(marker)
               if pos>=0:print('ARCHIVE HTML',latin,marker,re.sub(r'\s+',' ',body[max(0,pos-170):pos+280])[:450])
           PY
+
+      - name: Search historical scientific synonyms for the eight outstanding bird species
+        run: |
+          python - <<'PY'
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          import re,html
+          pairs={
+            'Calidris minuta':['Erolia minuta'],
+            'Circus pygargus':['Circus cineraceus','Circus montagui'],
+            'Gallinago media':['Capella media'],
+            'Ichthyaetus ichthyaetus':['Larus ichthyaetus'],
+            'Mergellus albellus':['Mergus albellus'],
+            'Tachyspiza brevipes':['Accipiter brevipes'],
+            'Circus macrourus':['Circus pallidus'],
+            'Larus hyperboreus':['Larus leucopterus'],
+          }
+          for current,aliases in pairs.items():
+            for name in aliases:
+              url='https://suche.tierstimmenarchiv.de/search/query.html?'+urlencode({'species':name,'requested':'species,duration,description,usage_permission'})
+              try:
+                body=urlopen(Request(url,headers={'User-Agent':'MoOLVaBirdAtlas/8.6 historical scientific-name audio search'}),timeout=16).read(170000).decode('utf-8','replace')
+                ids=list(dict.fromkeys(re.findall(r'TSA:[A-Za-z0-9_-]+',html.unescape(body))))
+                print('SYNONYM',current,name,'found',len(ids),'sample',ids[:5])
+              except Exception as e:
+                print('SYNONYM',current,name,'error',type(e).__name__,str(e)[:70])
+          PY
