@@ -4,7 +4,7 @@ const data=fs.readFileSync(path.join(root,'app','data.js'),'utf8');
 const box={window:{}};vm.runInNewContext(data,box);
 const birds=box.window.BIRDS_DATA;
 const mediaRoot=path.resolve(root,'app','media')+path.sep;
-const allowedMediaSource=/^https:\/\/(?:commons\.wikimedia\.org\/|www\.inaturalist\.org\/observations\/\d+(?:\/|$)|xeno-canto\.org\/\d+(?:\/|$)|freesound\.org\/(?:people|s)\/|archive\.org\/details\/)/;
+const allowedMediaSource=/^https:\/\/(?:commons\.wikimedia\.org\/|www\.inaturalist\.org\/observations\/\d+(?:\/|$)|xeno-canto\.org\/\d+(?:\/|$)|suche\.tierstimmenarchiv\.de\/search\/showdetails\.html\?|freesound\.org\/(?:people|s)\/|archive\.org\/details\/)/;
 const forbiddenLicense=/(?:by-nc|by-nd|nc-sa|nc-nd|noncommercial|no-derivatives)/i;
 test('full catalog of unique scientific species',()=>{
  assert.equal(birds.length,298);
@@ -35,6 +35,22 @@ test('only existing local media with open licenses, author and source credits',(
    assert.match(String(c.speciesMatch||''),/exact scientific taxon name on research-grade/i);
    assert.ok(c.audioQuality?.seconds>=1 && Number.isFinite(c.audioQuality?.meanDb),'Missing post-download FFmpeg QA');
    assert.ok(c.author && c.audioProcessing,'Missing author or processing metadata');
+  }
+  if(file==='audioFile'&&b[credit]?.sourcePlatform==='Tierstimmenarchiv'){
+   const c=b[credit];
+   assert.match(String(c.recordingId||''),/^TSA:[A-Za-z0-9_-]+$/);
+   assert.match(String(c.licenseUrl||''),/^https:\/\/creativecommons\.org\/licenses\/by(?:-sa)?\/\d+\.\d+\/?$/);
+   assert.equal(c.reviewStatus,'awaiting-user-review');
+   assert.equal(c.speciesHumanVerified,false);
+   assert.match(String(c.audioProcessing||''),/Tierstimmenarchiv MP3/);
+   assert.ok(c.audioQuality?.seconds>=1,'Scientific archive sound has not passed QA');
+  }
+  if(file==='audioFile'&&b[credit]?.sourcePlatform==='Wikimedia Commons'){
+   const c=b[credit];
+   assert.match(String(c.recordingId||''),/^WM[0-9a-f]{12}$/);
+   assert.equal(c.reviewStatus,'awaiting-user-review');
+   assert.equal(c.speciesHumanVerified,false);
+   assert.match(String(c.audioProcessing||''),/Wikimedia Commons/);
   }
   assert.match(b[credit]?.source||'',allowedMediaSource,'Unrecognized license source for '+b[file]);
  }

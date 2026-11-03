@@ -65,7 +65,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py scripts/stage_xeno87.py scripts/xeno_candidates87.py scripts/attach_voices88.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py scripts/stage_xeno87.py scripts/xeno_candidates87.py scripts/attach_voices88.py scripts/commons_voices89.py scripts/tsa_voices89.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -247,6 +247,34 @@ jobs:
           if ($import.newMainVoices -lt 7 -or $import.humanReviewedNew -ne 0 -or !$import.baseline265Preserved) {
             throw 'Import evidence missing or incorrect; refusing release'
           }
+      - name: Fill missing species from open-license Wikimedia Commons audio
+        timeout-minutes: 12
+        shell: pwsh
+        run: |
+          python -u scripts/commons_voices89.py --apply
+          if ($LASTEXITCODE -ne 0) { throw 'Commons audio import failed' }
+          $commons = Get-Content dist/release-evidence/commons-import89.json -Raw | ConvertFrom-Json
+          if ($commons.newVoices -lt 2 -or $commons.manualReviewedNew -ne 0) {
+            throw 'Commons did not yield at least two technically checked species recordings'
+          }
+      - name: Fill missing species from Tierstimmenarchiv licensed recordings
+        timeout-minutes: 18
+        shell: pwsh
+        run: |
+          python -u scripts/tsa_voices89.py --apply
+          if ($LASTEXITCODE -ne 0) { throw 'Scientific animal recording archive import failed' }
+          $tsa = Get-Content dist/release-evidence/tsa-import89.json -Raw | ConvertFrom-Json
+          if ($tsa.newVoices -lt 1 -or $tsa.manualHumanVerified -ne 0) {
+            throw 'Scientific archive produced no usable new licensed bird call'
+          }
+          python -u scripts/audit_audio.py
+          if ($LASTEXITCODE -ne 0) { throw 'Post-import audio audit failed' }
+          python scripts/voice_guard85.py
+          if ($LASTEXITCODE -ne 0) { throw 'Historical 265 recordings were changed' }
+          python scripts/verify_cache.py
+          if ($LASTEXITCODE -ne 0) { throw 'Expanded offline catalog invalid' }
+          python scripts/candidate_review86.py
+          if ($LASTEXITCODE -ne 0) { throw 'Final candidate report failed' }
       - name: Report true 298-species milestone, including shortfall
         shell: pwsh
         run: |
