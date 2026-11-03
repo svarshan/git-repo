@@ -113,12 +113,14 @@ def extra_xeno(latin, deadline):
 
 def safe_inat_download(url, dest):
     parsed=urlparse(url)
-    if parsed.scheme!='https' or (parsed.hostname or '') not in ALLOWED_INAT:
+    host=parsed.hostname or ''
+    if parsed.scheme!='https' or not (host=='inaturalist.org' or host.endswith('.inaturalist.org') or host=='inaturalist-open-data.s3.amazonaws.com'):
         raise ValueError('Untrusted iNaturalist download host')
     request=Request(url,headers={'User-Agent':SRC_UA})
     with urlopen(request,timeout=35) as response:
         final=urlparse(response.geturl())
-        if final.scheme!='https' or (final.hostname or '') not in ALLOWED_INAT:
+        final_host=final.hostname or ''
+        if final.scheme!='https' or not (final_host=='inaturalist.org' or final_host.endswith('.inaturalist.org') or final_host=='inaturalist-open-data.s3.amazonaws.com'):
             raise ValueError('Unexpected iNaturalist redirect')
         if int(response.headers.get('Content-Length') or 0)>MAX_DOWNLOAD_BYTES:
             raise ValueError('Source recording too large')
