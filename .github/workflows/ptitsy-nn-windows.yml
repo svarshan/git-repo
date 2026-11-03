@@ -370,6 +370,13 @@ jobs:
         run: |
           python scripts/release_evidence79.py finalize
           if ($LASTEXITCODE -ne 0) { throw 'Release evidence check failed' }
+      - name: Upload screenshots and QA evidence separately
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ptitsy-NN-8.5-Evidence
+          path: PtitsyNN/dist/release-evidence/**/*
+          if-no-files-found: error
+          retention-days: 30
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
