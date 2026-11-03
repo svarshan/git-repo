@@ -6,7 +6,7 @@
   const genus=x=>String(x.latin||'').split(' ')[0];
   const type=genus(a)===genus(b)?'Один научный род':a.group===b.group?'Одна группа каталога':'Разные группы каталога';
   return {type,rows:[a,b].map(x=>({id:x.id,name:String(x.name||''),latin:String(x.latin||''),imageFile:x.imageFile||null,audioFile:x.audioFile||null,
-   group:x.group||'',excerpt:String(x.description||'').slice(0,700),source:x.descriptionSource||null}))};
+   group:x.group||'',excerpt:String(x.description||'').slice(0,700),source:x.descriptionSource||null,imageCredits:x.imageCredits||null,audioCredits:x.audioCredits||null}))};
  }
  function windows(predictions){
   const timeline=[];
