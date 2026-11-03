@@ -54,16 +54,26 @@ TIME_BUDGET=260
 
 
 def api(params):
+    from urllib.error import HTTPError
     q=dict(params)
     q.update(action=q.get("action","query"),format="json",formatversion="2")
     req=Request(ENDPOINT+"?"+urlencode(q),headers={"User-Agent":UA,"Accept":"application/json"})
-    with urlopen(req,timeout=32) as response:
-        if urlparse(response.geturl()).hostname!="commons.wikimedia.org":
-            raise ValueError("Commons API redirected to another site")
-        out=json.load(response)
-    if not isinstance(out,dict) or "error" in out:
-        raise ValueError("Unexpected Commons API response")
-    return out
+    for attempt in range(5):
+        try:
+            with urlopen(req,timeout=32) as response:
+                if urlparse(response.geturl()).hostname!="commons.wikimedia.org":
+                    raise ValueError("Commons API redirected to another site")
+                out=json.load(response)
+            if not isinstance(out,dict) or "error" in out:
+                raise ValueError("Unexpected Commons API response")
+            time.sleep(1.1)  # Be considerate of Wikimedia's rate limits
+            return out
+        except HTTPError as exc:
+            if exc.code not in (429,500,502,503,504) or attempt==4:
+                raise
+            print("COMMONS RETRY",exc.code,"attempt",attempt+1,flush=True)
+            time.sleep(min(18,2*(2**attempt)))
+    raise RuntimeError("Commons API query attempts exhausted")
 
 
 def search_titles(latin):
@@ -192,10 +202,6 @@ def candidates_for(latin,deadline,existing_hashes):
             print("COMMONS REJECT",latin,item["recordingId"],str(exc)[:120],flush=True)
         except Exception as exc:
             print("COMMONS DOWNLOAD ISSUE",latin,item["recordingId"],type(exc).__name__,flush=True)
-        finally:
-            if preview.exists() and not any(True for _ in ()):
-                # The caller promotes the candidate during iteration before cleanup.
-                pass
 
 
 def main(apply=False):
