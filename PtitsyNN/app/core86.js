@@ -22,7 +22,8 @@
   if(!['audio','photo'].includes(kind))return [];
   const r=mediaReview(rawReview)[kind],file=kind==='audio'?'audioFile':'imageFile';
   return (Array.isArray(birds)?birds:[]).filter(b=>{
-   if(!b[file])return filter==='missing';
+   if(filter==='missing')return !b[file];
+   if(!b[file])return false;
    if(filter==='all')return true;
    if(filter==='confirmed')return r[b.id]==='confirmed';
    if(filter==='questioned')return r[b.id]==='questioned';
