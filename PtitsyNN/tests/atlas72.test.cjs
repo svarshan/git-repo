@@ -46,7 +46,7 @@ test('7.2 archives separate Portable and Setup',()=>{
  assert.equal(pkg.version,'8.6.0');
  assert.equal(pkg.build.nsis.artifactName,'MoOLVa-8.6-Setup-${arch}.exe');
  assert.equal(pkg.build.portable.artifactName,'MoOLVa-8.6-Portable-${arch}.exe');
- assert.match(workflow,/Ptitsy-NN-8\.5-Portable-only/);
+ assert.match(workflow,/Ptitsy-NN-8\.6-Portable-only/);
  assert.match(workflow,/gh release create \$tag/);
  assert.match(workflow,/make_ultra_map\.py/);
 });

@@ -18,7 +18,7 @@ test('4.0 offline dashboard matches required layout and navigates to real pages'
  assert.match(html,/href="ui3\.css"/);
  assert.match(html,/src="ui3\.js"/);
  assert.ok(html.indexOf('src="ui3.js"')>html.indexOf('src="app.js"'));
- assert.match(html,/MoOLVa 8\.5/);
+ assert.match(html,/MoOLVa 8\.6/);
 });
 test('dashboard relies on real species data and old user stores',()=>{
  assert.match(js,/window\.BIRDS_DATA/);
@@ -40,8 +40,8 @@ test('version 3.0 keeps installer and portable and does not load remote media',(
  assert.equal(p.version,'8.6.0');
  assert.ok(p.build.win.target.some(x=>x.target==='nsis'));
  assert.ok(p.build.win.target.some(x=>x.target==='portable'));
- assert.match(p.build.portable.artifactName,/8\.5/);
- assert.match(workflow,/Ptitsy-NN-8\.5-Windows/);
+ assert.match(p.build.portable.artifactName,/8\.6/);
+ assert.match(workflow,/Ptitsy-NN-8\.6-Windows/);
  assert.match(workflow,/node --check app\/ui3\.js/);
  assert.match(html,/connect-src 'none'/);
  assert.doesNotMatch(html,/<script[^>]+src="https?:/);

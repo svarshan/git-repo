@@ -42,8 +42,8 @@ test('seasonal API pipeline separates CC-licensed observations and coarse geogra
 test('7.0 retains authentic atlas and only enables actual Perch v2 offline AI',()=>{
  const p=JSON.parse(read('package.json')),html=read('app/index.html');
  assert.equal(p.version,'8.6.0');
- assert.match(p.build.nsis.artifactName,/8\.5/);
- assert.match(p.build.portable.artifactName,/8\.5/);
+ assert.match(p.build.nsis.artifactName,/8\.6/);
+ assert.match(p.build.portable.artifactName,/8\.6/);
  assert.match(html,/Google Perch v2/);
  assert.match(html,/Bird AI/);
 });
