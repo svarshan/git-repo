@@ -1,0 +1,1596 @@
+{
+  "source_commit": "99b785e383d3db385203758687535373664ed6ad",
+  "count": 265,
+  "records": [
+    {
+      "latin": "Gallinago gallinago",
+      "file": "media/audio/gallinago-gallinago.mp3",
+      "sha256": "c8357a1604ae25b9732163bfcdb039b9969634f43022251149bc4a7dadec963e",
+      "source": "https://commons.wikimedia.org/wiki/File:Gallinago_gallinago_-_Common_Snipe_XC433287.mp3"
+    },
+    {
+      "latin": "Lagopus lagopus",
+      "file": "media/audio/lagopus-lagopus.mp3",
+      "sha256": "aabedd9d00fbf5c30f7fe250085366de37089d0f6d371e70fe816841093c3e69",
+      "source": "https://commons.wikimedia.org/wiki/File:Red_Grouse_(Lagopus_lagopus)_(W1CDR0001407_BD28).ogg"
+    },
+    {
+      "latin": "Cyanistes cyanus",
+      "file": "media/audio/cyanistes-cyanus-inat.mp3",
+      "sha256": "0ab285a9e708f24fdb3fb07a20086a2be170141abaad1aae39bb13408ea6e62b",
+      "source": "https://www.inaturalist.org/observations/288628224"
+    },
+    {
+      "latin": "Motacilla alba",
+      "file": "media/audio/motacilla-alba.mp3",
+      "sha256": "1293c0cd46a4fae21c93de2cf5d864c6de87ec0cfa65975d136d0362977746b7",
+      "source": "https://commons.wikimedia.org/wiki/File:Motacilla_alba_-_White_Wagtail_XC466458.mp3"
+    },
+    {
+      "latin": "Turdus iliacus",
+      "file": "media/audio/turdus-iliacus.mp3",
+      "sha256": "4c2478876d80cbe52ca3d10561d60110618102032fecfcd7baf6bda14f9e1526",
+      "source": "https://commons.wikimedia.org/wiki/File:Turdus_iliacus_-_Redwing_XC538936.mp3"
+    },
+    {
+      "latin": "Tachymarptis melba",
+      "file": "media/audio/tachymarptis-melba.mp3",
+      "sha256": "b8e7e88f01b514d192b710eb0d8fa9d8eb7d7d8ad0c0fbc03fbd7b03909652b6",
+      "source": "https://commons.wikimedia.org/wiki/File:Tachymarptis_melba_-_Alpine_Swift_XC483586.mp3"
+    },
+    {
+      "latin": "Chlidonias leucopterus",
+      "file": "media/audio/chlidonias-leucopterus-inat.mp3",
+      "sha256": "01a50afb3aa73d9f96ad0129275699862e3f2e3f926292472d8a7d4f977520e5",
+      "source": "https://www.inaturalist.org/observations/255856649"
+    },
+    {
+      "latin": "Loxia leucoptera",
+      "file": "media/audio/loxia-leucoptera.mp3",
+      "sha256": "e81d585653057356b59a5cf986e8bdd08f06fa5d2e31e8aa98ae35aaffd050f7",
+      "source": "https://commons.wikimedia.org/wiki/File:Loxia_leucoptera_-_Two-barred_Crossbill_XC613110.mp3"
+    },
+    {
+      "latin": "Anser albifrons",
+      "file": "media/audio/anser-albifrons.mp3",
+      "sha256": "b27ed99232edc60be6b2b8990cc3d6a14539d59d27bb919bf8e24de2c7f20b7d",
+      "source": "https://commons.wikimedia.org/wiki/File:Anser_albifrons_-_Greater_White-fronted_Goose_-_XC96532.ogg"
+    },
+    {
+      "latin": "Dendrocopos leucotos",
+      "file": "media/audio/dendrocopos-leucotos.ogg",
+      "sha256": "b394a68fe5db40dea32852907329f65e7f1994dbf9d961730d07fa5ef13c9b08",
+      "source": "https://commons.wikimedia.org/wiki/File:Feh%C3%A9rh%C3%A1t%C3%BA_fakop%C3%A1ncs_dob_-_Dendrocopos_leucotos.ogg"
+    },
+    {
+      "latin": "Branta leucopsis",
+      "file": "media/audio/branta-leucopsis.mp3",
+      "sha256": "b27bc79d78c0c005c0eaafd9b85c154cb90d479890422982d6bc9e702eba534e",
+      "source": "https://commons.wikimedia.org/wiki/File:Branta_leucopsis_-_Barnacle_Goose_XC466464.mp3"
+    },
+    {
+      "latin": "Ciconia ciconia",
+      "file": "media/audio/ciconia-ciconia.mp3",
+      "sha256": "9b129e8fd60dd0b7240b96e32e429297f0ae5172bba47943e3b67028faa63f55",
+      "source": "https://commons.wikimedia.org/wiki/File:Ciconia_ciconia_bill-clattering.ogg"
+    },
+    {
+      "latin": "Riparia riparia",
+      "file": "media/audio/riparia-riparia.mp3",
+      "sha256": "c23c887c0e389bf6e73a56a3ecd799b8069c41b676eaeba4d0b67aa9491ed67a",
+      "source": "https://commons.wikimedia.org/wiki/File:Riparia_riparia_-_Sand_Martin_XC487832.mp3"
+    },
+    {
+      "latin": "Aquila chrysaetos",
+      "file": "media/audio/aquila-chrysaetos.mp3",
+      "sha256": "ead45840435c8df9b13137d6e686cf636997c947e7f63dd0821abf9990da9dd6",
+      "source": "https://commons.wikimedia.org/wiki/File:Golden_Eagle_(Aquila_chrysaetos)_(W1CDR0001387_BD6).ogg"
+    },
+    {
+      "latin": "Acrocephalus palustris",
+      "file": "media/audio/acrocephalus-palustris.mp3",
+      "sha256": "f72cccab59b19f06492686fba6c4460d427a56c773703f6f8ad100219d9398f5",
+      "source": "https://commons.wikimedia.org/wiki/File:Marsh_Warbler_(Acrocephalus_palustris)_(W_ACROCEPHALUS_PALUSTRIS_R10_C2).ogg"
+    },
+    {
+      "latin": "Asio flammeus",
+      "file": "media/audio/asio-flammeus-inat.mp3",
+      "sha256": "b9624933889437107e3a21658b767248be8b45741defb0a1a1be6b7a213efb81",
+      "source": "https://www.inaturalist.org/observations/252612273"
+    },
+    {
+      "latin": "Circus aeruginosus",
+      "file": "media/audio/circus-aeruginosus-inat.mp3",
+      "sha256": "d6a38789b7f1bbaf41e08c3695bed4b442b269eba1ca213ee4d1b27fdb4a826c",
+      "source": "https://www.inaturalist.org/observations/363283146"
+    },
+    {
+      "latin": "Ardea alba",
+      "file": "media/audio/ardea-alba-inat.mp3",
+      "sha256": "709bcef46e62f37fc8670798fa074ae301d72b3061e1fe263e457c8a9788019f",
+      "source": "https://www.inaturalist.org/observations/339132274"
+    },
+    {
+      "latin": "Botaurus stellaris",
+      "file": "media/audio/botaurus-stellaris.mp3",
+      "sha256": "632cdc547ef83f78d453996588cde128c2b5cbaa4d4e93e1cc9e869ed1e442d4",
+      "source": "https://commons.wikimedia.org/wiki/File:Botaurus_stellaris_-_Eurasian_Bittern_XC362697.mp3"
+    },
+    {
+      "latin": "Streptopelia orientalis",
+      "file": "media/audio/streptopelia-orientalis-inat.mp3",
+      "sha256": "79ddf3491077c252922f853baa22580775851924e436eadcfe64761b7a29a580",
+      "source": "https://www.inaturalist.org/observations/388132954"
+    },
+    {
+      "latin": "Parus major",
+      "file": "media/audio/parus-major.mp3",
+      "sha256": "d8f8b8d66585e4f30eeef6c6584a7cb9013aa0a2baaa999b1e3f3d2eb12de711",
+      "source": "https://commons.wikimedia.org/wiki/File:Parus_major_-_Great_Tit_XC165665.mp3"
+    },
+    {
+      "latin": "Phalacrocorax carbo",
+      "file": "media/audio/phalacrocorax-carbo-inat.mp3",
+      "sha256": "e8d6af7232cdd8501ffef892feeed7c746ac1119f4bf7c6b8ec8941367fd9e34",
+      "source": "https://www.inaturalist.org/observations/335137796"
+    },
+    {
+      "latin": "Limosa limosa",
+      "file": "media/audio/limosa-limosa.mp3",
+      "sha256": "ef06fcf9be388b227872225e450fd075a7afb2af79c6b8b78e61080da3cd3954",
+      "source": "https://commons.wikimedia.org/wiki/File:Limosa_limosa_-_Black-tailed_Godwit_XC129138.ogg"
+    },
+    {
+      "latin": "Numenius arquata",
+      "file": "media/audio/numenius-arquata.mp3",
+      "sha256": "56b698394aa157297c65dbb22582404d744f7674a7de686b699918ccb5300b6d",
+      "source": "https://commons.wikimedia.org/wiki/File:Numenius_arquata_-_Eurasian_Curlew_XC466469.mp3"
+    },
+    {
+      "latin": "Mergus merganser",
+      "file": "media/audio/mergus-merganser.mp3",
+      "sha256": "e436dca3f1a69a15ccba265fb4e2c820cc0ed03148a0f97b0c8b908b13a63c2d",
+      "source": "https://commons.wikimedia.org/wiki/File:Mergus_merganser_-_Common_Merganser_XC513502.mp3"
+    },
+    {
+      "latin": "Clanga clanga",
+      "file": "media/audio/clanga-clanga-inat.mp3",
+      "sha256": "285ccbec8d796f34a25c2b4d90702bfb8e2e0ee6521fee16c92fdba94f13c0c2",
+      "source": "https://www.inaturalist.org/observations/391481237"
+    },
+    {
+      "latin": "Dendrocopos major",
+      "file": "media/audio/dendrocopos-major.mp3",
+      "sha256": "3bb894b06d48126f457d0dede140eb141f706032e1e1b8c5f83d849d802f7aa8",
+      "source": "https://commons.wikimedia.org/wiki/File:Dendrocopos_major_-_Great_Spotted_Woodpecker_XC542957.mp3"
+    },
+    {
+      "latin": "Tringa nebularia",
+      "file": "media/audio/tringa-nebularia.mp3",
+      "sha256": "c13889697310dd143474cd53834eecd90e5f4141628f771eaddafb2b820ab53e",
+      "source": "https://commons.wikimedia.org/wiki/File:Tringa_nebularia_-_Common_Greenshank_XC494033.mp3"
+    },
+    {
+      "latin": "Iduna caligata",
+      "file": "media/audio/iduna-caligata-inat.mp3",
+      "sha256": "307f2914ad368b6c315f04ec752323ab118ebbb43ef7bc81575b5c3b0880d59d",
+      "source": "https://www.inaturalist.org/observations/369761825"
+    },
+    {
+      "latin": "Strix nebulosa",
+      "file": "media/audio/strix-nebulosa-inat.mp3",
+      "sha256": "3927a596b97d2447cc80292a52867510fa31ea5fc62c4bfc592a0266938a57cd",
+      "source": "https://www.inaturalist.org/observations/51532292"
+    },
+    {
+      "latin": "Poecile montanus",
+      "file": "media/audio/poecile-montanus.mp3",
+      "sha256": "f6e47097ac3cd5cffc4aa4e6281acff60a66255d5c5166b8de9892a19b8f0174",
+      "source": "https://commons.wikimedia.org/wiki/File:Poecile_montanus_-_Willow_Tit_XC462898.mp3"
+    },
+    {
+      "latin": "Scolopax rusticola",
+      "file": "media/audio/scolopax-rusticola-inat.mp3",
+      "sha256": "23ce1302c05349a3dffe480a0aeaf9e67e1126c59b9b6af230ab690387f370de",
+      "source": "https://www.inaturalist.org/observations/348450707"
+    },
+    {
+      "latin": "Luscinia svecica",
+      "file": "media/audio/luscinia-svecica.mp3",
+      "sha256": "8223cbf0465e0a0a5e093b097a3d2d1bbac3cf10a875ef596d70368f5e28bf1f",
+      "source": "https://commons.wikimedia.org/wiki/File:Luscinia_svecica.ogg"
+    },
+    {
+      "latin": "Jynx torquilla",
+      "file": "media/audio/jynx-torquilla-inat.mp3",
+      "sha256": "f3be5621d7e8e12956534dd84f68b180e2d356d6d74e32a43f81923e3fbcc024",
+      "source": "https://www.inaturalist.org/observations/376481390"
+    },
+    {
+      "latin": "Rallus aquaticus",
+      "file": "media/audio/rallus-aquaticus.mp3",
+      "sha256": "542326f031ac4b9775c2bbecc8b3add14a49f35a104babd1e1e34fef3a019e08",
+      "source": "https://commons.wikimedia.org/wiki/File:Rallus_aquaticus_-_Water_Rail_XC411543.mp3"
+    },
+    {
+      "latin": "Glaucidium passerinum",
+      "file": "media/audio/glaucidium-passerinum-inat.mp3",
+      "sha256": "3956439690d22c4a115ec92bba5506437c7c74b736b6d6acb92ad06076bfa247",
+      "source": "https://www.inaturalist.org/observations/395161559"
+    },
+    {
+      "latin": "Corvus corax",
+      "file": "media/audio/corvus-corax.mp3",
+      "sha256": "1ed71bf4f68b017de07880d360e5cddb53e5566a541efe3e9645f38496be9a0d",
+      "source": "https://commons.wikimedia.org/wiki/File:Corvus_corax_-_Northern_Raven_-_XC101590.ogg"
+    },
+    {
+      "latin": "Columba palumbus",
+      "file": "media/audio/columba-palumbus-inat.mp3",
+      "sha256": "14c48e3f5fcfef90ab3d62c3d2414dad21f576bc79db0b6a7e65ee9573c41c5a",
+      "source": "https://www.inaturalist.org/observations/404256804"
+    },
+    {
+      "latin": "Coloeus monedula",
+      "file": "media/audio/coloeus-monedula.mp3",
+      "sha256": "cab984ce5d4623ba3ad348a0ce313a8ba1d7b1efd604e9f9197d3ec868934017",
+      "source": "https://commons.wikimedia.org/wiki/File:Jackdaws_(Coloeus_monedula)_calling_-_B%C3%A6rum,_Norway_2021-04-03_(01).mp3"
+    },
+    {
+      "latin": "Charadrius hiaticula",
+      "file": "media/audio/charadrius-hiaticula-inat.mp3",
+      "sha256": "11c52930814f855203f560287b6926dd87dbdb381d641ee567d211b1a4e368f3",
+      "source": "https://www.inaturalist.org/observations/410070825"
+    },
+    {
+      "latin": "Tetrao urogallus",
+      "file": "media/audio/tetrao-urogallus.mp3",
+      "sha256": "d550ee7cf3661231f9528f916e211317dfce49f1368b1c9b6e62e38ee034f5eb",
+      "source": "https://commons.wikimedia.org/wiki/File:Western_Capercaillie_(Tetrao_urogallus)_(W1CDR0001418_BD47).ogg"
+    },
+    {
+      "latin": "Cuculus optatus",
+      "file": "media/audio/cuculus-optatus-inat.mp3",
+      "sha256": "c6e58cf3a6201fd6a963c3519a48ca76f857292533a070c174dbbb31e4fa9f17",
+      "source": "https://www.inaturalist.org/observations/385930506"
+    },
+    {
+      "latin": "Bucephala clangula",
+      "file": "media/audio/bucephala-clangula-inat.mp3",
+      "sha256": "0d24c63b5907d1c2933baf794716bc5eb6baf40b73a7787e75246e2c2ac57dd0",
+      "source": "https://www.inaturalist.org/observations/338828732"
+    },
+    {
+      "latin": "Phoenicurus ochruros",
+      "file": "media/audio/phoenicurus-ochruros.mp3",
+      "sha256": "a2c8fd255b757ef343bfd17a222f1f6bd1d258eb5b8e94b42f96174dfef5e09f",
+      "source": "https://commons.wikimedia.org/wiki/File:Phoenicurus_ochruros_-_Black_Redstart_XC560015.mp3"
+    },
+    {
+      "latin": "Linaria flavirostris",
+      "file": "media/audio/linaria-flavirostris-inat.mp3",
+      "sha256": "1f1ab14708403a504dfe604583de6e8ab0165d2754c8ae04d2136ff97b6f7175",
+      "source": "https://www.inaturalist.org/observations/387273198"
+    },
+    {
+      "latin": "Phylloscopus sindianus",
+      "file": "media/audio/phylloscopus-sindianus-inat.mp3",
+      "sha256": "d5284c300516c05f0fdf8a56dad8826830f8c4c202f8142feb67df188333c8f0",
+      "source": "https://www.inaturalist.org/observations/297654544"
+    },
+    {
+      "latin": "Motacilla cinerea",
+      "file": "media/audio/motacilla-cinerea-inat.mp3",
+      "sha256": "857c48a1c2f0894710db0ecead73bf3c202167217dafa85e581d522e67ca2425",
+      "source": "https://www.inaturalist.org/observations/400292908"
+    },
+    {
+      "latin": "Delichon urbicum",
+      "file": "media/audio/delichon-urbicum-inat.mp3",
+      "sha256": "39a4c0e356d1fdf93db6ab209c1660ab60f81f5a65af2ac61a04a44f2774a16e",
+      "source": "https://www.inaturalist.org/observations/397489218"
+    },
+    {
+      "latin": "Corvus frugilegus",
+      "file": "media/audio/corvus-frugilegus-inat.mp3",
+      "sha256": "481634ebef5423c4081182ab1075e98adb4c6a52c9250a77b16549715b271144",
+      "source": "https://www.inaturalist.org/observations/408312179"
+    },
+    {
+      "latin": "Anser fabalis",
+      "file": "media/audio/anser-fabalis-inat.mp3",
+      "sha256": "2713644534c27aa33a8825a26278e260af52118b4e7aa273908e56489cbefca3",
+      "source": "https://www.inaturalist.org/observations/264962663"
+    },
+    {
+      "latin": "Anser serrirostris",
+      "file": "media/audio/anser-serrirostris.mp3",
+      "sha256": "72c1d49fb3e408eceb3d1be552a311480f7c304bfa48dcc11787b132d1e0bb82",
+      "source": "https://commons.wikimedia.org/wiki/File:Anser_serrirostris_-_Tundra_Bean_Goose_XC512591.mp3"
+    },
+    {
+      "latin": "Falco columbarius",
+      "file": "media/audio/falco-columbarius.mp3",
+      "sha256": "9a564c28cad5417dde24a7f5049b505630f30e213e36f8c7f799e242bcce7a63",
+      "source": "https://commons.wikimedia.org/wiki/File:Falco_columbarius_-_Merlin_XC77877.mp3"
+    },
+    {
+      "latin": "Hirundo rustica",
+      "file": "media/audio/hirundo-rustica.mp3",
+      "sha256": "f854c40979e442dc1d9ca3550b6ef2c086131577ab009941e3ceb035ec8ddc77",
+      "source": "https://commons.wikimedia.org/wiki/File:Hirundo_rustica_-_Barn_Swallow_-_XC83449.ogg"
+    },
+    {
+      "latin": "Turdus viscivorus",
+      "file": "media/audio/turdus-viscivorus.mp3",
+      "sha256": "fd67868cb75ca76fc579559fc660e4e85b60069e7c99cac4d1928f012d3bf70a",
+      "source": "https://commons.wikimedia.org/wiki/File:Turdus_viscivorus_-_Mistle_Thrush_XC430010.mp3"
+    },
+    {
+      "latin": "Mergus serrator",
+      "file": "media/audio/mergus-serrator-inat.mp3",
+      "sha256": "73d25277b4e9c3a40f6ed5d34e9f539d23c1ceb2626d8f300cacaba623d932b5",
+      "source": "https://www.inaturalist.org/observations/162816710"
+    },
+    {
+      "latin": "Strix uralensis",
+      "file": "media/audio/strix-uralensis.mp3",
+      "sha256": "8c25548039025f70369769bbcc9b926f1f6e88cf10e37d38d0356fc0a39a6ab1",
+      "source": "https://commons.wikimedia.org/wiki/File:Strix_uralensis_-_Ural_Owl_XC108372.mp3"
+    },
+    {
+      "latin": "Passer domesticus",
+      "file": "media/audio/passer-domesticus.mp3",
+      "sha256": "a2ba1f2a4dbd2267119c67466d1d25c7e5ca387c8c3e8176eb69739d3bc9b16d",
+      "source": "https://commons.wikimedia.org/wiki/File:Passer_domesticus_-_House_Sparrow_-_XC86749.ogg"
+    },
+    {
+      "latin": "Athene noctua",
+      "file": "media/audio/athene-noctua.mp3",
+      "sha256": "37d1980da1e1c6994ba57820e4ed01ddeed5898672855a7191ea7a09ae63f602",
+      "source": "https://commons.wikimedia.org/wiki/File:Steinkauz.OGG"
+    },
+    {
+      "latin": "Turdus pilaris",
+      "file": "media/audio/turdus-pilaris.mp3",
+      "sha256": "c35ad791cde60e6c4ccd15577934a56a684ec0c8c1dbf2596acf29b27b022d22",
+      "source": "https://commons.wikimedia.org/wiki/File:Turdus_pilaris_-_Fieldfare_XC531160.mp3"
+    },
+    {
+      "latin": "Acrocephalus arundinaceus",
+      "file": "media/audio/acrocephalus-arundinaceus.mp3",
+      "sha256": "af0cc7cd0d6c1097c88d7f3f1d8374ea538620d9267dc81f4e97f66ab8ac8ae7",
+      "source": "https://commons.wikimedia.org/wiki/File:Acrocephalus_arundinaceus_-_Great_Reed_Warbler_XC457406.mp3"
+    },
+    {
+      "latin": "Otis tarda",
+      "file": "media/audio/otis-tarda-82.ogg",
+      "sha256": "a7aaee6f7a93f569fd289b3e7fd4936d04655250e180e8a54fa5c3dc17072812",
+      "source": "https://commons.wikimedia.org/wiki/File:G%C5%82os_dropa.ogg"
+    },
+    {
+      "latin": "Coccothraustes coccothraustes",
+      "file": "media/audio/coccothraustes-coccothraustes.mp3",
+      "sha256": "15744c4e5e1a86ee9fefa0e0a942225605b288c5b570a5c2740e7fbdc0f52699",
+      "source": "https://commons.wikimedia.org/wiki/File:Coccothraustes_coccothraustes_-_Hawfinch_XC107638.mp3"
+    },
+    {
+      "latin": "Emberiza aureola",
+      "file": "media/audio/emberiza-aureola-inat.mp3",
+      "sha256": "a4377e5abb397038168425002883e487fde25ee931aa3d3b662896050c48a55c",
+      "source": "https://www.inaturalist.org/observations/262270321"
+    },
+    {
+      "latin": "Dryocopus martius",
+      "file": "media/audio/dryocopus-martius.mp3",
+      "sha256": "c8629ab000366e26aa53d76229f88be5d68e30f190b3ba39c752aa6b2432f0b3",
+      "source": "https://commons.wikimedia.org/wiki/File:Dryocopus_martius_-_spring_call.oga"
+    },
+    {
+      "latin": "Regulus regulus",
+      "file": "media/audio/regulus-regulus.mp3",
+      "sha256": "8ad6de2e2374e1ecbe27620b68361fa83ad467c521482e90d635564e79cb3fc9",
+      "source": "https://commons.wikimedia.org/wiki/File:XC164989-Eurasian_Nuthatch_call_Oostermaet_NL_2014.ogg"
+    },
+    {
+      "latin": "Lanius collurio",
+      "file": "media/audio/lanius-collurio-inat.mp3",
+      "sha256": "9e92376ff90fbe527b007c5c7ac50c1d01a58106163953c225131817d80c7548",
+      "source": "https://www.inaturalist.org/observations/368411585"
+    },
+    {
+      "latin": "Motacilla flava",
+      "file": "media/audio/motacilla-flava-inat.mp3",
+      "sha256": "7f849c08443accdfd69a6834e9df90f6d9986211ff95b7821e58cec2e4a942b5",
+      "source": "https://www.inaturalist.org/observations/396624097"
+    },
+    {
+      "latin": "Erithacus rubecula",
+      "file": "media/audio/erithacus-rubecula-inat.mp3",
+      "sha256": "7d9e8cfc4bf1034afc7844da0a7b564e95b30d8f95e8164d562834e4e582ce3a",
+      "source": "https://www.inaturalist.org/observations/410456635"
+    },
+    {
+      "latin": "Chloris chloris",
+      "file": "media/audio/chloris-chloris-inat.mp3",
+      "sha256": "d9f8202ca452fed3c92a5bc7d460b1ae9c0cffb81f7908dae0fad2273338c0f5",
+      "source": "https://www.inaturalist.org/observations/406191997"
+    },
+    {
+      "latin": "Phylloscopus trochiloides",
+      "file": "media/audio/phylloscopus-trochiloides-inat.mp3",
+      "sha256": "13736f37c09077dd70f9e81a3b838e78e37b9401eec8c8bba7ff8b8df19ee36a",
+      "source": "https://www.inaturalist.org/observations/388003229"
+    },
+    {
+      "latin": "Hippolais icterina",
+      "file": "media/audio/hippolais-icterina-inat.mp3",
+      "sha256": "683a9c3ed4d8547664417357b73bc8a146fab03ce9f830ad8d156d85f5d79db3",
+      "source": "https://www.inaturalist.org/observations/398804755"
+    },
+    {
+      "latin": "Picus viridis",
+      "file": "media/audio/picus-viridis.mp3",
+      "sha256": "053413bbe6944d6323a0d075eb60c62d2a2f2cdb873bdf70aaed5f74a9c5a9d8",
+      "source": "https://commons.wikimedia.org/wiki/File:Picus_viridis_-_European_Green_Woodpecker_XC416424.mp3"
+    },
+    {
+      "latin": "Alcedo atthis",
+      "file": "media/audio/alcedo-atthis.mp3",
+      "sha256": "19d3885cc944e48024b8719b50b5a38939199697bc02810deda7bdccca72bb49",
+      "source": "https://commons.wikimedia.org/wiki/File:Alcedo_atthis_-_Common_Kingfisher_XC476785.mp3"
+    },
+    {
+      "latin": "Circaetus gallicus",
+      "file": "media/audio/circaetus-gallicus-inat.mp3",
+      "sha256": "2c8e785f5b67da8d006bfdac8d6bb8f750b44392668dde065319b29cc5365c47",
+      "source": "https://www.inaturalist.org/observations/372865217"
+    },
+    {
+      "latin": "Pluvialis apricaria",
+      "file": "media/audio/pluvialis-apricaria.mp3",
+      "sha256": "d6d5c6cac3cf6eb120fac8f986b72fbe92b7620a5d54d93b597046ab27b239b9",
+      "source": "https://commons.wikimedia.org/wiki/File:Pluvialis_apricaria_-_European_Golden_Plover_XC471077.mp3"
+    },
+    {
+      "latin": "Merops apiaster",
+      "file": "media/audio/merops-apiaster.mp3",
+      "sha256": "ec10dfb91509d1acda5ad73dc8c585390da9308a96fde33d53c72a0a8d8705c6",
+      "source": "https://commons.wikimedia.org/wiki/File:Merops_apiaster_-_European_Bee-eater_XC477953.mp3"
+    },
+    {
+      "latin": "Fringilla coelebs",
+      "file": "media/audio/fringilla-coelebs.mp3",
+      "sha256": "c8e9f22a215ec8068c3aa28446e257532ab08f2a6ed91af339e8f18f659ee7da",
+      "source": "https://commons.wikimedia.org/wiki/File:Fringilla_coelebs_-_Common_Chaffinch_XC582029.mp3"
+    },
+    {
+      "latin": "Oriolus oriolus",
+      "file": "media/audio/oriolus-oriolus.mp3",
+      "sha256": "987ff69f4d31df69829d43023fd33d51024430ce93fbc2aca167359a7a5109bf",
+      "source": "https://commons.wikimedia.org/wiki/File:Oriolus_oriolus_-_Eurasian_Golden_Oriole_XC481644.mp3"
+    },
+    {
+      "latin": "Acrocephalus agricola",
+      "file": "media/audio/acrocephalus-agricola-inat.mp3",
+      "sha256": "f1dd695fd2f5fcac7b3fc3a608ab9313cc2e7b4eb2cc24683d01489d96a23bb1",
+      "source": "https://www.inaturalist.org/observations/262670765"
+    },
+    {
+      "latin": "Arenaria interpres",
+      "file": "media/audio/arenaria-interpres-inat.mp3",
+      "sha256": "0d792e54d0a0296bd370c8e8e6cc989554043e156644836284f3cb74d7e207ae",
+      "source": "https://www.inaturalist.org/observations/400830530"
+    },
+    {
+      "latin": "Gallinula chloropus",
+      "file": "media/audio/gallinula-chloropus.mp3",
+      "sha256": "40012854221483083bf8efd0d4686aadbe935279678fac081c7fcbc174a672c4",
+      "source": "https://commons.wikimedia.org/wiki/File:Gallinula_chloropus_-_Common_Moorhen_XC545003.mp3"
+    },
+    {
+      "latin": "Emberiza schoeniclus",
+      "file": "media/audio/emberiza-schoeniclus.mp3",
+      "sha256": "6aee0c725c0a4ed3c53c88b67c5cedccee32493333da70199f57b68b558fa51a",
+      "source": "https://commons.wikimedia.org/wiki/File:Emberiza_schoeniclus_-_Common_Reed_Bunting_XC552170.mp3"
+    },
+    {
+      "latin": "Acrocephalus schoenobaenus",
+      "file": "media/audio/acrocephalus-schoenobaenus-inat.mp3",
+      "sha256": "e9976951cc71cfa616ce96d370e68ac0450552d129600f8acd7471eb28025610",
+      "source": "https://www.inaturalist.org/observations/385637906"
+    },
+    {
+      "latin": "Serinus serinus",
+      "file": "media/audio/serinus-serinus.mp3",
+      "sha256": "ff28cf83e71159c77c19522c070f75d63092d3c702b0e7019ef1f976148055bb",
+      "source": "https://commons.wikimedia.org/wiki/File:Serinus_serinus_-_European_Serin_XC471334.mp3"
+    },
+    {
+      "latin": "Buteo buteo",
+      "file": "media/audio/buteo-buteo-inat.mp3",
+      "sha256": "7584a7755e696ccfa09cdbe6ea109150e9a6c46d46e349be69510573d5864e43",
+      "source": "https://www.inaturalist.org/observations/406975329"
+    },
+    {
+      "latin": "Nucifraga caryocatactes",
+      "file": "media/audio/nucifraga-caryocatactes.mp3",
+      "sha256": "8d90a58c47f35225d7ce8c09fce6daa0ff62b5b5a274f4e63cfa9e737deea567",
+      "source": "https://commons.wikimedia.org/wiki/File:Nucifraga_caryocatactes_-_Spotted_Nutcracker_XC441534.mp3"
+    },
+    {
+      "latin": "Columba oenas",
+      "file": "media/audio/columba-oenas-inat.mp3",
+      "sha256": "b9afafeda4e9f6672ff759082bacd1ac2ee392d59abe2f1d5f97cb82f118c89c",
+      "source": "https://www.inaturalist.org/observations/392063125"
+    },
+    {
+      "latin": "Larus fuscus",
+      "file": "media/audio/larus-fuscus-inat.mp3",
+      "sha256": "103bba30459fc49fb99404ac67e250dfb7a41ee655ab52184aaa63ed24691881",
+      "source": "https://www.inaturalist.org/observations/354551000"
+    },
+    {
+      "latin": "Loxia curvirostra",
+      "file": "media/audio/loxia-curvirostra.mp3",
+      "sha256": "e351d9147dc1e9a3b2e2520b43ad64493d64593246252a8940ecbca784648a85",
+      "source": "https://commons.wikimedia.org/wiki/File:Loxia_curvirostra_-_Red_Crossbill_XC254481.mp3"
+    },
+    {
+      "latin": "Falco vespertinus",
+      "file": "media/audio/falco-vespertinus-inat.mp3",
+      "sha256": "9cb43210cacdd27635ceb48d5ae422a55ca8218fa15e6566c60fbfdd382345dc",
+      "source": "https://www.inaturalist.org/observations/215547787"
+    },
+    {
+      "latin": "Caprimulgus europaeus",
+      "file": "media/audio/caprimulgus-europaeus-inat.mp3",
+      "sha256": "2fabb1ed78d9fc6c3a854a251e2f339dfe55a1fc8855b80bb9c09e6c1969580e",
+      "source": "https://www.inaturalist.org/observations/388726452"
+    },
+    {
+      "latin": "Larus delawarensis",
+      "file": "media/audio/larus-delawarensis-inat.mp3",
+      "sha256": "ea95e7b84963fe2df66b61ba09dbc5d3326d4b0f8285f674a04304bef55f32fc",
+      "source": "https://www.inaturalist.org/observations/387735123"
+    },
+    {
+      "latin": "Streptopelia decaocto",
+      "file": "media/audio/streptopelia-decaocto-inat.mp3",
+      "sha256": "705ac8b7b5451f7720a5553749e6519ca6c0a6fabfd3e2d320bf1e1ff76c82fd",
+      "source": "https://www.inaturalist.org/observations/406840512"
+    },
+    {
+      "latin": "Linaria cannabina",
+      "file": "media/audio/linaria-cannabina-inat.mp3",
+      "sha256": "ad65345fb2536f1ebe66b59e9eb928a6a8629a513868e9008f22a1e571dd779f",
+      "source": "https://www.inaturalist.org/observations/402959848"
+    },
+    {
+      "latin": "Crex crex",
+      "file": "media/audio/crex-crex.mp3",
+      "sha256": "cdb2f5fa60aae47fc8adaaad489805319afba9299e65a88df255e04ab0e5b698",
+      "source": "https://commons.wikimedia.org/wiki/File:Derkacz_Crex_crex_sound_July_2021_Obserwacje_BirdNET_-_Derkacz_-_2021-07-04_19_42_49.wav"
+    },
+    {
+      "latin": "Troglodytes troglodytes",
+      "file": "media/audio/troglodytes-troglodytes-inat.mp3",
+      "sha256": "d86c8971eab9fcd53fc57085e6e57bd27e5ceb1057e6b791b4a60c91c3228920",
+      "source": "https://www.inaturalist.org/observations/410061488"
+    },
+    {
+      "latin": "Aythya ferina",
+      "file": "media/audio/aythya-ferina-inat.mp3",
+      "sha256": "d170e6c926a3734f7fa750dc78393dd5149ff8f1f7ab51341e52d945d5e89502",
+      "source": "https://www.inaturalist.org/observations/167009751"
+    },
+    {
+      "latin": "Gavia stellata",
+      "file": "media/audio/gavia-stellata-inat.mp3",
+      "sha256": "203944288c87ecf2d49bdc2262e11d02e8477a3bf8300b41ac6c24a3a0ba160f",
+      "source": "https://www.inaturalist.org/observations/240457986"
+    },
+    {
+      "latin": "Branta ruficollis",
+      "file": "media/audio/branta-ruficollis.mp3",
+      "sha256": "e0e8009eaae165e13a10d97ff4ba206eec9911dd29273bf911cb0028a42bdb7c",
+      "source": "https://commons.wikimedia.org/wiki/File:Red-breasted_Goose_call_(Branta_ruficollis).ogg"
+    },
+    {
+      "latin": "Calidris canutus",
+      "file": "media/audio/calidris-canutus-inat.mp3",
+      "sha256": "93ee0185843d92d3f8e4d7317b41bdc43589b185aeab6114a2d602ec69ed7780",
+      "source": "https://www.inaturalist.org/observations/116402934"
+    },
+    {
+      "latin": "Anthus cervinus",
+      "file": "media/audio/anthus-cervinus-inat.mp3",
+      "sha256": "648274ef34dd8aa69aeed51eedae7399549c0c4737b8632eaa3eaca765f46727",
+      "source": "https://www.inaturalist.org/observations/407227053"
+    },
+    {
+      "latin": "Netta rufina",
+      "file": "media/audio/netta-rufina-inat.mp3",
+      "sha256": "a642aa600a8dca46663a753db2425a20e5f4efd5aab5b6d418255d8167e3ab48",
+      "source": "https://www.inaturalist.org/observations/69516643"
+    },
+    {
+      "latin": "Podiceps auritus",
+      "file": "media/audio/podiceps-auritus-inat.mp3",
+      "sha256": "70a1dbaa04c27110813679b9f766c3ceeed3fde5f4ad4adaeaae24baa15cf3e4",
+      "source": "https://www.inaturalist.org/observations/138889748"
+    },
+    {
+      "latin": "Milvus milvus",
+      "file": "media/audio/milvus-milvus.mp3",
+      "sha256": "a0c68446821da44c23a4fe4aa5ed9da9a5e0a1433463b68b928c1f8fcc7f7fef",
+      "source": "https://commons.wikimedia.org/wiki/File:Milvus_milvus_-_Red_Kite_XC518958.mp3"
+    },
+    {
+      "latin": "Falco rusticolus",
+      "file": "media/audio/falco-rusticolus.ogg",
+      "sha256": "e275e709f8b9a5b61816dd559f3b383d1f7807ae689a40df10935562e272ca97",
+      "source": "https://commons.wikimedia.org/wiki/File:Falco_rusticolus.ogg"
+    },
+    {
+      "latin": "Phalaropus lobatus",
+      "file": "media/audio/phalaropus-lobatus-inat.mp3",
+      "sha256": "823201d258e5bbfcf3817162db55941e9e8acd561de848741bcc715634c37b3e",
+      "source": "https://www.inaturalist.org/observations/253024330"
+    },
+    {
+      "latin": "Anas platyrhynchos",
+      "file": "media/audio/anas-platyrhynchos.mp3",
+      "sha256": "32bac345900de3d7b43fdc3a324bca08219266c056b45ee9e261046f05242eef",
+      "source": "https://commons.wikimedia.org/wiki/File:Anas_platyrhynchos_-_Mallard_XC62258.mp3"
+    },
+    {
+      "latin": "Perisoreus infaustus",
+      "file": "media/audio/perisoreus-infaustus-inat.mp3",
+      "sha256": "43380a31ba649cd8680c762b5f55d46c43edf2f3007a67294a96675daee36c64",
+      "source": "https://www.inaturalist.org/observations/68214609"
+    },
+    {
+      "latin": "Haematopus ostralegus",
+      "file": "media/audio/haematopus-ostralegus.mp3",
+      "sha256": "1a188d7303a7e65b5aa0a1299b79e173537756ecae52473a380df09bfd37a1d7",
+      "source": "https://commons.wikimedia.org/wiki/File:Haematopus_ostralegus_-_Eurasian_Oystercatcher_XC503632.mp3"
+    },
+    {
+      "latin": "Calcarius lapponicus",
+      "file": "media/audio/calcarius-lapponicus.wav",
+      "sha256": "cf5d35636b628fd6435d84e9be038ea50e538213839462980b158699a0955267",
+      "source": "https://commons.wikimedia.org/wiki/File:Calcarius_lapponicus_30352.wav"
+    },
+    {
+      "latin": "Cygnus cygnus",
+      "file": "media/audio/cygnus-cygnus.mp3",
+      "sha256": "e1fa6cdb4c276beafb01512c721fa8969faec88d9946901ceb212ed45f6f9ce1",
+      "source": "https://commons.wikimedia.org/wiki/File:Cygnus_cygnus_-_Whooper_Swan_XC510800.mp3"
+    },
+    {
+      "latin": "Cygnus olor",
+      "file": "media/audio/cygnus-olor-inat.mp3",
+      "sha256": "a1daea633e35e40e65e0daf47a9838339f6136de503149c7123f53d6660c2c31",
+      "source": "https://www.inaturalist.org/observations/398806920"
+    },
+    {
+      "latin": "Prunella modularis",
+      "file": "media/audio/prunella-modularis.mp3",
+      "sha256": "dfa6300e18d3c5367d604a39f7f47902ab29b8082f44171d1e916585a0687c8a",
+      "source": "https://commons.wikimedia.org/wiki/File:Prunella_modularis_-_Dunnock_XC546169.mp3"
+    },
+    {
+      "latin": "Lullula arborea",
+      "file": "media/audio/lullula-arborea.mp3",
+      "sha256": "7e53d8b0fd898a2426c39931b0fe075df8dc998e4c1e885cfdaa150a6fc46015",
+      "source": "https://commons.wikimedia.org/wiki/File:Woodlark_(Lullula_arborea)_(W1CDR0001500_BD8).ogg"
+    },
+    {
+      "latin": "Anthus trivialis",
+      "file": "media/audio/anthus-trivialis.mp3",
+      "sha256": "7d342c947a8583f014154fe2286c61758a904cb080f84512e253b21aa383612c",
+      "source": "https://commons.wikimedia.org/wiki/File:Anthus_trivialis_-_Tree_Pipit_XC588228.mp3"
+    },
+    {
+      "latin": "Anthus pratensis",
+      "file": "media/audio/anthus-pratensis.mp3",
+      "sha256": "1333d8542f791023301fdb4d3025469a6d4110640720d308c3d0b650122c468b",
+      "source": "https://commons.wikimedia.org/wiki/File:Anthus_pratensis_-_Meadow_Pipit_XC501787.mp3"
+    },
+    {
+      "latin": "Saxicola rubetra",
+      "file": "media/audio/saxicola-rubetra-inat.mp3",
+      "sha256": "003bc3817e6785af1b41ecdd3417a34bee242db60d6bb15bafc439833679a922",
+      "source": "https://www.inaturalist.org/observations/383568702"
+    },
+    {
+      "latin": "Fulica atra",
+      "file": "media/audio/fulica-atra-inat.mp3",
+      "sha256": "2900f88447ae70d0c1045d9ffb41a96424774094667979e19a36bab90bcd0b24",
+      "source": "https://www.inaturalist.org/observations/385635374"
+    },
+    {
+      "latin": "Botaurus minutus",
+      "file": "media/audio/botaurus-minutus-inat.mp3",
+      "sha256": "cdd6814daa7a2a571ff6992e2811229bf8d6ffa58a19655fcfa0f00ac2431978",
+      "source": "https://www.inaturalist.org/observations/372257472"
+    },
+    {
+      "latin": "Sternula albifrons",
+      "file": "media/audio/sternula-albifrons-inat.mp3",
+      "sha256": "599fb0957d5747023163c2bae886d7e54c8d3660697d26c2655686c6b7548927",
+      "source": "https://www.inaturalist.org/observations/388784631"
+    },
+    {
+      "latin": "Ficedula parva",
+      "file": "media/audio/ficedula-parva-inat.mp3",
+      "sha256": "7743f192983e7a911109c7509d5c90fa1794edecab7ae24a41b206afadb4f240",
+      "source": "https://www.inaturalist.org/observations/373870702"
+    },
+    {
+      "latin": "Tachybaptus ruficollis",
+      "file": "media/audio/tachybaptus-ruficollis-inat.mp3",
+      "sha256": "27fc0a807f51bc974646d6316c81b7a89af5144739bf2ef833ecd0c8be0ad720",
+      "source": "https://www.inaturalist.org/observations/394157637"
+    },
+    {
+      "latin": "Hydrocoloeus minutus",
+      "file": "media/audio/hydrocoloeus-minutus-inat.mp3",
+      "sha256": "5868aaa7afed66216affd69312d1a5d7d092f4f88fcb6bf2a56f04ab2df081d7",
+      "source": "https://www.inaturalist.org/observations/78059195"
+    },
+    {
+      "latin": "Cygnus columbianus",
+      "file": "media/audio/cygnus-columbianus-inat.mp3",
+      "sha256": "820566cebfba88c4e0056d509b879f8960ecd673dd2deaf67115ff62901a65e5",
+      "source": "https://www.inaturalist.org/observations/408540809"
+    },
+    {
+      "latin": "Zapornia parva",
+      "file": "media/audio/zapornia-parva-inat.mp3",
+      "sha256": "c550c2f42324ed0c43b5609d8b8f599ee2640197bc8ce517177f4ef5268cbc39",
+      "source": "https://www.inaturalist.org/observations/359267059"
+    },
+    {
+      "latin": "Clanga pomarina",
+      "file": "media/audio/clanga-pomarina-inat.mp3",
+      "sha256": "a52a7ae60ca7b86caccbb7ed4aff39b0b350cadeae6eb20bcac7f6ccc3dd4f62",
+      "source": "https://www.inaturalist.org/observations/351710709"
+    },
+    {
+      "latin": "Dryobates minor",
+      "file": "media/audio/dryobates-minor-inat.mp3",
+      "sha256": "c3acc62024c8a66657f8f482308b6b0d36de20d195a6de3f50700eee7a3abb55",
+      "source": "https://www.inaturalist.org/observations/395721683"
+    },
+    {
+      "latin": "Rissa tridactyla",
+      "file": "media/audio/rissa-tridactyla-inat.mp3",
+      "sha256": "00c03dfded3edeeec4d87d36434b1cb90969704cc6e9092a0aeae502f148b691",
+      "source": "https://www.inaturalist.org/observations/374598114"
+    },
+    {
+      "latin": "Xenus cinereus",
+      "file": "media/audio/xenus-cinereus-inat.mp3",
+      "sha256": "6a2ce6b7ea3b052d5b07584ab5ad1fb4850dea003db0311ac52a06561808a661",
+      "source": "https://www.inaturalist.org/observations/361548364"
+    },
+    {
+      "latin": "Larus marinus",
+      "file": "media/audio/larus-marinus-inat.mp3",
+      "sha256": "d1779205b2eb61c14e144db227d75ea4046613d910aab3c30ea0e0cd5a8f46e0",
+      "source": "https://www.inaturalist.org/observations/327351425"
+    },
+    {
+      "latin": "Aythya marila",
+      "file": "media/audio/aythya-marila-inat.mp3",
+      "sha256": "b8c911fb417403f4f3bbb439787d5bdb85cc942f234ce52e18656557a603585c",
+      "source": "https://www.inaturalist.org/observations/117572475"
+    },
+    {
+      "latin": "Clangula hyemalis",
+      "file": "media/audio/clangula-hyemalis-inat.mp3",
+      "sha256": "639567d4fc11b19ed0f5abd0dc84a675fb94109c6d161451738e72b6cf11bff0",
+      "source": "https://www.inaturalist.org/observations/354775740"
+    },
+    {
+      "latin": "Periparus ater",
+      "file": "media/audio/periparus-ater-inat.mp3",
+      "sha256": "b7cb219e6abcae3f35622194ae10b60382ad1be2e51eda9f194ee4153d16ab08",
+      "source": "https://www.inaturalist.org/observations/408081986"
+    },
+    {
+      "latin": "Aegolius funereus",
+      "file": "media/audio/aegolius-funereus.mp3",
+      "sha256": "c6c9bb30e02c4f3e35420b2f831f0426280c9d50cfdfb797f126bca49e9358c2",
+      "source": "https://commons.wikimedia.org/wiki/File:Aegolius_funereus_-_Boreal_Owl_XC407208.mp3"
+    },
+    {
+      "latin": "Ficedula albicollis",
+      "file": "media/audio/ficedula-albicollis-inat.mp3",
+      "sha256": "be003b7a78142adb80c9c23fb2029f0ab0a4a1331eb9f13695470823cc70b06d",
+      "source": "https://www.inaturalist.org/observations/363476876"
+    },
+    {
+      "latin": "Ficedula hypoleuca",
+      "file": "media/audio/ficedula-hypoleuca-inat.mp3",
+      "sha256": "c79e9ebbbf8cc920db0f0295b9f78251bbd75483355d8f1644560e3ff88daa64",
+      "source": "https://www.inaturalist.org/observations/406975323"
+    },
+    {
+      "latin": "Phoenicurus phoenicurus",
+      "file": "media/audio/phoenicurus-phoenicurus.mp3",
+      "sha256": "71d455d2473edf5dc474ba1743dbc274f63f374dff8000d143cbd067732d2e9e",
+      "source": "https://commons.wikimedia.org/wiki/File:Phoenicurus_phoenicurus_-_Common_Redstart_XC468918.mp3"
+    },
+    {
+      "latin": "Streptopelia turtur",
+      "file": "media/audio/streptopelia-turtur.mp3",
+      "sha256": "5a832bab94072dd71a5c444b0e3eff6decf89fa0ef258f4e5d72a0c36ac40edc",
+      "source": "https://commons.wikimedia.org/wiki/File:Streptopelia_turtur_-_European_Turtle_Dove_XC481626.mp3"
+    },
+    {
+      "latin": "Oenanthe oenanthe",
+      "file": "media/audio/oenanthe-oenanthe-inat.mp3",
+      "sha256": "0d852410d5b76c78e825b6cfdbd731fd455fb17fa0fe39d6256d990909fa4652",
+      "source": "https://www.inaturalist.org/observations/376682786"
+    },
+    {
+      "latin": "Cuculus canorus",
+      "file": "media/audio/cuculus-canorus.mp3",
+      "sha256": "53aaa4cac747b72e45a1b15bfb1e41980651d57f3f3ffb053e224e4d1f312124",
+      "source": "https://commons.wikimedia.org/wiki/File:Cuculus_canorus_-_Common_Cuckoo_XC542432.mp3"
+    },
+    {
+      "latin": "Cyanistes caeruleus",
+      "file": "media/audio/cyanistes-caeruleus-inat.mp3",
+      "sha256": "59eb36830c8815fe08b9e037a545152fd08211e2b13d916e2bfcdb1ff659a41e",
+      "source": "https://www.inaturalist.org/observations/407812713"
+    },
+    {
+      "latin": "Emberiza citrinella",
+      "file": "media/audio/emberiza-citrinella-inat.mp3",
+      "sha256": "c090344af5a4fb76c47680433829607a8c661ae3d31ff16d391b32dede0dc074",
+      "source": "https://www.inaturalist.org/observations/398806757"
+    },
+    {
+      "latin": "Certhia familiaris",
+      "file": "media/audio/certhia-familiaris-inat.mp3",
+      "sha256": "deda993aa0c12431aeb5876fa22c4b4d50f72e498422af4db514482df424e85e",
+      "source": "https://www.inaturalist.org/observations/404257138"
+    },
+    {
+      "latin": "Falco tinnunculus",
+      "file": "media/audio/falco-tinnunculus-inat.mp3",
+      "sha256": "b5a7c8fe1ef306ed63d34888c7f0e67f585f289c8afcb0aed5464dc40f1e57da",
+      "source": "https://www.inaturalist.org/observations/406976245"
+    },
+    {
+      "latin": "Locustella naevia",
+      "file": "media/audio/locustella-naevia-inat.mp3",
+      "sha256": "52d73cb511e5a87a428158c56e8ebd20f23013e30c2aaba9143b4eb811782cf6",
+      "source": "https://www.inaturalist.org/observations/400417782"
+    },
+    {
+      "latin": "Sturnus vulgaris",
+      "file": "media/audio/sturnus-vulgaris-inat.mp3",
+      "sha256": "d2d68c8c30c8e4a017ae0093fffd26b16fbb24cf03793f1d0ce53e25563a909e",
+      "source": "https://www.inaturalist.org/observations/410243745"
+    },
+    {
+      "latin": "Luscinia luscinia",
+      "file": "media/audio/luscinia-luscinia.mp3",
+      "sha256": "3d40fac113fb4880a695908bb7244ea5cd2bca7faf3eac539a110780037e7da0",
+      "source": "https://commons.wikimedia.org/wiki/File:Luscinia_luscinia_-_Thrush_Nightingale_XC537550.mp3"
+    },
+    {
+      "latin": "Emberiza rustica",
+      "file": "media/audio/emberiza-rustica-inat.mp3",
+      "sha256": "fdfba894fc9f1e7622b5d715d1d100d72d6e4326b2bfc74fcc8ae65f9d0ec984",
+      "source": "https://www.inaturalist.org/observations/304660323"
+    },
+    {
+      "latin": "Tadorna ferruginea",
+      "file": "media/audio/tadorna-ferruginea-inat.mp3",
+      "sha256": "3257ca39121a861e1ae8307c0ecdec46f062b2b7a3b7f0c53bef7c822db061cc",
+      "source": "https://www.inaturalist.org/observations/405545583"
+    },
+    {
+      "latin": "Chroicocephalus ridibundus",
+      "file": "media/audio/chroicocephalus-ridibundus.mp3",
+      "sha256": "b3d9585be4481d30a2048f0a766e37ef793921a973a6e626667e1e332009daeb",
+      "source": "https://commons.wikimedia.org/wiki/File:Chroicocephalus_ridibundus_-_Black-headed_Gull_XC571971.mp3"
+    },
+    {
+      "latin": "Anthus hodgsoni",
+      "file": "media/audio/anthus-hodgsoni-inat.mp3",
+      "sha256": "5de1af7a8751dfb3774a2cbe4050d6ba3b84b676de68116ab194dfad09db3547",
+      "source": "https://www.inaturalist.org/observations/361056677"
+    },
+    {
+      "latin": "Cinclus cinclus",
+      "file": "media/audio/cinclus-cinclus-inat.mp3",
+      "sha256": "dc4af54c4c5606bf6efcdacb0b58c79695980d849f94d613a385ed7c88bbbff0",
+      "source": "https://www.inaturalist.org/observations/371954911"
+    },
+    {
+      "latin": "Aegithalos caudatus",
+      "file": "media/audio/aegithalos-caudatus.mp3",
+      "sha256": "e85ee88cdc8af4986fa70a07b89451668dc45daf4b1581c3e6ff83bec968051a",
+      "source": "https://commons.wikimedia.org/wiki/File:Aegithalos_caudatus_-_Long-tailed_Tit_-_XC114614.ogg"
+    },
+    {
+      "latin": "Haliaeetus albicilla",
+      "file": "media/audio/haliaeetus-albicilla-inat.mp3",
+      "sha256": "524f855d0b873faefce01d934bbb9bf760338a7ebf27d06d4050b4f24725ed42",
+      "source": "https://www.inaturalist.org/observations/349473925"
+    },
+    {
+      "latin": "Hieraaetus pennatus",
+      "file": "media/audio/hieraaetus-pennatus-inat.mp3",
+      "sha256": "2c03340705001ed19b24194174ebf0bc00d6742e557999f5cc70914d33b5deb4",
+      "source": "https://www.inaturalist.org/observations/394381396"
+    },
+    {
+      "latin": "Pernis apivorus",
+      "file": "media/audio/pernis-apivorus-inat.mp3",
+      "sha256": "9319b148248f92f2880b2dffa606dcb1584d5517043f9e9d711b64be9ce984f9",
+      "source": "https://www.inaturalist.org/observations/383302236"
+    },
+    {
+      "latin": "Turdus philomelos",
+      "file": "media/audio/turdus-philomelos-inat.mp3",
+      "sha256": "8d9c59cf58d1ceae9ea35f2db113bad790589c2fd3ed95746956135fae2fb01c",
+      "source": "https://www.inaturalist.org/observations/396023162"
+    },
+    {
+      "latin": "Tadorna tadorna",
+      "file": "media/audio/tadorna-tadorna-inat.mp3",
+      "sha256": "f54207a2a89bfdea3d3ef5521e8ebd4c5d337f1294bfb396ad473a4593a074f1",
+      "source": "https://www.inaturalist.org/observations/358212713"
+    },
+    {
+      "latin": "Phylloscopus trochilus",
+      "file": "media/audio/phylloscopus-trochilus-inat.mp3",
+      "sha256": "f6b0e6a520fd911d8fe54fedc3ed8470e611c35aecdc1d8182cb6adfcda6beff",
+      "source": "https://www.inaturalist.org/observations/397746218"
+    },
+    {
+      "latin": "Phylloscopus inornatus",
+      "file": "media/audio/phylloscopus-inornatus-inat.mp3",
+      "sha256": "b80f03cf38b97d3f2ab0db612c1c9afa2dd18c41075dc754afc7580f965d3456",
+      "source": "https://www.inaturalist.org/observations/340586098"
+    },
+    {
+      "latin": "Phylloscopus collybita",
+      "file": "media/audio/phylloscopus-collybita-inat.mp3",
+      "sha256": "7bd45256afa2ba942fe0c6dfaa27b93f706b458db329b110d09a36e3357f6cfb",
+      "source": "https://www.inaturalist.org/observations/405817310"
+    },
+    {
+      "latin": "Phylloscopus sibilatrix",
+      "file": "media/audio/phylloscopus-sibilatrix-inat.mp3",
+      "sha256": "d86a782f236f7c9f86f21af5801921af04a5a63da7e129d65aef55e4f71adbb9",
+      "source": "https://www.inaturalist.org/observations/374590272"
+    },
+    {
+      "latin": "Actitis hypoleucos",
+      "file": "media/audio/actitis-hypoleucos-inat.mp3",
+      "sha256": "ac2de2831552c70ed1dea24e3ab4984ed49e84ee8960d3a2ba50d01b7d94193e",
+      "source": "https://www.inaturalist.org/observations/398529990"
+    },
+    {
+      "latin": "Coturnix coturnix",
+      "file": "media/audio/coturnix-coturnix-inat.mp3",
+      "sha256": "4159282929e26feaeb49d7dc75596cdf543dc3d001e1585c14334aca247332cc",
+      "source": "https://www.inaturalist.org/observations/392618038"
+    },
+    {
+      "latin": "Accipiter nisus",
+      "file": "media/audio/accipiter-nisus-inat.mp3",
+      "sha256": "9292b99f25a08c3f59f2078f5e4143c9e42a6e2037ba294723745065f3ca0612",
+      "source": "https://www.inaturalist.org/observations/389428945"
+    },
+    {
+      "latin": "Calidris temminckii",
+      "file": "media/audio/calidris-temminckii.mp3",
+      "sha256": "f1bd2692dcfdc6c5142bd8422a0f2116df8bfc2b5f42f66c282a8810c71909f4",
+      "source": "https://commons.wikimedia.org/wiki/File:Calidris_temminckii_song.ogg"
+    },
+    {
+      "latin": "Calidris alba",
+      "file": "media/audio/calidris-alba-inat.mp3",
+      "sha256": "70683918fda7dadd28ed7b13d0f63d319e807f017b7a9ca0b512703ac1a75202",
+      "source": "https://www.inaturalist.org/observations/401651272"
+    },
+    {
+      "latin": "Porzana porzana",
+      "file": "media/audio/porzana-porzana-82.ogg",
+      "sha256": "d8dbdc4edbf7b9d0b13e1051e8e8477c522be9ab4ad135913c27119bc3089b4e",
+      "source": "https://commons.wikimedia.org/wiki/File:Spotted_Crake_(Porzana_porzana)_(W1CDR0001382_BD3).ogg"
+    },
+    {
+      "latin": "Zapornia pusilla",
+      "file": "media/audio/zapornia-pusilla-inat.mp3",
+      "sha256": "187279f292ebdbfb3aef1a8f541cc7a2e6f7bae3a991ef268a23fe1c545df035",
+      "source": "https://www.inaturalist.org/observations/374590732"
+    },
+    {
+      "latin": "Passer montanus",
+      "file": "media/audio/passer-montanus-inat.mp3",
+      "sha256": "405b9415130f392f671511b4c98cdb55bd16cfb2d24152458686024e17b5c606",
+      "source": "https://www.inaturalist.org/observations/391399357"
+    },
+    {
+      "latin": "Alauda arvensis",
+      "file": "media/audio/alauda-arvensis.mp3",
+      "sha256": "ca08d0a9efe6efd43eeec15700a9862a1e906ebe61468129134d2247e5985602",
+      "source": "https://commons.wikimedia.org/wiki/File:Alauda_arvensis_-_Eurasian_Skylark_XC528350.mp3"
+    },
+    {
+      "latin": "Circus cyaneus",
+      "file": "media/audio/circus-cyaneus-inat.mp3",
+      "sha256": "5511215dc8aaafa658e3b541d5df14e87d8534e1a655600a6f3dc717fa72a455",
+      "source": "https://www.inaturalist.org/observations/379967237"
+    },
+    {
+      "latin": "Gavia immer",
+      "file": "media/audio/gavia-immer.mp3",
+      "sha256": "7263ace40989e08c889cf85c1d243c3522e00e398604c5c88e99a73a9d1e7cee",
+      "source": "https://commons.wikimedia.org/wiki/File:Common_loon_yodels.ogg"
+    },
+    {
+      "latin": "Sitta europaea",
+      "file": "media/audio/sitta-europaea-inat.mp3",
+      "sha256": "20bb67e629f80d527d25c1c40600d1f1c7aee1737da86cc593f981db951e57f8",
+      "source": "https://www.inaturalist.org/observations/410058634"
+    },
+    {
+      "latin": "Tringa stagnatilis",
+      "file": "media/audio/tringa-stagnatilis-inat.mp3",
+      "sha256": "0c35346bd32dc2420719b546d818c4200786eabd576adbbacc1ebce90ea57d88",
+      "source": "https://www.inaturalist.org/observations/362457845"
+    },
+    {
+      "latin": "Emberiza calandra",
+      "file": "media/audio/emberiza-calandra-inat.mp3",
+      "sha256": "b8d0bce411eaad3ad7fd8277f0bc0c7c9e42a6afb1a97b7e6490a5e54a78adb0",
+      "source": "https://www.inaturalist.org/observations/382319699"
+    },
+    {
+      "latin": "Plectrophenax nivalis",
+      "file": "media/audio/plectrophenax-nivalis-inat.mp3",
+      "sha256": "0b49ae049b9e44602e43b4df19704b7bf4a08d6ab420a031cf0f0efbb594b4e6",
+      "source": "https://www.inaturalist.org/observations/343432708"
+    },
+    {
+      "latin": "Locustella lanceolata",
+      "file": "media/audio/locustella-lanceolata-inat.mp3",
+      "sha256": "8cf836e80fb31a37b5aa293c63e60748553359ee4b7a78b9b7ac09ee6162db8c",
+      "source": "https://www.inaturalist.org/observations/335222534"
+    },
+    {
+      "latin": "Remiz pendulinus",
+      "file": "media/audio/remiz-pendulinus-inat.mp3",
+      "sha256": "848fa88a040ccb0601d69f5bac568d640159b4410a74702582591830307ecde3",
+      "source": "https://www.inaturalist.org/observations/405514247"
+    },
+    {
+      "latin": "Sterna hirundo",
+      "file": "media/audio/sterna-hirundo-inat.mp3",
+      "sha256": "3e8b2a5607b8edf50b34f9ce14aacf8a4db4a789ab620d962d6d2e3f4703da37",
+      "source": "https://www.inaturalist.org/observations/361184333"
+    },
+    {
+      "latin": "Locustella fluviatilis",
+      "file": "media/audio/locustella-fluviatilis-inat.mp3",
+      "sha256": "e49943620b2c7c0751b1cd2ed91b44023f768d2434f23acb8226d492f7840889",
+      "source": "https://www.inaturalist.org/observations/369709953"
+    },
+    {
+      "latin": "Eremophila alpestris",
+      "file": "media/audio/eremophila-alpestris-inat.mp3",
+      "sha256": "d969d3b0057f234aec21ec9ba9fc193d0248c329fe23559ff48c436a84354c6c",
+      "source": "https://www.inaturalist.org/observations/402938174"
+    },
+    {
+      "latin": "Phoenicopterus roseus",
+      "file": "media/audio/phoenicopterus-roseus-inat.mp3",
+      "sha256": "f828c42cd095172cce5bfaa5ab693592918df551909645786f2313dfd2bfd443",
+      "source": "https://www.inaturalist.org/observations/325698139"
+    },
+    {
+      "latin": "Tetrastes bonasia",
+      "file": "media/audio/tetrastes-bonasia-inat.mp3",
+      "sha256": "b28d7bde676bf71657ec73255d3514c5ab4573c0ccdad8f2fed0eba8e80feb7a",
+      "source": "https://www.inaturalist.org/observations/408448408"
+    },
+    {
+      "latin": "Acrocephalus dumetorum",
+      "file": "media/audio/acrocephalus-dumetorum.mp3",
+      "sha256": "7f95c4bf00af9d70bb8d7b29a85635b5c52f8ac36159196adf61925791586f51",
+      "source": "https://commons.wikimedia.org/wiki/File:Acrocephalus_dumetorum_-_Blyth%27s_Reed_Warbler_XC566094.mp3"
+    },
+    {
+      "latin": "Emberiza hortulana",
+      "file": "media/audio/emberiza-hortulana-inat.mp3",
+      "sha256": "a09b1b1203814910ab4aabca7220b7accb1ca3d6705d5b55e39f4e6583e555f9",
+      "source": "https://www.inaturalist.org/observations/368029999"
+    },
+    {
+      "latin": "Sylvia borin",
+      "file": "media/audio/sylvia-borin-inat.mp3",
+      "sha256": "c509749253b159f6feef425987d078e0a207d020e47928ebc946397125eb8b13",
+      "source": "https://www.inaturalist.org/observations/379438698"
+    },
+    {
+      "latin": "Falco peregrinus",
+      "file": "media/audio/falco-peregrinus-inat.mp3",
+      "sha256": "10437284fd847d96789c9ad3d050df44ed65e00d4113e5466a2df8d0dcb40206",
+      "source": "https://www.inaturalist.org/observations/405326575"
+    },
+    {
+      "latin": "Bombycilla garrulus",
+      "file": "media/audio/bombycilla-garrulus-inat.mp3",
+      "sha256": "1f5922bca7b67582a6c43819fe2d1039c85abf031eb16a70091bb622dc9b17ce",
+      "source": "https://www.inaturalist.org/observations/410246179"
+    },
+    {
+      "latin": "Mareca penelope",
+      "file": "media/audio/mareca-penelope.mp3",
+      "sha256": "59f1dc35a9b1ace66e9a25e78bfa1db104e8a7bfbb7eb8143257f43ade0d4a68",
+      "source": "https://commons.wikimedia.org/wiki/File:Mareca_penelope_-_Eurasian_Wigeon_XC507245.mp3"
+    },
+    {
+      "latin": "Lanius borealis",
+      "file": "media/audio/lanius-borealis-inat.mp3",
+      "sha256": "a892df5987d401ce599928530e9c1c46ddbf2c70630518e68629887e1957c867",
+      "source": "https://www.inaturalist.org/observations/271246656"
+    },
+    {
+      "latin": "Picus canus",
+      "file": "media/audio/picus-canus.mp3",
+      "sha256": "4514de62fb40e5325087cf119b8ece7dddd05c2bf694a02a9c69725cc9f65e38",
+      "source": "https://commons.wikimedia.org/wiki/File:Picus_canus_-_Grey-headed_Woodpecker_XC501791.mp3"
+    },
+    {
+      "latin": "Corvus cornix",
+      "file": "media/audio/corvus-cornix.mp3",
+      "sha256": "c89a17ae68179e8b91c8e527b1c1aae7399022b3974ca2ede9b07a202b51904b",
+      "source": "https://commons.wikimedia.org/wiki/File:Corvus_cornix_-_Hooded_Crow_XC405788.mp3"
+    },
+    {
+      "latin": "Perdix perdix",
+      "file": "media/audio/perdix-perdix-inat.mp3",
+      "sha256": "23a7e1d01336f86cfa56ce0168640b401e429fe6d426fc9df432998840cf0210",
+      "source": "https://www.inaturalist.org/observations/406850422"
+    },
+    {
+      "latin": "Muscicapa striata",
+      "file": "media/audio/muscicapa-striata.mp3",
+      "sha256": "69ad1225110358bee3ac35e397f8335df829ad9566c557301c2fc551331e2d14",
+      "source": "https://commons.wikimedia.org/wiki/File:Muscicapa_striata_-_Spotted_Flycatcher_XC342793.mp3"
+    },
+    {
+      "latin": "Strix aluco",
+      "file": "media/audio/strix-aluco.mp3",
+      "sha256": "a86bbdea2322ddbe0e47ac9aeacdab5adcab21f613c066dd61be2d3c297b9aae",
+      "source": "https://commons.wikimedia.org/wiki/File:Strix_aluco_-_Tawny_Owl_XC565862.mp3"
+    },
+    {
+      "latin": "Curruca communis",
+      "file": "media/audio/curruca-communis.mp3",
+      "sha256": "6efe6ef7aa1d49efbddc2df032ff07f0888b02730c8d2fd8fcdbfec72e8176d6",
+      "source": "https://commons.wikimedia.org/wiki/File:Sylvia_communis_-_Common_Whitethroat_XC503635.mp3"
+    },
+    {
+      "latin": "Mareca strepera",
+      "file": "media/audio/mareca-strepera.mp3",
+      "sha256": "c58406e6fcd249865208f73bf1b7cf356147ec040bcd27c0266d3fdcff079955",
+      "source": "https://commons.wikimedia.org/wiki/File:Mareca_strepera_-_Gadwall_XC436359.mp3"
+    },
+    {
+      "latin": "Ardea cinerea",
+      "file": "media/audio/ardea-cinerea-inat.mp3",
+      "sha256": "a7f0d5777e0806e0504661d9138f6fa17914a11f5a12a8e6ad66807b12ae3d4b",
+      "source": "https://www.inaturalist.org/observations/400830518"
+    },
+    {
+      "latin": "Larus argentatus",
+      "file": "media/audio/larus-argentatus.mp3",
+      "sha256": "ae6efd68b13693c81b875720af6783eea5281a6606d27c67673d420424d59fea",
+      "source": "https://commons.wikimedia.org/wiki/File:XC707075_-_European_Herring_Gull_-_Larus_argentatus.mp3"
+    },
+    {
+      "latin": "Podiceps grisegena",
+      "file": "media/audio/podiceps-grisegena-inat.mp3",
+      "sha256": "8ff5b137ca951b7e0377d33ecfa83b959107a0d1b1415c51102de23247a66a62",
+      "source": "https://www.inaturalist.org/observations/297264749"
+    },
+    {
+      "latin": "Grus grus",
+      "file": "media/audio/grus-grus-inat.mp3",
+      "sha256": "b9d3a8f4f3bbd99ecdd6cbb002b7a6b739f7c846047637fd5ac4766b2135e7fc",
+      "source": "https://www.inaturalist.org/observations/409707984"
+    },
+    {
+      "latin": "Lanius excubitor",
+      "file": "media/audio/lanius-excubitor-inat.mp3",
+      "sha256": "1d679190d29496c21d37f2d092bc7c444202100e24de22618d16ade9f84b2451",
+      "source": "https://www.inaturalist.org/observations/331399324"
+    },
+    {
+      "latin": "Saxicola maurus",
+      "file": "media/audio/saxicola-maurus-inat.mp3",
+      "sha256": "073bb8faa3fd37311fedd3d6f7c482e6133f3511ff325c4781030232b4e32eb6",
+      "source": "https://www.inaturalist.org/observations/85366985"
+    },
+    {
+      "latin": "Larus canus",
+      "file": "media/audio/larus-canus-inat.mp3",
+      "sha256": "2c57cbe3329fe68742cb4c51d0159f803f9f64acd320dff059179f4901cfe683",
+      "source": "https://www.inaturalist.org/observations/357154440"
+    },
+    {
+      "latin": "Coracias garrulus",
+      "file": "media/audio/coracias-garrulus-inat.mp3",
+      "sha256": "aefe65a89572c0b1a5e5839da814be5f1e0d4171ec0099fa35a1d8952e093ba3",
+      "source": "https://www.inaturalist.org/observations/324720560"
+    },
+    {
+      "latin": "Columba livia",
+      "file": "media/audio/columba-livia-inat.mp3",
+      "sha256": "d54e385e616394dfae25873c37a78c9e897c57016db285e2a3d7004a9663f774",
+      "source": "https://www.inaturalist.org/observations/354294294"
+    },
+    {
+      "latin": "Pandion haliaetus",
+      "file": "media/audio/pandion-haliaetus-inat.mp3",
+      "sha256": "40c7c7a22c35ec69d9cd84e7b410f6cea15d6872cd7c8ea709c957490f25380a",
+      "source": "https://www.inaturalist.org/observations/408544793"
+    },
+    {
+      "latin": "Curruca curruca",
+      "file": "media/audio/curruca-curruca-inat.mp3",
+      "sha256": "10d332447988e0933b60e26b98c828e42d64f8f563246fca76a1905cfabef0be",
+      "source": "https://www.inaturalist.org/observations/397756079"
+    },
+    {
+      "latin": "Pyrrhula pyrrhula",
+      "file": "media/audio/pyrrhula-pyrrhula-inat.mp3",
+      "sha256": "fb146a23bcd0228cee24b74805f059638fab0cc5cbd65a4f67692152f9f1f826",
+      "source": "https://www.inaturalist.org/observations/407026198"
+    },
+    {
+      "latin": "Garrulus glandarius",
+      "file": "media/audio/garrulus-glandarius-inat.mp3",
+      "sha256": "4e26d400790b0111ec84e92bba32978fec5ace1055bcc3e6129daae29c10ef5a",
+      "source": "https://www.inaturalist.org/observations/408676881"
+    },
+    {
+      "latin": "Locustella luscinioides",
+      "file": "media/audio/locustella-luscinioides-inat.mp3",
+      "sha256": "ac5642ba4470cc7174b92b9c2e618fe6f6e1c1225e2e8d70abff9f8a8b8f92bb",
+      "source": "https://www.inaturalist.org/observations/370548437"
+    },
+    {
+      "latin": "Pica pica",
+      "file": "media/audio/pica-pica-84.ogg",
+      "sha256": "0865ea6c517e92fab4405efe3fe65070fa62f833d7c31ec28fb925ed566b9b87",
+      "source": "https://commons.wikimedia.org/wiki/File:Eurasian_Magpie_(Pica_pica)_(W1CDR0001537_BD28).ogg"
+    },
+    {
+      "latin": "Loxia pytyopsittacus",
+      "file": "media/audio/loxia-pytyopsittacus-inat.mp3",
+      "sha256": "80b799c7a662af88f4b1a783a16dc474e7b576e9cc0dc287a1d6822b83686191",
+      "source": "https://www.inaturalist.org/observations/266431345"
+    },
+    {
+      "latin": "Otus scops",
+      "file": "media/audio/otus-scops.mp3",
+      "sha256": "2051a3d63f6cf8f5ea3df4ef1415e7b1d3d68a7b3e59c632f496507c76cd03aa",
+      "source": "https://commons.wikimedia.org/wiki/File:Otus_scops_-_Eurasian_Scops_Owl_XC554663.mp3"
+    },
+    {
+      "latin": "Numenius phaeopus",
+      "file": "media/audio/numenius-phaeopus-inat.mp3",
+      "sha256": "05d94540e4667aa88c5e0487cff369c9b29fb562789b6f9c0d51bd434db2ac97",
+      "source": "https://www.inaturalist.org/observations/393758525"
+    },
+    {
+      "latin": "Dendrocoptes medius",
+      "file": "media/audio/dendrocoptes-medius-inat.mp3",
+      "sha256": "54053739f2257a65eb4353973e9c70a3ad5c19f5c4efad2cf78c5daba0c4c8ea",
+      "source": "https://www.inaturalist.org/observations/404543358"
+    },
+    {
+      "latin": "Falco naumanni",
+      "file": "media/audio/falco-naumanni-inat.mp3",
+      "sha256": "ba68c8fa03ede72de759ed2940bcc0a5eece466ef3951b9b259ea34dc6e8cc52",
+      "source": "https://www.inaturalist.org/observations/225136213"
+    },
+    {
+      "latin": "Tetrax tetrax",
+      "file": "media/audio/tetrax-tetrax-inat.mp3",
+      "sha256": "8076e1c010b1ca81e338aa4dd5ff06423941df14a544ba96f91689df551ab81b",
+      "source": "https://www.inaturalist.org/observations/367646283"
+    },
+    {
+      "latin": "Phylloscopus borealis",
+      "file": "media/audio/phylloscopus-borealis-inat.mp3",
+      "sha256": "ffc9301366543a5c4fcb31b28e67a7e230643688e06bc0f9cab7847b004c67fa",
+      "source": "https://www.inaturalist.org/observations/372413337"
+    },
+    {
+      "latin": "Lyrurus tetrix",
+      "file": "media/audio/lyrurus-tetrix-inat.mp3",
+      "sha256": "bff5f73604ca7ca212423a6a4861dfab375bfc75e48985cbfbef9e1b25d39fe1",
+      "source": "https://www.inaturalist.org/observations/362707723"
+    },
+    {
+      "latin": "Astur gentilis",
+      "file": "media/audio/astur-gentilis-inat.mp3",
+      "sha256": "7b9aa9d1cd0ec92723577c69a90d19b831563d541759af6a3fa690d935dd6d7d",
+      "source": "https://www.inaturalist.org/observations/405949700"
+    },
+    {
+      "latin": "Tringa totanus",
+      "file": "media/audio/tringa-totanus-inat.mp3",
+      "sha256": "3a778384a885230dc3d615bf253a1ebe7de216c2ea6594a4416db7b3793ad0d0",
+      "source": "https://www.inaturalist.org/observations/394911236"
+    },
+    {
+      "latin": "Acrocephalus scirpaceus",
+      "file": "media/audio/acrocephalus-scirpaceus.mp3",
+      "sha256": "bb28af926a9e6ffbf289b6f1bca4e447f88a9248caf305597bf8f9c7420a524c",
+      "source": "https://commons.wikimedia.org/wiki/File:Acrocephalus_scirpaceus_-_Eurasian_Reed_Warbler_XC503636.mp3"
+    },
+    {
+      "latin": "Picoides tridactylus",
+      "file": "media/audio/picoides-tridactylus-inat.mp3",
+      "sha256": "2b19a54566c21d73091bf02ded010f8544f7130263ffd8f1aed9f3de60b7e0e9",
+      "source": "https://www.inaturalist.org/observations/374703014"
+    },
+    {
+      "latin": "Pluvialis squatarola",
+      "file": "media/audio/pluvialis-squatarola-inat.mp3",
+      "sha256": "c68dabccd0bfb8c6cf1eb06b5af2a6757e30be82f8195a4fc864df90f41b01d7",
+      "source": "https://www.inaturalist.org/observations/255211753"
+    },
+    {
+      "latin": "Upupa epops",
+      "file": "media/audio/upupa-epops.mp3",
+      "sha256": "6b4f3a7da7452e84f4bdf060fab4edb4ecf0cf62d0d217472990c574b94be27f",
+      "source": "https://commons.wikimedia.org/wiki/File:Upupa_epops_%C2%B7_XC135728.ogg"
+    },
+    {
+      "latin": "Chlidonias hybrida",
+      "file": "media/audio/chlidonias-hybrida-inat.mp3",
+      "sha256": "4a7fd1ace631f86db8223841093a9d10399c82bff10dea6e407c64cfa988e2bb",
+      "source": "https://www.inaturalist.org/observations/369399175"
+    },
+    {
+      "latin": "Panurus biarmicus",
+      "file": "media/audio/panurus-biarmicus.mp3",
+      "sha256": "a14a48ec1b814711e3b5df43b8d49d8cbdee38471da2ccbaa2216e5732783acb",
+      "source": "https://commons.wikimedia.org/wiki/File:Bearded_Tit_(Panurus_biarmicus)_(W1CDR0001379_BD5).ogg"
+    },
+    {
+      "latin": "Asio otus",
+      "file": "media/audio/asio-otus-84.mp3",
+      "sha256": "c92bf8546a205d5ec60145dad8e6b9bdf7f57fb7b51c8ac1e1b5f9c90a2f9fca",
+      "source": "https://commons.wikimedia.org/wiki/File:Asio_otus_-_Long-eared_Owl_XC571684.mp3"
+    },
+    {
+      "latin": "Phasianus colchicus",
+      "file": "media/audio/phasianus-colchicus-inat.mp3",
+      "sha256": "a3a0071b94eee73eb2a6303a1f5eab32bf4f85523cf018de67f171648cfd5985",
+      "source": "https://www.inaturalist.org/observations/399041614"
+    },
+    {
+      "latin": "Bubo bubo",
+      "file": "media/audio/bubo-bubo-inat.mp3",
+      "sha256": "ac8e4bf6f47c93d9ad6602f2a19fe2c079e2e84dad2a0f9e5daafc08e26d4546",
+      "source": "https://www.inaturalist.org/observations/408315582"
+    },
+    {
+      "latin": "Tringa glareola",
+      "file": "media/audio/tringa-glareola-inat.mp3",
+      "sha256": "75d627fd695a889bc70d3fce58857aee05e8601f8233f03c6c1abdecdc7d0b2e",
+      "source": "https://www.inaturalist.org/observations/403269227"
+    },
+    {
+      "latin": "Himantopus himantopus",
+      "file": "media/audio/himantopus-himantopus-inat.mp3",
+      "sha256": "c1b51390d40bf583be0b201122fc4f192e240c16f10318577e41dec070cf45d8",
+      "source": "https://www.inaturalist.org/observations/381816426"
+    },
+    {
+      "latin": "Lophophanes cristatus",
+      "file": "media/audio/lophophanes-cristatus-inat.mp3",
+      "sha256": "e8ac5f7bcb38181530cdcc19eb95d3ef0552e0ea686ac5ccdc6d75597a882706",
+      "source": "https://www.inaturalist.org/observations/402239092"
+    },
+    {
+      "latin": "Aythya fuligula",
+      "file": "media/audio/aythya-fuligula-inat.mp3",
+      "sha256": "2cd5c5d8e31beb1e846d6d5efe5aa1be02c8651a77764a9a1371a576654b3bfb",
+      "source": "https://www.inaturalist.org/observations/272814647"
+    },
+    {
+      "latin": "Galerida cristata",
+      "file": "media/audio/galerida-cristata-inat.mp3",
+      "sha256": "9d9665999d7c03913bb4f7c750a974a16a95cc7acb66710f65e0768c453819d0",
+      "source": "https://www.inaturalist.org/observations/408478248"
+    },
+    {
+      "latin": "Falco subbuteo",
+      "file": "media/audio/falco-subbuteo-inat.mp3",
+      "sha256": "77707c77570ea6fd8cc18fdaf97ed356ccc737e695bee0ccaed5673d2510f4f1",
+      "source": "https://www.inaturalist.org/observations/403622013"
+    },
+    {
+      "latin": "Hydroprogne caspia",
+      "file": "media/audio/hydroprogne-caspia-inat.mp3",
+      "sha256": "a13d46c0988c7ab2cd3e2ef0af2568184e611a51e59af5b756f56d0d0eef11ab",
+      "source": "https://www.inaturalist.org/observations/394505596"
+    },
+    {
+      "latin": "Poecile palustris",
+      "file": "media/audio/poecile-palustris-inat.mp3",
+      "sha256": "371645406ac17d2428d5d1935b10833127d9db4d538afecd0df1146fbd050f05",
+      "source": "https://www.inaturalist.org/observations/397478378"
+    },
+    {
+      "latin": "Sylvia atricapilla",
+      "file": "media/audio/sylvia-atricapilla-inat.mp3",
+      "sha256": "af03a27cf905ca3d5a4ba890d4c15691dd7c1d376a59e54e8ae9d0915ced16b5",
+      "source": "https://www.inaturalist.org/observations/406975326"
+    },
+    {
+      "latin": "Ichthyaetus melanocephalus",
+      "file": "media/audio/ichthyaetus-melanocephalus-inat.mp3",
+      "sha256": "77f9aa6654e1ac4d38adb1d81238f8a5866337721abc22df9f87f1eada92e997",
+      "source": "https://www.inaturalist.org/observations/356081185"
+    },
+    {
+      "latin": "Saxicola rubicola",
+      "file": "media/audio/saxicola-rubicola-inat.mp3",
+      "sha256": "fc45987f9dba98b2e9d6e0e981a456eca755e5577893577557b09f5c8e582d87",
+      "source": "https://www.inaturalist.org/observations/394609790"
+    },
+    {
+      "latin": "Calidris alpina",
+      "file": "media/audio/calidris-alpina.mp3",
+      "sha256": "c7bbc41bcfd74ab46d77c6435ea4504a08728949689caec60110364dd461c9d7",
+      "source": "https://commons.wikimedia.org/wiki/File:Calidris_alpina_-_Dunlin_XC545082.mp3"
+    },
+    {
+      "latin": "Tringa ochropus",
+      "file": "media/audio/tringa-ochropus-inat.mp3",
+      "sha256": "3cb731905d926eee27b71f802f4a31e0e13393d626772bd14c8f8cbad965028e",
+      "source": "https://www.inaturalist.org/observations/370291427"
+    },
+    {
+      "latin": "Carpodacus erythrinus",
+      "file": "media/audio/carpodacus-erythrinus-inat.mp3",
+      "sha256": "3e2ec6e2e109ddb47682daf49b5fb55d9face75b102c2c21af7afcf17e14286d",
+      "source": "https://www.inaturalist.org/observations/387950966"
+    },
+    {
+      "latin": "Acanthis flammea",
+      "file": "media/audio/acanthis-flammea-inat.mp3",
+      "sha256": "324db73319175ac6c8b1c8cb6f009f6c072e8dd938610c529ff7c7cfd713c70f",
+      "source": "https://www.inaturalist.org/observations/405155345"
+    },
+    {
+      "latin": "Vanellus vanellus",
+      "file": "media/audio/vanellus-vanellus.mp3",
+      "sha256": "629a1b79e3b417dfcd84867e85fa9642ec5e006f4358a792983bcb3b5f02895c",
+      "source": "https://commons.wikimedia.org/wiki/File:Vanellus_vanellus_-_Northern_Lapwing_XC436942.mp3"
+    },
+    {
+      "latin": "Spinus spinus",
+      "file": "media/audio/spinus-spinus.mp3",
+      "sha256": "5c3bfeeff69e3de73a28e2d58d1749818cc5f02aa3e4fa4a59fc38ea19dccd83",
+      "source": "https://commons.wikimedia.org/wiki/File:Spinus_spinus_-_Eurasian_Siskin_XC539301.mp3"
+    },
+    {
+      "latin": "Anas crecca",
+      "file": "media/audio/anas-crecca-inat.mp3",
+      "sha256": "e02fd40b028c022db80cc4770111f67eecfd90dd708b9917485ecc0752fdb341",
+      "source": "https://www.inaturalist.org/observations/346013652"
+    },
+    {
+      "latin": "Spatula querquedula",
+      "file": "media/audio/spatula-querquedula-inat.mp3",
+      "sha256": "c36dd609746ccd367db5d59da4778f1749294fd052ad90bfd1d157bbcedafa52",
+      "source": "https://www.inaturalist.org/observations/362654893"
+    },
+    {
+      "latin": "Podiceps cristatus",
+      "file": "media/audio/podiceps-cristatus-inat.mp3",
+      "sha256": "d297af6c2ba86238f2006b798301b363a55f58771d8e423b28f689cbdbc51074",
+      "source": "https://www.inaturalist.org/observations/385635385"
+    },
+    {
+      "latin": "Corvus corone",
+      "file": "media/audio/corvus-corone.mp3",
+      "sha256": "6bb2e820bf79a63cd27ebc6e33b2cb60e5eced8293fe90b7fd5db0b21c1ea441",
+      "source": "https://commons.wikimedia.org/wiki/File:Corvus_corone_-_Carrion_Crow_XC509841.mp3"
+    },
+    {
+      "latin": "Chlidonias niger",
+      "file": "media/audio/chlidonias-niger.mp3",
+      "sha256": "405688319fa30f44155890715e419fdd5a2dee5ce7344af52d2ebb6c4bbebe78",
+      "source": "https://commons.wikimedia.org/wiki/File:Chlidonias_niger_-_Black_Tern_XC428430.mp3"
+    },
+    {
+      "latin": "Turdus merula",
+      "file": "media/audio/turdus-merula-inat.mp3",
+      "sha256": "8042dba18e692e0d82360988110940780ed3f1beb138081124bf85d37c56ea74",
+      "source": "https://www.inaturalist.org/observations/410241569"
+    },
+    {
+      "latin": "Milvus migrans",
+      "file": "media/audio/milvus-migrans.mp3",
+      "sha256": "67aaa0edbc85bacc0cb6835f0070204723da446b5361fd748378291b69689b90",
+      "source": "https://commons.wikimedia.org/wiki/File:De-Schwarzmilan.ogg"
+    },
+    {
+      "latin": "Apus apus",
+      "file": "media/audio/apus-apus-inat.mp3",
+      "sha256": "24167dd566c635ff0e6d403f9e051b9019496d36c250366c96919615f7a072ab",
+      "source": "https://www.inaturalist.org/observations/397687153"
+    },
+    {
+      "latin": "Recurvirostra avosetta",
+      "file": "media/audio/recurvirostra-avosetta-inat.mp3",
+      "sha256": "f3ff11ef007ea557eabc73dcdfb63d6f4b15bd477f444cd486c841a8e32de326",
+      "source": "https://www.inaturalist.org/observations/358043710"
+    },
+    {
+      "latin": "Anas acuta",
+      "file": "media/audio/anas-acuta-inat.mp3",
+      "sha256": "e19eb5887a24a5f04d9f322bdffaeccfd559c5a3af0c7971b2a49951aff0e5d8",
+      "source": "https://www.inaturalist.org/observations/269719332"
+    },
+    {
+      "latin": "Spatula clypeata",
+      "file": "media/audio/spatula-clypeata-inat.mp3",
+      "sha256": "d58d7aaad74f9901ffd41fb84d9a1343f7686fd223aecd1c199ca70be233276f",
+      "source": "https://www.inaturalist.org/observations/254933313"
+    },
+    {
+      "latin": "Carduelis carduelis",
+      "file": "media/audio/carduelis-carduelis.mp3",
+      "sha256": "a581fb51d09c6c19d8ca47715808b6c29b2ac46029aa87c28610075cad28e0fa",
+      "source": "https://commons.wikimedia.org/wiki/File:Carduelis_carduelis_-_European_Goldfinch_XC101463.mp3"
+    },
+    {
+      "latin": "Pinicola enucleator",
+      "file": "media/audio/pinicola-enucleator-inat.mp3",
+      "sha256": "1121d0394c3a000912ddb5eabb1737b602e5f0641d1e1737966c3c760d01d0c1",
+      "source": "https://www.inaturalist.org/observations/339401690"
+    },
+    {
+      "latin": "Tringa erythropus",
+      "file": "media/audio/tringa-erythropus-inat.mp3",
+      "sha256": "6005ca95105f7def029b3beb6775ea7e30ab6874d6840fda71abf8681ebdbc3a",
+      "source": "https://www.inaturalist.org/observations/369377481"
+    },
+    {
+      "latin": "Fringilla montifringilla",
+      "file": "media/audio/fringilla-montifringilla.mp3",
+      "sha256": "ee5093e1837db4bb7e03f7273f207cb7146151685ad40449f05b23c6f3c199ff",
+      "source": "https://commons.wikimedia.org/wiki/File:Fringilla_montifringilla_-_Brambling_XC108349.mp3"
+    },
+    {
+      "latin": "Curruca nisoria",
+      "file": "media/audio/curruca-nisoria-inat.mp3",
+      "sha256": "a9c099852c0e913e40e8ed87bef945dd30c78cd74ce44ee450279a766446a05e",
+      "source": "https://www.inaturalist.org/observations/374064116"
+    }
+  ]
+}

@@ -143,10 +143,11 @@ async function windowsFromFile(blob){
    src.buffer=buffer;
    // Optional experimental band-pass for low-frequency hum and high-frequency hiss.
    // Unfiltered Perch inference remains the default because preprocessing can change scores.
-   if($('#m77AIFilter')?.checked){
+   const preset=$('#m83AIProfile')?.value||'off';
+   if($('#m77AIFilter')?.checked||preset!=='off'){
     const hp=offline.createBiquadFilter(),lp=offline.createBiquadFilter();
-    hp.type='highpass';hp.frequency.value=160;hp.Q.value=0.707;
-    lp.type='lowpass';lp.frequency.value=9000;lp.Q.value=0.707;
+    hp.type='highpass';hp.frequency.value=preset==='wind'?420:160;hp.Q.value=0.707;
+    lp.type='lowpass';lp.frequency.value=preset==='hiss'?5700:9000;lp.Q.value=0.707;
     src.connect(hp);hp.connect(lp);lp.connect(offline.destination);
    }else src.connect(offline.destination);
    src.start(0,offset,Math.max(.001,Math.min(segment,buffer.duration-offset)));
