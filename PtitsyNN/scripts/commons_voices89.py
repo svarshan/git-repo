@@ -46,6 +46,9 @@ KNOWN={
  "Ciconia nigra":["File:Black stork.ogg"],
  "Surnia ulula":["File:Northern hawk owl.ogg"],
 }
+# The named Commons film explicitly describes calls of Pallas's gull adults and nestlings.
+# Only its original audio track may be extracted; arbitrary bird videos are not accepted.
+KNOWN_VIDEO={"Ichthyaetus ichthyaetus":["File:Larus ichthyaetus 720p.webm"]}
 RED_FLAGS=re.compile(r"pronunciat|aussprach|prononcia|word spoken|spoken word|speaker:|speech|voiceover|voice-over|interview|narrat|human voice|dictionary|wiktionary",re.I)
 MEDIA_ALLOWED=re.compile(r"\.(?:mp3|ogg|oga|flac|wav|opus)$",re.I)
 ALLOWED_UPLOAD="upload.wikimedia.org"
@@ -101,9 +104,10 @@ def parse_info(latin, title, ii):
     if not isinstance(ii,dict):
         return None
     title=str(title)
-    if not title.startswith("File:") or not MEDIA_ALLOWED.search(title):
+    video_audio=title in KNOWN_VIDEO.get(latin,[])
+    if not title.startswith("File:") or not (MEDIA_ALLOWED.search(title) or video_audio):
         return None
-    if title not in KNOWN.get(latin,[]) and latin.casefold() not in title.replace("_"," ").casefold():
+    if not video_audio and title not in KNOWN.get(latin,[]) and latin.casefold() not in title.replace("_"," ").casefold():
         return None
     if RED_FLAGS.search(title):
         return None
@@ -119,11 +123,18 @@ def parse_info(latin, title, ii):
         return None
     # Some old files have no description, but a definite category/bird filename.
     mimetype=str(ii.get("mime") or "")
-    if not mimetype.startswith("audio/") and mimetype not in ("application/ogg","application/x-ogg"):
-        return None
-    if str(ii.get("mediatype") or "AUDIO").upper()!="AUDIO":
-        return None
-    if int(ii.get("size") or 0)<3000 or int(ii.get("size") or 0)>13_000_000:
+    if video_audio:
+        if mimetype!="video/webm" or str(ii.get("mediatype") or "").upper()!="VIDEO":
+            return None
+        if not re.search(r"\bcalls?\b|\bкрик[иаое]\b",description,re.I):
+            return None
+    else:
+        if not mimetype.startswith("audio/") and mimetype not in ("application/ogg","application/x-ogg"):
+            return None
+        if str(ii.get("mediatype") or "AUDIO").upper()!="AUDIO":
+            return None
+    limit=23_000_000 if video_audio else 13_000_000
+    if int(ii.get("size") or 0)<3000 or int(ii.get("size") or 0)>limit:
         return None
     source="https://commons.wikimedia.org/wiki/"+quote(title.replace(" ","_"),safe=":_()'-")
     return {
@@ -132,12 +143,12 @@ def parse_info(latin, title, ii):
         "sourceTaxon":latin,"quality":"Commons field recording; technical QA only",
         "type":"Bird sound (unverified by independent listening)",
         "recordingId":"WM"+hashlib.sha1(title.encode("utf-8")).hexdigest()[:12],
-        "description":description[:350],
+        "description":description[:350],"videoAudio":video_audio,
     }
 
 
 def retrieve_candidates(latin, deadline):
-    titles=list(dict.fromkeys(KNOWN.get(latin,[])+search_titles(latin)))
+    titles=list(dict.fromkeys(KNOWN.get(latin,[])+KNOWN_VIDEO.get(latin,[])+search_titles(latin)))
     if not titles:
         return []
     entries=[]
@@ -159,14 +170,14 @@ def retrieve_candidates(latin, deadline):
     return sorted(entries,key=lambda e:(0 if "XC" in e["title"] else 1,len(e["title"])))[:8]
 
 
-def download_wikimedia(url,target):
+def download_wikimedia(url,target,max_bytes=13_000_000):
     req=Request(url,headers={"User-Agent":UA})
     total=0
     with urlopen(req,timeout=35) as response:
         final=urlparse(response.geturl())
         if final.scheme!="https" or final.hostname!=ALLOWED_UPLOAD or not final.path.startswith("/wikipedia/commons/"):
             raise ValueError("Commons audio redirected off Wikimedia")
-        if int(response.headers.get("Content-Length") or 0)>13_000_000:
+        if int(response.headers.get("Content-Length") or 0)>max_bytes:
             raise ValueError("Commons audio too large")
         with target.open("wb") as stream:
             while True:
@@ -174,7 +185,7 @@ def download_wikimedia(url,target):
                 if not block:
                     break
                 total+=len(block)
-                if total>13_000_000:
+                if total>max_bytes:
                     raise ValueError("Commons file size exceeded")
                 stream.write(block)
     if total<3500:
@@ -191,7 +202,7 @@ def candidates_for(latin,deadline,existing_hashes):
         try:
             with tempfile.TemporaryDirectory() as tmp:
                 original=Path(tmp)/"source.bin"
-                download_wikimedia(item["url"],original)
+                download_wikimedia(item["url"],original,max_bytes=23_000_000 if item.get("videoAudio") else 13_000_000)
                 transcode(original,preview,ffmpeg_path())
             quality=verify_audio(preview)
             if filehash(preview) in existing_hashes:
@@ -233,7 +244,7 @@ def main(apply=False):
             try:
                 if apply:
                     receipt=promote(by_latin[latin],item,item["filePath"],hashes,item["metrics"])
-                    by_latin[latin]["audioCredits"]["audioProcessing"]="Wikimedia Commons source transcoded to 32kHz mono MP3, up to 45 seconds"
+                    by_latin[latin]["audioCredits"]["audioProcessing"]="Wikimedia Commons "+("field video audio track" if item.get("videoAudio") else "audio source")+" transcoded to 32kHz mono MP3, up to 45 seconds"
                     by_latin[latin]["audioCredits"]["speciesMatch"]="Commons title/category indicates this bird; unverified by human"
                     chosen=receipt
                 else:

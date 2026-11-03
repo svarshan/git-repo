@@ -21,6 +21,18 @@ class OpenBirdVoiceSources89(unittest.TestCase):
         self.assertIsNone(parse_info("Anser anser",title,{**ii,"extmetadata":{**ii["extmetadata"],"LicenseUrl":{"value":"https://creativecommons.org/licenses/by-nc/4.0/"}}}))
         self.assertIsNone(parse_info("Anser anser",title,{**ii,"mime":"video/webm"}))
 
+    def test_only_explicit_pallas_gull_field_video_audio_is_eligible(self):
+        ii={"url":"https://upload.wikimedia.org/wikipedia/commons/1/12/gull.webm",
+            "mime":"video/webm","mediatype":"VIDEO","size":15510000,
+            "extmetadata":{"LicenseUrl":{"value":"https://creativecommons.org/licenses/by-sa/4.0/"},
+                           "Artist":{"value":"Dmitry Mikhirev"},
+                           "ImageDescription":{"value":"Pallas's Gull colony. Calls of adults and nestlings."}}}
+        row=parse_info("Ichthyaetus ichthyaetus","File:Larus ichthyaetus 720p.webm",ii)
+        self.assertIsNotNone(row)
+        self.assertTrue(row["videoAudio"])
+        self.assertIsNone(parse_info("Larus hyperboreus","File:Larus ichthyaetus 720p.webm",ii))
+        self.assertIsNone(parse_info("Ichthyaetus ichthyaetus","File:Larus ichthyaetus 720p.webm",{**ii,"extmetadata":{**ii["extmetadata"],"ImageDescription":{"value":"No audio description"}}}))
+
     def test_tierstimmenarchiv_strict_species_sound_and_author(self):
         identifier="TSA:Lanius_minor_Kr_54_07_1"
         body="""<div class="audio-player"><audio id="audioplayer"
