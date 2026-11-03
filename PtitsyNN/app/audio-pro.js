@@ -46,7 +46,7 @@ function player(b){
  add(root,add(segment,markA,markB,clearSegment,segmentStatus));
  const credit=b.audioCredits||{};
  root.appendChild(make('p','audio-pro-muted','Тип звука: '+(credit.vocalization||'не определён')+' · Источник: '+(credit.author||'не указан')+' · '+(credit.license||'не указана')+'. Технический контроль: '+(credit.audioQuality?'пройден':'данных нет')+'. Вид определён по метаданным; не проверен прослушиванием специалиста.'+(credit.audioProcessing?' Запись из 8.4 уже обрабатывалась; исходный файл автора может отсутствовать.':'')));
- if(credit.source&&/^https:\/\/(commons\.wikimedia\.org\/|xeno-canto\.org\/|freesound\.org\/|archive\.org\/)/.test(credit.source)){
+ if(credit.source&&/^https:\/\/(commons\.wikimedia\.org\/|xeno-canto\.org\/|(?:www\.)?inaturalist\.org\/observations\/|freesound\.org\/|archive\.org\/)/.test(credit.source)){
   const link=make('a','audio-pro-source','Открыть источник ↗');link.href=credit.source;link.target='_blank';link.rel='noopener noreferrer';root.appendChild(link);
  }
  const select=make('select','audio-pro-problem');

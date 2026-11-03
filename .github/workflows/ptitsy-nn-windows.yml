@@ -167,10 +167,26 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download 41492046191 --repo "${{ github.repository }}" --name Ptitsy-NN-8.4-Media-Snapshot --dir ../baseline84
-          if ($LASTEXITCODE -ne 0) { throw 'Exact 8.4 media backup unavailable; refusing a potentially regressed build' }
+          $tag = 'ptitsy-v8.4-media-backup-99b785e'
+          $backup = '../Ptitsy-8.4-Media-Backup.zip'
+          gh release download $tag --repo "${{ github.repository }}" --pattern 'Ptitsy-8.4-Media-Backup.zip' --dir .. --clobber 2>$null
+          $fromRelease = $LASTEXITCODE -eq 0
+          if ($fromRelease) {
+            Expand-Archive -Path $backup -DestinationPath ../baseline84 -Force
+          } else {
+            gh run download 41492046191 --repo "${{ github.repository }}" --name Ptitsy-NN-8.4-Media-Snapshot --dir ../baseline84
+            if ($LASTEXITCODE -ne 0) { throw 'Exact 8.4 media backup unavailable; refusing a potentially regressed build' }
+          }
           python scripts/restore_baseline85.py ../baseline84
           if ($LASTEXITCODE -ne 0) { throw '8.4 baseline restore or hash verification failed' }
+          if (-not $fromRelease) {
+            gh release view $tag --repo "${{ github.repository }}" --json tagName --jq '.tagName' 2>$null
+            if ($LASTEXITCODE -eq 0) { throw 'Backup release exists but its media ZIP is unavailable; refusing to overwrite it' }
+            Compress-Archive -Path ../baseline84/* -DestinationPath $backup -Force
+            if (-not (Test-Path $backup)) { throw 'Could not prepare persistent 8.4 backup' }
+            gh release create $tag $backup --repo "${{ github.repository }}" --target 99b785e383d3db385203758687535373664ed6ad --title 'MoOLVa 8.4 — резервная копия аудио' --notes 'Архив аудиофайлов, каталога и сведений об источниках из успешной сборки 8.4. Исходный коммит 99b785e. Проверка 265 файлов по SHA-256 выполняется при восстановлении.'
+            if ($LASTEXITCODE -ne 0) { throw 'Could not save persistent 8.4 backup on GitHub' }
+          }
       - name: Audit preserved recordings and collect unreviewed candidates
         timeout-minutes: 18
         shell: pwsh

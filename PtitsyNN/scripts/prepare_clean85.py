@@ -31,7 +31,8 @@ def make(bird):
     # File identity includes source hash, so a later source change cannot silently reuse a stale derivative.
     name = source.stem + '-clean85-' + source_hash[:12] + '.mp3'
     dest = source.parent / name
-    tmp = source.parent / (name + '.tmp.mp3')
+    tmp = ROOT / 'dist' / 'audio85-tmp' / (name + '.tmp.mp3')
+    tmp.parent.mkdir(parents=True, exist_ok=True)
     probe = subprocess.run([FFMPEG, '-nostdin', '-hide_banner', '-i', str(source), '-af',
         'silencedetect=noise=-50dB:d=1.5', '-f', 'null', '-'], stdout=subprocess.DEVNULL,
         stderr=subprocess.PIPE, timeout=120)
@@ -80,8 +81,6 @@ def main():
         raise ValueError('Invalid species count')
     with concurrent.futures.ThreadPoolExecutor(max_workers=4) as pool:
         records = list(pool.map(make, birds))
-    for leftover in (APP / 'media' / 'audio').glob('*-clean85-*.mp3.tmp.mp3'):
-        leftover.unlink(missing_ok=True)
     records = [r for r in records if r]
     by_name = {r['latin']:r for r in records}
     for b in birds:
