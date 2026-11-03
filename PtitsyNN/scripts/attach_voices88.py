@@ -164,7 +164,8 @@ def promote(bird, item, file, existing_hashes, metrics):
     bird['audioFile']='media/audio/'+filename
     bird['audioCredits']={
         'source':item['source'], 'author':item['author'],
-        'license':item['license'], 'licenseUrl':item['license'],
+        'license':item.get('licenseCode') if item['sourcePlatform']=='iNaturalist' else item['license'],
+        'licenseUrl':item['license'],
         'recordingId':item['recordingId'], 'sourcePlatform':item['sourcePlatform'],
         'sourceTaxon':item.get('sourceTaxon') or bird['latin'],
         'vocalization':item.get('type') or 'Звуковой сигнал',
@@ -174,6 +175,13 @@ def promote(bird, item, file, existing_hashes, metrics):
         'speciesHumanVerified':False,'audioQuality':metrics,
         'sha256':digest,
     }
+    if item['sourcePlatform']=='iNaturalist':
+        sound_id=item.get('soundId')
+        if not isinstance(sound_id,int) or sound_id<=0:
+            raise ValueError('Original iNaturalist sound ID missing')
+        bird['audioCredits']['soundId']=sound_id
+        bird['audioCredits']['speciesMatch']='exact scientific taxon name on research-grade iNaturalist observation'
+        bird['audioCredits']['audioProcessing']='FFmpeg: trimmed to at most 45 s, mono 32 kHz MP3'
     existing_hashes.add(digest)
     return {'latin':bird['latin'],'name':bird['name'],'source':item['source'],
             'recordingId':item['recordingId'],'author':item['author'],'license':item['license'],
@@ -261,6 +269,7 @@ def main(minimum=1):
                         raise ValueError('Cross-species duplicate')
                     selected={'recordingId':'iNat:'+soundid,'source':obs,
                               'sourceTaxon':latin,'sourcePlatform':'iNaturalist',
+                              'soundId':int(soundid),'licenseCode':str(item['license']).upper(),
                               'license':lic,'author':author,'quality':'research-grade observation',
                               'type':'Запись наблюдения; тип звука требует проверки',
                               'filePath':dest,'metrics':quality}
