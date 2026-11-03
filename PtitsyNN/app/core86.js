@@ -33,7 +33,7 @@
   const months=seasons[season]||[],zones=[],years=new Set();
   for(const cell of Array.isArray(cells)?cells:[]){
    const hits=(cell.species||[]).filter(x=>x.id===birdId&&Number(x.n)>0&&
-     (!months.length||(Array.isArray(x.months)&&x.months.some(m=>months.includes(Number(m)))));
+     (!months.length||(Array.isArray(x.months)&&x.months.some(m=>months.includes(Number(m))))));
    if(!hits.length)continue;
    const sum=hits.reduce((n,x)=>n+Number(x.n),0);
    for(const x of hits)for(let y=Number(x.fromYear);Number.isInteger(y)&&y<=Number(x.toYear)&&y<2100&&y>=1900;y++)years.add(y);
