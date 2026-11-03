@@ -4,6 +4,19 @@
  const root=document.getElementById('media86'),core=window.MoOLVa86Core;
  if(!root||!core)return;
  const birds=Array.isArray(window.BIRDS_DATA)?window.BIRDS_DATA:[];
+ const newPreviewFiles=Array.isArray(window.MOOLVA_CANDIDATE_VOICES87)?window.MOOLVA_CANDIDATE_VOICES87:[];
+ const previewByLatin=new Map(newPreviewFiles.filter(x=>x&&typeof x.latin==='string'&&typeof x.file==='string'&&x.state==='requires-independent-listening').map(x=>[x.latin,x]));
+ const voiceReviewKey='ptitsy-nn.voice-candidates87.review.v1';
+ function candidateReviews(){try{const x=JSON.parse(localStorage.getItem(voiceReviewKey));return x&&x.version===1&&typeof x.marks==='object'&&x.marks?x.marks:{};}catch{return {};}}
+ function markCandidateVoice(latin,recordingId,verdict){
+  try{
+   const marks=candidateReviews();
+   marks[latin]={recordingId,verdict,markedAt:new Date().toISOString()};
+   localStorage.setItem(voiceReviewKey,JSON.stringify({version:1,marks}));
+   drawQueue();
+  }catch{message('Не удалось сохранить результат прослушивания');}
+ }
+
  const byId=new Map(birds.map(b=>[b.id,b]));
  const reviewKey='ptitsy-nn.media83.review.v1';
  const $=id=>document.getElementById(id);
@@ -17,7 +30,8 @@
   const s=core.summary(birds,reviews()),items=[['Видов',s.species],['Голосов',s.voices+'/'+s.target],
    ['Недостаёт',s.missing.length],['Фото',s.photos+'/'+s.target],
    ['Статей',s.articles+'/'+s.target],['Прослушано человеком',s.audioHuman],
-   ['Фото подтверждено',s.photoHuman],['Сомнительных отметок',s.audioQuestioned+s.photoQuestioned]];
+   ['Фото подтверждено',s.photoHuman],['Сомнительных отметок',s.audioQuestioned+s.photoQuestioned],
+   ['Новых голосов для прослушивания',previewByLatin.size]];
   const host=$('m86Stats');host.replaceChildren();
   for(const [label,value] of items){const x=node('div',null,'m86-stat');x.append(node('strong',value),node('small',label));host.append(x);}
   $('m86Scope').textContent='Наличие файла не означает подтверждение вида. Отметки ручной проверки независимы от технического аудита.';
@@ -33,8 +47,19 @@
    if(b.imageFile){const img=node('img');img.src=b.imageFile;img.alt='Фотография '+b.name;img.loading='lazy';x.append(img);}
    x.append(node('strong',b.name),node('small',b.latin));
    if(kind==='audio'&&b.audioFile){const player=node('audio');player.src=b.audioFile;player.controls=true;player.preload='none';x.append(player);}
+   const candidate=kind==='audio'&&!b.audioFile?previewByLatin.get(b.latin):null;
+   if(candidate){
+    x.append(node('strong','Новый голос Xeno-canto — НЕ проверен экспертом'));
+    x.append(node('small','Загружена реальная лицензированная запись. Техническая проверка пройдена, но вид и посторонние звуки требуют прослушивания.'));
+    const player=node('audio');player.src=candidate.file;player.controls=true;player.preload='none';player.setAttribute('aria-label','Предварительная запись '+b.name);x.append(player);
+    x.append(node('small',candidate.author+' · '+candidate.license+' · качество '+candidate.quality));
+    const a=node('a','Посмотреть запись и автора на Xeno-canto ↗');a.href=candidate.source;a.target='_blank';a.rel='noopener noreferrer';x.append(a);
+    const mark=candidateReviews()[b.latin];x.append(node('small',mark?.recordingId===candidate.recordingId?('Моя отметка: '+(mark.verdict==='plausible'?'прослушано, похоже на вид':'есть сомнения')):'Ожидает ручного прослушивания'));
+    x.append(btn('Прослушал: похоже на вид',()=>markCandidateVoice(b.latin,candidate.recordingId,'plausible')));
+    x.append(btn('Есть сомнения / другой звук',()=>markCandidateVoice(b.latin,candidate.recordingId,'questioned')));
+   }
    const credit=kind==='audio'?b.audioCredits:b.imageCredits;
-   x.append(node('small',credit?(String(credit.author||'Автор не указан')+' · '+String(credit.license||'Лицензия не указана')):'Исходный файл отсутствует'));
+   x.append(node('small',credit?(String(credit.author||'Автор не указан')+' · '+String(credit.license||'Лицензия не указана')):(candidate?'Основного подтверждённого голоса пока нет; выше доступен кандидат.':'Исходный файл отсутствует')));
    if(b.audioFile||b.imageFile)x.append(btn('Открыть контроль материалов',()=>{navigate('media83');$('m83Search').value=b.latin;$('m83Search').dispatchEvent(new Event('input'));}));
    if(!b.audioFile&&kind==='audio')x.append(node('small','Нужна настоящая запись с подходящей лицензией. Подмена запрещена.'));
    x.append(btn('Открыть паспорт',()=>document.dispatchEvent(new CustomEvent('living-open',{detail:b.id}))));
@@ -80,7 +105,7 @@
   area.append(choices,feedback);
  }
  function exportReport(){
-  const report={type:'moolva-8.6-local-media-status',createdAt:new Date().toISOString(),notes:'Metadata and your review marks only. NOT an audio/media backup or expert verification.',summary:core.summary(birds,reviews()),review:reviews(),
+  const report={type:'moolva-8.6-local-media-status',createdAt:new Date().toISOString(),notes:'Metadata and your review marks only. NOT an audio/media backup or expert verification.',summary:core.summary(birds,reviews()),review:reviews(),candidateReview87:candidateReviews(),candidatePreviews87:newPreviewFiles.map(x=>({latin:x.latin,recordingId:x.recordingId,source:x.source,reviewStatus:x.state})),
    missing:birds.filter(b=>!b.audioFile).map(b=>({latin:b.latin,name:b.name}))};
   const file=new Blob([JSON.stringify(report,null,2)],{type:'application/json'}),url=URL.createObjectURL(file),a=node('a');
   a.href=url;a.download='MoOLVa-8.6-media-report.json';a.click();setTimeout(()=>URL.revokeObjectURL(url),2000);
