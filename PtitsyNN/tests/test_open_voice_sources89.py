@@ -37,6 +37,15 @@ class OpenBirdVoiceSources89(unittest.TestCase):
         self.assertIsNone(parse_detail("Lanius minor",identifier,body.replace("/by-sa/","/by-nc-sa/").replace("CC BY-SA","CC BY-NC-SA")))
         self.assertIsNone(parse_detail("Lanius minor",identifier,body.replace("Krey, Winfried","Unknown")))
 
+    def test_archive_historical_taxonomic_alias_is_explicit(self):
+        ident="TSA:Accipiter_brevipes_Lue_60_1_1"
+        body="""<audio src="/download.mp3?unique_identifier=TSA:Accipiter_brevipes_Lue_60_1_1"></audio>
+            <div class="license"><a href="https://creativecommons.org/licenses/by-sa/3.0/de/legalcode">CC BY-SA</a></div>
+            Species Accipiter brevipes Author Lütgens, Hans Collection TSA"""
+        row=parse_detail("Tachyspiza brevipes",ident,body)
+        self.assertIsNotNone(row)
+        self.assertEqual(row["sourceTaxon"],"Accipiter brevipes")
+
     def test_known_mixed_background_recording_is_excluded(self):
         identifier="TSA:Aythya_nyroca_Lue_65_2_1"
         body="""<div class="audio-player"><audio src="/download.mp3?unique_identifier=TSA:Aythya_nyroca_Lue_65_2_1"></audio></div>

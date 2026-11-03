@@ -27,6 +27,7 @@ from stage_xeno87 import transcode, ffmpeg_path, verify_audio
 ORIGIN="https://suche.tierstimmenarchiv.de"
 UA="MoOLVaBirdAtlas/8.6 (research and licensed audio redistribution; github.com/svarshan/git-repo)"
 STAGED=ROOT/"dist"/"tier-audio89"
+SEARCH_ALIASES={"Tachyspiza brevipes":["Accipiter brevipes"]}  # ITIS/GBIF synonym
 PREVIOUS={"Acrocephalus paludicola","Calidris ferruginea","Calidris pugnax",
           "Charadrius dubius","Emberiza pusilla","Eudromias morinellus",
           "Gavia arctica","Gyps fulvus","Larus cachinnans",
@@ -62,26 +63,27 @@ def get(url, limit=180000, binary=False):
 
 def search_ids(latin):
     ids=[]
-    for page in (1,2):
-        url=ORIGIN+"/search/query.html?"+urlencode({
-             "species":latin,"page":page,
-             "requested":"species,duration,description,sound_type,usage_permission"
-        })
-        try:
-            text=get(url,limit=240000)
-        except (OSError,ValueError) as exc:
-            print("TSA SEARCH ERROR",latin,type(exc).__name__,flush=True)
-            break
-        if latin.casefold() not in text.casefold():
-            break
-        found=re.findall(r"TSA:[A-Za-z0-9_-]+",unescape(text))
-        for rid in found:
-            if rid not in ids:
-                ids.append(rid)
-        if len(found)<10 or len(ids)>=20:
-            break
-        time.sleep(.3)
-    return ids[:20]
+    for taxon in [latin]+SEARCH_ALIASES.get(latin,[]):
+        for page in (1,2):
+            url=ORIGIN+"/search/query.html?"+urlencode({
+                 "species":taxon,"page":page,
+                 "requested":"species,duration,description,sound_type,usage_permission"
+            })
+            try:
+                text=get(url,limit=240000)
+            except (OSError,ValueError) as exc:
+                print("TSA SEARCH ERROR",taxon,type(exc).__name__,flush=True)
+                break
+            if taxon.casefold() not in text.casefold():
+                break
+            found=re.findall(r"TSA:[A-Za-z0-9_-]+",unescape(text))
+            for rid in found:
+                if rid not in ids:
+                    ids.append(rid)
+            if len(found)<10 or len(ids)>=22:
+                break
+            time.sleep(.3)
+    return ids[:22]
 
 
 def plaintext(text):
@@ -95,7 +97,10 @@ def parse_detail(latin, identifier, html):
         return None
     if identifier in KNOWN_MIXED:
         return None
-    if latin.casefold() not in plaintext(html).casefold():
+    text_species=plaintext(html).casefold()
+    source_taxon=next((name for name in [latin]+SEARCH_ALIASES.get(latin,[])
+                       if name.casefold() in text_species),None)
+    if source_taxon is None:
         return None
     # Licensing must be extracted from this individual recording, NOT site footer.
     license_section=re.search(r"(?is)<div[^>]+class=['\"][^'\"]*\blicense\b[^'\"]*['\"][^>]*>(.{0,2100})",html)
@@ -129,7 +134,7 @@ def parse_detail(latin, identifier, html):
         return None
     source=ORIGIN+"/search/showdetails.html?"+urlencode({"unique_identifier":identifier,"language":"deutsch"})
     return {"recordingId":identifier,"sourcePlatform":"Tierstimmenarchiv",
-            "sourceTaxon":latin,"source":source,"url":link,
+            "sourceTaxon":source_taxon,"source":source,"url":link,
             "author":author,"license":license_url,
             "quality":"Tierstimmenarchiv; FFmpeg QA",
             "type":"Archived animal voice: species unverified by independent listening",
