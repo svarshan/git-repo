@@ -92,7 +92,7 @@ def photo_from_wikipedia(bird, title):
  for name,inf,credit in file_info(['File:'+title.replace('File:','')]):
   mime=inf.get('mime','')
   if mime not in ('image/jpeg','image/png','image/webp'):continue
-  if re.search(r'map|range|distribution|eggs|nest|drawing|sketch|diagram|illustration|logo',name,re.I):continue
+  if re.search(r'map|range|distribution|egg|eggs|eggshell|clutch|oeuf|eier|nest|drawing|sketch|diagram|illustration|logo|яйц|гнезд',name,re.I):continue
   url=inf.get('thumburl') or inf.get('url')
   if url:return url,credit,mime
  return None
@@ -103,7 +103,7 @@ def media_search(latin,kind):
  for p in q.get('pages',[]):
   name=p.get('title','')
   if not re.search(r'(?<![a-z])'+re.escape(genus)+r'[ _.-]+'+re.escape(species)+r'(?![a-z])',name,re.I):continue
-  if kind=='image' and re.search(r'map|range|distribution|eggs|nest|illustration|drawing|sketch|diagram',name,re.I):continue
+  if kind=='image' and re.search(r'map|range|distribution|egg|eggs|eggshell|clutch|oeuf|eier|nest|illustration|drawing|sketch|diagram|яйц|гнезд',name,re.I):continue
   if kind=='audio' and not re.search(r'song|call|sound|voice|audio|sing|vocal|songbird|пени|крик|голос',name,re.I):continue
   info=(p.get('imageinfo') or [{}])[0]
   mime=info.get('mime','')
