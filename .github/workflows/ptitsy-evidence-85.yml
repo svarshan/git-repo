@@ -1,0 +1,28 @@
+name: Extract verified MoOLVa 8.5 evidence
+on:
+  push:
+    branches:
+      - evidence/ptitsy-8.5-run-41655333655
+permissions:
+  contents: read
+  actions: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download evidence from successful Windows build
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p bundle
+          gh run download 41655333655 --repo "${{ github.repository }}" --name Ptitsy-NN-8.5-Windows --dir bundle
+          test -f bundle/dist/release-evidence/test-report.md
+          test -f bundle/dist/release-evidence/gui-smoke.json
+      - name: Upload real screenshots and test report
+        uses: actions/upload-artifact@v4
+        with:
+          name: Ptitsy-NN-8.5-Verified-Evidence-41655333655
+          path: bundle/dist/release-evidence/**/*
+          if-no-files-found: error
+          retention-days: 30
