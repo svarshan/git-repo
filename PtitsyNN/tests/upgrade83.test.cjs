@@ -28,10 +28,10 @@ test('8.3 geographic evidence only uses sourced cells and seasonal reports',()=>
 test('8.3 branded version, backup inclusion, and genuine release controls stay wired',()=>{
  const read=f=>fs.readFileSync(path.resolve(__dirname,'..',f),'utf8');
  const pkg=JSON.parse(read('package.json')),html=read('app/index.html'),backup=read('app/backup82.js'),core78=read('app/ultra78-core.js'),wf=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(pkg.version,'8.4.0');
+ assert.equal(pkg.version,'8.5.0');
  assert.ok(pkg.build.win.icon.endsWith('moolva.ico'));
  assert.match(html,/id="media83"/);assert.match(html,/src="core83.js"/);assert.match(html,/src="upgrade83.js"/);
  assert.match(backup,/ptitsy-nn\.media83\.review\.v1/);assert.match(core78,/ptitsy-nn\.media83\.review\.v1/);
- assert.match(wf,/Ptitsy-NN-8\.4-Windows/);assert.match(wf,/release_evidence79\.py finalize/);
+ assert.match(wf,/Ptitsy-NN-8\.5-Windows/);assert.match(wf,/release_evidence79\.py finalize/);
  assert.match(html,/id="m83PreUpdate"/);assert.match(backup,/before-update/);
 });

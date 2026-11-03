@@ -64,9 +64,9 @@
   try{
    const previous=localStorage.getItem('ptitsy-nn.installed-version.v1');
    const hadUserData=keys.some(k=>k!=='ptitsy-nn.installed-version.v1'&&localStorage.getItem(k)!==null);
-   const reason=(previous!=='8.4.0'&&(previous!==null||hadUserData))?'before-update':'startup';
+   const reason=(previous!=='8.5.0'&&(previous!==null||hadUserData))?'before-update':'startup';
    await snapshot(reason);
-   localStorage.setItem('ptitsy-nn.installed-version.v1','8.4.0');
+   localStorage.setItem('ptitsy-nn.installed-version.v1','8.5.0');
   }catch(error){report(error);}
  },3000);
  setInterval(()=>snapshot('periodic').catch(report),5*60*1000);

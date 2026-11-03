@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 8.4
+name: Птицы НН — Windows EXE 8.5
 on:
   workflow_dispatch:
     inputs:
@@ -18,6 +18,7 @@ on:
       - '.github/workflows/ptitsy-nn-windows.yml'
 permissions:
   contents: write
+  actions: read
 concurrency:
   group: ptitsy-nn-windows-${{ github.ref }}
   cancel-in-progress: true
@@ -59,7 +60,7 @@ jobs:
         with:
           python-version: '3.12'
       - name: Install catalog downloader
-        run: python -m pip install requests==2.32.5 imageio-ffmpeg==0.6.0 Pillow==11.3.0
+        run: python -m pip install requests==2.32.5 imageio-ffmpeg==0.6.0 Pillow==11.3.0 numpy==2.3.4 webrtcvad-wheels==2.0.14.post1
       # Reuse audited and already downloaded media on subsequent builds.
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
@@ -161,46 +162,31 @@ jobs:
           python -u scripts/enrich_articles.py
         env:
           BIRDS_WIKI_BUDGET_SECONDS: '420'
-      - name: Grow genuine open-licensed voices toward 298 licensed species
-        timeout-minutes: 42
+      - name: Restore and verify exact archived 8.4 audio baseline
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 41492046191 --repo "${{ github.repository }}" --name Ptitsy-NN-8.4-Media-Snapshot --dir ../baseline84
+          if ($LASTEXITCODE -ne 0) { throw 'Exact 8.4 media backup unavailable; refusing a potentially regressed build' }
+          python scripts/restore_baseline85.py ../baseline84
+          if ($LASTEXITCODE -ne 0) { throw '8.4 baseline restore or hash verification failed' }
+      - name: Audit preserved recordings and collect unreviewed candidates
+        timeout-minutes: 18
         shell: pwsh
         run: |
-          python -u scripts/voice_recover84.py
-          if ($LASTEXITCODE -ne 0) { throw '8.4 historical voice recovery failed' }
-          if ('${{ steps.existing-catalog.outputs.ready }}' -eq 'true') {
-            Write-Host 'Searching additional licensed Commons and optional keyed Xeno-canto recordings in preserved catalog'
-            python -u scripts/voice_max.py
-            python -u scripts/openverse_voices.py
-          }
-          python -u scripts/voices_298.py
           python -u scripts/audit_audio.py
-          python -u scripts/verify_cache.py
-        env:
-          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
-          BIRDS_MAX_BUDGET_SECONDS: '210'
-          BIRDS_OPENVERSE_BUDGET_SECONDS: '140'
-          BIRDS_VOICES_298_BUDGET_SECONDS: '1600'
-          BIRDS_84_RECOVERY_SECONDS: '480'
-      - name: Find extra genuine voices for remaining species and report suspect audio
-        timeout-minutes: 14
-        run: |
-          python -u scripts/voices_82.py
-          if ($LASTEXITCODE -ne 0) { throw '8.4 voice discovery failed; do not report success' }
-          python -u scripts/voice_recover84.py
-          if ($LASTEXITCODE -ne 0) { throw '8.4 retry missing historical voices failed' }
-          python -u scripts/audit_audio.py
-          if ($LASTEXITCODE -ne 0) { throw '8.4 audio audit failed' }
-          python scripts/verify_cache.py
-          if ($LASTEXITCODE -ne 0) { throw '8.4 post-audit media cache integrity failed' }
+          if ($LASTEXITCODE -ne 0) { throw '8.5 technical audit failed' }
+          python scripts/voice_guard85.py
+          if ($LASTEXITCODE -ne 0) { throw '8.5 lost an 8.4 recording' }
           python scripts/audio_review82.py
-          if ($LASTEXITCODE -ne 0) { throw '8.4 listening report generation failed' }
+          if ($LASTEXITCODE -ne 0) { throw '8.5 listening report failed' }
           python scripts/audio_review83.py
-          if ($LASTEXITCODE -ne 0) { throw '8.4 cross-species media QA failed' }
+          if ($LASTEXITCODE -ne 0) { throw '8.5 provenance report failed' }
           python scripts/voice_manifest84.py
-          if ($LASTEXITCODE -ne 0) { throw '8.4 provenance and SHA256 manifest failed' }
-        env:
-          BIRDS_VOICES82_BUDGET_SECONDS: '540'
-          BIRDS_84_RECOVERY_SECONDS: '320'
+          if ($LASTEXITCODE -ne 0) { throw '8.5 source manifest failed' }
+          python -u scripts/find_voice_candidates85.py
+          if ($LASTEXITCODE -ne 0) { throw '8.5 candidate search failed' }
       - name: Report true 298-species milestone, including shortfall
         shell: pwsh
         run: |
@@ -231,20 +217,18 @@ jobs:
           Write-Host "Audio QA: accepted $($r.audioTechnicalAccepted) rejected $($r.audioTechnicalRejected)"
           Write-Host "Voices MAX: xeno-canto key configured $($r.maxVoices.xenoApiKeyConfigured) / new sources $($r.maxVoices.newSources)"
           Write-Host "Voices ULTRA: total sound tracks $($r.audioTracksTotal) | additional tracks $($r.extraAudioTracks) | multi-track species $($r.multiTrackSpecies)"
-      - name: Try improving genuine voice coverage in validated cached catalog
-        if: steps.existing-catalog.outputs.ready == 'true' && github.event_name == 'workflow_dispatch'
-        timeout-minutes: 5
-        run: |
-          python -u scripts/voice_max.py
-          python -u scripts/ultra_tracks.py
-          python -u scripts/audit_audio.py
-          python scripts/verify_cache.py
-        env:
-          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
-          BIRDS_MAX_BUDGET_SECONDS: '100'
-          BIRDS_ULTRA_BUDGET_SECONDS: '65'
       - name: Inventory every missing licensed bird voice from the actual generated catalog
-        run: python scripts/release_evidence79.py inventory
+        run: |
+          python scripts/voice_guard85.py
+          if ($LASTEXITCODE -ne 0) { throw 'A voice from 8.4 is missing or its archival bytes have changed' }
+          python scripts/audio_audit85.py
+          if ($LASTEXITCODE -ne 0) { throw '8.5 audio audit failed' }
+          python scripts/prepare_clean85.py
+          if ($LASTEXITCODE -ne 0) { throw '8.5 derivative preparation failed' }
+          python scripts/voice_guard85.py
+          if ($LASTEXITCODE -ne 0) { throw '8.4 voice archive changed during processing' }
+          python scripts/release_evidence79.py inventory
+          if ($LASTEXITCODE -ne 0) { throw '8.5 missing voice inventory failed' }
       - name: Compare exact species coverage with immutable 7.9 release and block regressions
         shell: pwsh
         env:
@@ -373,35 +357,37 @@ jobs:
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.4-Portable-only
-          path: PtitsyNN/dist/MoOLVa-8.4-Portable-x64.exe
+          name: Ptitsy-NN-8.5-Portable-only
+          path: PtitsyNN/dist/MoOLVa-8.5-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.4-Setup-only
-          path: PtitsyNN/dist/MoOLVa-8.4-Setup-x64.exe
+          name: Ptitsy-NN-8.5-Setup-only
+          path: PtitsyNN/dist/MoOLVa-8.5-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Preserve authentic media and source manifest as independent recovery artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.4-Media-Snapshot
+          name: Ptitsy-NN-8.5-Media-Snapshot
           path: |
             PtitsyNN/app/media/audio/**
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
             PtitsyNN/dist/release-evidence/voice-sources84.csv
             PtitsyNN/dist/release-evidence/voice-goal84.json
+            PtitsyNN/dist/release-evidence/clean-variants85.json
+            PtitsyNN/dist/release-evidence/audio-audit85.*
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.4-Windows
+          name: Ptitsy-NN-8.5-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
@@ -450,7 +436,7 @@ jobs:
           $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
           $ev = (Resolve-Path dist/release-evidence).Path
           $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','voice-regression.json','voice-regression.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png')
-          $evidenceNames += @('audio-review82.csv','audio-review82.md','audio-review83.csv','audio-review83.md,'voice-goal84.json','voice-sources84.csv')
+          $evidenceNames += @('audio-review82.csv','audio-review82.md','audio-review83.csv','audio-review83.md','voice-goal84.json','voice-sources84.csv','audio-audit85.csv','audio-audit85.json','clean-variants85.json')
           $evidenceFiles = foreach ($name in $evidenceNames) {
             $item = Get-Item (Join-Path $ev $name) -ErrorAction Stop
             $item.FullName

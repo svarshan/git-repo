@@ -49,9 +49,9 @@ test('8.1 new center, academy, map, diary and quality wired without deleting old
 });
 test('8.1 archives, EXEs and verified seven Windows screenshots',()=>{
  const pkg=JSON.parse(read('package.json')),wf=read('../.github/workflows/ptitsy-nn-windows.yml'),report=read('scripts/release_evidence79.py');
- assert.equal(pkg.version,'8.4.0');
- assert.ok(pkg.build.nsis.artifactName.startsWith('MoOLVa-8.4-Setup-'));
- assert.ok(pkg.build.portable.artifactName.startsWith('MoOLVa-8.4-Portable-'));
+ assert.equal(pkg.version,'8.5.0');
+ assert.ok(pkg.build.nsis.artifactName.startsWith('MoOLVa-8.5-Setup-'));
+ assert.ok(pkg.build.portable.artifactName.startsWith('MoOLVa-8.5-Portable-'));
  for(const k of ['ptitsy-nn.academy80.v1','ptitsy-nn.fieldmode80.v1']){
   assert.ok(read('app/backup78.js').includes(k));assert.ok(read('app/ultra78-core.js').includes(k));
  }
