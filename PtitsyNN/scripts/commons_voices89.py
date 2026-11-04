@@ -95,19 +95,41 @@ def search_titles(latin):
     return output[:6]
 
 
+
+def exact_taxon_category_titles(latin):
+    """Browse only taxon-named *audio* categories, not arbitrary bird videos.
+
+    Wikimedia category membership is independent evidence for an English-only
+    filename. A category hit is still checked for the file's actual media
+    license, author, MIME type and pronunciation/narration warnings.
+    """
+    found=[]
+    for prefix in ("Audio files of ", "Sounds of "):
+        try:
+            data=api({"list":"categorymembers", "cmtitle":"Category:"+prefix+latin,
+                      "cmnamespace":6,"cmtype":"file","cmlimit":40})
+            for item in data.get("query",{}).get("categorymembers",[]):
+                title=str(item.get("title") or "")
+                if title.startswith("File:") and MEDIA_ALLOWED.search(title) and not RED_FLAGS.search(title):
+                    found.append(title)
+        except Exception as exc:
+            print("COMMONS TAXON CATEGORY",latin,type(exc).__name__,flush=True)
+        time.sleep(.25)
+    return list(dict.fromkeys(found))[:35]
+
 def plain(html):
     s=re.sub(r"<[^>]*>"," ",str(html or ""))
     return re.sub(r"\s+"," ",unescape(s)).strip()
 
 
-def parse_info(latin, title, ii):
+def parse_info(latin, title, ii, exact_category=False):
     if not isinstance(ii,dict):
         return None
     title=str(title)
     video_audio=title in KNOWN_VIDEO.get(latin,[])
     if not title.startswith("File:") or not (MEDIA_ALLOWED.search(title) or video_audio):
         return None
-    if not video_audio and title not in KNOWN.get(latin,[]) and latin.casefold() not in title.replace("_"," ").casefold():
+    if not video_audio and not exact_category and title not in KNOWN.get(latin,[]) and latin.casefold() not in title.replace("_"," ").casefold():
         return None
     if RED_FLAGS.search(title):
         return None
@@ -148,7 +170,9 @@ def parse_info(latin, title, ii):
 
 
 def retrieve_candidates(latin, deadline):
-    titles=list(dict.fromkeys(KNOWN.get(latin,[])+KNOWN_VIDEO.get(latin,[])+search_titles(latin)))
+    category_titles=exact_taxon_category_titles(latin)
+    category_set=set(category_titles)
+    titles=list(dict.fromkeys(KNOWN.get(latin,[])+KNOWN_VIDEO.get(latin,[])+search_titles(latin)+category_titles))
     if not titles:
         return []
     entries=[]
@@ -163,7 +187,7 @@ def retrieve_candidates(latin, deadline):
             continue
         for page in response.get("query",{}).get("pages",[]):
             info=(page.get("imageinfo") or [{}])[0]
-            matched=parse_info(latin,page.get("title",""),info)
+            matched=parse_info(latin,page.get("title",""),info,exact_category=page.get("title","") in category_set)
             if matched:
                 entries.append(matched)
         time.sleep(.3)
