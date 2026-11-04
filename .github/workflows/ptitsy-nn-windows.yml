@@ -340,6 +340,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           New-Item -ItemType Directory -Force -Path data/baseline79 | Out-Null
+          $baselineSha = gh api "repos/${{ github.repository }}/git/ref/tags/ptitsy-v7.9.0" --jq '.object.sha'
+          if ($LASTEXITCODE -ne 0 -or $baselineSha.Trim() -ne '8f98e67b8904a87bf0940f05e84692aabeefe293') { throw '7.9 baseline tag moved or is inaccessible' }
           gh release download ptitsy-v7.9.0 -p 'coverage.json' -p 'missing-voices.csv' -D data/baseline79 --clobber
           if ($LASTEXITCODE -ne 0) { throw 'Previous known-good 7.9 evidence unavailable; do not publish' }
           python scripts/voice_guard81.py
