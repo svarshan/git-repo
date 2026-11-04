@@ -45,7 +45,7 @@ jobs:
              if not r:continue
              if (str(r.get('gen'))+' '+str(r.get('sp'))).casefold()!=latin.casefold():continue
              lic=str(r.get('lic') or '')
-             if not re.fullmatch(r'https://creativecommons.org/licenses/by-nc-sa/(3\\.0|4\\.0)/?',lic):continue
+             if lic.rstrip('/') not in ('https://creativecommons.org/licenses/by-nc-sa/3.0','https://creativecommons.org/licenses/by-nc-sa/4.0'):continue
              if r.get('also') or not r.get('rec') or not r.get('type') or str(r.get('q')).upper() not in ('A','B'):continue
              if re.search(r'hybrid|wind|human|speech|voices?|talk|noise|imitation|mixed|playback',str(r.get('rmk') or '')+' '+str(r.get('type') or ''),re.I):continue
              if str(r.get('playback-used') or '').lower()=='yes':continue
