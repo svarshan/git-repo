@@ -12,7 +12,7 @@ import make_catalog as core
 APP=core.APP;ROOT=core.ROOT;MEDIA=core.M
 DATA=APP/'data.js'; REPORT=ROOT/'data'/'coverage.json'
 OUT=ROOT/'dist'/'release-evidence'/'photo-review'
-BAD=re.compile(r'(?<![a-z])(?:eggs?|eggshells?|clutch|nest(?:ing|lings?)?|oeufs?|eiers?|яйц[аоуы]?|кладка|гнезд[оа]?|муляж|illustration|drawing|sketch|diagram|range|distribution|map)(?![a-z])',re.I)
+BAD=re.compile(r'(?<![a-z])(?:eggs?|eggshells?|clutch|mhnt|museum|specimen|taxidermy|thorburn|nest(?:ing|lings?)?|oeufs?|eiers?|яйц[аоуы]?|кладка|гнезд[оа]?|муляж|illustration|drawing|sketch|diagram|range|distribution|map)(?![a-z])',re.I)
 BIRD=re.compile(r'(?<![a-z])(?:bird|birds|adult|male|female|perched|flight|flying|portrait|птица|самец|самка)(?![a-z])',re.I)
 
 def source_title(credit):

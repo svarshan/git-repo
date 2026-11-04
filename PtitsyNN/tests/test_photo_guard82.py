@@ -6,7 +6,7 @@ from photo_guard82 import suspicious,source_title,inspect_image
 from PIL import Image
 class Photo82Tests(unittest.TestCase):
  def test_reject_eggs_and_nest_images(self):
-  for title in ('File:Parus major egg.jpg','File:Passer montanus eggs.jpg','File:Falco egg clutch.jpg','File:Anas oeufs.jpg','File:Picus viridis nest.jpg','File:Anser яйца.jpg'):
+  for title in ('File:Parus major egg.jpg','File:Passer montanus eggs.jpg','File:Falco egg clutch.jpg','File:Anas oeufs.jpg','File:Picus viridis nest.jpg','File:Anser яйца.jpg','File:Limosa limosa MHNT.jpg','File:Naturalis bird skin specimen.jpeg','File:Melanitta nigra Thorburn.jpg'):
    with self.subTest(title=title):
     self.assertTrue(suspicious({'source':'https://commons.wikimedia.org/wiki/'+title.replace(' ','_')}))
  def test_allow_bird_portrait_titles(self):

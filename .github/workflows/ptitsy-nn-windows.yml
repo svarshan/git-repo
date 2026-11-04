@@ -309,6 +309,11 @@ jobs:
           python -u scripts/verify_cache.py
         env:
           BIRDS_FILL_76_BUDGET_SECONDS: '300'
+      - name: Install visually reviewed photographs for 12 bird species
+        shell: pwsh
+        run: |
+          python -u scripts/repair_bird_photos91.py
+          if ($LASTEXITCODE -ne 0) { throw 'Reviewed photo installation failed' }
       - name: Audit all 298 bird photographs and replace egg/nest images where possible
         timeout-minutes: 14
         run: python -u scripts/photo_guard82.py
