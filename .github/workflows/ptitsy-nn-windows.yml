@@ -292,6 +292,17 @@ jobs:
             throw 'Final-pass metadata does not match genuine audio coverage'
           }
           Write-Host "Final voice coverage: $($report.after) / 298; still missing $($report.remaining)."
+      - name: Install seven personal-use calls and re-audit
+        shell: pwsh
+        run: |
+          python scripts/install_personal_voices92.py
+          if ($LASTEXITCODE -ne 0) { throw 'Could not install personal-use recordings' }
+          python -u scripts/audit_audio.py
+          if ($LASTEXITCODE -ne 0) { throw 'Audio re-audit failed' }
+          python scripts/voice_guard85.py
+          if ($LASTEXITCODE -ne 0) { throw 'Archival voices were changed' }
+          python scripts/verify_cache.py
+          if ($LASTEXITCODE -ne 0) { throw 'Final media catalog invalid' }
       - name: Report true 298-species milestone, including shortfall
         shell: pwsh
         run: |
