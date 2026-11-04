@@ -1,0 +1,55 @@
+name: MoOLVa targeted seven voice search
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/ptitsy-8.6-pro-max]
+    paths: [.github/workflows/ptitsy-seven-voice-search.yml]
+permissions:
+  contents: read
+jobs:
+  search:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Search recordings without exposing API key
+        working-directory: PtitsyNN
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import sys
+          sys.path.insert(0,'scripts')
+          import json,time
+          from pathlib import Path
+          from xeno_candidates87 import query_page
+          taxa=['Clanga clanga','Aquila clanga','Larus hyperboreus','Gallinago media','Calidris minuta','Circus pygargus','Mergellus albellus','Mergus albellus','Circus macrourus']
+          results=[]
+          for taxon in taxa:
+           try:
+            first=query_page(taxon,1)
+            num=int(first.get('numPages') or 1)
+            for page in range(1,min(num,12)+1):
+             data=first if page==1 else query_page(taxon,page)
+             for r in data.get('recordings',[]):
+              results.append({k:r.get(k) for k in ['id','gen','sp','rec','lic','q','type','rmk','also','length','file','id-questioned','playback-used']})
+             time.sleep(.4)
+            print(taxon,'pages searched:',min(num,12),'total recordings:',first.get('numRecordings'),flush=True)
+           except Exception as exc:
+            print(taxon,'search failed:',type(exc).__name__,str(exc)[:100],flush=True)
+          out=Path('dist/target-voice-search')
+          out.mkdir(parents=True,exist_ok=True)
+          (out/'recordings.json').write_text(json.dumps(results,ensure_ascii=False,indent=2),encoding='utf8')
+          print('metadata rows:',len(results),flush=True)
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Ptitsy-Seven-Voice-Metadata
+          path: PtitsyNN/dist/target-voice-search/
+          retention-days: 30
