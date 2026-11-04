@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
-"""Install seven noncommercial bird calls with provenance and user review pending."""
+"""Install six personal-use recordings; quarantine user-reported wind-only eagle XC19688."""
 import hashlib,json,shutil
 from pathlib import Path
 ROOT=Path(__file__).resolve().parents[1]
 ASSETS=ROOT/'data'/'personal-seven-calls'
-EXPECTED={'Clanga clanga','Larus hyperboreus','Gallinago media','Calidris minuta','Circus pygargus','Mergellus albellus','Circus macrourus'}
+EXPECTED={'Larus hyperboreus','Gallinago media','Calidris minuta','Circus pygargus','Mergellus albellus','Circus macrourus'}
 LICENSES={'https://creativecommons.org/licenses/by-nc-sa/3.0/':'CC BY-NC-SA 3.0',
           'https://creativecommons.org/licenses/by-nc-sa/4.0/':'CC BY-NC-SA 4.0'}
 def apply_recordings(birds,entries,assets,app):
@@ -22,9 +22,7 @@ def apply_recordings(birds,entries,assets,app):
         if item.get('license') not in LICENSES or item.get('source')!='https://xeno-canto.org/'+ident or not item.get('author'):
             raise ValueError('Invalid attribution or license: '+latin)
         bird=by_latin[latin];current=bird.get('audioFile') or ''
-        if latin=='Clanga clanga' and current and not (current.endswith('/clanga-clanga-inat.mp3') or current.endswith('/'+filename)):
-            raise ValueError('Eagle source changed; refusing to replace an unexpected recording')
-        if latin!='Clanga clanga' and current and not current.endswith('/'+filename):
+        if current and not current.endswith('/'+filename):
             continue
         staged.append((bird,item,source,app/'media'/'audio'/filename))
     report=[]
@@ -34,8 +32,6 @@ def apply_recordings(birds,entries,assets,app):
             shutil.copyfile(source,dest)
         bird['audioFile']='media/audio/'+dest.name
         bird.pop('audioCleanFile85',None)
-        if bird['latin']=='Clanga clanga':
-            bird['audioTracks']=[]
         bird['audioCredits']={'source':item['source'],'author':item['author'],
             'license':LICENSES[item['license']],'licenseUrl':item['license'],
             'recordingId':'XC'+str(item['id']),'sourcePlatform':'Xeno-canto',
@@ -51,17 +47,36 @@ def apply_recordings(birds,entries,assets,app):
             'license':LICENSES[item['license']],'licenseUrl':item['license'],
             'sha256':item['sha256'],'reviewStatus':'awaiting-user-review'})
     return report
+EAGLE_SAFE_IDS={'XC371196','XC371198','XC460234','XC983557','XC981181','XC460224'}
+def quarantine_eagle(birds):
+    bird=next(b for b in birds if b['latin']=='Clanga clanga')
+    credit=bird.get('audioCredits') or {}
+    if credit.get('recordingId') in EAGLE_SAFE_IDS and bird.get('audioFile'):
+        return False
+    # Preserve physical files as evidence, never ship or replay an unreviewed
+    # ambient/wind report or an unknown earlier Eagle association.
+    bird['audioFile']=None
+    bird['audioCredits']=None
+    bird['audioTracks']=[]
+    bird.pop('audioCleanFile85',None)
+    return True
+
 def main():
     catalog=ROOT/'app'/'data.js';prefix='window.BIRDS_DATA='
     raw=catalog.read_text(encoding='utf-8-sig').strip()
     if not raw.startswith(prefix):raise ValueError('Missing bird catalog')
     birds=json.loads(raw[len(prefix):].rstrip(';'))
     if len(birds)!=298:raise ValueError('Expected 298 birds')
-    entries=json.loads((ASSETS/'manifest.json').read_text(encoding='utf8'))
+    manifest=json.loads((ASSETS/'manifest.json').read_text(encoding='utf8'))
+    blocked=[entry for entry in manifest if entry.get('latin')=='Clanga clanga']
+    if len(blocked)!=1 or str(blocked[0].get('id'))!='19688':
+        raise ValueError('Unexpected rejected Eagle manifest: review required')
+    entries=[entry for entry in manifest if entry.get('latin')!='Clanga clanga']
     report=apply_recordings(birds,entries,ASSETS,ROOT/'app')
+    quarantine_eagle(birds)
     catalog.write_text(prefix+json.dumps(birds,ensure_ascii=False,separators=(',',':'))+';',encoding='utf8')
     out=ROOT/'dist'/'release-evidence'/'personal-seven-voices.json'
     out.parent.mkdir(parents=True,exist_ok=True)
     out.write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
-    print('Personal noncommercial recordings installed:',len(report),'awaiting user review',flush=True)
+    print('Personal recordings installed:',len(report),'wind-only eagle quarantined; awaiting alternate',flush=True)
 if __name__=='__main__':main()
