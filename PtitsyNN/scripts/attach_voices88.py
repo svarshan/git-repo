@@ -206,7 +206,10 @@ def main(minimum=1):
         if filehash(original)!=record['sha256']:
             raise ValueError('Baseline original modified: '+latin)
         old_hashes.add(record['sha256'])
-    hashes=set(old_hashes)
+    # Include previously imported recordings as well, not just the immutable 265.
+    # This makes a retry on a 277-voice catalog safe and idempotent.
+    previous_count=sum(bool(b.get('audioFile')) for b in birds)
+    hashes={filehash(APP/b['audioFile']) for b in birds if b.get('audioFile')}
     data_path=OUT/'voice-candidates87.json'
     existing=json.loads(data_path.read_text(encoding='utf-8')) if data_path.exists() else {'entries':[]}
     old_preview={e['latin']:e for e in existing.get('entries',[])}
@@ -290,13 +293,13 @@ def main(minimum=1):
         print('%02d/33 %s: %s'%(index,latin,'attached' if selected and bird.get('audioFile') else 'not added'),flush=True)
     # No partial catalog write if integrity or minimum gates fail.
     added=len(imported)
-    if added<minimum:
-        raise RuntimeError('Only '+str(added)+' new sounds met checks; require '+str(minimum))
+    if previous_count+added < 265+minimum:
+        raise RuntimeError('Only '+str(previous_count+added)+' current sounds meet the minimum of '+str(265+minimum))
     for latin,record in originals.items():
         if filehash(APP/record['file'])!=record['sha256']:
             raise ValueError('Original archive regression after ingestion: '+latin)
     count=sum(bool(b.get('audioFile')) for b in birds)
-    if count!=265+added:
+    if count!=previous_count+added:
         raise ValueError('Voice count mismatch')
     CAT.write_text('window.BIRDS_DATA='+json.dumps(birds,ensure_ascii=False,separators=(',',':'))+';',encoding='utf-8')
     report=json.loads(COVERAGE.read_text(encoding='utf-8'))
@@ -323,4 +326,4 @@ if __name__=='__main__':
     ap=argparse.ArgumentParser()
     ap.add_argument('--min',type=int,default=1)
     args=ap.parse_args()
-    main(max(1,args.min))
+    main(max(0,args.min))
