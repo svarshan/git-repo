@@ -1,0 +1,44 @@
+name: MoOLVa — Xeno-canto candidate search (33 missing voices)
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/ptitsy-8.6-pro-max
+    paths:
+      - PtitsyNN/scripts/xeno_candidates87.py
+      - .github/workflows/ptitsy-xeno-candidates.yml
+
+permissions:
+  contents: read
+
+jobs:
+  xeno-canto-candidates:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    defaults:
+      run:
+        working-directory: PtitsyNN
+    steps:
+      - name: Checkout candidate search script and immutable catalog inventory
+        uses: actions/checkout@v4
+      - name: Prepare Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Validate search script and 265/298 source baseline
+        run: |
+          python -m py_compile scripts/xeno_candidates87.py
+          python -c "from scripts.xeno_candidates87 import catalog_missing; print('Missing species validated:', len(catalog_missing()))"
+      - name: Query Xeno-canto v3 without exposing the key or changing media
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+        run: python -u scripts/xeno_candidates87.py
+      - name: Upload candidate report even if some queries fail
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Xeno-Canto-33-Candidates
+          path: PtitsyNN/dist/xeno-canto-candidates/
+          if-no-files-found: warn
+          retention-days: 30
