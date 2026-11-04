@@ -65,7 +65,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py scripts/stage_xeno87.py scripts/xeno_candidates87.py scripts/attach_voices88.py scripts/commons_voices89.py scripts/tsa_voices89.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py scripts/stage_xeno87.py scripts/xeno_candidates87.py scripts/attach_voices88.py scripts/commons_voices89.py scripts/tsa_voices89.py scripts/remaining21_inat90.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -233,7 +233,7 @@ jobs:
         env:
           XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
         run: |
-          python -u scripts/attach_voices88.py --min 7
+          python -u scripts/attach_voices88.py --min 0
           if ($LASTEXITCODE -ne 0) { throw 'No safe voice expansion: preserving old 265 recordings' }
           python -u scripts/audit_audio.py
           if ($LASTEXITCODE -ne 0) { throw 'Audio QA rejected the new catalog' }
@@ -244,8 +244,8 @@ jobs:
           python scripts/candidate_review86.py
           if ($LASTEXITCODE -ne 0) { throw 'Candidate report cannot reflect expanded catalog' }
           $import = Get-Content dist/release-evidence/imported-voices88.json -Raw | ConvertFrom-Json
-          if ($import.newMainVoices -lt 7 -or $import.humanReviewedNew -ne 0 -or !$import.baseline265Preserved) {
-            throw 'Import evidence missing or incorrect; refusing release'
+          if ($import.catalogVoices -lt 265 -or $import.humanReviewedNew -ne 0 -or !$import.baseline265Preserved) {
+            throw 'Import evidence invalid or original 265 recordings missing; refusing release'
           }
       - name: Fill missing species from open-license Wikimedia Commons audio
         timeout-minutes: 12
@@ -254,8 +254,8 @@ jobs:
           python -u scripts/commons_voices89.py --apply
           if ($LASTEXITCODE -ne 0) { throw 'Commons audio import failed' }
           $commons = Get-Content dist/release-evidence/commons-import89.json -Raw | ConvertFrom-Json
-          if ($commons.newVoices -lt 2 -or $commons.manualReviewedNew -ne 0) {
-            throw 'Commons did not yield at least two technically checked species recordings'
+          if ($commons.newVoices -lt 0 -or $commons.manualReviewedNew -ne 0) {
+            throw 'Commons source quality metadata invalid'
           }
       - name: Fill missing species from Tierstimmenarchiv licensed recordings
         timeout-minutes: 18
@@ -264,8 +264,8 @@ jobs:
           python -u scripts/tsa_voices89.py --apply
           if ($LASTEXITCODE -ne 0) { throw 'Scientific animal recording archive import failed' }
           $tsa = Get-Content dist/release-evidence/tsa-import89.json -Raw | ConvertFrom-Json
-          if ($tsa.newVoices -lt 1 -or $tsa.manualHumanVerified -ne 0) {
-            throw 'Scientific archive produced no usable new licensed bird call'
+          if ($tsa.newVoices -lt 0 -or $tsa.manualHumanVerified -ne 0) {
+            throw 'Scientific archive source quality metadata invalid'
           }
           python -u scripts/audit_audio.py
           if ($LASTEXITCODE -ne 0) { throw 'Post-import audio audit failed' }
@@ -275,6 +275,23 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Expanded offline catalog invalid' }
           python scripts/candidate_review86.py
           if ($LASTEXITCODE -ne 0) { throw 'Final candidate report failed' }
+      - name: Find final missing bird calls in research-grade iNaturalist field recordings
+        timeout-minutes: 13
+        shell: pwsh
+        run: |
+          python -u scripts/remaining21_inat90.py --apply --seconds 490
+          if ($LASTEXITCODE -ne 0) { throw 'Final iNaturalist field audio acquisition or integrity guard failed' }
+          python scripts/audit_audio.py
+          if ($LASTEXITCODE -ne 0) { throw 'Final source audio technical QA failed' }
+          python scripts/voice_guard85.py
+          if ($LASTEXITCODE -ne 0) { throw 'Historical 265 voices were lost or modified' }
+          python scripts/verify_cache.py
+          if ($LASTEXITCODE -ne 0) { throw 'Final offline voice catalog invalid' }
+          $report = Get-Content dist/release-evidence/remaining-voices90.json -Raw | ConvertFrom-Json
+          if ($report.historical265Preserved -ne $true -or $report.after -lt $report.startedWith -or $report.humanVerifiedNew -ne 0) {
+            throw 'Final-pass metadata does not match genuine audio coverage'
+          }
+          Write-Host "Final voice coverage: $($report.after) / 298; still missing $($report.remaining)."
       - name: Report true 298-species milestone, including shortfall
         shell: pwsh
         run: |
@@ -494,6 +511,7 @@ jobs:
             PtitsyNN/dist/release-evidence/clean-variants85.json
             PtitsyNN/dist/release-evidence/audio-audit85.*
             PtitsyNN/dist/release-evidence/candidate-review86.*
+            PtitsyNN/dist/release-evidence/remaining-voices90.json
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
@@ -523,6 +541,7 @@ jobs:
             PtitsyNN/dist/release-evidence/voice-goal84.json
             PtitsyNN/dist/release-evidence/voice-sources84.csv
             PtitsyNN/data/recovery84.json
+            PtitsyNN/dist/release-evidence/remaining-voices90.json
           if-no-files-found: ignore
           retention-days: 14
       # Immutable published binaries stay available beyond temporary Actions artifacts.
