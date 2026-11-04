@@ -58,6 +58,27 @@ class OpenBirdVoiceSources89(unittest.TestCase):
         self.assertIsNotNone(row)
         self.assertEqual(row["sourceTaxon"],"Accipiter brevipes")
 
+    def test_archive_historical_names_do_not_lose_rare_calls(self):
+        synonyms = {
+            "Bubo scandiacus": "Nyctea scandiaca",
+            "Mergellus albellus": "Mergus albellus",
+            "Poecile cinctus": "Parus cinctus",
+            "Ichthyaetus ichthyaetus": "Larus ichthyaetus",
+        }
+        for desired, archived in synonyms.items():
+            with self.subTest(desired=desired):
+                identifier = "TSA:" + archived.replace(" ", "_") + "_Recorder_1"
+                body = (
+                    '<audio src="/download.mp3?unique_identifier=' + identifier + '"></audio>'
+                    '<div class="license"><a href="https://creativecommons.org/licenses/by/4.0/legalcode">CC BY</a></div>'
+                    'Species ' + archived + ' Author Example Recordist Collection TSA'
+                )
+                result = parse_detail(desired, identifier, body)
+                self.assertIsNotNone(result)
+                self.assertEqual(result["sourceTaxon"], archived)
+                self.assertEqual(result["license"], "https://creativecommons.org/licenses/by/4.0/")
+                self.assertIsNone(parse_detail("Aquila heliaca", identifier, body))
+
     def test_known_mixed_background_recording_is_excluded(self):
         identifier="TSA:Aythya_nyroca_Lue_65_2_1"
         body="""<div class="audio-player"><audio src="/download.mp3?unique_identifier=TSA:Aythya_nyroca_Lue_65_2_1"></audio></div>
