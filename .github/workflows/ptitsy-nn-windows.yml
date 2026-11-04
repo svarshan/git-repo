@@ -110,17 +110,17 @@ jobs:
           node --check scripts/test_ai.cjs
       - name: Restore validated offline catalog cache
         id: media-cache
-        uses: actions/cache@v4
+        uses: actions/cache/restore@v4
         with:
           path: |
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v10-${{ runner.os }}-8f98e67b8904a87bf0940f05e84692aabeefe293
+          key: ptitsy-nn-media-v11-${{ runner.os }}-${{ github.sha }}
           restore-keys: |
+            ptitsy-nn-media-v11-${{ runner.os }}-
             ptitsy-nn-media-v10-${{ runner.os }}-
             ptitsy-nn-media-v9-${{ runner.os }}-
-            ptitsy-nn-media-v8-${{ runner.os }}-
       - name: Check complete offline media cache
         id: existing-catalog
         shell: pwsh
@@ -406,7 +406,7 @@ jobs:
             PtitsyNN/app/media
             PtitsyNN/app/data.js
             PtitsyNN/data/coverage.json
-          key: ptitsy-nn-media-v10-${{ runner.os }}-${{ github.sha }}
+          key: ptitsy-nn-media-v11-${{ runner.os }}-${{ github.sha }}
       - name: Cache npm package downloads
         uses: actions/cache@v4
         with:
