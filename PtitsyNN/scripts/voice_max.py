@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 import json,os,re,time,threading,requests
 
 from make_catalog import APP,ROOT,M,COMMONS,lic,valid_existing_media
+from audit_audio import inspect as inspect_sound
 from harvest_voices import SYNONYMS,match_scientific,BAD_TITLE,POSITIVE
 
 DATA=APP/'data.js'
@@ -152,6 +153,11 @@ def enrich(b):
   if time.monotonic()>=STOP:break
   dst=M/'audio'/(b['id']+'.'+ext)
   if download(url,dst):
+   try:inspect_sound(dst)
+   except Exception as ex:
+    print('VOICES MAX skipped technically weak recording',b['latin'],str(ex)[:100],flush=True)
+    dst.unlink(missing_ok=True)
+    continue
    b['audioFile']='media/audio/'+dst.name
    b['audioCredits']=credit
    return b,'xeno-canto' if 'xeno-canto' in credit['source'] else 'Commons'
