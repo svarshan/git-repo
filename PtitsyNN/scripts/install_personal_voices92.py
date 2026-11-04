@@ -74,6 +74,9 @@ def main():
     entries=[entry for entry in manifest if entry.get('latin')!='Clanga clanga']
     report=apply_recordings(birds,entries,ASSETS,ROOT/'app')
     quarantine_eagle(birds)
+    # Remove the rejected cached derivative from distributable media; the Git
+    # source asset and its original checksum remain available for diagnosis.
+    (ROOT/'app'/'media'/'audio'/'clanga-clanga-xc19688.mp3').unlink(missing_ok=True)
     catalog.write_text(prefix+json.dumps(birds,ensure_ascii=False,separators=(',',':'))+';',encoding='utf8')
     out=ROOT/'dist'/'release-evidence'/'personal-seven-voices.json'
     out.parent.mkdir(parents=True,exist_ok=True)
