@@ -27,7 +27,15 @@ from stage_xeno87 import transcode, ffmpeg_path, verify_audio
 ORIGIN="https://suche.tierstimmenarchiv.de"
 UA="MoOLVaBirdAtlas/8.6 (research and licensed audio redistribution; github.com/svarshan/git-repo)"
 STAGED=ROOT/"dist"/"tier-audio89"
-SEARCH_ALIASES={"Tachyspiza brevipes":["Accipiter brevipes"]}  # ITIS/GBIF synonym
+# Explicit older scientific combinations documented in ornithological taxonomies.
+# Only these exact aliases may be used; never relax species matching to common names.
+SEARCH_ALIASES={
+    "Tachyspiza brevipes":["Accipiter brevipes"],
+    "Bubo scandiacus":["Nyctea scandiaca"],
+    "Mergellus albellus":["Mergus albellus"],
+    "Poecile cinctus":["Parus cinctus"],
+    "Ichthyaetus ichthyaetus":["Larus ichthyaetus"],
+}
 PREVIOUS={"Acrocephalus paludicola","Calidris ferruginea","Calidris pugnax",
           "Charadrius dubius","Emberiza pusilla","Eudromias morinellus",
           "Gavia arctica","Gyps fulvus","Larus cachinnans",
