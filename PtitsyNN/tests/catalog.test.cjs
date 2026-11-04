@@ -25,15 +25,22 @@ test('only existing local media with open licenses, author and source credits',(
    // Only the seven separately approved personal-use recordings may use CC BY-NC-SA.
    assert.equal(file,'audioFile','Noncommercial images are not allowed');
    const personal=JSON.parse(fs.readFileSync(path.join(root,'data','personal-seven-calls','manifest.json'),'utf8'));
-   const entry=personal.find(x=>x.latin===b.latin && x.source===b[credit].source);
-   assert.ok(entry,'Noncommercial recording is not an approved personal-use source');
-   assert.match(b[credit].license,/^CC BY-NC-SA (3\.0|4\.0)$/);
-   assert.equal(b[credit].licenseUrl,entry.license);
+   const entry=personal.find(x=>x.latin===b.latin && x.source===b[credit].source && String(x.id)!=='19688');
+   const eagleReplacement=b.latin==='Clanga clanga' &&
+      /^XC(?:371196|371198|460234|983557|981181|460224)$/.test(String(b[credit].recordingId||'')) &&
+      b[credit].source==='https://xeno-canto.org/'+String(b[credit].recordingId).slice(2);
+   assert.ok(entry||eagleReplacement,'Only the six approved personal recordings or eligible eagle alternatives may be included');
+   assert.match(b[credit].license,/^CC BY-NC-SA (2\.0|2\.5|3\.0|4\.0)$/);
+   if(entry)assert.equal(b[credit].licenseUrl,entry.license);
+   else assert.match(b[credit].licenseUrl,/^https:\/\/creativecommons\.org\/licenses\/by-nc-sa\/(?:2\.0|2\.5|3\.0|4\.0)\/$/);
    assert.equal(b[credit].noncommercialOnly,true);
    assert.equal(b[credit].reviewStatus,'awaiting-user-review');
    assert.equal(b[credit].speciesHumanVerified,false);
    assert.match(fs.readFileSync(path.join(root,'app','index.html'),'utf8'),/Личная некоммерческая версия/);
   }else assert.doesNotMatch(b[credit].license,forbiddenLicense);
+  if(file==='audioFile' && b.latin==='Clanga clanga') {
+   assert.notEqual(b[credit].recordingId,'XC19688','Wind-only eagle recording must never be included');
+  }
   if(file==='audioFile' && /inaturalist\.org/.test(b[credit].source)){
    // Bare ambient observation recordings remain forbidden; only an identified
    // individual sound with licensed metadata, author and audit is admissible.
