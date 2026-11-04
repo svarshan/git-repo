@@ -25,7 +25,7 @@ OUT=ROOT/'dist'/'release-evidence'/'eagle-repair93.json'
 IDS=('371196','371198','460234','983557','981181','460224')
 BAD_ID='19688'
 BAD_NOTES=re.compile(r'windy|strong wind|wind noise|speech|talking|conversation|hybrid|other species|background only|playback|imitation|uncertain',re.I)
-PERMITTED=re.compile(r'^/licenses/(by|by-sa|by-nc-sa)/(2\\.0|2\\.5|3\\.0|4\\.0)/?$')
+PERMITTED=re.compile(r'^/licenses/(by|by-sa|by-nc-sa)/(2\.0|2\.5|3\.0|4\.0)/?$')
 
 def safe_license(raw):
     raw=str(raw or '').strip()
@@ -42,7 +42,7 @@ def inspect_candidate(rec):
         return None
     if str(rec.get('gen','')).casefold()!='clanga' or str(rec.get('sp','')).casefold()!='clanga':
         return None
-    if str(rec.get('q','')).upper() not in ('A','B') or not re.search(r'\\bcall\\b',str(rec.get('type','')),re.I):
+    if str(rec.get('q','')).upper() not in ('A','B') or not re.search(r'\bcall\b',str(rec.get('type','')),re.I):
         return None
     if str(rec.get('playback-used') or rec.get('playbackUsed') or '').lower() in ('yes','true'):
         return None
