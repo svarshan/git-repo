@@ -180,7 +180,7 @@ def main(apply=False):
         for entry in baseline:
             if filehash(APP/entry["file"])!=entry["sha256"]:
                 raise ValueError("Baseline audio hash mismatch: "+entry["latin"])
-        hashes={filehash(APP[b["audioFile"]]) for b in birds if b.get("audioFile")}
+        hashes={filehash(APP / b["audioFile"]) for b in birds if b.get("audioFile")}
         pending=[(x["latin"],x["name"]) for x in birds if not x.get("audioFile")]
     else:
         baseline=[]
