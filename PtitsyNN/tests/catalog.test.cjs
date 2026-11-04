@@ -21,7 +21,19 @@ test('only existing local media with open licenses, author and source credits',(
   assert.ok(fs.statSync(location).size>=250,'Suspiciously short media: '+b[file]);
   assert.ok(b[credit]?.author,'Missing author credit for '+b[file]);
   assert.ok(b[credit]?.license,'Missing license for '+b[file]);
-  assert.doesNotMatch(b[credit].license,forbiddenLicense);
+  if(forbiddenLicense.test(b[credit].license)){
+   // Only the seven separately approved personal-use recordings may use CC BY-NC-SA.
+   assert.equal(file,'audioFile','Noncommercial images are not allowed');
+   const personal=JSON.parse(fs.readFileSync(path.join(root,'data','personal-seven-calls','manifest.json'),'utf8'));
+   const entry=personal.find(x=>x.latin===b.latin && x.source===b[credit].source);
+   assert.ok(entry,'Noncommercial recording is not an approved personal-use source');
+   assert.match(b[credit].license,/^CC BY-NC-SA (3\.0|4\.0)$/);
+   assert.equal(b[credit].licenseUrl,entry.license);
+   assert.equal(b[credit].noncommercialOnly,true);
+   assert.equal(b[credit].reviewStatus,'awaiting-user-review');
+   assert.equal(b[credit].speciesHumanVerified,false);
+   assert.match(fs.readFileSync(path.join(root,'app','index.html'),'utf8'),/Личная некоммерческая версия/);
+  }else assert.doesNotMatch(b[credit].license,forbiddenLicense);
   if(file==='audioFile' && /inaturalist\.org/.test(b[credit].source)){
    // Bare ambient observation recordings remain forbidden; only an identified
    // individual sound with licensed metadata, author and audit is admissible.
