@@ -21,6 +21,25 @@ class OpenBirdVoiceSources89(unittest.TestCase):
         self.assertIsNone(parse_info("Anser anser",title,{**ii,"extmetadata":{**ii["extmetadata"],"LicenseUrl":{"value":"https://creativecommons.org/licenses/by-nc/4.0/"}}}))
         self.assertIsNone(parse_info("Anser anser",title,{**ii,"mime":"video/webm"}))
 
+    def test_commons_taxon_audio_category_accepts_bird_name_without_latin(self):
+        ii = {
+            "url": "https://upload.wikimedia.org/wikipedia/commons/1/12/Lesser_Grey_Shrike_calls.ogg",
+            "mime": "application/ogg", "mediatype": "AUDIO", "size": 90000,
+            "extmetadata": {
+                "LicenseUrl": {"value": "https://creativecommons.org/licenses/by-sa/4.0/"},
+                "Artist": {"value": "Field recordist"},
+                "ImageDescription": {"value": "Lesser Grey Shrike calls recorded in the field"},
+            },
+        }
+        title = "File:Lesser Grey Shrike calls.ogg"
+        self.assertIsNone(parse_info("Lanius minor", title, ii))
+        valid = parse_info("Lanius minor", title, ii, exact_category=True)
+        self.assertIsNotNone(valid)
+        self.assertEqual(valid["sourceTaxon"], "Lanius minor")
+        self.assertIsNone(parse_info("Lanius minor", title, {**ii, "extmetadata": {
+            **ii["extmetadata"], "ImageDescription": {"value": "Pronunciation recording: name of this bird"}}},
+            exact_category=True))
+
     def test_only_explicit_pallas_gull_field_video_audio_is_eligible(self):
         ii={"url":"https://upload.wikimedia.org/wikipedia/commons/1/12/gull.webm",
             "mime":"video/webm","mediatype":"VIDEO","size":15510000,
