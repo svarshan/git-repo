@@ -23,17 +23,8 @@ jobs:
           from PIL import Image,ImageOps,ImageDraw
           from io import BytesIO
           photos={
-          'Limosa limosa':'Limosa limosa (calling).jpg',
-          'Gallinula chloropus':'Gallinula chloropus 109736904.jpg',
-          'Calidris ferruginea':'Calidris ferruginea, winter adult, Pak Thale.jpg',
-          'Circus macrourus':'Circus macrourus roosting in little rann of kutch.JPG',
-          'Phasianus colchicus':'Phasianus colchicus -Netherlands-8a.jpg',
-          'Hydroprogne caspia':'Hydroprogne caspia in flight.jpg',
-          'Melanitta nigra':'Melanitta nigra 278393468.jpg',
-          'Melanitta fusca':'Melanitta fusca 1.jpg',
-          'Tetrax tetrax':'Tetrax tetrax, Castuera, Estremadura, Spain 1.jpg',
-          'Lyrurus tetrix':'Lyrurus tetrix in Larix sibirica Mongolia.jpg',
-          'Locustella fluviatilis':'Locustella fluviatilis 123791068.jpg'}
+          'Locustella fluviatilis':'Locustella fluviatilis 123791068.jpg',
+          'Phylloscopus sindianus':'Mountain Chiffchaff (Phylloscopus sindianus) (35799887584).jpg'}
           os.makedirs('candidates',exist_ok=True)
           session=requests.Session()
           session.headers.update({'User-Agent':'MoOLVaBirdAtlas/8.6 (species photo review; github.com/svarshan/git-repo)'})
