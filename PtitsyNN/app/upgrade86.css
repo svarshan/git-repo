@@ -1,0 +1,25 @@
+/* MoOLVa 8.6 desktop-friendly addition; keep the original branded interface. */
+.m86-panel{max-width:1350px;margin:auto;color:#e2f3fc}
+.m86-panel .m86-intro{color:#b7d5e6;line-height:1.6}
+.m86-panel h1{margin-bottom:8px}
+.m86-panel h2{font-size:19px;margin:0 0 12px}
+.m86-panel section{background:#102b40;border:1px solid #37627b;border-radius:15px;padding:17px;margin:16px 0}
+.m86-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(125px,1fr));gap:9px}
+.m86-stat{background:#0a2033;border:1px solid #315a71;padding:14px;border-radius:10px;display:flex;flex-direction:column;gap:5px}
+.m86-stat strong{font-size:23px;color:#f3fbff}.m86-stat small{font-size:12px;color:#adcfdf}
+.m86-tools,.m86-controls,.m86-choices{display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin:12px 0}
+.m86-panel button{border:1px solid #6a97af;border-radius:9px;padding:9px 12px;background:#1a4c66;color:#e9f8ff;cursor:pointer}
+.m86-panel button:hover{background:#255e7c}.m86-panel button:disabled{opacity:.5;cursor:not-allowed}
+.m86-panel input,.m86-panel select{background:#081d2e;color:#edf7ff;border:1px solid #567991;border-radius:8px;min-height:38px;padding:8px;max-width:100%}
+.m86-panel input[type=search]{min-width:230px;flex:1}
+.m86-media-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(225px,1fr));gap:12px}
+.m86-media-card{border:1px solid #345b73;border-radius:10px;padding:11px;display:flex;flex-direction:column;gap:9px;min-width:0}
+.m86-media-card img{height:140px;max-width:100%;object-fit:contain}
+.m86-media-card audio,.m86-panel audio{width:100%}
+.m86-media-card small{color:#b5d3e3;overflow-wrap:anywhere}
+.m86-feedback{color:#c5eaca}
+.m86-quiz-photo{display:block;max-width:230px;max-height:180px;object-fit:contain;margin-top:12px}
+.m86-model-row{padding:8px;display:flex;gap:10px;align-items:center;justify-content:space-between;border-bottom:1px solid #32546a}
+.m86-panel button:focus-visible,.m86-panel select:focus-visible,.m86-panel input:focus-visible{outline:3px solid #9bdcff;outline-offset:2px}
+@media(max-width:630px){.m86-panel section{padding:11px}.m86-panel input[type=search]{min-width:0;width:100%}}
+@media(prefers-reduced-motion:reduce){.m86-panel *{scroll-behavior:auto!important}}
