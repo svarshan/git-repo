@@ -122,7 +122,7 @@
   $('m87Season').addEventListener('change',map);$('m87Bird').addEventListener('change',map);
   $('m87OpenMap').addEventListener('click',()=>{jump('map');window.BirdHabitat?.focusSpecies?.($('m87Bird').value);});
   $('m87Export').addEventListener('click',exportReport);
-  $('m87Backup').addEventListener('click',()=>{jump('media86');$('m86Backup')?.click();});
+  $('m87Backup').addEventListener('click',async()=>{const control=$('m87Backup');control.disabled=true;try{const outcome=await window.MoOLVaAutoBackup?.create('manual');if(!outcome?.saved)throw new Error('Архив не подтверждён');status('Локальная резервная копия подтверждена. Исходники отдельно сохранены в резервной ветке GitHub.');}catch{status('Локальная резервная копия не подтверждена. Проверьте доступность папки сохранения.');}finally{control.disabled=false;}});
   $('m87PhotoQueue').addEventListener('click',()=>{$('m87Filter').value='photo-review';page=0;render();});
   $('m87VoiceQueue').addEventListener('click',()=>{$('m87Filter').value='new';page=0;render();});
   $('m87Compare').addEventListener('click',()=>{const b=birds.find(x=>x.id===$('m87Bird').value);if(b)window.MoOLVaCompare6?.selectSpecies?.(b.id);else jump('comparebirds6');});
