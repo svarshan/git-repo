@@ -351,6 +351,7 @@ jobs:
           python scripts/voice_guard85.py
           if ($LASTEXITCODE -ne 0) { throw 'A voice from 8.4 is missing or its archival bytes have changed' }
           python scripts/audio_audit85.py
+          python scripts/media_triage87.py
           if ($LASTEXITCODE -ne 0) { throw '8.5 audio audit failed' }
           python scripts/prepare_clean85.py
           if ($LASTEXITCODE -ne 0) { throw '8.5 derivative preparation failed' }
@@ -395,6 +396,7 @@ jobs:
         run: python -u scripts/prepare_vision80.py
       - name: Verify generated JS and catalog
         run: |
+          node --check app/quality-triage87.js
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
