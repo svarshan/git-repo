@@ -4,7 +4,7 @@ const active=new Set(),KEY='ptitsy-nn.audio-reports.v1';
 const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;};
 const add=(parent,...children)=>{for(const x of children)parent.appendChild(x);return parent;};
 const stamp=x=>Number.isFinite(x)&&x>=0?Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0'):'0:00';
-function stopAll(){for(const a of active){try{a.pause();a.currentTime=0;}catch{}}}
+function stopAll(){const players=[...active];active.clear();for(const a of players){try{a.pause();a.currentTime=0;}catch{}}}
 function reports(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[];}catch{return [];}}
 function report(b,reason){
  const r=reports();
@@ -62,8 +62,8 @@ function player(b){
   seek.value=d>0?String(Math.round(p/d*1000)):'0';
   play.textContent=audio.paused?'▶ Воспроизвести':'Ⅱ Пауза';
  }
- play.addEventListener('click',()=>{if(audio.paused){stopAll();audio.play().catch(()=>{result.textContent='Ошибка воспроизведения';refresh();});}else audio.pause();});
- audio.addEventListener('play',()=>{for(const other of active){if(other!==audio)other.pause();}refresh();});
+ play.addEventListener('click',()=>{if(audio.paused){stopAll();active.add(audio);audio.play().catch(()=>{active.delete(audio);result.textContent='Ошибка воспроизведения';refresh();});}else audio.pause();});
+ audio.addEventListener('play',()=>{for(const other of active){if(other!==audio){try{other.pause();other.currentTime=0;}catch{}}}active.add(audio);refresh();});
  for(const name of ['loadedmetadata','timeupdate','pause','ended'])audio.addEventListener(name,refresh);
  audio.addEventListener('error',()=>{result.textContent='Нет доступного аудиофайла';});
  seek.addEventListener('input',()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=audio.duration*Number(seek.value)/1000;});
