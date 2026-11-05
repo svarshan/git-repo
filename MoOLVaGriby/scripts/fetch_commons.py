@@ -7,6 +7,7 @@ import json
 import os
 import re
 import time
+import threading
 from pathlib import Path
 from urllib.parse import quote
 
@@ -79,6 +80,80 @@ def acquire(species,deadline):
     except (requests.RequestException,ValueError,OSError,KeyError) as exc:
         return latin,None,str(exc)[:160]
 
+
+# iNaturalist photo licenses differ per contributor. Accept only open media
+# (CC0, CC BY, CC BY-SA). Taxonomic metadata does not establish species identity.
+NAT='https://api.inaturalist.org/v1'
+NAT_MEDIA='https://inaturalist-open-data.s3.amazonaws.com/photos/'
+_naturalist_lock=threading.Lock()
+_naturalist_last=[0.0]
+
+def naturalist_get(endpoint,params):
+    with _naturalist_lock:
+        pause=1.15-(time.monotonic()-_naturalist_last[0])
+        if pause>0:time.sleep(pause)
+        _naturalist_last[0]=time.monotonic()
+    response=requests.get(NAT+endpoint,params=params,headers=HEADERS,timeout=17)
+    if response.status_code==429:
+        time.sleep(3)
+        response=requests.get(NAT+endpoint,params=params,headers=HEADERS,timeout=17)
+    response.raise_for_status()
+    return response.json()
+
+def downloaded_photo(latin,photo,source):
+    code=str(photo.get('license_code') or '').upper()
+    if not license_ok(code):return None
+    url=photo.get('medium_url') or photo.get('url') or ''
+    if '/square.' in url:url=url.replace('/square.','/medium.')
+    if not url.startswith(NAT_MEDIA):return None
+    response=requests.get(url,timeout=18,headers=HEADERS)
+    if response.status_code!=200 or len(response.content)>3_000_000:return None
+    from io import BytesIO
+    with Image.open(BytesIO(response.content)) as raw:
+        picture=ImageOps.exif_transpose(raw)
+        if min(picture.size)<190:return None
+        picture=picture.convert('RGB');picture.thumbnail((740,600))
+        MEDIA.mkdir(parents=True,exist_ok=True)
+        file=MEDIA/(latin.replace(' ','_')+'.jpg')
+        picture.save(file,quality=83,optimize=True)
+    return {'file':'media/photos/'+file.name,'source':source,
+            'author':str(photo.get('attribution') or 'iNaturalist photographer')[:240],
+            'license':code.replace('_','-'),
+            'review':'iNaturalist exact taxon metadata; visual identity still requires human verification'}
+
+def acquire_naturalist(species,deadline):
+    latin=species['latin']
+    if time.monotonic()>deadline:return latin,None,'deadline'
+    try:
+        data=naturalist_get('/taxa',{'q':latin,'rank':'species','per_page':10})
+        exact=next((t for t in data.get('results',[]) if str(t.get('name','')).casefold()==latin.casefold() and t.get('rank')=='species'),None)
+        if not exact:return latin,None,'no exact species taxon'
+        default=exact.get('default_photo') or {}
+        if default.get('id'):
+            found=downloaded_photo(latin,default,'https://www.inaturalist.org/photos/'+str(default['id']))
+            if found:return latin,found,None
+        if time.monotonic()>deadline:return latin,None,'deadline'
+        observations=naturalist_get('/observations',{
+            'taxon_id':exact['id'],'quality_grade':'research','photos':'true',
+            'photo_license':'cc-by,cc-by-sa,cc0','per_page':'20','order_by':'votes'})
+        for obs in observations.get('results',[]):
+            if str((obs.get('taxon') or {}).get('name','')).casefold()!=latin.casefold():continue
+            for photo in obs.get('photos',[]):
+                if not photo.get('id'):continue
+                found=downloaded_photo(latin,photo,'https://www.inaturalist.org/photos/'+str(photo['id']))
+                if found:return latin,found,None
+        return latin,None,'no eligible openly-licensed iNaturalist photo'
+    except (requests.RequestException,ValueError,OSError,KeyError) as exc:
+        return latin,None,'iNaturalist: '+str(exc)[:145]
+
+def acquire_any(species,deadline):
+    taxon,found,reason=acquire_naturalist(species,deadline)
+    if found:return taxon,found,None
+    if time.monotonic()>deadline:return taxon,None,reason
+    second=acquire(species,deadline)
+    if second[1]:return second
+    return taxon,None,reason+' / Commons: '+str(second[2])
+
 def main():
     text=(ROOT/'catalog.js').read_text(encoding='utf8').strip()
     prefix='window.MOOLVA_MUSHROOMS='
@@ -91,7 +166,7 @@ def main():
     result={}
     misses=[]
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
-        futures={pool.submit(acquire,s,deadline):s for s in species[:limit]}
+        futures={pool.submit(acquire_any,s,deadline):s for s in species[:limit]}
         for future in concurrent.futures.as_completed(futures):
             latin,info,reason=future.result()
             if info: result[latin]=info
