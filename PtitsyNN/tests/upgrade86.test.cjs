@@ -39,10 +39,10 @@ test('8.6 model scores are never described as verified probabilities',()=>{
 });
 test('8.6 integrates all modules, preserves icon, backup and audio baseline guard',()=>{
  const pkg=JSON.parse(read('package.json')),html=read('app/index.html'),workflow=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(pkg.version,'8.6.0');
+ assert.equal(pkg.version,'8.7.0');
  for(const x of ['media86','m86Backup','m86QuizNew','m86VisionAI','m86VoiceAI','m86VerifyBackups','m86Compact','m86Bird'])assert.match(html,new RegExp('id="'+x+'"'));
  for(const x of ['core86.js','upgrade86.js','upgrade86.css'])assert.ok(html.includes(x));
  assert.equal(pkg.build.win.icon,'build/moolva.ico');
  assert.match(workflow,/voice_guard85\.py/);
- assert.match(workflow,/Ptitsy-NN-8\.6-Portable-only/);
+ assert.match(workflow,/Ptitsy-NN-8\.7-Portable-only/);
 });
