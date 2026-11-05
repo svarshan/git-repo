@@ -28,7 +28,8 @@
       "app.js",
       "main.cjs",
       "media/photos/**/*",
-      "package.json"
+      "package.json",
+      "build/moolva-griby.ico"
     ],
     "asar": true,
     "win": {
@@ -46,8 +47,7 @@
           ]
         }
       ],
-      "icon": "build/moolva-griby.ico",
-      "signAndEditExecutable": false
+      "icon": "build/moolva-griby.ico"
     },
     "nsis": {
       "oneClick": false,
