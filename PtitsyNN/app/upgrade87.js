@@ -18,7 +18,7 @@
  }
  function status(value){const t=$('m87Status');if(t)t.textContent=value;}
  function jump(view){document.querySelector('aside.sidebar [data-view="'+view+'"]')?.click();}
- function openBird(bird){document.dispatchEvent(new CustomEvent('living-open',{detail:bird.id}));}
+ function openBird(bird){stopLocal();document.dispatchEvent(new CustomEvent('living-open',{detail:bird.id}));}
  function saveJSON(payload,filename){
   const url=URL.createObjectURL(new Blob([JSON.stringify(payload,null,2)],{type:'application/json'}));
   const a=node('a');a.href=url;a.download=filename;document.body.append(a);a.click();a.remove();
