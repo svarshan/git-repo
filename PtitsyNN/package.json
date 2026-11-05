@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "8.6.0",
+  "version": "8.7.0",
   "private": true,
-  "description": "MoOLVa 8.6 PRO MAX: голоса ULTRA, медиаконтроль, тренажёр, честные AI-гипотезы и резервирование исходных 265 записей.",
+  "description": "MoOLVa 8.7 PRO MAX: голоса ULTRA, медиаконтроль, тренажёр, честные AI-гипотезы и резервирование исходных 265 записей.",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -57,10 +57,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-8.6-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-8.7-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-8.6-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-8.7-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [
