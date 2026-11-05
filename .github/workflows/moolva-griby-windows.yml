@@ -1,0 +1,133 @@
+name: MoOLVa Griby - Windows Setup and Portable
+on:
+  pull_request:
+    branches: [master]
+    paths:
+      - 'MoOLVaGriby/**'
+      - '.github/workflows/moolva-griby-windows.yml'
+  push:
+    branches: [master]
+    paths:
+      - 'MoOLVaGriby/**'
+      - '.github/workflows/moolva-griby-windows.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows:
+    runs-on: windows-latest
+    timeout-minutes: 55
+    defaults:
+      run:
+        working-directory: MoOLVaGriby
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install image dependencies
+        run: python -m pip install requests==2.32.5 Pillow==11.3.0
+      - name: Check offline catalog and source tests
+        run: |
+          node --check app.js
+          node --check catalog.js
+          node --check photos.js
+          node --check main.cjs
+          npm test
+          python -m unittest discover -s tests -p 'test_*.py'
+      - name: Fetch real licensed Commons photographs and preserve attribution
+        timeout-minutes: 8
+        env:
+          MOOLVA_PHOTO_BUDGET_SECONDS: '210'
+        run: python -u scripts/fetch_commons.py
+      - name: Verify generated photos
+        shell: pwsh
+        run: |
+          node --check photos.js
+          $r = Get-Content photo-report.json -Raw | ConvertFrom-Json
+          if ($r.species -ne 53) { throw 'Wrong catalog size' }
+          Write-Host "Photos from Commons: $($r.photos) / 53. Species identity requires manual visual check."
+      - name: Make original MoOLVa mushroom icon
+        run: python scripts/make_icon.py
+      - name: Install Electron
+        shell: pwsh
+        run: |
+          npm config set fetch-retries 4
+          npm install --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { throw 'npm install failed' }
+      - name: Build Setup and Portable EXE
+        timeout-minutes: 18
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: npm run build:win
+      - name: Capture actual packaged Windows application screenshot
+        shell: pwsh
+        timeout-minutes: 4
+        run: |
+          $exe = Get-ChildItem 'dist/win-unpacked' -Filter '*.exe' | Where-Object { $_.Name -notmatch 'uninstall|update|unins' } | Select-Object -First 1
+          if (-not $exe) { throw 'Packaged application EXE not found' }
+          $dir = Join-Path (Get-Location).Path 'dist/evidence'
+          New-Item -ItemType Directory -Force -Path $dir | Out-Null
+          $arg = "--moolva-evidence-dir=$dir"
+          $job = Start-Process -FilePath $exe.FullName -ArgumentList $arg -Wait -PassThru
+          if ($job.ExitCode -ne 0) {
+            Get-Content 'dist/evidence/gui-error.txt' -ErrorAction SilentlyContinue
+            throw "Real GUI smoke failed: $($job.ExitCode)"
+          }
+          if (-not (Test-Path 'dist/evidence/01-glavnaya.png')) { throw 'Real screenshot missing' }
+      - name: Validate EXEs and calculate SHA256
+        shell: pwsh
+        run: |
+          $files = @('dist/MoOLVa-Griby-1.0-Setup-x64.exe','dist/MoOLVa-Griby-1.0-Portable-x64.exe')
+          $lines = @()
+          foreach($p in $files) {
+            if (-not (Test-Path $p)) { throw "Missing EXE: $p" }
+            $item = Get-Item $p
+            if ($item.Length -lt 10000000) { throw "EXE too small: $p" }
+            $hash = (Get-FileHash -Algorithm SHA256 $p).Hash.ToLowerInvariant()
+            $lines += "$hash  $($item.Name)"
+          }
+          $lines | Set-Content 'dist/SHA256SUMS.txt' -Encoding utf8
+      - name: Setup EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Griby-1.0-Setup-EXE
+          path: MoOLVaGriby/dist/MoOLVa-Griby-1.0-Setup-x64.exe
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 30
+      - name: Portable EXE
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Griby-1.0-Portable-EXE
+          path: MoOLVaGriby/dist/MoOLVa-Griby-1.0-Portable-x64.exe
+          compression-level: 0
+          if-no-files-found: error
+          retention-days: 30
+      - name: Real screenshot and audit evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Griby-1.0-Quality-Evidence
+          path: |
+            MoOLVaGriby/dist/SHA256SUMS.txt
+            MoOLVaGriby/dist/evidence/*
+            MoOLVaGriby/photo-report.json
+            MoOLVaGriby/photos.js
+          if-no-files-found: error
+          retention-days: 30
+      - name: Diagnostics on failed build
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Griby-1.0-Diagnostics
+          path: |
+            MoOLVaGriby/photo-report.json
+            MoOLVaGriby/dist/evidence/*
+          if-no-files-found: ignore
+          retention-days: 14
