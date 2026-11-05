@@ -8,6 +8,7 @@
  const node=(tag,value,cls)=>{const n=document.createElement(tag);if(value!==undefined&&value!==null)n.textContent=String(value);if(cls)n.className=cls;return n;};
  const button=(value,fn)=>{const n=node('button',value);n.type='button';n.addEventListener('click',fn);return n;};
  const REVIEW='ptitsy-nn.media83.review.v1',PAGE_SIZE=16;
+ const quality=window.MOOLVA_MEDIA_TRIAGE87||{audio:{},photo:{},summary:{}};
  const note='Наличие аудиофайла, правильное латинское имя и техническое качество не доказывают, что голос принадлежит нужной птице.';
  let page=0,selected=null;
  const read=()=>{try{return core.reviews(JSON.parse(localStorage.getItem(REVIEW)));}catch{return core.reviews(null);}};
@@ -25,9 +26,9 @@
   setTimeout(()=>URL.revokeObjectURL(url),3000);
  }
  function stats(){
-  const s=core.summary(birds,read());const box=$('m87Kpis');box.replaceChildren();
+  const s=core.summary(birds,read(),quality);const box=$('m87Kpis');box.replaceChildren();
   for(const [key,value] of [['Видов',s.species],['Фотографий',s.photos],['Записей',s.audio+'/'+s.target],
-   ['Без звука',s.audioMissing.length],['Новых без прослушивания',s.audioAwaiting],['Фото с замечаниями',s.photoPersonalQuestioned]]){
+   ['Без звука',s.audioMissing.length],['Аудио — сигнал проверки',s.audioTechnicalFlags],['Фото — проверить',s.photoVisualQueue],['Фото с замечаниями',s.photoPersonalQuestioned]]){
    const x=node('div',null,'m87-kpi');x.append(node('strong',value),node('small',key));box.append(x);
   }
   const missing=$('m87Missing');missing.replaceChildren();
@@ -44,13 +45,15 @@
   window.BirdAudioPro?.stopAll?.();
  }
  function mediaCard(b,review){
-  const card=node('article',null,'m87-bird');
-  if(b.imageFile){const photo=node('img');photo.src=b.imageFile;photo.alt='Каталожная фотография '+b.name;photo.loading='lazy';card.append(photo);}
+  const card=node('article',null,'m87-bird');const audioFlag=core.triageEntry(quality,b,'audio'),photoFlag=core.triageEntry(quality,b,'photo');
+  if(b.imageFile){const photo=node('img');photo.src=b.imageFile;photo.alt='Каталожная фотография '+b.name;photo.loading='lazy';photo.decoding='async';card.append(photo);}
   else card.append(node('p','Фото отсутствует','m87-muted'));
   card.append(node('strong',b.name),node('small',b.latin+' · '+(b.group||'Группа не указана')));
   const tags=node('div',null,'m87-tags');
   tags.append(node('span',b.audioFile?'Файл голоса есть':'Голос отсутствует'));
   if(b.audioCredits?.reviewStatus==='awaiting-user-review')tags.append(node('span','Проверьте новый звук'));
+  if(audioFlag?.priority>0&&review.audio[b.id]!=='confirmed')tags.append(node('span','Аудио: сигнал алгоритма, не доказательство речи'));
+  if(photoFlag?.priority>0&&review.photo[b.id]!=='confirmed')tags.append(node('span','Фото: нужна визуальная проверка'));
   if(review.audio[b.id]==='questioned'||review.photo[b.id]==='questioned')tags.append(node('span','Есть замечание'));
   card.append(tags);
   if(b.audioFile){
@@ -84,7 +87,7 @@
   card.append(actions);return card;
  }
  function render(){
-  const review=read(),rows=core.worklist(birds,review,$('m87Filter').value,$('m87Search').value);
+  const review=read(),rows=core.worklist(birds,review,$('m87Filter').value,$('m87Search').value,quality);
   const total=rows.length,count=Math.ceil(total/PAGE_SIZE);page=Math.min(page,Math.max(0,count-1));
   const slice=rows.slice(page*PAGE_SIZE,(page+1)*PAGE_SIZE);
   const host=$('m87Results');stopLocal();host.replaceChildren(...slice.map(b=>mediaCard(b,review)));
@@ -103,19 +106,21 @@
   }else host.append(node('p','Опубликованных наблюдений для выбранного сезона нет. Это не доказывает отсутствие птицы.'));
  }
  function exportReport(){
-  const s=core.summary(birds,read());
+  const s=core.summary(birds,read(),quality);
   const report={app:'MoOLVa 8.7 PRO MAX',schema:1,createdAt:new Date().toISOString(),
     warning:'Metadata and personal ratings only. Technical acceptance is NOT species verification, and this is not a backup of the audio files.',
     summary:s,personalReview:read(),media:birds.map(b=>({id:b.id,latin:b.latin,name:b.name,photo:!!b.imageFile,
       voice:!!b.audioFile,recordingId:b.audioCredits?.recordingId||null,
       voiceSource:b.audioCredits?.source||null,license:b.audioCredits?.license||null,
-      newUnreviewed:b.audioCredits?.reviewStatus==='awaiting-user-review'}))};
+      newUnreviewed:b.audioCredits?.reviewStatus==='awaiting-user-review',
+      audioTriage:core.triageEntry(quality,b,'audio'),photoTriage:core.triageEntry(quality,b,'photo')}))};
   saveJSON(report,'MoOLVa-8.7-media-review.json');status('Отчёт создан. Это не архив медиа и не экспертная проверка.');
  }
  function boot(){
   for(const b of birds.slice().sort((x,y)=>x.name.localeCompare(y.name,'ru'))){const opt=node('option',b.name+' · '+b.latin);opt.value=b.id;$('m87Bird').append(opt);}
   $('m87Bird').value=(birds.find(b=>b.latin==='Ichthyaetus ichthyaetus')||birds[0]||{}).id||'';
-  $('m87Search').addEventListener('input',()=>{page=0;render();});
+  let searchFrame=0;
+  $('m87Search').addEventListener('input',()=>{if(searchFrame)cancelAnimationFrame(searchFrame);searchFrame=requestAnimationFrame(()=>{searchFrame=0;page=0;render();});});
   $('m87Filter').addEventListener('change',()=>{page=0;render();});
   $('m87Prev').addEventListener('click',()=>{page=Math.max(0,page-1);render();});
   $('m87Next').addEventListener('click',()=>{page++;render();});
@@ -124,7 +129,7 @@
   $('m87Export').addEventListener('click',exportReport);
   $('m87Backup').addEventListener('click',async()=>{const control=$('m87Backup');control.disabled=true;try{const outcome=await window.MoOLVaAutoBackup?.create('manual');if(!outcome?.saved)throw new Error('Архив не подтверждён');status('Локальная резервная копия подтверждена. Исходники отдельно сохранены в резервной ветке GitHub.');}catch{status('Локальная резервная копия не подтверждена. Проверьте доступность папки сохранения.');}finally{control.disabled=false;}});
   $('m87PhotoQueue').addEventListener('click',()=>{$('m87Filter').value='photo-review';page=0;render();});
-  $('m87VoiceQueue').addEventListener('click',()=>{$('m87Filter').value='new';page=0;render();});
+  $('m87VoiceQueue').addEventListener('click',()=>{$('m87Filter').value='audit-priority';page=0;render();});
   $('m87Compare').addEventListener('click',()=>{const b=birds.find(x=>x.id===$('m87Bird').value);if(b)window.MoOLVaCompare6?.selectSpecies?.(b.id);else jump('comparebirds6');});
   $('m87BirdAI').addEventListener('click',()=>jump('birdai'));
   $('m87PhotoAI').addEventListener('click',()=>jump('photoid'));
