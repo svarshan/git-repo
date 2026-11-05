@@ -27,7 +27,9 @@
   if(!raw||raw.version!==1||typeof raw.audio!=='object'||typeof raw.photo!=='object'||!raw.audio||!raw.photo)return {version:1,audio:{},photo:{}};
   return {version:1,audio:{...raw.audio},photo:{...raw.photo}};
  }
- function summary(birds,reviewRaw){
+ function triageEntry(quality,bird,kind){const q=quality&&quality[kind];return q&&q[bird.latin]||null;}
+ function triagePriority(quality,bird,kind){return Number(triageEntry(quality,bird,kind)?.priority)||0;}
+ function summary(birds,reviewRaw,quality){
   const list=Array.isArray(birds)?birds:[],mark=reviews(reviewRaw);
   return {target:TARGET,species:list.length,photos:list.filter(x=>!!x.imageFile).length,
    audio:list.filter(x=>!!x.audioFile).length,
@@ -37,16 +39,22 @@
    audioPersonalConfirmed:list.filter(x=>x.audioFile&&mark.audio[x.id]==='confirmed').length,
    audioPersonalQuestioned:list.filter(x=>x.audioFile&&mark.audio[x.id]==='questioned').length,
    photoPersonalConfirmed:list.filter(x=>x.imageFile&&mark.photo[x.id]==='confirmed').length,
-   photoPersonalQuestioned:list.filter(x=>x.imageFile&&mark.photo[x.id]==='questioned').length};
+   photoPersonalQuestioned:list.filter(x=>x.imageFile&&mark.photo[x.id]==='questioned').length,
+   audioTechnicalFlags:list.filter(x=>x.audioFile&&triagePriority(quality,x,'audio')>0).length,
+   photoVisualQueue:list.filter(x=>x.imageFile&&triagePriority(quality,x,'photo')>0).length};
  }
- function worklist(birds,raw,filter,query){
+ function worklist(birds,raw,filter,query,quality){
   const mark=reviews(raw),list=search(birds,query,298);
-  const f=b=>filter==='missing'?!b.audioFile:
+  const f=b=>filter==='audit-priority'?!!b.audioFile&&mark.audio[b.id]!=='confirmed'&&triagePriority(quality,b,'audio')>0:
+   filter==='missing'?!b.audioFile:
    filter==='audio-review'?!!b.audioFile&&mark.audio[b.id]!=='confirmed':
    filter==='questioned'?mark.audio[b.id]==='questioned'||mark.photo[b.id]==='questioned':
    filter==='photo-review'?!!b.imageFile&&mark.photo[b.id]!=='confirmed':
    filter==='new'?b.audioCredits?.reviewStatus==='awaiting-user-review':true;
-  return list.filter(f);
+  const result=list.filter(f);
+  if(filter==='audit-priority'||filter==='audio-review')result.sort((a,b)=>triagePriority(quality,b,'audio')-triagePriority(quality,a,'audio'));
+  if(filter==='photo-review')result.sort((a,b)=>triagePriority(quality,b,'photo')-triagePriority(quality,a,'photo'));
+  return result;
  }
  function tracks(bird){
   const r=[];
@@ -66,5 +74,5 @@
   return (birds||[]).find(x=>x.id!==bird.id&&String(x.latin||'').split(' ')[0]===genus)
    ||(birds||[]).find(x=>x.id!==bird.id&&x.group===bird.group)||null;
  }
- return {TARGET,norm,latin,score,search,reviews,summary,worklist,tracks,season,nextCandidate};
+ return {TARGET,norm,latin,score,search,reviews,triageEntry,triagePriority,summary,worklist,tracks,season,nextCandidate};
 });
