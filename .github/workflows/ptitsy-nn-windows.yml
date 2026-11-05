@@ -1,4 +1,4 @@
-name: Птицы НН — Windows EXE 8.6
+name: Птицы НН — Windows EXE 8.7
 on:
   workflow_dispatch:
     inputs:
@@ -65,7 +65,7 @@ jobs:
       # Changing the species list or ingestion script invalidates this cache.
       - name: Preflight Python and JavaScript syntax
         run: |
-          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py scripts/stage_xeno87.py scripts/xeno_candidates87.py scripts/attach_voices88.py scripts/commons_voices89.py scripts/tsa_voices89.py scripts/remaining21_inat90.py scripts/install_personal_voices92.py scripts/repair_clanga93.py
+          python -m py_compile scripts/make_catalog.py scripts/harvest_voices.py scripts/openverse_voices.py scripts/curate_audio.py scripts/audit_audio.py scripts/enrich_articles.py scripts/voice_max.py scripts/ultra_tracks.py scripts/voices_150.py scripts/voices_298.py scripts/fill_missing76.py scripts/verify_cache.py scripts/make_habitat.py scripts/habitat_fallback84.py scripts/prepare_ai.py scripts/prepare_vision80.py scripts/release_evidence79.py scripts/voice_guard81.py scripts/voices_82.py scripts/photo_guard82.py scripts/audio_review82.py scripts/audio_review83.py scripts/voice_recover84.py scripts/voice_guard84.py scripts/voice_manifest84.py scripts/make_icon82.py scripts/candidate_review86.py scripts/stage_xeno87.py scripts/xeno_candidates87.py scripts/attach_voices88.py scripts/commons_voices89.py scripts/tsa_voices89.py scripts/remaining21_inat90.py scripts/install_personal_voices92.py scripts/repair_clanga93.py scripts/last_voice94.py
           node --check app/app.js
           node --check app/audio-pro.js
           node --check app/voice-lab.js
@@ -82,6 +82,8 @@ jobs:
           node --check app/core83.js
           node --check app/upgrade83.js
           node --check app/core84.js
+          node --check app/core87.js
+          node --check app/upgrade87.js
           node --check app/upgrade84.js
           node --check app/core86.js
           node --check app/upgrade86.js
@@ -207,10 +209,10 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw '8.5 source manifest failed' }
           python -u scripts/find_voice_candidates85.py
           if ($LASTEXITCODE -ne 0) { throw '8.5 candidate search failed' }
-      - name: Export 8.6 unreviewed licensed candidate report
+      - name: Export 8.7 unreviewed licensed candidate report
         run: |
           python scripts/candidate_review86.py
-          if ($LASTEXITCODE -ne 0) { throw '8.6 candidate review appendix failed' }
+          if ($LASTEXITCODE -ne 0) { throw '8.7 candidate review appendix failed' }
       - name: Stage licensed real Xeno-canto audio for safe offline human listening
         timeout-minutes: 16
         shell: pwsh
@@ -301,6 +303,8 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Could not preserve six personal-use calls' }
           python -u scripts/repair_clanga93.py
           if ($LASTEXITCODE -ne 0) { throw 'Eagle repair script failed' }
+          python -u scripts/last_voice94.py
+          if ($LASTEXITCODE -ne 0) { throw 'Last exact-taxon voice search failed' }
           python -u scripts/audit_audio.py
           if ($LASTEXITCODE -ne 0) { throw 'Audio re-audit failed' }
           python scripts/voice_guard85.py
@@ -500,30 +504,30 @@ jobs:
       - name: Upload screenshots and QA evidence separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.6-Evidence
+          name: Ptitsy-NN-8.7-Evidence
           path: PtitsyNN/dist/release-evidence/**/*
           if-no-files-found: error
           retention-days: 30
       - name: Upload Portable EXE separately for reliable single-file download
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.6-Portable-only
-          path: PtitsyNN/dist/MoOLVa-8.6-Portable-x64.exe
+          name: Ptitsy-NN-8.7-Portable-only
+          path: PtitsyNN/dist/MoOLVa-8.7-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Upload Setup EXE separately
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.6-Setup-only
-          path: PtitsyNN/dist/MoOLVa-8.6-Setup-x64.exe
+          name: Ptitsy-NN-8.7-Setup-only
+          path: PtitsyNN/dist/MoOLVa-8.7-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Preserve authentic media and source manifest as independent recovery artifact
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.6-Media-Snapshot
+          name: Ptitsy-NN-8.7-Media-Snapshot
           path: |
             PtitsyNN/app/media/audio/**
             PtitsyNN/app/data.js
@@ -535,12 +539,13 @@ jobs:
             PtitsyNN/dist/release-evidence/candidate-review86.*
             PtitsyNN/dist/release-evidence/remaining-voices90.json
             PtitsyNN/dist/release-evidence/eagle-repair93.json
+            PtitsyNN/dist/release-evidence/final-voice94.json
           if-no-files-found: error
           retention-days: 30
       - name: Upload EXE installers and coverage report
         uses: actions/upload-artifact@v4
         with:
-          name: Ptitsy-NN-8.6-Windows
+          name: Ptitsy-NN-8.7-Windows
           path: |
             PtitsyNN/dist/*.exe
             PtitsyNN/dist/SHA256SUMS.txt
@@ -589,14 +594,14 @@ jobs:
           $sums = (Get-Item 'dist/SHA256SUMS.txt' -ErrorAction Stop).FullName
           $coverage = (Get-Item 'data/coverage.json' -ErrorAction Stop).FullName
           $ev = (Resolve-Path dist/release-evidence).Path
-          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','voice-regression.json','voice-regression.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png','08-pro-max-8.6.png')
+          $evidenceNames = @('test-report.md','test-report.json','missing-voices.csv','missing-voices.md','voice-regression.json','voice-regression.md','gui-smoke.json','01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png','08-pro-max-8.7.png','final-voice94.json')
           $evidenceNames += @('audio-review82.csv','audio-review82.md','audio-review83.csv','audio-review83.md','voice-goal84.json','voice-sources84.csv','audio-audit85.csv','audio-audit85.json','clean-variants85.json','candidate-review86.csv','candidate-review86.json')
           $evidenceFiles = foreach ($name in $evidenceNames) {
             $item = Get-Item (Join-Path $ev $name) -ErrorAction Stop
             $item.FullName
           }
           $evidenceFiles += @((Get-ChildItem dist/release-evidence/photo-review -File | Select-Object -ExpandProperty FullName))
-          $notes = "Built by GitHub Actions from $sha. Windows Setup + Portable EXE, SHA256, catalog coverage, seven real packaged Windows Electron screenshots, automatic QA report and exact missing licensed voices. Screenshots are offscreen captures from a running packaged EXE; they do not replace manual tests on user hardware. Exact source: archive/ptitsy-$version-build-$($sha.Substring(0,12))."
+          $notes = "Built by GitHub Actions from $sha. Windows Setup + Portable EXE, SHA256, catalog coverage, eight real packaged Windows Electron screenshots, automatic QA report and exact missing licensed voices. Screenshots are offscreen captures from a running packaged EXE; they do not replace manual tests on user hardware. Exact source: archive/ptitsy-$version-build-$($sha.Substring(0,12))."
           gh release create $tag $setup $portable $sums $coverage @evidenceFiles --target $sha --title "MoOLVa Птицы Нижегородской области $version" --notes $notes
           if ($LASTEXITCODE -ne 0) { throw 'Release creation failed; Actions artifacts retained separately.' }
           Write-Host "Download: https://github.com/${{ github.repository }}/releases/tag/$tag"
