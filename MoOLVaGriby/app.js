@@ -58,7 +58,7 @@
     if(page==='diary')renderDiary();if(page==='map')renderMap();if(page==='quality')renderQuality();
     window.scrollTo(0,0);}
   function sourceLink(b){const img=safePhoto(b);if(!img)return '<p class="photo-credit">Подтверждённая фотография не загружена. Имитировать её не будем.</p>';
-    const link=/^https:\/\/commons\.wikimedia\.org\/wiki\/File:/.test(img.source)?'<a href="'+escapeHTML(img.source)+'" target="_blank" rel="noopener noreferrer">Открыть оригинал на Wikimedia Commons ↗</a>':'';
+    const link=/^https:\/\/(commons\.wikimedia\.org\/wiki\/File:|www\.inaturalist\.org\/photos\/)/.test(img.source)?'<a href="'+escapeHTML(img.source)+'" target="_blank" rel="noopener noreferrer">Открыть первоисточник фотографии ↗</a>':'';
     return '<p class="photo-credit">Фото: '+escapeHTML(img.author||'автор указан в первоисточнике')+' · '+escapeHTML(img.license||'условия не указаны')+'. Категория по метаданным; визуальная идентификация вида не подтверждена. '+link+'</p>';}
   function closeDetail(){if(currentId===null)return;stopSpeech();$('#overlay').hidden=true;document.body.style.overflow='';currentId=null;}
   function openDetail(id){
