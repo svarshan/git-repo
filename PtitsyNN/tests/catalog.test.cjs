@@ -4,7 +4,7 @@ const data=fs.readFileSync(path.join(root,'app','data.js'),'utf8');
 const box={window:{}};vm.runInNewContext(data,box);
 const birds=box.window.BIRDS_DATA;
 const mediaRoot=path.resolve(root,'app','media')+path.sep;
-const allowedMediaSource=/^https:\/\/(?:commons\.wikimedia\.org\/|www\.inaturalist\.org\/observations\/\d+(?:\/|$)|xeno-canto\.org\/\d+(?:\/|$)|freesound\.org\/(?:people|s)\/|archive\.org\/details\/)/;
+const allowedMediaSource=/^https:\/\/(?:commons\.wikimedia\.org\/|www\.inaturalist\.org\/observations\/\d+(?:\/|$)|xeno-canto\.org\/\d+(?:\/|$)|suche\.tierstimmenarchiv\.de\/search\/showdetails\.html\?|freesound\.org\/(?:people|s)\/|archive\.org\/details\/)/;
 const forbiddenLicense=/(?:by-nc|by-nd|nc-sa|nc-nd|noncommercial|no-derivatives)/i;
 test('full catalog of unique scientific species',()=>{
  assert.equal(birds.length,298);
@@ -21,7 +21,26 @@ test('only existing local media with open licenses, author and source credits',(
   assert.ok(fs.statSync(location).size>=250,'Suspiciously short media: '+b[file]);
   assert.ok(b[credit]?.author,'Missing author credit for '+b[file]);
   assert.ok(b[credit]?.license,'Missing license for '+b[file]);
-  assert.doesNotMatch(b[credit].license,forbiddenLicense);
+  if(forbiddenLicense.test(b[credit].license)){
+   // Only the seven separately approved personal-use recordings may use CC BY-NC-SA.
+   assert.equal(file,'audioFile','Noncommercial images are not allowed');
+   const personal=JSON.parse(fs.readFileSync(path.join(root,'data','personal-seven-calls','manifest.json'),'utf8'));
+   const entry=personal.find(x=>x.latin===b.latin && x.source===b[credit].source && String(x.id)!=='19688');
+   const eagleReplacement=b.latin==='Clanga clanga' &&
+      /^XC(?:371196|371198|460234|983557|981181|460224)$/.test(String(b[credit].recordingId||'')) &&
+      b[credit].source==='https://xeno-canto.org/'+String(b[credit].recordingId).slice(2);
+   assert.ok(entry||eagleReplacement,'Only the six approved personal recordings or eligible eagle alternatives may be included');
+   assert.match(b[credit].license,/^CC BY-NC-SA (2\.0|2\.5|3\.0|4\.0)$/);
+   if(entry)assert.equal(b[credit].licenseUrl,entry.license);
+   else assert.match(b[credit].licenseUrl,/^https:\/\/creativecommons\.org\/licenses\/by-nc-sa\/(?:2\.0|2\.5|3\.0|4\.0)\/$/);
+   assert.equal(b[credit].noncommercialOnly,true);
+   assert.equal(b[credit].reviewStatus,'awaiting-user-review');
+   assert.equal(b[credit].speciesHumanVerified,false);
+   assert.match(fs.readFileSync(path.join(root,'app','index.html'),'utf8'),/Личная некоммерческая версия/);
+  }else assert.doesNotMatch(b[credit].license,forbiddenLicense);
+  if(file==='audioFile' && b.latin==='Clanga clanga') {
+   assert.notEqual(b[credit].recordingId,'XC19688','Wind-only eagle recording must never be included');
+  }
   if(file==='audioFile' && /inaturalist\.org/.test(b[credit].source)){
    // Bare ambient observation recordings remain forbidden; only an identified
    // individual sound with licensed metadata, author and audit is admissible.
@@ -35,6 +54,22 @@ test('only existing local media with open licenses, author and source credits',(
    assert.match(String(c.speciesMatch||''),/exact scientific taxon name on research-grade/i);
    assert.ok(c.audioQuality?.seconds>=1 && Number.isFinite(c.audioQuality?.meanDb),'Missing post-download FFmpeg QA');
    assert.ok(c.author && c.audioProcessing,'Missing author or processing metadata');
+  }
+  if(file==='audioFile'&&b[credit]?.sourcePlatform==='Tierstimmenarchiv'){
+   const c=b[credit];
+   assert.match(String(c.recordingId||''),/^TSA:[A-Za-z0-9_-]+$/);
+   assert.match(String(c.licenseUrl||''),/^https:\/\/creativecommons\.org\/licenses\/by(?:-sa)?\/\d+\.\d+\/?$/);
+   assert.equal(c.reviewStatus,'awaiting-user-review');
+   assert.equal(c.speciesHumanVerified,false);
+   assert.match(String(c.audioProcessing||''),/Tierstimmenarchiv MP3/);
+   assert.ok(c.audioQuality?.seconds>=1,'Scientific archive sound has not passed QA');
+  }
+  if(file==='audioFile'&&b[credit]?.sourcePlatform==='Wikimedia Commons'){
+   const c=b[credit];
+   assert.match(String(c.recordingId||''),/^WM[0-9a-f]{12}$/);
+   assert.equal(c.reviewStatus,'awaiting-user-review');
+   assert.equal(c.speciesHumanVerified,false);
+   assert.match(String(c.audioProcessing||''),/Wikimedia Commons/);
   }
   assert.match(b[credit]?.source||'',allowedMediaSource,'Unrecognized license source for '+b[file]);
  }
@@ -137,5 +172,5 @@ test('ULTRA playback features are offline and local imports are explicitly not l
  assert.match(js,/не проверены и не включаются в распространяемый EXE/);
  assert.match(player,/window\.BirdUltra\?\.render/);
  assert.match(html,/src="ultra-audio\.js"/);
- assert.match(html,/MoOLVa 8\.1/);
+ assert.match(html,/MoOLVa 8\.6/);
 });
