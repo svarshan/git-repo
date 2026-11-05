@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#0b1b17"><title>MoOLVa Грибы 1.0 PRO MAX</title>
+<link rel="stylesheet" href="styles.css"></head><body>
+<div class="shell">
+<aside class="sidebar" aria-label="Разделы">
+  <div class="brand"><div class="brandmark">🍄</div><div><strong>MoOLVa</strong><span>ГРИБЫ · PRO MAX</span></div></div>
+  <p class="sidetitle">АТЛАС ПРИРОДЫ</p>
+  <nav id="nav"><button data-page="catalog" class="selected"><span>▦</span> Атлас грибов</button>
+  <button data-page="compare"><span>⇄</span> Сравнение</button>
+  <button data-page="diary"><span>✎</span> Дневник грибника</button>
+  <button data-page="map"><span>⌖</span> Мои места</button>
+  <button data-page="favorites"><span>♡</span> Избранное</button>
+  <button data-page="quality"><span>◎</span> Фото и источники</button>
+  <button data-page="about"><span>ⓘ</span> О приложении</button></nav>
+  <div class="sidebottom"><span class="live-dot"></span> Работает без интернета<div class="small">MoOLVa Грибы 1.0 · Windows</div></div>
+</aside>
+<div class="content">
+  <header class="top"><div class="topmeta"><span class="eyebrow">НИЖЕГОРОДСКАЯ ОБЛАСТЬ</span><h1 id="heading">Грибной атлас</h1><p id="subtitle">Изучайте виды и опасные двойники, сохраняйте наблюдения</p></div><div class="header-right"><span id="counter" class="count-pill"></span><button id="backupBtn" class="icon-btn" title="Экспорт дневника и избранного">⇩ Резерв</button></div></header>
+  <div class="alert"><b>Важно:</b> фотографии и признаки не подтверждают безопасность гриба. Не употребляйте дикорастущие грибы по определению из приложения. При подозрении на отравление срочно обращайтесь за медицинской помощью.</div>
+  <main>
+    <section class="page active" id="catalog">
+      <div class="hero"><div><span class="eyebrow">ЖИВАЯ ЭНЦИКЛОПЕДИЯ</span><h2>Откройте природу<br><em>по-новому</em></h2><p>53 вида грибов средней полосы России. Изучайте строение, сравнивайте похожие виды и ведите собственный дневник находок.</p><div class="hero-actions"><button id="heroSearch" class="primary">Найти гриб →</button><button data-goto="compare" class="ghost">Сравнить виды</button></div></div><div class="hero-illustration" aria-hidden="true"><span>🍄</span><i>✦</i></div></div>
+      <div class="stats"><div><span>В энциклопедии</span><strong id="statTotal">53</strong><small>вида для изучения</small></div><div><span>Опасные виды</span><strong id="statHazard">—</strong><small>требуют особой осторожности</small></div><div><span>С фотографиями</span><strong id="statImages">—</strong><small>сведения об авторах</small></div><div><span>Мои наблюдения</span><strong id="statDiary">0</strong><small>остаются на устройстве</small></div></div>
+      <div class="sectiontop"><div><span class="eyebrow">КАТАЛОГ</span><h2>Грибы и их двойники</h2></div><div id="resultCount"></div></div>
+      <div class="filters"><input id="search" type="search" autocomplete="off" placeholder="Название, латынь или признак…"><select id="group"><option value="">Все группы</option></select><select id="risk"><option value="">Любые виды</option><option value="danger">Известно ядовитые</option><option value="reference">Остальные (справочно)</option></select><select id="season"><option value="">Любой сезон</option><option value="4">Апрель</option><option value="5">Май</option><option value="6">Июнь</option><option value="7">Июль</option><option value="8">Август</option><option value="9">Сентябрь</option><option value="10">Октябрь</option><option value="11">Ноябрь</option><option value="12">Декабрь</option></select></div>
+      <div id="cards" class="cards"></div><button id="showMore" class="showmore">Показать ещё виды ↓</button>
+    </section>
+    <section class="page" id="favorites"><div class="sectiontop"><div><span class="eyebrow">МОЯ КОЛЛЕКЦИЯ</span><h2>Избранные виды</h2></div></div><div id="favCards" class="cards"></div></section>
+    <section class="page" id="compare"><div class="sectiontop"><div><span class="eyebrow">ПОЛЕВОЙ СПРАВОЧНИК</span><h2>Сравнение видов</h2></div></div><p class="note">Похожие грибы могут быть смертельно опасны. Сравнение показывает сведения из атласа, но не устанавливает вид конкретной находки.</p><div class="comparison-pick"><label>Первый вид<select id="pickA"></select></label><label>Второй вид<select id="pickB"></select></label></div><div id="comparison" class="comparison"></div></section>
+    <section class="page" id="diary"><div class="sectiontop"><div><span class="eyebrow">ЛИЧНЫЕ НАБЛЮДЕНИЯ</span><h2>Дневник грибника</h2></div><button id="exportDiary" class="primary">Экспорт JSON ⇩</button></div><p class="note">Ваши записи хранятся только на этом устройстве. Названия видов в дневнике — предположения пользователя, не экспертное определение.</p>
+      <form id="diaryForm" class="diaryform"><label>Название вида<select id="obsSpecies" required></select></label><label>Дата<input type="date" id="obsDate" required></label><label>Район / место<input id="obsPlace" maxlength="100" placeholder="Например, лес возле Семёнова" required></label><label>Примечание<textarea id="obsNote" maxlength="1000" rows="2" placeholder="Условия, особенности шляпки, ножки, местообитание…"></textarea></label><button class="primary" type="submit">＋ Добавить наблюдение</button></form>
+      <div id="diaryItems"></div>
+    </section>
+    <section class="page" id="map"><div class="sectiontop"><div><span class="eyebrow">БЕЗ ЛОЖНЫХ ГЕОТОЧЕК</span><h2>Мои грибные места</h2></div></div><p class="note">Здесь отображаются только места, которые вы сами добавили в дневник. Готовые точки «где растут грибы» намеренно не выдумываются. Для настоящей географической карты потребуется проверенный геосервис.</p><div id="mapItems" class="place-list"></div><button data-goto="diary" class="primary">Добавить находку →</button></section>
+    <section class="page" id="quality"><div class="sectiontop"><div><span class="eyebrow">КАЧЕСТВО ДАННЫХ</span><h2>Фотографии и источники</h2></div></div><p class="note">Фотографии берутся из Wikimedia Commons с указанием автора и лицензии. Совпадение названия категории и техническая проверка файла не доказывают вид гриба на изображении. Без проверенной фотографии отображается заглушка, а не чужой гриб.</p><div id="qualityStats" class="stats"></div><div id="qualityItems" class="quality-list"></div></section>
+    <section class="page" id="about"><div class="sectiontop"><div><span class="eyebrow">ОТКРЫТАЯ ПРИРОДА</span><h2>О MoOLVa Грибы</h2></div></div><div class="aboutbox"><h3>MoOLVa Грибы 1.0 PRO MAX</h3><p>Русскоязычный учебный офлайн-атлас грибов средней полосы. Это самостоятельное приложение, не изменяющее MoOLVa Птицы.</p><p>Список видов — учебная стартовая подборка. Достоверное присутствие каждого вида именно в Нижегородской области пока требует отдельной проверки по опубликованным региональным наблюдениям.</p><p>Фотографии: Wikimedia Commons; автор, ссылка на файл и лицензия указываются в карточке. Если онлайн-поиск не смог получить пригодный файл, фото не подставляется. У каждого гриба название и признаки носят справочный характер и не являются инструкцией по приготовлению.</p><p><b>При отравлении:</b> незамедлительно обратитесь в экстренные службы или медицинское учреждение; не ожидайте симптомов. В России единый номер экстренных служб 112.</p><p>Дневник и избранное сохраняются локально, экспортируются в JSON, не отправляются на сервер.</p><button id="resetAll" class="danger-outline">Очистить мой дневник и избранное</button></div></section>
+  </main>
+</div></div>
+<div id="overlay" class="overlay" hidden><div class="shade" data-close></div><section class="modal" role="dialog" aria-modal="true" aria-label="Карточка гриба"><button id="closeModal" class="close" data-close aria-label="Закрыть">✕</button><div id="detail"></div></section></div>
+<div id="toast" role="status" aria-live="polite"></div>
+<script src="catalog.js"></script><script src="photos.js"></script><script src="app.js"></script>
+</body></html>
