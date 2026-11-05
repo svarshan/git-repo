@@ -52,7 +52,7 @@ def screenshots():
         raise ValueError('Real packaged Windows Electron screenshot evidence absent')
     if smoke.get('catalog',{}).get('species')!=298 or smoke.get('modelAvailable') is not True or not smoke.get('visionModelVerified',{}).get('ok'):
         raise ValueError('Packaged screenshot runtime lacks catalog or Perch model')
-    names=['01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png','08-pro-max-8.6.png']
+    names=['01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png','08-pro-max-8.7.png']
     rows=smoke.get('screenshots',[])
     if [x.get('name') for x in rows]!=names:raise ValueError('Some actual application sections were not captured')
     result=[]
@@ -84,7 +84,7 @@ def finalize():
     coverage=json.loads((BASE/'data'/'coverage.json').read_text(encoding='utf-8-sig'))
     voices=json.loads((DIST/'voice-inventory.json').read_text(encoding='utf-8'))
     version=json.loads((BASE/'package.json').read_text(encoding='utf-8'))['version']
-    if smoke.get('version')!=version or version!='8.6.0':raise ValueError('Executable version differs from release')
+    if smoke.get('version')!=version or version!='8.7.0':raise ValueError('Executable version differs from release')
     if voices['withPrimaryVoice']!=coverage.get('birdCalls'):raise ValueError('Coverage changed after inventory')
     if coverage.get('species')!=298 or coverage.get('photos')!=298 or coverage.get('articles')!=298:
         raise ValueError('8.4 integrity gate: missing species, real photos, or articles')
