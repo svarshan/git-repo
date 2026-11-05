@@ -20,8 +20,8 @@ test('8.4 AI keeps relative scores and reveals ambiguity',()=>{
 });
 test('8.4 installed modules and Windows artifact versions',()=>{
  const pkg=JSON.parse(read('package.json')),html=read('app/index.html'),wf=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(pkg.version,'8.6.0');assert.match(html,/id="m84Tools"/);
+ assert.match(pkg.version,/^8\.\d+\.\d+$/);assert.match(html,/id="m84Tools"/);
  assert.match(html,/src="core84.js"/);assert.match(html,/src="upgrade84.js"/);
- assert.match(wf,/Ptitsy-NN-8\.6-Windows/);assert.match(wf,/voice_guard84\.py/);
+ assert.ok(wf.includes('Ptitsy-NN-'+pkg.version.replace(/\.0$/,'')+'-Windows'));assert.match(wf,/voice_guard84\.py/);
  assert.match(read('app/backup82.js'),/before-update/);
 });

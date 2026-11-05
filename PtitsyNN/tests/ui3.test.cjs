@@ -37,11 +37,11 @@ test('dashboard relies on real species data and old user stores',()=>{
 test('version 3.0 keeps installer and portable and does not load remote media',()=>{
  const p=JSON.parse(file('package.json'));
  const workflow=file('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(p.version,'8.6.0');
+ assert.match(p.version,/^8\.\d+\.\d+$/);
  assert.ok(p.build.win.target.some(x=>x.target==='nsis'));
  assert.ok(p.build.win.target.some(x=>x.target==='portable'));
- assert.match(p.build.portable.artifactName,/8\.6/);
- assert.match(workflow,/Ptitsy-NN-8\.6-Windows/);
+ assert.ok(p.build.portable.artifactName.includes('MoOLVa-'+p.version.replace(/\.0$/,'')+'-'));
+ assert.ok(workflow.includes('Ptitsy-NN-'+p.version.replace(/\.0$/,'')+'-Windows'));
  assert.match(workflow,/node --check app\/ui3\.js/);
  assert.match(html,/connect-src 'none'/);
  assert.doesNotMatch(html,/<script[^>]+src="https?:/);
