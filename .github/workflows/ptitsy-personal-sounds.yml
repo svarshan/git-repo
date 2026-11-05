@@ -1,0 +1,79 @@
+name: MoOLVa personal licensed sound preparation
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/ptitsy-8.6-pro-max]
+    paths: [.github/workflows/ptitsy-personal-sounds.yml]
+permissions:
+  contents: read
+jobs:
+  sounds:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests imageio-ffmpeg
+      - name: Prepare attributed noncommercial recordings for user review
+        working-directory: PtitsyNN
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+        shell: bash
+        run: |
+          python - <<'PY'
+          import hashlib,json,time,tempfile,sys,re
+          from pathlib import Path
+          sys.path.insert(0,'scripts')
+          from xeno_candidates87 import query_page
+          from stage_xeno87 import download_source,transcode,verify_audio,ffmpeg_path
+          candidates=json.loads("{\"Clanga clanga\":[\"19688\",\"331529\",\"331528\",\"371196\",\"371198\",\"981181\",\"983557\"],\"Larus hyperboreus\":[\"432754\",\"406443\",\"1045651\",\"1045649\",\"1173210\",\"457538\",\"514048\",\"424891\"],\"Gallinago media\":[\"800049\",\"1133855\",\"800784\",\"184812\",\"342369\",\"903187\",\"243989\",\"316164\"],\"Calidris minuta\":[\"765719\",\"765716\",\"185089\",\"765880\",\"765717\",\"1168642\",\"765881\",\"989490\"],\"Circus pygargus\":[\"1075280\",\"511921\",\"1152360\",\"1152361\",\"1152386\",\"433723\",\"433701\",\"433716\"],\"Mergellus albellus\":[\"1167398\",\"1167245\",\"1167283\",\"565127\",\"466526\",\"564365\",\"564362\",\"1167362\"],\"Circus macrourus\":[\"471461\",\"549572\",\"182529\",\"438852\",\"145075\"]}")
+          out=Path('dist/seven-calls');out.mkdir(parents=True,exist_ok=True)
+          report=[];ffmpeg=ffmpeg_path()
+          for latin,ids in candidates.items():
+           chosen=None
+           try:
+            lookup={}
+            first=query_page(latin,1)
+            total=int(first.get('numPages') or 1)
+            for page in range(1,min(total,12)+1):
+             payload=first if page==1 else query_page(latin,page)
+             for rec in payload.get('recordings',[]):lookup[str(rec.get('id'))]=rec
+            for ident in ids:
+             r=lookup.get(ident)
+             if not r:continue
+             if (str(r.get('gen'))+' '+str(r.get('sp'))).casefold()!=latin.casefold():continue
+             lic=str(r.get('lic') or '')
+             if lic.rstrip('/') not in ('https://creativecommons.org/licenses/by-nc-sa/3.0','https://creativecommons.org/licenses/by-nc-sa/4.0'):continue
+             if r.get('also') or not r.get('rec') or not r.get('type') or str(r.get('q')).upper() not in ('A','B'):continue
+             if re.search(r'hybrid|wind|human|speech|voices?|talk|noise|imitation|mixed|playback',str(r.get('rmk') or '')+' '+str(r.get('type') or ''),re.I):continue
+             if str(r.get('playback-used') or '').lower()=='yes':continue
+             url=str(r.get('file') or '')
+             if url.startswith('//'):url='https:'+url
+             if not url.startswith(('https://xeno-canto.org/','https://www.xeno-canto.org/')):continue
+             dest=out/(latin.replace(' ','-').lower()+'-xc'+ident+'.mp3')
+             try:
+              with tempfile.TemporaryDirectory() as tmp:
+               src=Path(tmp)/'source'
+               download_source(url,src)
+               transcode(src,dest,ffmpeg)
+              metrics=verify_audio(dest)
+              chosen={'latin':latin,'id':ident,'file':dest.name,'source':'https://xeno-canto.org/'+ident,'author':str(r['rec']),'license':lic,'quality':str(r['q']),'type':str(r['type']),'metrics':metrics,'sha256':hashlib.sha256(dest.read_bytes()).hexdigest(),'note':'Преобразовано в моно MP3; некоммерческая лицензия CC BY-NC-SA. Вид и отсутствие посторонних звуков требуют проверки пользователем.'}
+              break
+             except Exception as ex:
+              dest.unlink(missing_ok=True);print('Candidate rejected',latin,ident,type(ex).__name__,flush=True)
+            print(latin,('XC'+chosen['id']) if chosen else 'NOT FOUND',flush=True)
+           except Exception as ex:
+            print('Search failed',latin,type(ex).__name__,flush=True)
+           report.append(chosen or {'latin':latin,'error':'no candidate passed checks'})
+          (out/'manifest.json').write_text(json.dumps(report,ensure_ascii=False,indent=2),encoding='utf8')
+          if any('error' in x for x in report):raise SystemExit('Some sounds require further search')
+          
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: Ptitsy-Personal-Seven-Sounds
+          path: PtitsyNN/dist/seven-calls/
+          retention-days: 30
