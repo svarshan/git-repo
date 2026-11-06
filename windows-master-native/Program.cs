@@ -20,6 +20,9 @@ static class Program {
   if(args.Contains("--self-test")) return SelfTest.Run();
   string browserSmoke=args.FirstOrDefault(x=>x.StartsWith("--browser-smoke="));
   if(browserSmoke!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);var browser=new IsoBrowser("11",Path.GetTempPath(),null,browserSmoke.Substring(16));Application.Run(browser);return browser.Initialized?0:6;}
+  string downloadProbe10=args.FirstOrDefault(x=>x.StartsWith("--download-probe10="));
+  string downloadProbe11=args.FirstOrDefault(x=>x.StartsWith("--download-probe11="));
+  if(downloadProbe10!=null||downloadProbe11!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);string output=(downloadProbe10??downloadProbe11).Substring(19);var browser=new IsoBrowser(downloadProbe10!=null?"10":"11",Path.GetTempPath(),null,output,false,true);Application.Run(browser);return browser.Initialized?0:6;}
   string browserLive10=args.FirstOrDefault(x=>x.StartsWith("--browser-live10="));
   if(browserLive10!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);var browser=new IsoBrowser("10",Path.GetTempPath(),null,browserLive10.Substring(17),true);Application.Run(browser);return browser.Initialized?0:6;}
   string browserLive=args.FirstOrDefault(x=>x.StartsWith("--browser-live="));

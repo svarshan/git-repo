@@ -83,6 +83,16 @@ jobs:
           $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force;Set-Content ($shot+'.status.txt') 'TIMEOUT: Microsoft page'}
           if(Test-Path ($shot+'.status.txt')){Get-Content ($shot+'.status.txt')}else{Set-Content ($shot+'.status.txt') 'UNAVAILABLE: no result'}
+      - name: Probe ISO download handoff without full download
+        shell: powershell
+        run: |
+          foreach($version in @('10','11')) {
+            $log=Join-Path (Resolve-Path dist).Path ('ISO-Download-Probe-'+$version+'.txt')
+            $arg='--download-probe'+$version+'="'+$log+'"'
+            $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList $arg -PassThru
+            if(-not $p.WaitForExit(130000)){Stop-Process -Id $p.Id -Force;Set-Content $log 'TIMEOUT: ISO handoff probe'}
+            if(Test-Path $log){Get-Content $log}else{Set-Content $log 'UNAVAILABLE: probe exited without output'}
+          }
       - name: Test embedded WebView2 window
         shell: powershell
         run: |
