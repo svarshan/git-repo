@@ -1,0 +1,144 @@
+using System;
+using System.Collections.Generic;
+using System.Drawing;
+using System.IO;
+using System.Linq;
+using System.Management;
+using System.Net;
+using System.Security.Cryptography;
+using System.Security.Principal;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+using System.Drawing.Imaging;
+using Microsoft.CSharp.RuntimeBinder;
+
+namespace MoOLVaMaster {
+static class Program {
+ [STAThread] static int Main(string[] args) {
+  if(args.Contains("--self-test")) return SelfTest.Run();
+  Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
+  var app=new MainForm(args.Contains("--drivers"));
+  string shot=args.FirstOrDefault(x=>x.StartsWith("--screenshot="));
+  if(shot!=null) { string path=shot.Substring("--screenshot=".Length); app.Shown+=(s,e)=>{try {app.Refresh();using(var image=new Bitmap(app.Width,app.Height)){app.DrawToBitmap(image,new Rectangle(0,0,image.Width,image.Height));image.Save(path,ImageFormat.Png);}} finally {app.Close();}}; }
+  Application.Run(app); return 0;
+ }
+}
+static class Rules {
+ public static bool Firmware(string title) { string t=(title??"").ToLowerInvariant(); return t.Contains("firmware")||t.Contains("прошив")||t.Contains("микропрограмм")||System.Text.RegularExpressions.Regex.IsMatch(t,@"\b(bios|uefi)\b"); }
+ public static bool MicrosoftLink(string s) { Uri u; if(!Uri.TryCreate(s,UriKind.Absolute,out u)||u.Scheme!="https"||!String.IsNullOrEmpty(u.UserInfo))return false; string h=u.DnsSafeHost.ToLowerInvariant();return h=="microsoft.com"||h.EndsWith(".microsoft.com")||h.EndsWith(".prss.microsoft.com"); }
+ public static bool SafeEmptyTarget(DriveInfo d, string src) { if(d.DriveType!=DriveType.Removable || !d.IsReady || !String.Equals(d.DriveFormat,"FAT32",StringComparison.OrdinalIgnoreCase) || String.Equals(d.RootDirectory.FullName,src,StringComparison.OrdinalIgnoreCase))return false;return !Directory.EnumerateFileSystemEntries(d.RootDirectory.FullName).Any(p=> {var n=Path.GetFileName(p);return !String.Equals(n,"System Volume Information",StringComparison.OrdinalIgnoreCase)&&!String.Equals(n,"$RECYCLE.BIN",StringComparison.OrdinalIgnoreCase);}); }
+}
+static class SelfTest { public static int Run(){
+ try {
+ if(!Rules.MicrosoftLink("https://software.download.prss.microsoft.com/path")||!Rules.MicrosoftLink("https://go.microsoft.com/fwlink/?linkid=1")||Rules.MicrosoftLink("https://microsoft.com.evil.test/a")||Rules.MicrosoftLink("http://microsoft.com/")||Rules.MicrosoftLink("https://user@microsoft.com/"))return 2;
+ if(!Rules.Firmware("HP BIOS update")||!Rules.Firmware("device firmware")||Rules.Firmware("Realtek Audio driver"))return 3;
+ return 0;
+ }catch{return 9;}
+}}
+sealed class DriverItem {public string Id,Title;public int Rev;public bool Eligible;public string Reason; public override string ToString(){return (Eligible?"Драйвер":"ПРОПУЩЕН: "+Reason)+" — "+Title;}}
+sealed class MainForm:Form {
+ readonly Color bg=Color.FromArgb(16,23,36),panel=Color.FromArgb(23,34,53),yellow=Color.FromArgb(255,196,71),muted=Color.FromArgb(185,197,214);
+ readonly Panel side=new Panel(),page=new Panel(); readonly List<string> report=new List<string>(); bool busy; CheckedListBox drivers; Label driverState; TextBox logBox; string selectedView=""; bool bootToDrivers;
+ public MainForm(bool openDrivers){bootToDrivers=openDrivers;Text="MoOLVa Windows Master 3.0 Portable";StartPosition=FormStartPosition.CenterScreen;MinimumSize=new Size(900,680);Size=new Size(1180,800);BackColor=bg;ForeColor=Color.White;Font=new Font("Segoe UI",10);
+ side.Dock=DockStyle.Left;side.Width=215;side.BackColor=Color.FromArgb(12,19,32);Controls.Add(side);page.Dock=DockStyle.Fill;page.AutoScroll=true;page.BackColor=bg;Controls.Add(page);page.BringToFront();
+ var logo=new Label{Text="MoOLVa",ForeColor=yellow,Font=new Font("Segoe UI",23,FontStyle.Bold),AutoSize=true,Location=new Point(20,23)};side.Controls.Add(logo);
+ var sub=new Label{Text="WINDOWS MASTER 3.0",ForeColor=muted,AutoSize=true,Location=new Point(22,77)};side.Controls.Add(sub);
+ string[] names={"Главная","Windows / флешка","Драйверы","BIOS / Boot Menu","Диагностика","Отчёт"}; Action[] actions={Home,WindowsPage,DriversPage,BiosPage,DiagnosticsPage,ReportPage};
+ for(int i=0;i<names.Length;i++){int n=i;var b=Button(names[i],false);b.SetBounds(12,130+i*57,190,47);b.TextAlign=ContentAlignment.MiddleLeft;b.Click+=(s,e)=>Navigate(actions[n]);side.Controls.Add(b);}
+ Shown+=(s,e)=> {if(bootToDrivers)DriversPage();else Home();}; FormClosing+=(s,e)=>{if(busy){e.Cancel=true;MessageBox.Show("Дождитесь завершения операции.");}};
+ }
+ Button Button(string text,bool primary){return new Button{Text=text,BackColor=primary?yellow:panel,ForeColor=primary?bg:Color.White,FlatStyle=FlatStyle.Flat,Font=new Font("Segoe UI",10,FontStyle.Bold),Margin=new Padding(5),AutoSize=false};}
+ Label Label(string text,int size=10,bool bold=false){return new Label{Text=text,ForeColor=size==10?muted:Color.White,Font=new Font("Segoe UI",size,bold?FontStyle.Bold:FontStyle.Regular),AutoSize=true,MaximumSize=new Size(790,0),Margin=new Padding(4,8,4,8)};}
+ FlowLayoutPanel BeginPage(string title,string subtitle){page.Controls.Clear();selectedView=title;var flow=new FlowLayoutPanel{Dock=DockStyle.Top,AutoSize=true,AutoSizeMode=AutoSizeMode.GrowAndShrink,FlowDirection=FlowDirection.TopDown,WrapContents=false,Padding=new Padding(28,20,20,50)};page.Controls.Add(flow);flow.Controls.Add(Label(title,21,true));flow.Controls.Add(Label(subtitle));return flow;}
+ Button AddButton(FlowLayoutPanel f,string text,Action action,bool primary=false,int width=390){var b=Button(text,primary);b.Size=new Size(width,48);b.Click+=(s,e)=>action();f.Controls.Add(b);return b;}
+ TextBox AddText(FlowLayoutPanel f,int height=200){var t=new TextBox{Multiline=true,ReadOnly=true,ScrollBars=ScrollBars.Vertical,BackColor=panel,ForeColor=Color.White,BorderStyle=BorderStyle.FixedSingle,Size=new Size(750,height),Font=new Font("Segoe UI",10)};f.Controls.Add(t);return t;}
+ void Navigate(Action a){if(busy){MessageBox.Show("Дождитесь завершения текущей операции.");return;}a();}
+ static bool IsAdmin(){using(var id=WindowsIdentity.GetCurrent())return new WindowsPrincipal(id).IsInRole(WindowsBuiltInRole.Administrator);}
+ void EnsureAdminDrivers(){if(IsAdmin()){DriversPage();return;}try{Process.Start(new ProcessStartInfo(Application.ExecutablePath,"--drivers"){Verb="runas",UseShellExecute=true});}catch(Exception e){MessageBox.Show("Не удалось получить права администратора: "+e.Message);}}
+ void Open(string u){try{Process.Start(new ProcessStartInfo(u){UseShellExecute=true});}catch(Exception e){MessageBox.Show(e.Message);}}
+ void Record(string line){report.Add(DateTime.Now.ToString("HH:mm:ss")+"  "+line);if(logBox!=null&&!logBox.IsDisposed)logBox.AppendText(line+Environment.NewLine);}
+ void Home(){var f=BeginPage("MoOLVa Windows Master 3.0","Ваш переносимый инструмент настройки Windows — C#/.NET без PowerShell.");AddButton(f,"Подготовить Windows и флешку",WindowsPage,true,600);AddButton(f,"Настроить драйверы",DriversPage,false,600);f.Controls.Add(Label("Этот компьютер",13,true));var t=AddText(f,245);t.Text=Hardware();}
+ static string Wmi(string cls,string prop){try{using(var s=new ManagementObjectSearcher("SELECT "+prop+" FROM "+cls)){foreach(ManagementObject o in s.Get())return Convert.ToString(o[prop]);}}catch{}return "нет данных";}
+ static string Hardware(){return "Производитель: "+Wmi("Win32_ComputerSystem","Manufacturer")+"\r\nМодель: "+Wmi("Win32_ComputerSystem","Model")+"\r\nСерийный номер: "+Wmi("Win32_BIOS","SerialNumber")+"\r\nBIOS: "+Wmi("Win32_BIOS","SMBIOSBIOSVersion")+"\r\nWindows: "+Wmi("Win32_OperatingSystem","Caption")+"\r\nПроцессор: "+Wmi("Win32_Processor","Name");}
+ static string ProblemDevices(){try{var lines=new List<string>();using(var s=new ManagementObjectSearcher("SELECT Name,ConfigManagerErrorCode FROM Win32_PnPEntity WHERE ConfigManagerErrorCode <> 0")){foreach(ManagementObject o in s.Get())lines.Add(Convert.ToString(o["Name"])+" — код "+Convert.ToString(o["ConfigManagerErrorCode"]));}return lines.Count==0?"Ошибки устройств не обнаружены. Проверьте также работу сети, звука и других устройств.":String.Join("\r\n",lines.Take(100));}catch(Exception e){return "Ошибка чтения устройств: "+e.Message;}}
+ void WindowsPage(){var f=BeginPage("Windows и установочная флешка","Официальные источники, загрузка внутри программы и подготовка UEFI-носителя.");
+ AddButton(f,"Скачать средство Microsoft — Windows 11",async()=>await Download("https://go.microsoft.com/fwlink/?linkid=2156295","MediaCreationTool-Win11.exe"),true);
+ AddButton(f,"Скачать средство Microsoft — Windows 10",async()=>await Download("https://go.microsoft.com/fwlink/?LinkId=691209","MediaCreationTool-Win10.exe"));
+ f.Controls.Add(Label("ISO: выберите язык и редакцию на сайте Microsoft, затем скопируйте временную ссылку сюда. Срок действия ссылки ограничен."));
+ var url=new TextBox{Width=750};f.Controls.Add(url);AddButton(f,"Скачать ISO по ссылке Microsoft",async()=>await Download(url.Text,"Windows.iso"));
+ AddButton(f,"Открыть страницу Microsoft Windows 11",()=>Open("https://www.microsoft.com/en-us/software-download/windows11"));AddButton(f,"Открыть страницу Microsoft Windows 10",()=>Open("https://www.microsoft.com/en-us/software-download/windows10"));
+ AddButton(f,"Проверить SHA-256 скачанного ISO",async()=>await HashFile());
+ AddButton(f,"Создать USB из подключённого ISO",UsbPage,true);
+ f.Controls.Add(Label("Windows 8.1: доступность официального ISO может измениться. Обновления Windows 8.1 и обычной Windows 10 завершены."));}
+ async Task Download(string address,string defaultName){
+ if(!Rules.MicrosoftLink(address)){MessageBox.Show("Разрешены только HTTPS-ссылки Microsoft. Получите ссылку на официальной странице.");return;}
+ using(var d=new SaveFileDialog{FileName=defaultName,OverwritePrompt=true,Filter="Все файлы|*.*"}){if(d.ShowDialog()!=DialogResult.OK)return;if(File.Exists(d.FileName)){MessageBox.Show("Выберите новое имя файла.");return;}
+ string tmp=d.FileName+".part-"+Guid.NewGuid().ToString("N");using(var wc=new WebClient()){
+ var progress=new Form{Text="Загрузка",Size=new Size(530,160),StartPosition=FormStartPosition.CenterParent,FormBorderStyle=FormBorderStyle.FixedDialog,ControlBox=false};var lbl=new Label{Text="Подготовка...",Location=new Point(20,15),AutoSize=true};var pb=new ProgressBar{Location=new Point(20,48),Width=465,Height=22};var cancel=new Button{Text="Отменить",Location=new Point(20,80),Width=140};progress.Controls.AddRange(new Control[]{lbl,pb,cancel});cancel.Click+=(s,e)=>wc.CancelAsync();
+ wc.DownloadProgressChanged+=(s,e)=>{pb.Value=Math.Max(0,Math.Min(100,e.ProgressPercentage));lbl.Text=String.Format("Загружено: {0:N1} МБ ({1}%)",e.BytesReceived/1048576.0,e.ProgressPercentage);};
+ busy=true;progress.Show(this);try{ServicePointManager.SecurityProtocol|=SecurityProtocolType.Tls12;await wc.DownloadFileTaskAsync(new Uri(address),tmp);File.Move(tmp,d.FileName);MessageBox.Show("Загрузка завершена: "+d.FileName+"\r\nПроверяйте подпись установщика или официальный SHA-256 ISO.");Record("Скачан файл: "+Path.GetFileName(d.FileName));}
+ catch(Exception ex){if(File.Exists(tmp))File.Delete(tmp);MessageBox.Show("Загрузка не завершена: "+ex.Message);}finally{busy=false;progress.Close();progress.Dispose();}}
+ }}
+ async Task HashFile(){using(var d=new OpenFileDialog{Filter="ISO-образ|*.iso|Все файлы|*.*"}){if(d.ShowDialog()!=DialogResult.OK)return;busy=true;try{string hash=await Task.Run(()=>{using(var sha=SHA256.Create())using(var file=File.OpenRead(d.FileName))return BitConverter.ToString(sha.ComputeHash(file)).Replace("-","");});MessageBox.Show("SHA-256:\r\n"+hash+"\r\nСравните со значением Microsoft.","Контрольная сумма");}catch(Exception e){MessageBox.Show(e.Message);}finally{busy=false;}}}
+ void UsbPage(){var f=BeginPage("Установочная флешка UEFI","Запись файлов на пустую флешку FAT32 без форматирования.");
+ f.Controls.Add(Label("1. Подключите ISO в Windows: дважды нажмите файл ISO в Проводнике. Затем выберите появившийся DVD-диск."));
+ var source=new ComboBox{Width=740,DropDownStyle=ComboBoxStyle.DropDownList};f.Controls.Add(source);
+ f.Controls.Add(Label("2. Выберите пустую USB-флешку FAT32. Программа не форматирует носитель и не перезаписывает существующие файлы."));
+ var target=new ComboBox{Width=740,DropDownStyle=ComboBoxStyle.DropDownList};f.Controls.Add(target);
+ Action refresh=()=>{source.Items.Clear();target.Items.Clear();foreach(var d in DriveInfo.GetDrives()){try{if(!d.IsReady)continue;if(d.DriveType==DriveType.CDRom)source.Items.Add(new DriveChoice(d));if(d.DriveType==DriveType.Removable)target.Items.Add(new DriveChoice(d));}catch{}}if(source.Items.Count>0)source.SelectedIndex=0;if(target.Items.Count>0)target.SelectedIndex=0;};
+ AddButton(f,"Обновить список дисков",refresh);refresh();
+ AddButton(f,"Записать установочные файлы",async()=>{var s=source.SelectedItem as DriveChoice;var t=target.SelectedItem as DriveChoice;if(s==null||t==null){MessageBox.Show("Выберите подключённый ISO и USB.");return;} await CopyUsb(s.Drive,t.Drive);},true);
+ AddButton(f,"Открыть управление дисками Windows",()=>{try{Process.Start("diskmgmt.msc");}catch(Exception e){MessageBox.Show(e.Message);}});
+ f.Controls.Add(Label("Поддерживается UEFI. Для файла install.wim больше 4 ГБ используется DISM. Файлы install.esd больше 4 ГБ пока не поддерживаются. Проверка реальной загрузки на физическом ПК ещё не выполнена.")); }
+ sealed class DriveChoice{public DriveInfo Drive;public DriveChoice(DriveInfo d){Drive=d;}public override string ToString(){try{return Drive.Name+"  "+Drive.VolumeLabel+"  "+(Drive.TotalSize/1073741824.0).ToString("N1")+" ГБ  "+Drive.DriveFormat;}catch{return Drive.Name;}}}
+ async Task CopyUsb(DriveInfo src,DriveInfo dst){
+ try {
+ if(src.DriveType!=DriveType.CDRom||!src.IsReady)throw new Exception("Источник должен быть подключённым ISO/DVD.");
+ string from=src.RootDirectory.FullName,to=dst.RootDirectory.FullName;
+ if(!Rules.SafeEmptyTarget(dst,from))throw new Exception("Нужна пустая съёмная флешка FAT32. Существующие файлы программа не удаляет.");
+ string exeRoot=Path.GetPathRoot(Application.ExecutablePath);if(String.Equals(exeRoot,to,StringComparison.OrdinalIgnoreCase))throw new Exception("Нельзя записывать на флешку, с которой запущен MoOLVa.");
+ uint serial=VolumeSerial(to);if(serial==0)throw new Exception("Не удалось подтвердить идентификатор флешки.");
+ string efi=Path.Combine(from,@"efi\boot");if(!File.Exists(Path.Combine(from,"setup.exe"))||!File.Exists(Path.Combine(from,@"sources\boot.wim"))||!(File.Exists(Path.Combine(efi,"bootx64.efi"))||File.Exists(Path.Combine(efi,"bootaa64.efi"))))throw new Exception("Источник не похож на установочный Windows ISO для UEFI.");
+ string[] inputs=Directory.GetFiles(from,"*",SearchOption.AllDirectories);string largeWim=Path.Combine(from,@"sources\install.wim");bool split=false;long total=0;foreach(string p in inputs){var len=new FileInfo(p).Length;total+=len;if(len>4294967295L){if(String.Equals(p,largeWim,StringComparison.OrdinalIgnoreCase))split=true;else throw new Exception("Файл слишком велик для FAT32: "+p);}}
+ if(!(File.Exists(largeWim)||File.Exists(Path.Combine(from,@"sources\install.esd"))||File.Exists(Path.Combine(from,@"sources\install.swm"))))throw new Exception("Не найден установочный образ Windows.");
+ if(dst.AvailableFreeSpace<total+268435456L)throw new Exception("На флешке недостаточно свободного места.");
+ if(MessageBox.Show("На пустую флешку "+to+" ("+dst.VolumeLabel+", "+(dst.TotalSize/1073741824.0).ToString("N1")+" ГБ) будут записаны установочные файлы Windows. Продолжить?","Подтверждение",MessageBoxButtons.YesNo,MessageBoxIcon.Warning)!=DialogResult.Yes)return;
+ var progress=new Form{Text="Запись файлов Windows",Size=new Size(640,180),StartPosition=FormStartPosition.CenterParent,FormBorderStyle=FormBorderStyle.FixedDialog,ControlBox=false};var status=new Label{Location=new Point(15,15),Size=new Size(595,55),Text="Подготовка..."};var bar=new ProgressBar{Location=new Point(15,80),Width=590,Height=24};progress.Controls.AddRange(new Control[]{status,bar});progress.Show(this);busy=true;
+ var prog=new Progress<Tuple<int,string>>(x=>{bar.Value=Math.Max(0,Math.Min(100,x.Item1));status.Text=x.Item2;});
+ try {await Task.Run(()=>WriteUsb(from,to,inputs,largeWim,split,serial,prog));Record("Установочные файлы записаны: "+to);MessageBox.Show("Основные файлы записаны. Проверьте загрузку через UEFI Boot Menu. Реальная загрузка автоматическим тестом не подтверждена.");}
+ catch(Exception e){Record("Ошибка записи: "+e.Message);MessageBox.Show("Запись не завершена: "+e.Message+"\r\nЧастично записанные файлы остаются на флешке.");}
+ finally{busy=false;progress.Close();progress.Dispose();}
+ }catch(Exception ex){MessageBox.Show(ex.Message);}}
+ [System.Runtime.InteropServices.DllImport("kernel32.dll",CharSet=System.Runtime.InteropServices.CharSet.Unicode,SetLastError=true)] static extern bool GetVolumeInformation(string root,System.Text.StringBuilder name,int n,out uint serial,out uint max,out uint flags,System.Text.StringBuilder fs,int fsn);
+ static uint VolumeSerial(string root){uint serial,max,flags;return GetVolumeInformation(root,null,0,out serial,out max,out flags,null,0)?serial:0;}
+ static void CheckUsb(string root,uint serial){var d=new DriveInfo(root);if(!d.IsReady||d.DriveType!=DriveType.Removable||!String.Equals(d.DriveFormat,"FAT32",StringComparison.OrdinalIgnoreCase)||VolumeSerial(root)!=serial)throw new IOException("Флешка отключена или изменилась.");}
+ static void WriteUsb(string from,string to,string[] files,string wim,bool split,uint serial,IProgress<Tuple<int,string>> progress){
+ for(int i=0;i<files.Length;i++){CheckUsb(to,serial);string file=files[i];if(split&&String.Equals(file,wim,StringComparison.OrdinalIgnoreCase))continue;string rel=file.Substring(from.Length);string dest=Path.Combine(to,rel);Directory.CreateDirectory(Path.GetDirectoryName(dest));File.Copy(file,dest,false);progress.Report(Tuple.Create((int)((long)(i+1)*100/files.Length),"Записано файлов: "+(i+1)+" / "+files.Length));}
+ if(split){CheckUsb(to,serial);string outw=Path.Combine(to,@"sources\install.swm");if(File.Exists(outw))throw new IOException("install.swm уже существует.");progress.Report(Tuple.Create(99,"Разделение install.wim через DISM..."));var psi=new ProcessStartInfo("dism.exe","/English /Split-Image /ImageFile:\""+wim+"\" /SWMFile:\""+outw+"\" /FileSize:3800"){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};using(var p=Process.Start(psi)){string output=p.StandardOutput.ReadToEnd();string err=p.StandardError.ReadToEnd();p.WaitForExit();if(p.ExitCode!=0)throw new IOException("DISM: код "+p.ExitCode+" "+err+" "+output);}}
+ CheckUsb(to,serial);if(!File.Exists(Path.Combine(to,"setup.exe"))||!File.Exists(Path.Combine(to,@"sources\boot.wim")))throw new IOException("Обязательные файлы не найдены.");
+ }
+ void DriversPage(){var f=BeginPage("Драйверы Windows Update","Поиск и установка подходящих обновлений; наличие всех драйверов не гарантируется.");
+ driverState=Label("Подключите интернет и нажмите «Найти». Возможные прошивки и непринятые лицензии исключаются; проверяйте названия вручную.");f.Controls.Add(driverState);
+ drivers=new CheckedListBox{Width=750,Height=280,CheckOnClick=true,BackColor=panel,ForeColor=Color.White,HorizontalScrollbar=true};drivers.ItemCheck+=(s,e)=>{if(e.Index>=0 && !(drivers.Items[e.Index] as DriverItem).Eligible)e.NewValue=CheckState.Unchecked;};f.Controls.Add(drivers);
+ AddButton(f,"Найти драйверы",async()=>await ScanDrivers(),true);AddButton(f,"Отметить доступные",()=>{for(int i=0;i<drivers.Items.Count;i++)if(((DriverItem)drivers.Items[i]).Eligible)drivers.SetItemChecked(i,true);});
+ AddButton(f,"Установить выбранные",async()=>await InstallDrivers());AddButton(f,"Диспетчер устройств",()=>{try{Process.Start("devmgmt.msc");}catch(Exception e){MessageBox.Show(e.Message);}});AddButton(f,"Официальный сайт производителя",OpenManufacturer);
+ }
+ static dynamic Com(string progId){Type type=Type.GetTypeFromProgID(progId,true);return Activator.CreateInstance(type);}
+ static List<DriverItem> SearchUpdates(){dynamic session=Com("Microsoft.Update.Session");dynamic searcher=session.CreateUpdateSearcher();searcher.Online=true;dynamic result=searcher.Search("IsInstalled=0 and IsHidden=0 and Type='Driver'");var list=new List<DriverItem>();for(int i=0;i<(int)result.Updates.Count;i++){dynamic u=result.Updates.Item(i);string title=Convert.ToString(u.Title);bool firmware=Rules.Firmware(title),eula=Convert.ToBoolean(u.EulaAccepted);list.Add(new DriverItem{Title=title,Id=Convert.ToString(u.Identity.UpdateID),Rev=Convert.ToInt32(u.Identity.RevisionNumber),Eligible=!firmware&&eula,Reason=firmware?"возможная прошивка":!eula?"лицензия не принята":""});}return list;}
+ async Task ScanDrivers(){busy=true;drivers.Items.Clear();driverState.Text="Поиск драйверов через Windows Update...";try{var found=await Task.Run(()=>SearchUpdates());foreach(var d in found)drivers.Items.Add(d,false);driverState.Text="Найдено: "+found.Count+". Внимательно проверьте список; прошивки по названию могут быть определены не все.";Record("Поиск драйверов: найдено "+found.Count);}catch(Exception e){driverState.Text="Ошибка поиска: "+e.Message;Record(driverState.Text);}finally{busy=false;}}
+ async Task InstallDrivers(){var chosen=drivers.CheckedItems.Cast<DriverItem>().Where(x=>x.Eligible).ToList();if(chosen.Count==0){MessageBox.Show("Отметьте драйверы.");return;}if(!IsAdmin()){MessageBox.Show("Для установки программа откроется с правами администратора. Затем повторите поиск и выбор драйверов.");EnsureAdminDrivers();return;}
+ if(MessageBox.Show("Установить выбранные драйверы ("+chosen.Count+")? Проверьте, что в списке нет прошивок. Возможна перезагрузка.","Драйверы",MessageBoxButtons.YesNo,MessageBoxIcon.Warning)!=DialogResult.Yes)return;
+ busy=true;driverState.Text="Загрузка и установка. Дождитесь завершения...";var progress=new Progress<string>(s=>{driverState.Text=s;Record(s);});
+ try{await Task.Run(()=>InstallSelected(chosen,progress));MessageBox.Show("Операция завершена. Подробности — в отчёте. Проверьте устройства.");}catch(Exception e){Record("Ошибка установки: "+e.Message);MessageBox.Show(e.Message);}finally{busy=false;}}
+ static void InstallSelected(List<DriverItem> items,IProgress<string> p){dynamic session=Com("Microsoft.Update.Session");dynamic search=session.CreateUpdateSearcher();search.Online=true;dynamic results=search.Search("IsInstalled=0 and IsHidden=0 and Type='Driver'");dynamic updates=Com("Microsoft.Update.UpdateColl");for(int i=0;i<(int)results.Updates.Count;i++){dynamic u=results.Updates.Item(i);string id=Convert.ToString(u.Identity.UpdateID);int rev=Convert.ToInt32(u.Identity.RevisionNumber);if(items.Any(a=>a.Id==id&&a.Rev==rev)&&Convert.ToBoolean(u.EulaAccepted)&&!Rules.Firmware(Convert.ToString(u.Title)))updates.Add(u);}
+ if((int)updates.Count==0)throw new Exception("Выбранные драйверы больше не доступны. Повторите поиск.");p.Report("Загрузка драйверов: "+updates.Count);dynamic downloader=session.CreateUpdateDownloader();downloader.Updates=updates;dynamic download=downloader.Download();dynamic ready=Com("Microsoft.Update.UpdateColl");for(int i=0;i<(int)updates.Count;i++){dynamic u=updates.Item(i);dynamic r=download.GetUpdateResult(i);if(Convert.ToBoolean(u.IsDownloaded)){ready.Add(u);p.Report("Загружен: "+u.Title);}else p.Report("Не загружен: "+u.Title+"; код "+r.HResult);}
+ if((int)ready.Count==0)throw new Exception("Нет загруженных драйверов для установки.");p.Report("Установка драйверов...");dynamic installer=session.CreateUpdateInstaller();installer.Updates=ready;dynamic result=installer.Install();string[] states={"Не начато","В процессе","Успешно","Успешно с ошибками","Ошибка","Прервано"};for(int i=0;i<(int)ready.Count;i++){dynamic r=result.GetUpdateResult(i);int n=Convert.ToInt32(r.ResultCode);p.Report(Convert.ToString(ready.Item(i).Title)+": "+(n>=0&&n<states.Length?states[n]:"код "+n)+"; HRESULT "+r.HResult);}if(Convert.ToBoolean(result.RebootRequired))p.Report("Требуется перезагрузка после сохранения работы.");}
+ void OpenManufacturer(){string m=Wmi("Win32_ComputerSystem","Manufacturer").ToLowerInvariant(),url=null;if(m.Contains("hp")||m.Contains("hewlett"))url="https://support.hp.com/drivers";else if(m.Contains("dell"))url="https://www.dell.com/support/home/drivers";else if(m.Contains("lenovo"))url="https://pcsupport.lenovo.com/";else if(m.Contains("asus"))url="https://www.asus.com/support/download-center/";else if(m.Contains("acer"))url="https://www.acer.com/support";else if(m.Contains("micro-star")||m.Contains("msi"))url="https://www.msi.com/support/download";else if(m.Contains("huawei"))url="https://consumer.huawei.com/en/support/";else if(m.Contains("samsung"))url="https://www.samsung.com/global/galaxybooks-downloadcenter/";if(url==null){MessageBox.Show("Производитель: "+m+". Выберите сайт в справочнике.");BiosPage();}else Open(url);}
+ sealed class Brand {public string Name,Boot,Bios,Url;public Brand(string n,string boot,string bios,string url){Name=n;Boot=boot;Bios=bios;Url=url;}public override string ToString(){return Name;}}
+ static readonly Brand[] brands={new Brand("HP","Esc, затем F9","Esc, затем F10","https://support.hp.com/drivers"),new Brand("Dell / Alienware","F12","F2","https://www.dell.com/support/home/drivers"),new Brand("Lenovo IdeaPad / Yoga","F12 / Fn+F12 / Novo","F2 / Fn+F2 / Novo","https://pcsupport.lenovo.com/"),new Brand("Lenovo ThinkPad","F12 / Fn+F12","F1","https://pcsupport.lenovo.com/"),new Brand("ASUS","Esc / F8","F2 / Del","https://www.asus.com/support/download-center/"),new Brand("Acer","F12 (может требовать включения)","F2 / Del","https://www.acer.com/support"),new Brand("MSI","F11","Del","https://www.msi.com/support/download"),new Brand("Samsung","F10","F2","https://www.samsung.com/global/galaxybooks-downloadcenter/"),new Brand("Huawei MateBook","F12","F2","https://consumer.huawei.com/en/support/"),new Brand("Gigabyte","F12","Del","https://www.gigabyte.com/Support")};
+ void BiosPage(){var f=BeginPage("BIOS / Boot Menu","Клавиши зависят от конкретной модели. Их можно использовать при Windows или Linux.");var box=new ComboBox{Width=600,DropDownStyle=ComboBoxStyle.DropDown,AutoCompleteMode=AutoCompleteMode.SuggestAppend,AutoCompleteSource=AutoCompleteSource.ListItems};foreach(var b in brands)box.Items.Add(b);f.Controls.Add(box);var text=AddText(f,180);Action update=()=>{var b=box.SelectedItem as Brand;if(b!=null)text.Text=b.Name+"\r\nBoot Menu: "+b.Boot+"\r\nBIOS / UEFI: "+b.Bios+"\r\nПроверьте руководство именно вашей модели.";};box.SelectedIndexChanged+=(s,e)=>update();box.SelectedIndex=0;AddButton(f,"Копировать клавиши",()=>{if(!String.IsNullOrEmpty(text.Text))Clipboard.SetText(text.Text);});AddButton(f,"Страница поддержки производителя",()=>{var b=box.SelectedItem as Brand;if(b!=null)Open(b.Url);});f.Controls.Add(Label("Windows: Параметры → Восстановление → Особые варианты загрузки → Параметры встроенного ПО UEFI. Linux с systemd: sudo systemctl reboot --firmware-setup (сразу перезагружает ПК; нужна поддержка UEFI)."));}
+ void DiagnosticsPage(){var f=BeginPage("Диагностика и сеть","Сведения остаются на этом компьютере, пока вы сами не сохраните отчёт.");var t=AddText(f,300);t.Text=Hardware()+"\r\n\r\nУстройства с ошибками:\r\n"+ProblemDevices();AddButton(f,"Обновить сведения",()=>t.Text=Hardware()+"\r\n\r\nУстройства с ошибками:\r\n"+ProblemDevices());AddButton(f,"Настройки сети и Wi-Fi",()=>Open("ms-settings:network"));AddButton(f,"Проверить доступ к Microsoft",async()=>{busy=true;try{var req=(HttpWebRequest)WebRequest.Create("https://www.microsoft.com/");req.Method="HEAD";req.Timeout=8000;using(var resp=await req.GetResponseAsync())MessageBox.Show("Сайт Microsoft доступен. Это не гарантирует доступность Windows Update.");}catch(Exception e){MessageBox.Show("Не удалось подключиться: "+e.Message);}finally{busy=false;}});f.Controls.Add(Label("Если сетевой драйвер отсутствует, используйте кабель, USB-модем или скачайте драйвер на другом компьютере."));}
+ void ReportPage(){var f=BeginPage("Отчёт об обслуживании","Сохранение выполняется только по вашему выбору.");var t=AddText(f,340);t.Text="MoOLVa Windows Master 3.0\r\nДата: "+DateTime.Now+"\r\n\r\n"+Hardware()+"\r\n\r\nСобытия:\r\n"+String.Join("\r\n",report)+"\r\n\r\nУстройства с ошибками:\r\n"+ProblemDevices();AddButton(f,"Обновить отчёт",ReportPage);AddButton(f,"Сохранить отчёт в TXT",()=>{using(var d=new SaveFileDialog{FileName="MoOLVa-Report.txt",Filter="Текстовые файлы|*.txt"})if(d.ShowDialog()==DialogResult.OK)try{File.WriteAllText(d.FileName,t.Text,new System.Text.UTF8Encoding(true));MessageBox.Show("Отчёт сохранён.");}catch(Exception e){MessageBox.Show(e.Message);}},true);}
+}
+}
