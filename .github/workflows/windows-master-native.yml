@@ -26,6 +26,14 @@ jobs:
         run: |
           $p = Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.0-Portable.exe).Path -ArgumentList '--self-test' -Wait -PassThru
           if ($p.ExitCode -ne 0) { throw "Self-test failed: $($p.ExitCode)" }
+      - name: Probe Windows Update search without installation
+        shell: powershell
+        run: |
+          $log=Join-Path (Resolve-Path dist).Path 'Windows-Update-Probe.txt'
+          $arg='--wua-probe="'+$log+'"'
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.0-Portable.exe).Path -ArgumentList $arg -PassThru
+          if(-not $p.WaitForExit(90000)){Stop-Process -Id $p.Id -Force;Set-Content -Path $log -Value 'TIMEOUT: Windows Update search did not finish'}
+          if(Test-Path $log){Get-Content $log}else{Set-Content -Path $log -Value 'UNAVAILABLE: probe exited without output'}
       - name: Test actual window and capture screenshot
         shell: powershell
         run: |
@@ -35,6 +43,14 @@ jobs:
           if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Window test timed out'}
           if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Screenshot or launch failed'}
           if((Get-Item $shot).Length -lt 3000){throw 'Screenshot unexpectedly small'}
+      - name: Capture drivers window
+        shell: powershell
+        run: |
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.0-Drivers.png'
+          $arg='--screenshot="'+$shot+'"'
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.0-Portable.exe).Path -ArgumentList @('--drivers',$arg) -PassThru
+          if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Driver window test timed out'}
+          if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Driver screenshot failed'}
       - name: Package instructions
         shell: powershell
         run: Copy-Item windows-master-native/README.txt dist/README.txt

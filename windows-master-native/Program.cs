@@ -17,6 +17,8 @@ namespace MoOLVaMaster {
 static class Program {
  [STAThread] static int Main(string[] args) {
   if(args.Contains("--self-test")) return SelfTest.Run();
+  string probe=args.FirstOrDefault(x=>x.StartsWith("--wua-probe="));
+  if(probe!=null){try{int n=MainForm.ProbeWua();File.WriteAllText(probe.Substring(12),"SUCCESS: Windows Update search completed; count="+n);return 0;}catch(Exception e){File.WriteAllText(probe.Substring(12),"UNAVAILABLE: "+e.ToString());return 4;}}
   Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
   var app=new MainForm(args.Contains("--drivers"));
   string shot=args.FirstOrDefault(x=>x.StartsWith("--screenshot="));
@@ -33,6 +35,7 @@ static class SelfTest { public static int Run(){
  try {
  if(!Rules.MicrosoftLink("https://software.download.prss.microsoft.com/path")||!Rules.MicrosoftLink("https://go.microsoft.com/fwlink/?linkid=1")||Rules.MicrosoftLink("https://microsoft.com.evil.test/a")||Rules.MicrosoftLink("http://microsoft.com/")||Rules.MicrosoftLink("https://user@microsoft.com/"))return 2;
  if(!Rules.Firmware("HP BIOS update")||!Rules.Firmware("device firmware")||Rules.Firmware("Realtek Audio driver"))return 3;
+ if(!MainForm.TestCopyCore())return 5;
  return 0;
  }catch{return 9;}
 }}
@@ -113,11 +116,18 @@ sealed class MainForm:Form {
  [System.Runtime.InteropServices.DllImport("kernel32.dll",CharSet=System.Runtime.InteropServices.CharSet.Unicode,SetLastError=true)] static extern bool GetVolumeInformation(string root,System.Text.StringBuilder name,int n,out uint serial,out uint max,out uint flags,System.Text.StringBuilder fs,int fsn);
  static uint VolumeSerial(string root){uint serial,max,flags;return GetVolumeInformation(root,null,0,out serial,out max,out flags,null,0)?serial:0;}
  static void CheckUsb(string root,uint serial){var d=new DriveInfo(root);if(!d.IsReady||d.DriveType!=DriveType.Removable||!String.Equals(d.DriveFormat,"FAT32",StringComparison.OrdinalIgnoreCase)||VolumeSerial(root)!=serial)throw new IOException("Флешка отключена или изменилась.");}
- static void WriteUsb(string from,string to,string[] files,string wim,bool split,uint serial,IProgress<Tuple<int,string>> progress){
- for(int i=0;i<files.Length;i++){CheckUsb(to,serial);string file=files[i];if(split&&String.Equals(file,wim,StringComparison.OrdinalIgnoreCase))continue;string rel=file.Substring(from.Length);string dest=Path.Combine(to,rel);Directory.CreateDirectory(Path.GetDirectoryName(dest));File.Copy(file,dest,false);progress.Report(Tuple.Create((int)((long)(i+1)*100/files.Length),"Записано файлов: "+(i+1)+" / "+files.Length));}
- if(split){CheckUsb(to,serial);string outw=Path.Combine(to,@"sources\install.swm");if(File.Exists(outw))throw new IOException("install.swm уже существует.");progress.Report(Tuple.Create(99,"Разделение install.wim через DISM..."));var psi=new ProcessStartInfo("dism.exe","/English /Split-Image /ImageFile:\""+wim+"\" /SWMFile:\""+outw+"\" /FileSize:3800"){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};using(var p=Process.Start(psi)){string output=p.StandardOutput.ReadToEnd();string err=p.StandardError.ReadToEnd();p.WaitForExit();if(p.ExitCode!=0)throw new IOException("DISM: код "+p.ExitCode+" "+err+" "+output);}}
- CheckUsb(to,serial);if(!File.Exists(Path.Combine(to,"setup.exe"))||!File.Exists(Path.Combine(to,@"sources\boot.wim")))throw new IOException("Обязательные файлы не найдены.");
+ static void WriteUsb(string from,string to,string[] files,string wim,bool split,uint serial,IProgress<Tuple<int,string>> progress){WriteUsbCore(from,to,files,wim,split,()=>CheckUsb(to,serial),progress);}
+ internal static void WriteUsbCore(string from,string to,string[] files,string wim,bool split,Action check,IProgress<Tuple<int,string>> progress){
+ for(int i=0;i<files.Length;i++){check();string file=files[i];if(split&&String.Equals(file,wim,StringComparison.OrdinalIgnoreCase))continue;string rel=file.Substring(from.Length);string dest=Path.Combine(to,rel);Directory.CreateDirectory(Path.GetDirectoryName(dest));File.Copy(file,dest,false);progress.Report(Tuple.Create((int)((long)(i+1)*100/files.Length),"Записано файлов: "+(i+1)+" / "+files.Length));}
+ if(split){check();string outw=Path.Combine(to,@"sources\install.swm");if(File.Exists(outw))throw new IOException("install.swm уже существует.");progress.Report(Tuple.Create(99,"Разделение install.wim через DISM..."));var psi=new ProcessStartInfo("dism.exe","/English /Split-Image /ImageFile:\""+wim+"\" /SWMFile:\""+outw+"\" /FileSize:3800"){UseShellExecute=false,CreateNoWindow=true,RedirectStandardOutput=true,RedirectStandardError=true};using(var p=Process.Start(psi)){string output=p.StandardOutput.ReadToEnd();string err=p.StandardError.ReadToEnd();p.WaitForExit();if(p.ExitCode!=0)throw new IOException("DISM: код "+p.ExitCode+" "+err+" "+output);}}
+ check();if(!File.Exists(Path.Combine(to,"setup.exe"))||!File.Exists(Path.Combine(to,@"sources\boot.wim")))throw new IOException("Обязательные файлы не найдены.");
  }
+ internal static bool TestCopyCore(){
+  string root=Path.Combine(Path.GetTempPath(),"MoOLVa-SelfTest-"+Guid.NewGuid().ToString("N"));
+  try{string source=Path.Combine(root,"src")+Path.DirectorySeparatorChar,dest=Path.Combine(root,"dst")+Path.DirectorySeparatorChar;Directory.CreateDirectory(Path.Combine(source,"sources"));Directory.CreateDirectory(dest);File.WriteAllText(Path.Combine(source,"setup.exe"),"setup");File.WriteAllText(Path.Combine(source,@"sources\boot.wim"),"boot");string[] files=Directory.GetFiles(source,"*",SearchOption.AllDirectories);int checks=0;var prog=new Progress<Tuple<int,string>>();WriteUsbCore(source,dest,files,"",false,()=>{checks++;},prog);if(checks<3||File.ReadAllText(Path.Combine(dest,"setup.exe"))!="setup")return false;try{WriteUsbCore(source,dest,files,"",false,()=>{},prog);return false;}catch(IOException){return File.ReadAllText(Path.Combine(dest,"setup.exe"))=="setup";}}
+  finally{if(Directory.Exists(root))Directory.Delete(root,true);}
+ }
+ internal static int ProbeWua(){return SearchUpdates().Count;}
  void DriversPage(){var f=BeginPage("Драйверы Windows Update","Поиск и установка подходящих обновлений; наличие всех драйверов не гарантируется.");
  driverState=Label("Подключите интернет и нажмите «Найти». Возможные прошивки и непринятые лицензии исключаются; проверяйте названия вручную.");f.Controls.Add(driverState);
  drivers=new CheckedListBox{Width=750,Height=280,CheckOnClick=true,BackColor=panel,ForeColor=Color.White,HorizontalScrollbar=true};drivers.ItemCheck+=(s,e)=>{if(e.Index>=0 && !(drivers.Items[e.Index] as DriverItem).Eligible)e.NewValue=CheckState.Unchecked;};f.Controls.Add(drivers);
