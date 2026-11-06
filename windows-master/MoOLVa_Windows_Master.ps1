@@ -520,13 +520,13 @@ function ShowReport {
 # Версия 1.4: новые страницы перекрывают одноименные функции 1.3.
 function ShowHome {
     AddHeading 'MoOLVa Windows Master 2.0 PRO' 'Выберите, что вы хотите сделать.'
-    $script:Content.Controls.Add((MakeButton '1. Подготовить Windows и флешку' 35 135 430 78 { ShowUsbGuide } $true))
-    $script:Content.Controls.Add((MakeButton '2. Настроить компьютер клиента' 480 135 430 78 { ShowDrivers }))
-    $t=MakeTextBox 35 245 875 250; $t.Text=FormatHardware; $script:Content.Controls.Add($t)
-    $script:Content.Controls.Add((MakeButton 'BIOS / Boot Menu' 35 525 270 48 { ShowBrands }))
-    $script:Content.Controls.Add((MakeButton 'Сеть и диагностика' 320 525 270 48 { ShowDiagnostics }))
-    $script:Content.Controls.Add((MakeButton 'Отчёт клиенту' 605 525 270 48 { ShowReport }))
-    $script:Content.Controls.Add((LabelText 'Для поиска драйверов и скачивания файлов нужен интернет. Перед записью Windows сохраните данные установочной флешки.' 35 610 860 75 11 $false $script:Muted))
+    $script:Content.Controls.Add((MakeButton '1. Подготовить Windows и флешку' 35 135 350 78 { ShowUsbGuide } $true))
+    $script:Content.Controls.Add((MakeButton '2. Настроить компьютер клиента' 400 135 350 78 { ShowDrivers }))
+    $t=MakeTextBox 35 245 715 250; $t.Text=FormatHardware; $script:Content.Controls.Add($t)
+    $script:Content.Controls.Add((MakeButton 'BIOS / Boot Menu' 35 525 225 48 { ShowBrands }))
+    $script:Content.Controls.Add((MakeButton 'Сеть и диагностика' 275 525 225 48 { ShowDiagnostics }))
+    $script:Content.Controls.Add((MakeButton 'Отчёт клиенту' 515 525 235 48 { ShowReport }))
+    $script:Content.Controls.Add((LabelText 'Для поиска драйверов и скачивания файлов нужен интернет. Перед записью Windows сохраните данные установочной флешки.' 35 610 715 75 11 $false $script:Muted))
 }
 function OpenDriverWindow {
     $helper=Join-Path $PSScriptRoot 'Драйверы_Windows_Update.ps1'
