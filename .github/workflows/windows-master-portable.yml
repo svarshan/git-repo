@@ -28,7 +28,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
           $csc = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-          & $csc /nologo /target:winexe /platform:anycpu /codepage:65001 /reference:System.Windows.Forms.dll /out:dist/MoOLVa-Windows-Master-Portable.exe '/resource:windows-master/MoOLVa_Windows_Master.ps1,main.ps1' '/resource:windows-master/drivers.ps1,drivers.ps1' windows-master/Launcher.cs
+          & $csc /nologo /target:winexe /platform:anycpu /codepage:65001 /reference:System.Windows.Forms.dll /out:dist/MoOLVa-Windows-Master-Portable.exe '/resource:windows-master\\MoOLVa_Windows_Master.ps1,main.ps1' '/resource:windows-master\\drivers.ps1,drivers.ps1' '.\\windows-master\\Launcher.cs'
           if ($LASTEXITCODE -ne 0) { throw 'Compilation failed' }
           if ((Get-Item dist/MoOLVa-Windows-Master-Portable.exe).Length -lt 20000) { throw 'EXE is unexpectedly small' }
       - name: Smoke test application startup
