@@ -115,6 +115,26 @@ $save.Add_Click({
 })
 $form.Add_FormClosing({param($sender,$e) if($null -ne $script:job){$e.Cancel=$true;[void][Windows.Forms.MessageBox]::Show('Дождитесь завершения текущей операции.')}})
 Record 'Нажмите «Найти драйверы». Для работы необходим интернет и доступ к Windows Update.'
-if($UiSmokeTest){$script:smokeTimer=New-Object Windows.Forms.Timer;$script:smokeTimer.Interval=1500;$script:smokeTimer.Add_Tick({$script:smokeTimer.Stop();$form.Close()});$script:smokeTimer.Start()}
+if($UiSmokeTest){
+ $script:smokeResult=1;$script:smokeTicks=0;$script:smokeStarted=$false
+ $scanScript={
+  [pscustomobject]@{kind='driver';title='Test ordinary';id='test';revision=1;eligible=$true;reason='Available'}
+  [pscustomobject]@{kind='driver';title='Test firmware';id='firmware';revision=1;eligible=$false;reason='Blocked'}
+  [pscustomobject]@{kind='status';text='Test complete'}
+ }
+ $script:smokeTimer=New-Object Windows.Forms.Timer;$script:smokeTimer.Interval=500
+ $script:smokeTimer.Add_Tick({
+  $script:smokeTicks++
+  if(-not $script:smokeStarted){$script:smokeStarted=$true;$scan.PerformClick();return}
+  if($null -eq $script:job -and $script:items.Count -eq 2){
+   $select.PerformClick();$list.SetItemChecked(1,$true)
+   if($list.GetItemChecked(0) -and -not $list.GetItemChecked(1)){$script:smokeResult=0}
+   $script:smokeTimer.Stop();$form.Close();return
+  }
+  if($script:smokeTicks -ge 28){if($null -ne $script:job){Stop-Job $script:job -ErrorAction SilentlyContinue;Remove-Job $script:job -Force -ErrorAction SilentlyContinue;$script:job=$null};$script:smokeTimer.Stop();$form.Close()}
+ })
+ $script:smokeTimer.Start()
+}
 [void]$form.ShowDialog()
 $timer.Stop();$timer.Dispose()
+if($UiSmokeTest){exit $script:smokeResult}
