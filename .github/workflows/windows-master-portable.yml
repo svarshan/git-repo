@@ -1,7 +1,7 @@
-name: MoOLVa Windows Master 1.4 PRO
+name: MoOLVa Windows Master 2.0 PRO
 on:
   push:
-    branches: [windows-master-portable-1-4]
+    branches: [windows-master-portable-2-0]
     paths:
       - 'windows-master/**'
       - '.github/workflows/windows-master-portable.yml'
@@ -17,7 +17,7 @@ jobs:
       - name: Validate PowerShell syntax
         shell: powershell
         run: |
-          $files = @('windows-master/MoOLVa_Windows_Master.ps1', 'windows-master/drivers.ps1')
+          $files = @('windows-master/MoOLVa_Windows_Master.ps1', 'windows-master/drivers.ps1', 'windows-master/usb.ps1')
           foreach ($f in $files) {
             $tokens = $null; $errors = $null
             [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $f).Path, [ref]$tokens, [ref]$errors)
@@ -28,7 +28,7 @@ jobs:
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
           $csc = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-          & $csc /nologo /target:winexe /platform:anycpu /codepage:65001 /reference:System.Windows.Forms.dll /out:dist/MoOLVa-Windows-Master-Portable.exe '/resource:windows-master\\MoOLVa_Windows_Master.ps1,main.ps1' '/resource:windows-master\\drivers.ps1,drivers.ps1' '.\\windows-master\\Launcher.cs'
+          & $csc /nologo /target:winexe /platform:anycpu /codepage:65001 /reference:System.Windows.Forms.dll /out:dist/MoOLVa-Windows-Master-Portable.exe '/resource:windows-master\\MoOLVa_Windows_Master.ps1,main.ps1' '/resource:windows-master\\drivers.ps1,drivers.ps1' '/resource:windows-master\\usb.ps1,usb.ps1' '.\\windows-master\\Launcher.cs'
           if ($LASTEXITCODE -ne 0) { throw 'Compilation failed' }
           if ((Get-Item dist/MoOLVa-Windows-Master-Portable.exe).Length -lt 20000) { throw 'EXE is unexpectedly small' }
       - name: Smoke test application startup
@@ -50,12 +50,29 @@ jobs:
           $p = Start-Process powershell.exe -ArgumentList @('-NoProfile','-STA','-ExecutionPolicy','Bypass','-File', ('"{0}"' -f $f),'-UiSmokeTest') -PassThru
           if (-not $p.WaitForExit(20000)) { Stop-Process -Id $p.Id -Force; throw 'Driver window test timed out' }
           if ($p.ExitCode -ne 0) { throw "Driver window failed: $($p.ExitCode)" }
+      - name: Test USB guardrails
+        shell: powershell
+        run: |
+          & powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File windows-master/usb.ps1 -SafetySmokeTest
+          if ($LASTEXITCODE -ne 0) { throw 'USB safety test failed' }
+          $f = (Resolve-Path windows-master/usb.ps1).Path
+          $p = Start-Process powershell.exe -ArgumentList @('-NoProfile','-STA','-ExecutionPolicy','Bypass','-File', ('"{0}"' -f $f),'-UiSmokeTest') -PassThru
+          if (-not $p.WaitForExit(20000)) { Stop-Process -Id $p.Id -Force; throw 'USB window test timed out' }
+          if ($p.ExitCode -ne 0) { throw 'USB window did not start' }
+      - name: Capture real application window
+        shell: powershell
+        run: |
+          $env:MOOLVA_QA_SCREENSHOT = (Join-Path (Resolve-Path dist).Path 'MoOLVa-2.0-Window.png')
+          & powershell.exe -NoProfile -STA -ExecutionPolicy Bypass -File windows-master/MoOLVa_Windows_Master.ps1
+          if ($LASTEXITCODE -ne 0 -or -not (Test-Path $env:MOOLVA_QA_SCREENSHOT)) { throw 'Screenshot failed' }
+          if ((Get-Item $env:MOOLVA_QA_SCREENSHOT).Length -lt 3000) { throw 'Screenshot unexpectedly small' }
+          Remove-Item Env:MOOLVA_QA_SCREENSHOT
       - name: Package instructions
         shell: powershell
         run: Copy-Item windows-master/README-EXE.txt dist/README.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Windows-Master-1.4-PRO
+          name: MoOLVa-Windows-Master-2.0-PRO
           path: dist/
           if-no-files-found: error
           retention-days: 30

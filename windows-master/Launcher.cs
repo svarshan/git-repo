@@ -25,9 +25,11 @@ internal static class Launcher
             string script = Path.Combine(dir, "MoOLVa_Windows_Master.ps1");
             Extract("main.ps1", script);
             Extract("drivers.ps1", Path.Combine(dir, "Драйверы_Windows_Update.ps1"));
+            Extract("usb.ps1", Path.Combine(dir, "usb.ps1"));
             string ps = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.System), @"WindowsPowerShell\v1.0\powershell.exe");
             var start = new ProcessStartInfo(ps, "-NoLogo -NoProfile -ExecutionPolicy Bypass -STA -File \"" + script + "\"");
             start.UseShellExecute = false;
+            start.EnvironmentVariables["MOOLVA_LAUNCHER_PATH"] = Assembly.GetExecutingAssembly().Location;
             start.CreateNoWindow = true;
             using (var p = Process.Start(start)) { if (p == null) throw new InvalidOperationException("PowerShell did not start"); p.WaitForExit(); return p.ExitCode; }
         }

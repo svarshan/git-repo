@@ -386,6 +386,12 @@ function ShowUsbGuide {
     $script:Content.Controls.Add((MakeButton 'Все загрузки Microsoft' 595 480 300 48 { OpenSafeUrl 'https://www.microsoft.com/en-us/software-download' }))
     $script:Content.Controls.Add((MakeButton 'Посмотреть мои USB' 35 550 265 48 { ShowMedia }))
 }
+function OpenUsbWizard {
+ $helper=Join-Path $PSScriptRoot 'usb.ps1'
+ if(-not (Test-Path -LiteralPath $helper)){ShowMessage 'Модуль записи USB не найден.';return}
+ try {Start-Process -FilePath 'powershell.exe' -Verb RunAs -WindowStyle Hidden -ArgumentList @('-NoLogo','-NoProfile','-ExecutionPolicy','Bypass','-STA','-File', ('"{0}"' -f $helper))}
+ catch {ShowMessage "Мастер USB не запущен: $_"}
+}
 function TestMicrosoftConnection {
     try {
         $req=[System.Net.WebRequest]::Create('https://www.microsoft.com/')
@@ -513,7 +519,7 @@ function ShowReport {
 
 # Версия 1.4: новые страницы перекрывают одноименные функции 1.3.
 function ShowHome {
-    AddHeading 'MoOLVa Windows Master 1.4 PRO' 'Выберите, что вы хотите сделать.'
+    AddHeading 'MoOLVa Windows Master 2.0 PRO' 'Выберите, что вы хотите сделать.'
     $script:Content.Controls.Add((MakeButton '1. Подготовить Windows и флешку' 35 135 430 78 { ShowUsbGuide } $true))
     $script:Content.Controls.Add((MakeButton '2. Настроить компьютер клиента' 480 135 430 78 { ShowDrivers }))
     $t=MakeTextBox 35 245 875 250; $t.Text=FormatHardware; $script:Content.Controls.Add($t)
@@ -536,15 +542,15 @@ function ShowDrivers {
     $script:DriverResult.Text=(FormatHardware)+"`r`n`r`n"+(GetDeviceProblems)
     $script:Content.Controls.Add($script:DriverResult)
     $script:Content.Controls.Add((MakeButton 'Обновить устройства' 35 420 270 45 {$script:DriverResult.Text=(FormatHardware)+"`r`n`r`n"+(GetDeviceProblems)}))
-    $script:Content.Controls.Add((MakeButton 'Поддержка производителя' 320 420 300 45 {ShowBrands}))
+    $script:Content.Controls.Add((MakeButton 'Поддержка производителя' 320 420 300 45 {OpenDetectedManufacturer}))
     $script:Content.Controls.Add((MakeButton 'Проверить интернет' 35 490 270 45 {TestMicrosoftConnection}))
     $script:Content.Controls.Add((MakeButton 'Настройки сети и Wi-Fi' 320 490 300 45 {try {Start-Process 'ms-settings:network'} catch {ShowMessage "Ошибка: $_"}}))
     $script:Content.Controls.Add((MakeButton 'Windows Update' 635 490 250 45 {try {Start-Process 'ms-settings:windowsupdate'} catch {ShowMessage "Ошибка: $_"}}))
     $script:Content.Controls.Add((LabelText 'Если сеть не работает из-за отсутствия драйвера, подключите кабель или USB-модем, либо скачайте сетевой драйвер с сайта производителя на другом ПК.' 35 560 875 85 11 $false $script:Muted))
 }
 function ShowUsbGuide {
-    AddHeading 'Загрузка Windows и установочная флешка' 'Скачивание файла в MoOLVa; запись флешки — через средство Microsoft.'
-    $script:Content.Controls.Add((MakeButton 'Показать USB-накопители' 35 125 275 48 {ShowMedia}))
+    AddHeading 'Загрузка Windows и установочная флешка' 'Скачайте ISO или используйте имеющийся; запись UEFI доступна в мастере.'
+    $script:Content.Controls.Add((MakeButton 'Открыть мастер USB' 35 125 275 48 {OpenUsbWizard}))
     $script:Content.Controls.Add((MakeButton 'Открыть Microsoft Windows 11' 325 125 300 48 {OpenSafeUrl 'https://www.microsoft.com/en-us/software-download/windows11'}))
     $script:Content.Controls.Add((MakeButton 'Windows 10' 640 125 260 48 {OpenSafeUrl 'https://www.microsoft.com/en-us/software-download/windows10'}))
     $script:Content.Controls.Add((LabelText '1. Средство Microsoft: скачайте его прямо в выбранную вами папку.' 35 195 850 30 11 $true))
@@ -555,7 +561,8 @@ function ShowUsbGuide {
     $script:Content.Controls.Add((MakeButton 'Скачать ISO внутри MoOLVa' 35 430 380 48 {StartMasterDownload $script:IsoUrl.Text 'Windows.iso'}))
     $script:Content.Controls.Add((MakeButton 'Отменить загрузку' 430 430 260 48 {CancelMasterDownload}))
     $script:DownloadStatus=LabelText 'Ожидание загрузки' 35 500 875 55 11 $false $script:Yellow;$script:Content.Controls.Add($script:DownloadStatus)
-    $script:Content.Controls.Add((LabelText 'Запись: запустите скачанное средство Microsoft и выберите отдельную флешку. Все данные на ней будут удалены. Проверяйте букву и размер! Windows 8.1: отдельная страница ISO Microsoft при проверке недоступна.' 35 570 875 110 11 $false $script:Muted))
+    $script:Content.Controls.Add((MakeButton 'Записать ISO на USB (UEFI)' 35 570 400 55 {OpenUsbWizard} $true))
+    $script:Content.Controls.Add((LabelText 'USB будет полностью очищен. Мастер проверяет устройство и запросит подтверждение. Windows 8.1: отдельная страница ISO Microsoft при проверке недоступна.' 35 650 875 85 11 $false $script:Muted))
 }
 function StartMasterDownload([string]$url,[string]$suggested) {
     if($null -ne $script:BitsJob){ShowMessage 'Дождитесь завершения текущей загрузки.';return}
@@ -606,8 +613,45 @@ function PollMasterDownload {
  }
 }
 
+function OpenDetectedManufacturer {
+ try {$manufacturer=[string](Get-CimInstance Win32_ComputerSystem -ErrorAction Stop).Manufacturer} catch {ShowBrands;return}
+ $patterns=[ordered]@{'HP'='HP (ноутбуки / ПК)';'Dell'='Dell / Alienware';'Lenovo'='Lenovo ThinkPad / ThinkCentre';'ASUS'='ASUS (ноутбуки / ПК)';'Acer'='Acer';'MSI'='MSI';'Samsung'='Samsung Galaxy Book';'Huawei'='Huawei MateBook (проверить модель)';'Gigabyte'='Gigabyte (материнские платы / ПК)'}
+ foreach($pattern in $patterns.Keys){if($manufacturer -match [regex]::Escape($pattern)){OpenSafeUrl $script:Manufacturers[$patterns[$pattern]].Drivers;return}}
+ ShowMessage ('Производитель: '+$manufacturer+'. Выберите сайт поддержки вручную.');ShowBrands
+}
+function ShowApps {
+ AddHeading 'Программы и обновления' 'Установка выбранных приложений через Windows Package Manager (WinGet).'
+ $script:SoftwareBoxes=@();$i=0
+ foreach($key in $script:Software.Keys){
+  $box=New-Object Windows.Forms.CheckBox;$box.Text=$key;$box.SetBounds((35+($i%2)*430),(125+[math]::Floor($i/2)*43),410,34);$box.ForeColor=$script:Text;$box.Tag=$script:Software[$key];$script:Content.Controls.Add($box);$script:SoftwareBoxes+=,$box;$i++
+ }
+ $script:AppOutput=MakeTextBox 35 420 875 195;$script:AppOutput.Text='Выберите программы, затем запустите установку.';$script:Content.Controls.Add($script:AppOutput)
+ $script:Content.Controls.Add((MakeButton 'Установить выбранные' 35 355 300 48 {
+  if($null -ne $script:AppJob){ShowMessage 'Дождитесь текущей операции.';return}
+  if(-not (HasWinget)){ShowMessage 'WinGet не найден. Установите App Installer из Microsoft Store.';return}
+  $ids=@($script:SoftwareBoxes|Where-Object {$_.Checked}|ForEach-Object {$_.Tag})
+  if($ids.Count -eq 0){ShowMessage 'Выберите программы.';return}
+  if(-not (AskYes ('Установить программы: '+(($script:SoftwareBoxes|Where-Object {$_.Checked}|ForEach-Object {$_.Text}) -join ', ')+'? Установка может потребовать действий в окне установщика.'))){return}
+  $script:AppOutput.Clear();$script:AppJob=Start-Job -ArgumentList (,$ids) -ScriptBlock {
+   param([string[]]$packages)
+   foreach($id in $packages){
+    Write-Output ('Начало установки: '+$id)
+    & winget.exe install --id $id --exact --source winget --disable-interactivity 2>&1 | ForEach-Object {[string]$_}
+    Write-Output ('Результат '+$id+': код '+$LASTEXITCODE)
+   }
+  };$script:AppTimer.Start()
+ } $true))
+ $script:Content.Controls.Add((MakeButton 'Открыть Microsoft Store' 350 355 280 48 {try{Start-Process 'ms-windows-store:'}catch{ShowMessage "Ошибка: $_"}}))
+ $script:Content.Controls.Add((LabelText 'Если источник или программа требует принять условия, WinGet может остановить установку. Прочитайте условия и выполните установку самостоятельно.' 35 640 875 75 10 $false $script:Muted))
+}
+function PollAppInstall {
+ if($null -eq $script:AppJob){$script:AppTimer.Stop();return}
+ foreach($line in @(Receive-Job $script:AppJob -ErrorAction SilentlyContinue)){if($script:AppOutput -and -not $script:AppOutput.IsDisposed){$script:AppOutput.AppendText([string]$line+"`r`n")}}
+ if($script:AppJob.State -in @('Completed','Failed','Stopped')){if($script:AppJob.State -eq 'Failed'){ShowMessage 'Фоновая установка завершилась ошибкой.'};Remove-Job $script:AppJob -Force -ErrorAction SilentlyContinue;$script:AppJob=$null;$script:AppTimer.Stop();ShowMessage 'Работа WinGet завершена. Проверьте коды результатов в окне.'}
+}
+
 $script:Form=New-Object System.Windows.Forms.Form
-$script:Form.Text='MoOLVa Windows Master Portable 1.4 PRO | Помощник компьютерного мастера'
+$script:Form.Text='MoOLVa Windows Master Portable 2.0 PRO | Помощник компьютерного мастера'
 $script:Form.ClientSize=New-Object System.Drawing.Size(1260,810)
 $script:Form.MinimumSize=New-Object System.Drawing.Size(1130,760)
 $script:Form.StartPosition='CenterScreen'
@@ -635,18 +679,25 @@ for($i=0;$i -lt $links.Count;$i++) {
     $b.TextAlign='MiddleLeft'
     $side.Controls.Add($b)
 }
-$side.Controls.Add((LabelText 'v1.4 PRO  •  Portable' 23 718 204 30 9 $false $script:Muted))
+$side.Controls.Add((LabelText 'v2.0 PRO  •  Portable' 23 718 204 30 9 $false $script:Muted))
 $script:Content=New-Object System.Windows.Forms.Panel
 $script:Content.Dock='Fill';$script:Content.AutoScroll=$true
 $script:Content.BackColor=$script:Bg
 $script:Form.Controls.Add($script:Content)
 $script:Content.BringToFront()
+$script:AppJob=$null
+$script:AppTimer=New-Object System.Windows.Forms.Timer
+$script:AppTimer.Interval=600
+$script:AppTimer.Add_Tick({ PollAppInstall })
 $script:BitsJob=$null
 $script:DownloadTimer=New-Object System.Windows.Forms.Timer
 $script:DownloadTimer.Interval=700
 $script:DownloadTimer.Add_Tick({ PollMasterDownload })
-$script:Form.Add_FormClosing({param($sender,$e) if($null -ne $script:BitsJob){$e.Cancel=$true;ShowMessage 'Дождитесь завершения загрузки.'}})
+$script:Form.Add_FormClosing({param($sender,$e) if($null -ne $script:BitsJob -or $null -ne $script:AppJob){$e.Cancel=$true;ShowMessage 'Дождитесь завершения загрузки или установки.'}})
 $script:Step=0
 $script:ImageFolder=''
 ShowHome
+if($env:MOOLVA_QA_SCREENSHOT){
+ $script:Form.Add_Shown({try { $script:Form.Refresh(); $bitmap=New-Object Drawing.Bitmap($script:Form.Width,$script:Form.Height); $script:Form.DrawToBitmap($bitmap,(New-Object Drawing.Rectangle(0,0,$bitmap.Width,$bitmap.Height))); $bitmap.Save($env:MOOLVA_QA_SCREENSHOT,[Drawing.Imaging.ImageFormat]::Png); $bitmap.Dispose() } finally {$script:Form.Close()}})
+}
 [void]$script:Form.ShowDialog()
