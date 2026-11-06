@@ -53,6 +53,17 @@ jobs:
           if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force; Set-Content ($iso+'.result.txt') 'TIMEOUT: ISO mount'}
           if(Test-Path ($iso+'.result.txt')){Copy-Item ($iso+'.result.txt') dist/ISO-Mount-Test.txt}else{Set-Content dist/ISO-Mount-Test.txt 'UNAVAILABLE: no result'}
           Get-Content dist/ISO-Mount-Test.txt
+      - name: Test formatter on isolated virtual disk
+        shell: powershell
+        run: ./windows-master-native/tests/VhdFormatTest.ps1
+      - name: Inspect Microsoft page in built-in window
+        shell: powershell
+        run: |
+          $shot=Join-Path (Resolve-Path dist).Path 'Microsoft-ISO-Page-Test.png'
+          $arg='--browser-live="'+$shot+'"'
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList $arg -PassThru
+          if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force;Set-Content ($shot+'.status.txt') 'TIMEOUT: Microsoft page'}
+          if(Test-Path ($shot+'.status.txt')){Get-Content ($shot+'.status.txt')}else{Set-Content ($shot+'.status.txt') 'UNAVAILABLE: no result'}
       - name: Test embedded WebView2 window
         shell: powershell
         run: |
@@ -69,6 +80,14 @@ jobs:
           $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Window test timed out'}
           if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Screenshot failed'}
+      - name: Capture Windows selection page
+        shell: powershell
+        run: |
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.1-Windows.png'
+          $arg='--screenshot="'+$shot+'"'
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList @('--windows',$arg) -PassThru
+          if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Windows page test timed out'}
+          if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Windows screenshot failed'}
       - name: Package instructions and license
         shell: powershell
         run: |

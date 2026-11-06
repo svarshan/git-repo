@@ -44,7 +44,7 @@ sealed class UsbWriter:Form {
  void RefreshUsb(){target.Items.Clear();foreach(var drive in DriveInfo.GetDrives())try{if(drive.DriveType==DriveType.Removable&&drive.IsReady)target.Items.Add(UsbDisk.CheckedTarget(drive.Name));}catch{} if(target.Items.Count>0)target.SelectedIndex=0;else Print("Подходящие USB не найдены. Нужен носитель 4–32 ГБ с одним разделом.");}
  static void Guard(UsbDisk chosen,string isoPath,bool checkSerial){
   var now=UsbDisk.CheckedTarget(chosen.Root);if(!chosen.SameDevice(now)||(checkSerial&&chosen.VolumeSerial!=now.VolumeSerial))throw new IOException("Флешка изменилась после выбора. Обновите список.");
-  foreach(string p in new[]{Path.GetFullPath(isoPath),Application.ExecutablePath,Environment.SystemDirectory}){string root=Path.GetPathRoot(p);var src=UsbDisk.FromRoot(root);if(String.Equals(src.Pnp,now.Pnp,StringComparison.OrdinalIgnoreCase))throw new IOException("Этот физический диск содержит ISO, MoOLVa или Windows. Выберите другую флешку.");}
+  foreach(string p in new[]{Path.GetFullPath(isoPath),Application.ExecutablePath,Environment.SystemDirectory,Path.GetTempPath(),Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData)}){string root=Path.GetPathRoot(p);var src=UsbDisk.FromRoot(root);if(String.Equals(src.Pnp,now.Pnp,StringComparison.OrdinalIgnoreCase))throw new IOException("Этот физический диск содержит ISO, MoOLVa или Windows. Выберите другую флешку.");}
  }
  async Task StartWrite(){var chosen=target.SelectedItem as UsbDisk;if(chosen==null){MessageBox.Show("Выберите USB.");return;}string path=iso.Text.Trim();if(!File.Exists(path)||!path.EndsWith(".iso",StringComparison.OrdinalIgnoreCase)){MessageBox.Show("Выберите существующий ISO.");return;}
  if(!new WindowsPrincipalAdapter().Admin){MessageBox.Show("Запустите MoOLVa от имени администратора и откройте мастер снова.");return;}
@@ -73,7 +73,10 @@ sealed class UsbWriter:Form {
  }
  static void FormatSelected(UsbDisk expected){
   var verify=UsbDisk.CheckedTarget(expected.Root);if(!expected.SameDevice(verify)||verify.VolumeSerial!=expected.VolumeSerial)throw new IOException("Флешка изменилась до форматирования.");
-  string letter=expected.Root.Substring(0,1);if(!System.Text.RegularExpressions.Regex.IsMatch(letter,"^[A-Z]$"))throw new IOException("Некорректная буква диска.");
+  FormatVolumeUnchecked(expected.Root);
+ }
+ static void FormatVolumeUnchecked(string root){
+  string letter=root.Substring(0,1);if(!System.Text.RegularExpressions.Regex.IsMatch(letter,"^[A-Z]$"))throw new IOException("Некорректная буква диска.");
   string file=Path.Combine(Path.GetTempPath(),"MoOLVa-format-"+Guid.NewGuid().ToString("N")+".txt");try{File.WriteAllText(file,"select volume "+letter+"\r\nformat fs=fat32 quick label=MOOLVA_WIN override\r\nexit\r\n",System.Text.Encoding.ASCII);
    using(var p=Process.Start(new ProcessStartInfo("diskpart.exe","/s \""+file+"\""){UseShellExecute=false,CreateNoWindow=true})){if(!p.WaitForExit(180000)){try{p.Kill();}catch{}throw new IOException("Превышено время форматирования.");}if(p.ExitCode!=0)throw new IOException("DiskPart сообщил код "+p.ExitCode);}
   }finally{try{File.Delete(file);}catch{}}

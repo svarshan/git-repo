@@ -9,10 +9,10 @@ using Microsoft.Web.WebView2.Core;
 using Microsoft.Web.WebView2.WinForms;
 namespace MoOLVaMaster {
 sealed class IsoBrowser:Form {
- readonly WebView2 browser=new WebView2(); readonly Label status=new Label(); readonly ProgressBar bar=new ProgressBar(); readonly Button cancel=new Button(),resume=new Button(); CoreWebView2DownloadOperation active; DateTime started; long initialBytes; readonly string screenshot,downloadFolder; readonly Action<string> onCompleted; bool initializing;
+ readonly WebView2 browser=new WebView2(); readonly Label status=new Label(); readonly ProgressBar bar=new ProgressBar(); readonly Button cancel=new Button(),resume=new Button(); CoreWebView2DownloadOperation active; DateTime started; long initialBytes; readonly string screenshot,downloadFolder; readonly Action<string> onCompleted; readonly bool liveTest; bool initializing;
  public bool Initialized{get;private set;}
- public IsoBrowser(string version,string folder,Action<string> completed,string smokeScreenshot=null) {
-  screenshot=smokeScreenshot; downloadFolder=folder;onCompleted=completed; Text="MoOLVa — ISO Windows "+version;Size=new Size(1120,800);MinimumSize=new Size(850,620);StartPosition=FormStartPosition.CenterParent;
+ public IsoBrowser(string version,string folder,Action<string> completed,string smokeScreenshot=null,bool live=false) {
+  screenshot=smokeScreenshot; downloadFolder=folder;onCompleted=completed;liveTest=live; Text="MoOLVa — ISO Windows "+version;Size=new Size(1120,800);MinimumSize=new Size(850,620);StartPosition=FormStartPosition.CenterParent;
   var top=new Label{Dock=DockStyle.Top,Height=45,Text="Выберите выпуск и язык на странице Microsoft. Затем нажмите кнопку загрузки ISO.",TextAlign=ContentAlignment.MiddleLeft,Padding=new Padding(12,0,0,0)};
   var bottom=new Panel{Dock=DockStyle.Bottom,Height=100};status.SetBounds(12,5,760,27);status.Text="Ожидание загрузки";bar.SetBounds(12,38,650,22);cancel.SetBounds(680,33,150,32);cancel.Text="Отменить";resume.SetBounds(840,33,150,32);resume.Text="Продолжить";bottom.Controls.AddRange(new Control[]{status,bar,cancel,resume});bottom.AutoScroll=true;
   browser.Dock=DockStyle.Fill;Controls.Add(browser);Controls.Add(bottom);Controls.Add(top);
@@ -21,7 +21,13 @@ sealed class IsoBrowser:Form {
   Shown+=async(s,e)=>{if(initializing)return;initializing=true;try {
    string profile=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MoOLVa","WebView2");var env=await CoreWebView2Environment.CreateAsync(null,profile);await browser.EnsureCoreWebView2Async(env);Initialized=true;
    browser.CoreWebView2.DownloadStarting+=OnDownload;
-   if(screenshot!=null){browser.CoreWebView2.Navigate("about:blank");await Task.Delay(1000);using(var img=new Bitmap(Width,Height)){DrawToBitmap(img,new Rectangle(0,0,img.Width,img.Height));img.Save(screenshot,System.Drawing.Imaging.ImageFormat.Png);}Close();}
+   if(screenshot!=null && liveTest){
+    var done=new TaskCompletionSource<CoreWebView2NavigationCompletedEventArgs>();browser.CoreWebView2.NavigationCompleted+=(o,eventArgs)=>done.TrySetResult(eventArgs);
+    browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/en-us/software-download/windows10ISO":"https://www.microsoft.com/en-us/software-download/windows11");
+    var finished=await Task.WhenAny(done.Task,Task.Delay(30000));if(finished!=done.Task){File.WriteAllText(screenshot+".status.txt","TIMEOUT: Microsoft page");Close();return;}
+    var nav=await done.Task;await Task.Delay(1500);string title=await browser.CoreWebView2.ExecuteScriptAsync("document.title");File.WriteAllText(screenshot+".status.txt","NavigationSuccess="+nav.IsSuccess+"; WebError="+nav.WebErrorStatus+"; Title="+title);
+    using(var file=File.Create(screenshot))await browser.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png,file);Close();
+   } else if(screenshot!=null){browser.CoreWebView2.Navigate("about:blank");await Task.Delay(1000);using(var img=new Bitmap(Width,Height)){DrawToBitmap(img,new Rectangle(0,0,img.Width,img.Height));img.Save(screenshot,System.Drawing.Imaging.ImageFormat.Png);}Close();}
    else browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/en-us/software-download/windows10ISO":"https://www.microsoft.com/en-us/software-download/windows11");
   }catch(Exception ex){status.Text="Не удалось открыть встроенную страницу Microsoft.";if(screenshot!=null){File.WriteAllText(screenshot+".error.txt",ex.ToString());Close();}else MessageBox.Show("Не удалось открыть встроенную страницу. Убедитесь, что установлен Microsoft Edge WebView2 Runtime.\r\n"+ex.Message);}};
  }

@@ -20,13 +20,15 @@ static class Program {
   if(args.Contains("--self-test")) return SelfTest.Run();
   string browserSmoke=args.FirstOrDefault(x=>x.StartsWith("--browser-smoke="));
   if(browserSmoke!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);var browser=new IsoBrowser("11",Path.GetTempPath(),null,browserSmoke.Substring(16));Application.Run(browser);return browser.Initialized?0:6;}
+  string browserLive=args.FirstOrDefault(x=>x.StartsWith("--browser-live="));
+  if(browserLive!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);var browser=new IsoBrowser("11",Path.GetTempPath(),null,browserLive.Substring(15),true);Application.Run(browser);return browser.Initialized?0:6;}
   string mountTest=args.FirstOrDefault(x=>x.StartsWith("--mount-test="));
   if(mountTest!=null){string iso=mountTest.Substring(13);try{using(var mounted=new IsoMount(iso)){bool ok=File.Exists(Path.Combine(mounted.Root,"HELLO.TXT"));File.WriteAllText(iso+".result.txt",ok?"SUCCESS: ISO attached and fixture read":"FAIL: fixture file not found");return ok?0:3;}}catch(Exception ex){File.WriteAllText(iso+".result.txt","UNAVAILABLE: "+ex);return 4;}}
   string probe=args.FirstOrDefault(x=>x.StartsWith("--wua-probe="));
   if(probe!=null){try{int n=MainForm.ProbeWua();File.WriteAllText(probe.Substring(12),"SUCCESS: Windows Update search completed; count="+n);return 0;}catch(Exception e){File.WriteAllText(probe.Substring(12),"UNAVAILABLE: "+e.ToString());return 4;}}
   Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
   string usbArg=args.FirstOrDefault(x=>x.StartsWith("--usb="));
-  var app=new MainForm(args.Contains("--drivers"),usbArg==null?null:usbArg.Substring(6));
+  var app=new MainForm(args.Contains("--drivers"),usbArg==null?null:usbArg.Substring(6),args.Contains("--windows"));
   string shot=args.FirstOrDefault(x=>x.StartsWith("--screenshot="));
   if(shot!=null) { string path=shot.Substring("--screenshot=".Length); app.Shown+=(s,e)=>{try {app.Refresh();using(var image=new Bitmap(app.Width,app.Height)){app.DrawToBitmap(image,new Rectangle(0,0,image.Width,image.Height));image.Save(path,ImageFormat.Png);}} finally {app.Close();}}; }
   Application.Run(app); return 0;
@@ -48,14 +50,14 @@ static class SelfTest { public static int Run(){
 sealed class DriverItem {public string Id,Title;public int Rev;public bool Eligible;public string Reason; public override string ToString(){return (Eligible?"Драйвер":"ПРОПУЩЕН: "+Reason)+" — "+Title;}}
 sealed class MainForm:Form {
  readonly Color bg=Color.FromArgb(16,23,36),panel=Color.FromArgb(23,34,53),yellow=Color.FromArgb(255,196,71),muted=Color.FromArgb(185,197,214);
- readonly Panel side=new Panel(),page=new Panel(); readonly List<string> report=new List<string>(); bool busy; CheckedListBox drivers; Label driverState; TextBox logBox; string selectedView=""; bool bootToDrivers; string startupUsb,selectedIso;
- public MainForm(bool openDrivers,string usbPath){bootToDrivers=openDrivers;startupUsb=usbPath;Text="MoOLVa Windows Master 3.1 Portable";StartPosition=FormStartPosition.CenterScreen;MinimumSize=new Size(900,680);Size=new Size(1180,800);BackColor=bg;ForeColor=Color.White;Font=new Font("Segoe UI",10);
+ readonly Panel side=new Panel(),page=new Panel(); readonly List<string> report=new List<string>(); bool busy; CheckedListBox drivers; Label driverState; TextBox logBox; string selectedView=""; bool bootToDrivers,bootToWindows; string startupUsb,selectedIso;
+ public MainForm(bool openDrivers,string usbPath,bool openWindows){bootToDrivers=openDrivers;bootToWindows=openWindows;startupUsb=usbPath;Text="MoOLVa Windows Master 3.1 Portable";StartPosition=FormStartPosition.CenterScreen;MinimumSize=new Size(900,680);Size=new Size(1180,800);BackColor=bg;ForeColor=Color.White;Font=new Font("Segoe UI",10);
  side.Dock=DockStyle.Left;side.Width=215;side.BackColor=Color.FromArgb(12,19,32);Controls.Add(side);page.Dock=DockStyle.Fill;page.AutoScroll=true;page.BackColor=bg;Controls.Add(page);page.BringToFront();
  var logo=new Label{Text="MoOLVa",ForeColor=yellow,Font=new Font("Segoe UI",23,FontStyle.Bold),AutoSize=true,Location=new Point(20,23)};side.Controls.Add(logo);
  var sub=new Label{Text="WINDOWS MASTER 3.1",ForeColor=muted,AutoSize=true,Location=new Point(22,77)};side.Controls.Add(sub);
  string[] names={"Главная","Windows / флешка","Драйверы","BIOS / Boot Menu","Диагностика","Отчёт"}; Action[] actions={Home,WindowsPage,DriversPage,BiosPage,DiagnosticsPage,ReportPage};
  for(int i=0;i<names.Length;i++){int n=i;var b=Button(names[i],false);b.SetBounds(12,130+i*57,190,47);b.TextAlign=ContentAlignment.MiddleLeft;b.Click+=(s,e)=>Navigate(actions[n]);side.Controls.Add(b);}
- Shown+=(s,e)=> {if(bootToDrivers)DriversPage();else Home();if(startupUsb!=null)UsbPage(startupUsb);}; FormClosing+=(s,e)=>{if(busy){e.Cancel=true;MessageBox.Show("Дождитесь завершения операции.");}};
+ Shown+=(s,e)=> {if(bootToDrivers)DriversPage();else if(bootToWindows)WindowsPage();else Home();if(startupUsb!=null)UsbPage(startupUsb);}; FormClosing+=(s,e)=>{if(busy){e.Cancel=true;MessageBox.Show("Дождитесь завершения операции.");}};
  }
  Button Button(string text,bool primary){return new Button{Text=text,BackColor=primary?yellow:panel,ForeColor=primary?bg:Color.White,FlatStyle=FlatStyle.Flat,Font=new Font("Segoe UI",10,FontStyle.Bold),Margin=new Padding(5),AutoSize=false};}
  Label Label(string text,int size=10,bool bold=false){return new Label{Text=text,ForeColor=size==10?muted:Color.White,Font=new Font("Segoe UI",size,bold?FontStyle.Bold:FontStyle.Regular),AutoSize=true,MaximumSize=new Size(790,0),Margin=new Padding(4,8,4,8)};}
