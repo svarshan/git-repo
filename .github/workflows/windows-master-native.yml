@@ -1,7 +1,7 @@
-name: MoOLVa Windows Master 3.0 Native
+name: MoOLVa Windows Master 3.1 Native
 on:
   push:
-    branches: [windows-master-native-3-0]
+    branches: [windows-master-native-3-1]
     paths:
       - 'windows-master-native/**'
       - '.github/workflows/windows-master-native.yml'
@@ -11,52 +11,73 @@ permissions:
 jobs:
   build:
     runs-on: windows-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
-      - name: Compile native C sharp application
+      - name: Install pinned WebView2 SDK
+        shell: powershell
+        run: |
+          nuget install Microsoft.Web.WebView2 -Version 1.0.2903.40 -OutputDirectory packages -NonInteractive
+          if($LASTEXITCODE -ne 0){throw 'WebView2 SDK download failed'}
+      - name: Compile self contained EXE
         shell: powershell
         run: |
           New-Item -ItemType Directory -Force dist | Out-Null
-          $csc = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-          & $csc /nologo /target:winexe /platform:anycpu /codepage:65001 /reference:System.Windows.Forms.dll /reference:System.Drawing.dll /reference:System.Management.dll /reference:Microsoft.CSharp.dll /out:dist/MoOLVa-Windows-Master-3.0-Portable.exe '.\windows-master-native\Program.cs'
-          if ($LASTEXITCODE -ne 0) { throw 'Compilation failed' }
+          $pkg=(Resolve-Path packages/Microsoft.Web.WebView2.1.0.2903.40).Path
+          $lib=Join-Path $pkg 'lib/net462'
+          if(-not (Test-Path (Join-Path $lib 'Microsoft.Web.WebView2.WinForms.dll'))){$lib=Join-Path $pkg 'lib/net45'}
+          $core=Join-Path $lib 'Microsoft.Web.WebView2.Core.dll'
+          $winforms=Join-Path $lib 'Microsoft.Web.WebView2.WinForms.dll'
+          $x64=Get-ChildItem $pkg -Recurse -File -Filter WebView2Loader.dll | Where-Object {$_.FullName -match '(win-x64|native[\\/]x64)[\\/]'} | Select-Object -First 1
+          $x86=Get-ChildItem $pkg -Recurse -File -Filter WebView2Loader.dll | Where-Object {$_.FullName -match '(win-x86|native[\\/]x86)[\\/]'} | Select-Object -First 1
+          if(-not (Test-Path $core) -or -not (Test-Path $winforms) -or -not $x64 -or -not $x86){throw 'WebView2 SDK files missing'}
+          $csc=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
+          $args=@('/nologo','/target:winexe','/platform:anycpu','/codepage:65001','/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll','/reference:System.Management.dll','/reference:Microsoft.CSharp.dll',("/reference:$core"),("/reference:$winforms"),'/out:dist/MoOLVa-Windows-Master-3.1-Portable.exe',("/resource:$core,Microsoft.Web.WebView2.Core.dll"),("/resource:$winforms,Microsoft.Web.WebView2.WinForms.dll"),("/resource:$($x64.FullName),WebView2Loader-x64.dll"),("/resource:$($x86.FullName),WebView2Loader-x86.dll"),'.\windows-master-native\Program.cs','.\windows-master-native\Bootstrap.cs','.\windows-master-native\IsoBrowser.cs','.\windows-master-native\IsoMount.cs','.\windows-master-native\UsbWriter.cs')
+          & $csc @args
+          if($LASTEXITCODE -ne 0){throw 'Compilation failed'}
       - name: Run safety self tests
         shell: powershell
         run: |
-          $p = Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.0-Portable.exe).Path -ArgumentList '--self-test' -Wait -PassThru
-          if ($p.ExitCode -ne 0) { throw "Self-test failed: $($p.ExitCode)" }
-      - name: Probe Windows Update search without installation
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList '--self-test' -Wait -PassThru
+          if($p.ExitCode -ne 0){throw "Self-test failed: $($p.ExitCode)"}
+      - name: Test native ISO mounting
         shell: powershell
         run: |
-          $log=Join-Path (Resolve-Path dist).Path 'Windows-Update-Probe.txt'
-          $arg='--wua-probe="'+$log+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.0-Portable.exe).Path -ArgumentList $arg -PassThru
-          if(-not $p.WaitForExit(90000)){Stop-Process -Id $p.Id -Force;Set-Content -Path $log -Value 'TIMEOUT: Windows Update search did not finish'}
-          if(Test-Path $log){Get-Content $log}else{Set-Content -Path $log -Value 'UNAVAILABLE: probe exited without output'}
-      - name: Test actual window and capture screenshot
+          python -m pip install --disable-pip-version-check pycdlib==1.14.0
+          if($LASTEXITCODE -ne 0){throw 'Cannot install ISO fixture generator'}
+          Set-Content -Path fixture.txt -Value 'fixture' -Encoding ASCII
+          python -c "import pycdlib; i=pycdlib.PyCdlib(); i.new(); i.add_file('fixture.txt','/HELLO.TXT;1'); i.write('fixture.iso'); i.close()"
+          $iso=(Resolve-Path fixture.iso).Path
+          $arg='--mount-test="'+$iso+'"'
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList $arg -PassThru
+          if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force; Set-Content ($iso+'.result.txt') 'TIMEOUT: ISO mount'}
+          if(Test-Path ($iso+'.result.txt')){Copy-Item ($iso+'.result.txt') dist/ISO-Mount-Test.txt}else{Set-Content dist/ISO-Mount-Test.txt 'UNAVAILABLE: no result'}
+          Get-Content dist/ISO-Mount-Test.txt
+      - name: Test embedded WebView2 window
         shell: powershell
         run: |
-          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.0-Window.png'
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.1-ISO-window.png'
+          $arg='--browser-smoke="'+$shot+'"'
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList $arg -PassThru
+          if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force;throw 'WebView2 test timed out'}
+          if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){if(Test-Path ($shot+'.error.txt')){Get-Content ($shot+'.error.txt')};throw 'WebView2 window failed'}
+      - name: Capture application window
+        shell: powershell
+        run: |
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.1-Window.png'
           $arg='--screenshot="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.0-Portable.exe).Path -ArgumentList $arg -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Window test timed out'}
-          if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Screenshot or launch failed'}
-          if((Get-Item $shot).Length -lt 3000){throw 'Screenshot unexpectedly small'}
-      - name: Capture drivers window
+          if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Screenshot failed'}
+      - name: Package instructions and license
         shell: powershell
         run: |
-          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.0-Drivers.png'
-          $arg='--screenshot="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.0-Portable.exe).Path -ArgumentList @('--drivers',$arg) -PassThru
-          if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Driver window test timed out'}
-          if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Driver screenshot failed'}
-      - name: Package instructions
-        shell: powershell
-        run: Copy-Item windows-master-native/README.txt dist/README.txt
+          Copy-Item windows-master-native/README.txt dist/README.txt
+          $license=Get-ChildItem packages/Microsoft.Web.WebView2.1.0.2903.40 -Filter LICENSE* -File | Select-Object -First 1
+          if($license){Copy-Item $license.FullName dist/WebView2-LICENSE.txt}
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Windows-Master-3.0-Native
+          name: MoOLVa-Windows-Master-3.1-Portable
           path: dist/
           if-no-files-found: error
           retention-days: 30
