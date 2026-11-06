@@ -7,14 +7,14 @@ try {
  $taken=@([IO.DriveInfo]::GetDrives() | ForEach-Object { $_.Name.Substring(0,1).ToUpperInvariant() })
  $letter=@('X','Y','Z','W','V','U','T','S','R','Q','P') | Where-Object {$_ -notin $taken} | Select-Object -First 1
  if(-not $letter){throw 'No unused drive letter'}
- @('create vdisk file="'+$vhd+'" maximum=128 type=expandable','select vdisk file="'+$vhd+'"','attach vdisk','exit') | Set-Content -LiteralPath $dp -Encoding ASCII
- & diskpart.exe /s $dp | Out-Null
- if(-not (Test-Path -LiteralPath $vhd)){throw 'Virtual test disk was not created'}
+ @(('create vdisk file="{0}" maximum=128 type=expandable' -f $vhd),('select vdisk file="{0}"' -f $vhd),'attach vdisk','exit') | Set-Content -LiteralPath $dp -Encoding ASCII
+ $diskpartOutput=(& diskpart.exe /s $dp 2>&1 | Out-String)
+ if(-not (Test-Path -LiteralPath $vhd)){throw ('Virtual test disk was not created: '+$diskpartOutput)}
  $attached=$true
  $disk=@(Get-DiskImage -ImagePath $vhd -ErrorAction Stop | Get-Disk -ErrorAction Stop)
  if($disk.Count -ne 1 -or $disk[0].IsSystem -or $disk[0].IsBoot -or ([string]$disk[0].BusType -notmatch 'Virtual')){throw 'Refusing: attached disk is not a non-system virtual disk'}
  $number=[int]$disk[0].Number
- @('select disk '+$number,'create partition primary','format fs=ntfs quick label=MOOLVA_TEST','assign letter='+$letter,'exit') | Set-Content -LiteralPath $dp -Encoding ASCII
+ @(('select disk {0}' -f $number),'create partition primary','format fs=ntfs quick label=MOOLVA_TEST',('assign letter={0}' -f $letter),'exit') | Set-Content -LiteralPath $dp -Encoding ASCII
  & diskpart.exe /s $dp | Out-Null
  $volume=Get-Volume -DriveLetter $letter -ErrorAction Stop
  $part=Get-Partition -DriveLetter $letter -ErrorAction Stop
@@ -35,10 +35,12 @@ try {
  Set-Content -LiteralPath $resultPath -Value ('UNAVAILABLE OR FAILED: '+$_.ToString()) -Encoding UTF8
 }finally{
  if($attached -and (Test-Path -LiteralPath $vhd)){
-  @('select vdisk file="'+$vhd+'"','detach vdisk','exit') | Set-Content -LiteralPath $dp -Encoding ASCII
+  @(('select vdisk file="{0}"' -f $vhd),'detach vdisk','exit') | Set-Content -LiteralPath $dp -Encoding ASCII
   & diskpart.exe /s $dp | Out-Null
  }
  Remove-Item -LiteralPath $dp -Force -ErrorAction SilentlyContinue
  Remove-Item -LiteralPath $vhd -Force -ErrorAction SilentlyContinue
 }
 Get-Content -LiteralPath $resultPath
+
+exit 0
