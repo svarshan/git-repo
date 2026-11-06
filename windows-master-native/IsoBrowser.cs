@@ -41,7 +41,7 @@ sealed class IsoBrowser:Form {
  async void OnDownload(object sender,CoreWebView2DownloadStartingEventArgs e){
   if(active!=null && active.State==CoreWebView2DownloadState.InProgress){e.Cancel=true;MessageBox.Show("Сначала завершите текущую загрузку.");return;}
   Uri u;if(!Uri.TryCreate(e.DownloadOperation.Uri,UriKind.Absolute,out u)||!Rules.MicrosoftLink(u.AbsoluteUri)){e.Cancel=true;if(downloadProbe)probeCompletion.TrySetResult("BLOCKED: unexpected download host");else MessageBox.Show("Загрузка разрешена только с официальных HTTPS-адресов Microsoft.");return;}
-  if(downloadProbe){e.Cancel=true;string uri=u.AbsoluteUri;string result=await Task.Run(()=>ProbeRange(uri));probeCompletion.TrySetResult(result);return;}
+  if(downloadProbe){e.Cancel=true;if(!Path.GetFileName(e.ResultFilePath).EndsWith(".iso",StringComparison.OrdinalIgnoreCase)){probeCompletion.TrySetResult("FAILED: suggested download name is not ISO");return;}string uri=u.AbsoluteUri;string result=await Task.Run(()=>ProbeRange(uri));probeCompletion.TrySetResult(result);return;}
   var deferral=e.GetDeferral();SynchronizationContext.Current.Post(_=>{using(deferral){
    string name=Path.GetFileName(e.ResultFilePath);if(!name.EndsWith(".iso",StringComparison.OrdinalIgnoreCase)){e.Cancel=true;MessageBox.Show("Выберите именно ISO-образ на странице Microsoft.");return;}
    using(var dialog=new SaveFileDialog{FileName=name,InitialDirectory=downloadFolder,Filter="Образы ISO|*.iso",OverwritePrompt=true}){
