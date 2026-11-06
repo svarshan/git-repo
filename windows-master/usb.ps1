@@ -107,6 +107,7 @@ $worker={param($chosen,$isoPath,$exePath)
  finally{if($mountedByUs){Dismount-DiskImage -ImagePath $isoPath -ErrorAction SilentlyContinue | Out-Null}}
 }
 if($SafetySmokeTest){
+ Import-Module Storage -ErrorAction Stop
  $dummy1=[IO.Path]::GetTempFileName();$dummy2=[IO.Path]::GetTempFileName()
  try {
   $expected=[pscustomobject]@{number=7;size=[uint64](16GB);unique='expected-id';serial='serial-7';path='virtual-path'}
