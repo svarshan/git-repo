@@ -16,7 +16,7 @@ using Microsoft.CSharp.RuntimeBinder;
 namespace MoOLVaMaster {
 static class Program {
  [STAThread] static int Main(string[] args) {
-  try{Bootstrap.Init();}catch(Exception e){MessageBox.Show("Не удалось инициализировать компоненты MoOLVa: "+e.Message);return 8;}
+  try{Bootstrap.Init(!args.Contains("--drivers")&&!args.Any(x=>x.StartsWith("--usb=")));}catch(Exception e){MessageBox.Show("Не удалось инициализировать компоненты MoOLVa: "+e.Message);return 8;}
   if(args.Contains("--self-test")) return SelfTest.Run();
   string browserSmoke=args.FirstOrDefault(x=>x.StartsWith("--browser-smoke="));
   if(browserSmoke!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);var browser=new IsoBrowser("11",Path.GetTempPath(),null,browserSmoke.Substring(16));Application.Run(browser);return browser.Initialized?0:6;}
@@ -60,7 +60,7 @@ sealed class MainForm:Form {
  var sub=new Label{Text="WINDOWS MASTER 3.1",ForeColor=muted,AutoSize=true,Location=new Point(22,77)};side.Controls.Add(sub);
  string[] names={"Главная","Windows / флешка","Драйверы","BIOS / Boot Menu","Диагностика","Отчёт"}; Action[] actions={Home,WindowsPage,DriversPage,BiosPage,DiagnosticsPage,ReportPage};
  for(int i=0;i<names.Length;i++){int n=i;var b=Button(names[i],false);b.SetBounds(12,130+i*57,190,47);b.TextAlign=ContentAlignment.MiddleLeft;b.Click+=(s,e)=>Navigate(actions[n]);side.Controls.Add(b);}
- Shown+=(s,e)=> {if(bootToDrivers)DriversPage();else if(bootToWindows)WindowsPage();else Home();if(startupUsb!=null)UsbPage(startupUsb);}; FormClosing+=(s,e)=>{if(busy){e.Cancel=true;MessageBox.Show("Дождитесь завершения операции.");}};
+ Shown+=(s,e)=> {if(startupUsb!=null){UsbPage(startupUsb);Close();return;}if(bootToDrivers)DriversPage();else if(bootToWindows)WindowsPage();else Home();}; FormClosing+=(s,e)=>{if(busy){e.Cancel=true;MessageBox.Show("Дождитесь завершения операции.");}};
  }
  Button Button(string text,bool primary){return new Button{Text=text,BackColor=primary?yellow:panel,ForeColor=primary?bg:Color.White,FlatStyle=FlatStyle.Flat,Font=new Font("Segoe UI",10,FontStyle.Bold),Margin=new Padding(5),AutoSize=false};}
  Label Label(string text,int size=10,bool bold=false){return new Label{Text=text,ForeColor=size==10?muted:Color.White,Font=new Font("Segoe UI",size,bold?FontStyle.Bold:FontStyle.Regular),AutoSize=true,MaximumSize=new Size(790,0),Margin=new Padding(4,8,4,8)};}
@@ -80,7 +80,7 @@ sealed class MainForm:Form {
  void SetIsoFolder(string path){string config=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MoOLVa");Directory.CreateDirectory(config);File.WriteAllText(Path.Combine(config,"iso-folder.txt"),path);}
  void RememberIso(string path){if(String.IsNullOrWhiteSpace(path))return;selectedIso=path;try{string config=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MoOLVa");Directory.CreateDirectory(config);string f=Path.Combine(config,"iso-history.txt");var items=File.Exists(f)?File.ReadAllLines(f).Where(File.Exists).ToList():new List<string>();items.RemoveAll(x=>String.Equals(x,path,StringComparison.OrdinalIgnoreCase));items.Insert(0,path);File.WriteAllLines(f,items.Take(30));}catch{}}
  IEnumerable<string> RecentIso(){var items=new List<string>();try{string f=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MoOLVa","iso-history.txt");if(File.Exists(f))items.AddRange(File.ReadAllLines(f).Where(File.Exists));items.AddRange(Directory.GetFiles(IsoFolder(),"*.iso"));}catch{}return items.Distinct(StringComparer.OrdinalIgnoreCase).Take(30);}
- void StartIsoBrowser(string version){try{using(var browser=new IsoBrowser(version,IsoFolder(),RememberIso)){browser.ShowDialog(this);}}catch(Exception e){MessageBox.Show("Не удалось открыть страницу Microsoft: "+e.Message);}}
+ void StartIsoBrowser(string version){if(!Bootstrap.NativeAvailable){MessageBox.Show("Для загрузки ISO откройте MoOLVa обычным запуском, без прав администратора.");return;}try{using(var browser=new IsoBrowser(version,IsoFolder(),RememberIso)){browser.ShowDialog(this);}}catch(Exception e){MessageBox.Show("Не удалось открыть страницу Microsoft: "+e.Message);}}
  void WindowsPage(){var f=BeginPage("Windows 10 / 11 и флешка","Выберите ISO в приложении, скачайте его с Microsoft и запишите на USB.");
  Action reload=null;
  AddButton(f,"Скачать ISO Windows 11 внутри MoOLVa",()=>{StartIsoBrowser("11");if(reload!=null)reload();},true);

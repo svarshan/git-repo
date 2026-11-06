@@ -21,6 +21,7 @@ sealed class IsoBrowser:Form {
   Shown+=async(s,e)=>{if(initializing)return;initializing=true;try {
    string profile=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MoOLVa","WebView2");var env=await CoreWebView2Environment.CreateAsync(null,profile);await browser.EnsureCoreWebView2Async(env);Initialized=true;
    browser.CoreWebView2.DownloadStarting+=OnDownload;
+   browser.CoreWebView2.NewWindowRequested+=(o,eventArgs)=>{eventArgs.Handled=true;if(Rules.MicrosoftLink(eventArgs.Uri))browser.CoreWebView2.Navigate(eventArgs.Uri);else MessageBox.Show("Переход к стороннему сайту не выполнен.");};
    // Microsoft serves its ISO selector to non-Windows clients; this compatibility mode requests the official ISO page.
    if(version=="10")browser.CoreWebView2.Settings.UserAgent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
    if(screenshot!=null && liveTest){
@@ -28,6 +29,7 @@ sealed class IsoBrowser:Form {
     browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/ru-ru/software-download/windows10ISO":"https://www.microsoft.com/ru-ru/software-download/windows11");
     var finished=await Task.WhenAny(done.Task,Task.Delay(30000));if(finished!=done.Task){File.WriteAllText(screenshot+".status.txt","TIMEOUT: Microsoft page");Close();return;}
     var nav=await done.Task;await Task.Delay(1500);string title=await browser.CoreWebView2.ExecuteScriptAsync("document.title");File.WriteAllText(screenshot+".status.txt","NavigationSuccess="+nav.IsSuccess+"; WebError="+nav.WebErrorStatus+"; Title="+title);
+    string elements=await browser.CoreWebView2.ExecuteScriptAsync("JSON.stringify(Array.from(document.querySelectorAll('select,button')).map(x=>({tag:x.tagName,id:x.id,name:x.name,text:(x.innerText||'').slice(0,100),options:x.options?Array.from(x.options).map(o=>({value:o.value,text:o.text})):[]})))");File.WriteAllText(screenshot+".elements.txt",elements);
     using(var file=File.Create(screenshot))await browser.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png,file);Close();
    } else if(screenshot!=null){browser.CoreWebView2.Navigate("about:blank");await Task.Delay(1000);using(var img=new Bitmap(Width,Height)){DrawToBitmap(img,new Rectangle(0,0,img.Width,img.Height));img.Save(screenshot,System.Drawing.Imaging.ImageFormat.Png);}Close();}
    else browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/ru-ru/software-download/windows10ISO":"https://www.microsoft.com/ru-ru/software-download/windows11");
