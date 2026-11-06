@@ -69,7 +69,7 @@ sealed class IsoBrowser:Form {
    File.WriteAllText(output,await probeCompletion.Task);
   }catch(Exception e){File.WriteAllText(output,"FAILED: "+e.GetType().Name+": "+e.Message);}
  }
- static string ProbeRange(string url){
+ internal static string ProbeRange(string url){
   try{var req=(HttpWebRequest)WebRequest.Create(url);req.Timeout=20000;req.ReadWriteTimeout=20000;req.AllowAutoRedirect=true;req.AddRange(0,65535);using(var resp=(HttpWebResponse)req.GetResponse()){
    if(!Rules.MicrosoftLink(resp.ResponseUri.AbsoluteUri))return "FAILED: redirect to untrusted host";
    using(var stream=resp.GetResponseStream()){byte[] b=new byte[65536];int count=0,n;while(count<b.Length&&(n=stream.Read(b,count,b.Length-count))>0)count+=n;
