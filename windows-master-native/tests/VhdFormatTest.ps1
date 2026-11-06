@@ -30,22 +30,16 @@ try {
  $out=Get-Volume -DriveLetter $letter -ErrorAction Stop
  $partAfter=Get-Partition -DriveLetter $letter -ErrorAction Stop
  if($partAfter.DiskNumber -ne $number -or $out.FileSystem -ne 'FAT32' -or $out.FileSystemLabel -ne 'MOOLVA_WIN' -or (Test-Path (Join-Path $root 'fixture.txt'))){throw 'Formatted virtual disk did not match expected result'}
- $isoType=$assembly.GetType('MoOLVaMaster.IsoMount',$true)
- $mount=[Activator]::CreateInstance($isoType,[object[]]@((Resolve-Path fixture.iso).Path))
+ $probe=Join-Path $env:RUNNER_TEMP ('MoOLVa-CopyProbe-'+[guid]::NewGuid().ToString('N')+'.exe')
  try {
-  $source=[string]$isoType.GetProperty('Root').GetValue($mount,$null)
-  if(-not (Test-Path (Join-Path $source 'setup.exe'))){throw 'Mounted test ISO lacks setup.exe'}
-  $copyType=$assembly.GetType('MoOLVaMaster.MainForm',$true)
-  $copy=$copyType.GetMethod('WriteUsbCore',[Reflection.BindingFlags]'NonPublic,Static')
-  if(-not $copy){throw 'Product copy method not found'}
-  $items=[IO.Directory]::GetFiles($source,'*',[IO.SearchOption]::AllDirectories)
-  $guard=[Action]{}
-  $progress=New-Object 'System.Progress[System.Tuple[int,string]]'
-  $arguments=New-Object object[] 7
-  $arguments[0]=$source;$arguments[1]=$root;$arguments[2]=$items;$arguments[3]=(Join-Path $source 'sources\install.wim');$arguments[4]=$false;$arguments[5]=$guard;$arguments[6]=$progress
-  [void]$copy.Invoke($null,$arguments)
-  if(-not (Test-Path (Join-Path $root 'setup.exe')) -or -not (Test-Path (Join-Path $root 'sources\boot.wim')) -or -not (Test-Path (Join-Path $root 'efi\boot\bootx64.efi'))){throw 'Fixture ISO files were not copied correctly'}
- } finally { if($mount){$mount.Dispose()} }
+  $csc=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
+  & $csc /nologo /target:exe ("/out:$probe") '.\windows-master-native\tests\VhdCopyProbe.cs'
+  if($LASTEXITCODE -ne 0){throw 'Could not compile the copy probe'}
+  $exePath=(Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).ProviderPath
+  $isoPath=(Resolve-Path fixture.iso).ProviderPath
+  $testOutput=(& $probe $exePath $isoPath $root 2>&1 | Out-String)
+  if($LASTEXITCODE -ne 0){throw ('Fixture ISO copy failed: '+$testOutput)}
+ } finally {Remove-Item -LiteralPath $probe -Force -ErrorAction SilentlyContinue}
  Set-Content -LiteralPath $resultPath -Value 'SUCCESS: product formatter and copy routine wrote fixture ISO to isolated FAT32 VHD; physical USB and UEFI boot not tested.' -Encoding UTF8
 }catch{
  Set-Content -LiteralPath $resultPath -Value ('UNAVAILABLE OR FAILED: '+$_.ToString()) -Encoding UTF8

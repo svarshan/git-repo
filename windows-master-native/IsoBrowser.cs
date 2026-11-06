@@ -21,6 +21,8 @@ sealed class IsoBrowser:Form {
   Shown+=async(s,e)=>{if(initializing)return;initializing=true;try {
    string profile=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MoOLVa","WebView2");var env=await CoreWebView2Environment.CreateAsync(null,profile);await browser.EnsureCoreWebView2Async(env);Initialized=true;
    browser.CoreWebView2.DownloadStarting+=OnDownload;
+   // Microsoft serves its ISO selector to non-Windows clients; this compatibility mode requests the official ISO page.
+   if(version=="10")browser.CoreWebView2.Settings.UserAgent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36";
    if(screenshot!=null && liveTest){
     var done=new TaskCompletionSource<CoreWebView2NavigationCompletedEventArgs>();browser.CoreWebView2.NavigationCompleted+=(o,eventArgs)=>done.TrySetResult(eventArgs);
     browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/ru-ru/software-download/windows10ISO":"https://www.microsoft.com/ru-ru/software-download/windows11");
