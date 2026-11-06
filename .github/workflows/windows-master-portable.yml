@@ -1,0 +1,54 @@
+name: MoOLVa Windows Master Portable EXE
+on:
+  push:
+    branches: [windows-master-portable-1-3]
+    paths:
+      - 'windows-master/**'
+      - '.github/workflows/windows-master-portable.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate PowerShell syntax
+        shell: powershell
+        run: |
+          $files = @('windows-master/MoOLVa_Windows_Master.ps1', 'windows-master/Драйверы_Windows_Update.ps1')
+          foreach ($f in $files) {
+            $tokens = $null; $errors = $null
+            [void][System.Management.Automation.Language.Parser]::ParseFile((Resolve-Path $f).Path, [ref]$tokens, [ref]$errors)
+            if ($errors.Count -gt 0) { $errors | Format-List | Out-String | Write-Error; exit 1 }
+          }
+      - name: Build portable EXE
+        shell: powershell
+        run: |
+          New-Item -ItemType Directory -Force dist | Out-Null
+          $csc = Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
+          & $csc /nologo /target:winexe /platform:anycpu /codepage:65001 /reference:System.Windows.Forms.dll /out:dist/MoOLVa-Windows-Master-Portable.exe '/resource:windows-master/MoOLVa_Windows_Master.ps1,main.ps1' '/resource:windows-master/Драйверы_Windows_Update.ps1,drivers.ps1' windows-master/Launcher.cs
+          if ($LASTEXITCODE -ne 0) { throw 'Compilation failed' }
+          if ((Get-Item dist/MoOLVa-Windows-Master-Portable.exe).Length -lt 20000) { throw 'EXE is unexpectedly small' }
+      - name: Smoke test application startup
+        shell: powershell
+        run: |
+          $exe = (Resolve-Path dist/MoOLVa-Windows-Master-Portable.exe).Path
+          $p = Start-Process $exe -PassThru
+          try {
+            Start-Sleep -Seconds 10
+            $p.Refresh()
+            if ($p.HasExited) { throw "EXE exited immediately: $($p.ExitCode)" }
+            $children = @(Get-CimInstance Win32_Process | Where-Object { $_.ParentProcessId -eq $p.Id -and $_.Name -eq 'powershell.exe' })
+            if ($children.Count -eq 0) { throw 'PowerShell application process not detected' }
+          } finally { & taskkill.exe /F /T /PID $p.Id 2>$null | Out-Null }
+      - name: Package instructions
+        shell: powershell
+        run: Copy-Item windows-master/README-EXE.txt dist/README.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Windows-Master-Portable-EXE
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
