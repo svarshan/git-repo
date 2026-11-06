@@ -1,7 +1,7 @@
-name: MoOLVa Windows Master Portable EXE
+name: MoOLVa Windows Master 1.4 PRO
 on:
   push:
-    branches: [windows-master-portable-1-3]
+    branches: [windows-master-portable-1-4]
     paths:
       - 'windows-master/**'
       - '.github/workflows/windows-master-portable.yml'
@@ -43,12 +43,19 @@ jobs:
             $children = @(Get-CimInstance Win32_Process | Where-Object { $_.ParentProcessId -eq $p.Id -and $_.Name -eq 'powershell.exe' })
             if ($children.Count -eq 0) { throw 'PowerShell application process not detected' }
           } finally { & taskkill.exe /F /T /PID $p.Id 2>$null | Out-Null }
+      - name: Test driver window
+        shell: powershell
+        run: |
+          $f = (Resolve-Path windows-master/drivers.ps1).Path
+          $p = Start-Process powershell.exe -ArgumentList @('-NoProfile','-STA','-ExecutionPolicy','Bypass','-File', ('"{0}"' -f $f),'-UiSmokeTest') -PassThru
+          if (-not $p.WaitForExit(20000)) { Stop-Process -Id $p.Id -Force; throw 'Driver window test timed out' }
+          if ($p.ExitCode -ne 0) { throw "Driver window failed: $($p.ExitCode)" }
       - name: Package instructions
         shell: powershell
         run: Copy-Item windows-master/README-EXE.txt dist/README.txt
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Windows-Master-Portable-EXE
+          name: MoOLVa-Windows-Master-1.4-PRO
           path: dist/
           if-no-files-found: error
           retention-days: 30

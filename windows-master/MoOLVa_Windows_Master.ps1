@@ -170,7 +170,7 @@ function GetHardware {
     try { $cs=Get-CimInstance -ClassName Win32_ComputerSystem -ErrorAction Stop; $d['Производитель']=$cs.Manufacturer; $d['Модель']=$cs.Model; $d['ОЗУ (ГБ)']=[math]::Round($cs.TotalPhysicalMemory/1GB,1) } catch { $d['Модель']='Нет данных' }
     try { $os=Get-CimInstance -ClassName Win32_OperatingSystem -ErrorAction Stop; $d['Windows']=$os.Caption; $d['Сборка']=$os.BuildNumber } catch {}
     try { $cpu=Get-CimInstance -ClassName Win32_Processor -ErrorAction Stop | Select-Object -First 1; $d['Процессор']=$cpu.Name } catch {}
-    try { $bios=Get-CimInstance -ClassName Win32_BIOS -ErrorAction Stop; $d['BIOS']=$bios.SMBIOSBIOSVersion } catch {}
+    try { $bios=Get-CimInstance -ClassName Win32_BIOS -ErrorAction Stop; $d['BIOS']=$bios.SMBIOSBIOSVersion; $d['Серийный номер']=$bios.SerialNumber } catch {}
     try { $drv=Get-CimInstance -ClassName Win32_LogicalDisk -Filter 'DriveType=3' -ErrorAction Stop; foreach($disk in $drv) { $d["Диск $($disk.DeviceID) свободно (ГБ)"]=[math]::Round($disk.FreeSpace/1GB,1) } } catch {}
     return $d
 }
@@ -328,7 +328,7 @@ function ShowBrands {
     $script:BrandCombo=New-Object System.Windows.Forms.ComboBox
     $script:BrandCombo.Location=New-Object System.Drawing.Point(35,129)
     $script:BrandCombo.Size=New-Object System.Drawing.Size(570,38)
-    $script:BrandCombo.DropDownStyle='DropDownList'; $script:BrandCombo.Font=New-Object System.Drawing.Font('Segoe UI',12)
+    $script:BrandCombo.DropDownStyle='DropDown'; $script:BrandCombo.AutoCompleteMode='SuggestAppend'; $script:BrandCombo.AutoCompleteSource='ListItems'; $script:BrandCombo.Font=New-Object System.Drawing.Font('Segoe UI',12)
     $script:BrandCombo.BackColor=$script:PanelBg; $script:BrandCombo.ForeColor=$script:Text
     foreach($key in $script:Manufacturers.Keys){[void]$script:BrandCombo.Items.Add($key)}
     $script:BrandCombo.Add_SelectedIndexChanged({ UpdateBrands })
@@ -342,6 +342,7 @@ function ShowBrands {
     $script:Content.Controls.Add((MakeButton 'Официальные драйверы' 326 626 280 48 { $b=$script:Manufacturers[[string]$script:BrandCombo.SelectedItem]; OpenSafeUrl $b.Drivers }))
     $script:Content.Controls.Add((LabelText 'Совет: выбирайте UEFI USB в разовом Boot Menu; не отключайте защиту без причины.' 35 700 900 42 10 $false $script:Muted))
     $script:Content.Controls.Add((MakeButton 'Вход в BIOS из Windows / Linux' 35 755 390 48 { ShowFirmwareGuide }))
+    $script:Content.Controls.Add((MakeButton 'Копировать клавиши BIOS / Boot' 430 755 425 48 {[Windows.Forms.Clipboard]::SetText($script:BrandBoot.Text+"`r`n"+$script:BrandBios.Text)}))
     $script:BrandCombo.SelectedIndex=0
 }
 function ShowFirmwareGuide {
@@ -510,8 +511,103 @@ function ShowReport {
     $script:Content.Controls.Add((LabelText 'Отчёт — это запись действий мастера, а не автоматическая гарантия успешности установки. Не вводите пароли клиента в приложение.' 35 646 910 80 11 $false $script:Muted))
 }
 
+# Версия 1.4: новые страницы перекрывают одноименные функции 1.3.
+function ShowHome {
+    AddHeading 'MoOLVa Windows Master 1.4 PRO' 'Выберите, что вы хотите сделать.'
+    $script:Content.Controls.Add((MakeButton '1. Подготовить Windows и флешку' 35 135 430 78 { ShowUsbGuide } $true))
+    $script:Content.Controls.Add((MakeButton '2. Настроить компьютер клиента' 480 135 430 78 { ShowDrivers }))
+    $t=MakeTextBox 35 245 875 250; $t.Text=FormatHardware; $script:Content.Controls.Add($t)
+    $script:Content.Controls.Add((MakeButton 'BIOS / Boot Menu' 35 525 270 48 { ShowBrands }))
+    $script:Content.Controls.Add((MakeButton 'Сеть и диагностика' 320 525 270 48 { ShowDiagnostics }))
+    $script:Content.Controls.Add((MakeButton 'Отчёт клиенту' 605 525 270 48 { ShowReport }))
+    $script:Content.Controls.Add((LabelText 'Для поиска драйверов и скачивания файлов нужен интернет. Перед записью Windows сохраните данные установочной флешки.' 35 610 860 75 11 $false $script:Muted))
+}
+function OpenDriverWindow {
+    $helper=Join-Path $PSScriptRoot 'Драйверы_Windows_Update.ps1'
+    if(-not (Test-Path -LiteralPath $helper)){ShowMessage 'Модуль драйверов не найден.';return}
+    try {Start-Process -FilePath 'powershell.exe' -Verb RunAs -WindowStyle Hidden -ArgumentList @('-NoLogo','-NoProfile','-ExecutionPolicy','Bypass','-STA','-File', ('"{0}"' -f $helper))}
+    catch {ShowMessage "Окно драйверов не запущено: $_"}
+}
+function ShowDrivers {
+    AddHeading 'Настройка компьютера' 'Драйверы, подключение к интернету и сведения об устройствах.'
+    $script:Content.Controls.Add((MakeButton 'Найти и установить драйверы' 35 125 420 55 {OpenDriverWindow} $true))
+    $script:Content.Controls.Add((MakeButton 'Диспетчер устройств' 470 125 330 55 {try {Start-Process 'devmgmt.msc'} catch {ShowMessage "Ошибка: $_"}}))
+    $script:DriverResult=MakeTextBox 35 205 875 195
+    $script:DriverResult.Text=(FormatHardware)+"`r`n`r`n"+(GetDeviceProblems)
+    $script:Content.Controls.Add($script:DriverResult)
+    $script:Content.Controls.Add((MakeButton 'Обновить устройства' 35 420 270 45 {$script:DriverResult.Text=(FormatHardware)+"`r`n`r`n"+(GetDeviceProblems)}))
+    $script:Content.Controls.Add((MakeButton 'Поддержка производителя' 320 420 300 45 {ShowBrands}))
+    $script:Content.Controls.Add((MakeButton 'Проверить интернет' 35 490 270 45 {TestMicrosoftConnection}))
+    $script:Content.Controls.Add((MakeButton 'Настройки сети и Wi-Fi' 320 490 300 45 {try {Start-Process 'ms-settings:network'} catch {ShowMessage "Ошибка: $_"}}))
+    $script:Content.Controls.Add((MakeButton 'Windows Update' 635 490 250 45 {try {Start-Process 'ms-settings:windowsupdate'} catch {ShowMessage "Ошибка: $_"}}))
+    $script:Content.Controls.Add((LabelText 'Если сеть не работает из-за отсутствия драйвера, подключите кабель или USB-модем, либо скачайте сетевой драйвер с сайта производителя на другом ПК.' 35 560 875 85 11 $false $script:Muted))
+}
+function ShowUsbGuide {
+    AddHeading 'Загрузка Windows и установочная флешка' 'Скачивание файла в MoOLVa; запись флешки — через средство Microsoft.'
+    $script:Content.Controls.Add((MakeButton 'Показать USB-накопители' 35 125 275 48 {ShowMedia}))
+    $script:Content.Controls.Add((MakeButton 'Открыть Microsoft Windows 11' 325 125 300 48 {OpenSafeUrl 'https://www.microsoft.com/en-us/software-download/windows11'}))
+    $script:Content.Controls.Add((MakeButton 'Windows 10' 640 125 260 48 {OpenSafeUrl 'https://www.microsoft.com/en-us/software-download/windows10'}))
+    $script:Content.Controls.Add((LabelText '1. Средство Microsoft: скачайте его прямо в выбранную вами папку.' 35 195 850 30 11 $true))
+    $script:Content.Controls.Add((MakeButton 'Скачать средство Windows 11' 35 232 380 48 {StartMasterDownload 'https://go.microsoft.com/fwlink/?linkid=2156295' 'MediaCreationTool_Windows11.exe'} $true))
+    $script:Content.Controls.Add((MakeButton 'Скачать средство Windows 10' 430 232 380 48 {StartMasterDownload 'https://go.microsoft.com/fwlink/?LinkId=691209' 'MediaCreationTool_Windows10.exe'}))
+    $script:Content.Controls.Add((LabelText '2. ISO: на сайте Microsoft выберите версию и язык, скопируйте временную ссылку на ISO и вставьте её ниже.' 35 310 875 62 11 $false $script:Muted))
+    $script:IsoUrl=New-Object Windows.Forms.TextBox;$script:IsoUrl.SetBounds(35,380,875,32);$script:IsoUrl.Font=New-Object Drawing.Font('Segoe UI',10);$script:Content.Controls.Add($script:IsoUrl)
+    $script:Content.Controls.Add((MakeButton 'Скачать ISO внутри MoOLVa' 35 430 380 48 {StartMasterDownload $script:IsoUrl.Text 'Windows.iso'}))
+    $script:Content.Controls.Add((MakeButton 'Отменить загрузку' 430 430 260 48 {CancelMasterDownload}))
+    $script:DownloadStatus=LabelText 'Ожидание загрузки' 35 500 875 55 11 $false $script:Yellow;$script:Content.Controls.Add($script:DownloadStatus)
+    $script:Content.Controls.Add((LabelText 'Запись: запустите скачанное средство Microsoft и выберите отдельную флешку. Все данные на ней будут удалены. Проверяйте букву и размер! Windows 8.1: отдельная страница ISO Microsoft при проверке недоступна.' 35 570 875 110 11 $false $script:Muted))
+}
+function StartMasterDownload([string]$url,[string]$suggested) {
+    if($null -ne $script:BitsJob){ShowMessage 'Дождитесь завершения текущей загрузки.';return}
+    try {$u=[uri]$url} catch {ShowMessage 'Введите корректную ссылку HTTPS от Microsoft.';return}
+    $hostName=$u.DnsSafeHost.ToLowerInvariant()
+    $allowed=($u.Scheme -eq 'https') -and ($hostName -eq 'microsoft.com' -or $hostName.EndsWith('.microsoft.com') -or $hostName -eq 'software-download.microsoft.com' -or $hostName.EndsWith('.prss.microsoft.com')) -and [string]::IsNullOrEmpty($u.UserInfo)
+    if(-not $allowed){ShowMessage 'Разрешены только HTTPS-ссылки Microsoft. Получите ссылку на официальной странице.';return}
+    $dlg=New-Object Windows.Forms.SaveFileDialog;$dlg.FileName=$suggested;$dlg.Filter='Все файлы|*.*';$dlg.OverwritePrompt=$true
+    if($dlg.ShowDialog() -ne 'OK'){return}
+    $dest=$dlg.FileName
+    if(Test-Path -LiteralPath $dest){ShowMessage 'Выберите новое имя файла: существующий файл не перезаписывается.';return}
+    $temp=$dest+'.moolva-'+[guid]::NewGuid().ToString('N')+'.part'
+    try {
+      Import-Module BitsTransfer -ErrorAction Stop
+      $script:BitsJob=Start-BitsTransfer -Source $u.AbsoluteUri -Destination $temp -Asynchronous -ErrorAction Stop
+      $script:BitsTemp=$temp;$script:BitsDestination=$dest;$script:DownloadIsTool=($suggested -like '*.exe')
+      $script:DownloadTimer.Start();$script:DownloadStatus.Text='Подготовка загрузки...'
+    } catch {if(Test-Path -LiteralPath $temp){Remove-Item -LiteralPath $temp -Force -ErrorAction SilentlyContinue};$script:BitsJob=$null;ShowMessage "Не удалось начать загрузку: $_"}
+}
+function CancelMasterDownload {
+ if($null -eq $script:BitsJob){ShowMessage 'Нет активной загрузки.';return}
+ try {Remove-BitsTransfer -BitsJob $script:BitsJob -Confirm:$false -ErrorAction Stop} catch {}
+ if(Test-Path -LiteralPath $script:BitsTemp){Remove-Item -LiteralPath $script:BitsTemp -Force -ErrorAction SilentlyContinue}
+ $script:BitsJob=$null;$script:DownloadTimer.Stop()
+ if($script:DownloadStatus -and -not $script:DownloadStatus.IsDisposed){$script:DownloadStatus.Text='Загрузка отменена.'}
+}
+function PollMasterDownload {
+ if($null -eq $script:BitsJob){$script:DownloadTimer.Stop();return}
+ try {
+  $j=Get-BitsTransfer -Id $script:BitsJob.Id -ErrorAction Stop
+  if($j.BytesTotal -gt 0){$desc=('Загрузка: {0:N1}%  ({1:N1} МБ)' -f (100.0*$j.BytesTransferred/$j.BytesTotal),($j.BytesTransferred/1MB))}else{$desc=('Загрузка: {0:N1} МБ; {1}' -f ($j.BytesTransferred/1MB),$j.JobState)}
+  if($script:DownloadStatus -and -not $script:DownloadStatus.IsDisposed){$script:DownloadStatus.Text=$desc}
+  if($j.JobState -eq 'Transferred'){
+   Complete-BitsTransfer -BitsJob $j -ErrorAction Stop
+   if($script:DownloadIsTool){$sig=Get-AuthenticodeSignature -FilePath $script:BitsTemp;if($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch '(?i)Microsoft') {Remove-Item -LiteralPath $script:BitsTemp -Force;throw 'Цифровая подпись Microsoft не подтверждена; файл удалён.'}}
+   [IO.File]::Move($script:BitsTemp,$script:BitsDestination)
+   $script:BitsJob=$null;$script:DownloadTimer.Stop();ShowMessage ('Скачано: '+$script:BitsDestination)
+  } elseif($j.JobState -in @('Error','Cancelled','Suspended')) {
+   $message="Загрузка остановлена: $($j.JobState). $($j.ErrorDescription)"
+   Remove-BitsTransfer -BitsJob $j -Confirm:$false -ErrorAction SilentlyContinue
+   if(Test-Path -LiteralPath $script:BitsTemp){Remove-Item -LiteralPath $script:BitsTemp -Force -ErrorAction SilentlyContinue}
+   $script:BitsJob=$null;$script:DownloadTimer.Stop();ShowMessage $message
+  }
+ } catch {
+  $msg=$_;if($null -ne $script:BitsJob){Remove-BitsTransfer -BitsJob $script:BitsJob -Confirm:$false -ErrorAction SilentlyContinue}
+  if($script:BitsTemp -and (Test-Path -LiteralPath $script:BitsTemp)){Remove-Item -LiteralPath $script:BitsTemp -Force -ErrorAction SilentlyContinue}
+  $script:DownloadTimer.Stop();$script:BitsJob=$null;ShowMessage "Ошибка загрузки: $msg"
+ }
+}
+
 $script:Form=New-Object System.Windows.Forms.Form
-$script:Form.Text='MoOLVa Windows Master Portable 1.3 | Помощник компьютерного мастера'
+$script:Form.Text='MoOLVa Windows Master Portable 1.4 PRO | Помощник компьютерного мастера'
 $script:Form.ClientSize=New-Object System.Drawing.Size(1260,810)
 $script:Form.MinimumSize=New-Object System.Drawing.Size(1130,760)
 $script:Form.StartPosition='CenterScreen'
@@ -539,12 +635,17 @@ for($i=0;$i -lt $links.Count;$i++) {
     $b.TextAlign='MiddleLeft'
     $side.Controls.Add($b)
 }
-$side.Controls.Add((LabelText 'v1.3  •  Portable' 23 718 204 30 9 $false $script:Muted))
+$side.Controls.Add((LabelText 'v1.4 PRO  •  Portable' 23 718 204 30 9 $false $script:Muted))
 $script:Content=New-Object System.Windows.Forms.Panel
 $script:Content.Dock='Fill';$script:Content.AutoScroll=$true
 $script:Content.BackColor=$script:Bg
 $script:Form.Controls.Add($script:Content)
 $script:Content.BringToFront()
+$script:BitsJob=$null
+$script:DownloadTimer=New-Object System.Windows.Forms.Timer
+$script:DownloadTimer.Interval=700
+$script:DownloadTimer.Add_Tick({ PollMasterDownload })
+$script:Form.Add_FormClosing({param($sender,$e) if($null -ne $script:BitsJob){$e.Cancel=$true;ShowMessage 'Дождитесь завершения загрузки.'}})
 $script:Step=0
 $script:ImageFolder=''
 ShowHome
