@@ -23,12 +23,12 @@ sealed class IsoBrowser:Form {
    browser.CoreWebView2.DownloadStarting+=OnDownload;
    if(screenshot!=null && liveTest){
     var done=new TaskCompletionSource<CoreWebView2NavigationCompletedEventArgs>();browser.CoreWebView2.NavigationCompleted+=(o,eventArgs)=>done.TrySetResult(eventArgs);
-    browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/en-us/software-download/windows10ISO":"https://www.microsoft.com/en-us/software-download/windows11");
+    browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/ru-ru/software-download/windows10ISO":"https://www.microsoft.com/ru-ru/software-download/windows11");
     var finished=await Task.WhenAny(done.Task,Task.Delay(30000));if(finished!=done.Task){File.WriteAllText(screenshot+".status.txt","TIMEOUT: Microsoft page");Close();return;}
     var nav=await done.Task;await Task.Delay(1500);string title=await browser.CoreWebView2.ExecuteScriptAsync("document.title");File.WriteAllText(screenshot+".status.txt","NavigationSuccess="+nav.IsSuccess+"; WebError="+nav.WebErrorStatus+"; Title="+title);
     using(var file=File.Create(screenshot))await browser.CoreWebView2.CapturePreviewAsync(CoreWebView2CapturePreviewImageFormat.Png,file);Close();
    } else if(screenshot!=null){browser.CoreWebView2.Navigate("about:blank");await Task.Delay(1000);using(var img=new Bitmap(Width,Height)){DrawToBitmap(img,new Rectangle(0,0,img.Width,img.Height));img.Save(screenshot,System.Drawing.Imaging.ImageFormat.Png);}Close();}
-   else browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/en-us/software-download/windows10ISO":"https://www.microsoft.com/en-us/software-download/windows11");
+   else browser.CoreWebView2.Navigate(version=="10"?"https://www.microsoft.com/ru-ru/software-download/windows10ISO":"https://www.microsoft.com/ru-ru/software-download/windows11");
   }catch(Exception ex){status.Text="Не удалось открыть встроенную страницу Microsoft.";if(screenshot!=null){File.WriteAllText(screenshot+".error.txt",ex.ToString());Close();}else MessageBox.Show("Не удалось открыть встроенную страницу. Убедитесь, что установлен Microsoft Edge WebView2 Runtime.\r\n"+ex.Message);}};
  }
  void OnDownload(object sender,CoreWebView2DownloadStartingEventArgs e){

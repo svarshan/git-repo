@@ -30,7 +30,23 @@ try {
  $out=Get-Volume -DriveLetter $letter -ErrorAction Stop
  $partAfter=Get-Partition -DriveLetter $letter -ErrorAction Stop
  if($partAfter.DiskNumber -ne $number -or $out.FileSystem -ne 'FAT32' -or $out.FileSystemLabel -ne 'MOOLVA_WIN' -or (Test-Path (Join-Path $root 'fixture.txt'))){throw 'Formatted virtual disk did not match expected result'}
- Set-Content -LiteralPath $resultPath -Value 'SUCCESS: product formatter formatted isolated VHD fixture as FAT32; physical USB not tested.' -Encoding UTF8
+ $isoType=$assembly.GetType('MoOLVaMaster.IsoMount',$true)
+ $mount=[Activator]::CreateInstance($isoType,[object[]]@((Resolve-Path fixture.iso).Path))
+ try {
+  $source=[string]$isoType.GetProperty('Root').GetValue($mount,$null)
+  if(-not (Test-Path (Join-Path $source 'setup.exe'))){throw 'Mounted test ISO lacks setup.exe'}
+  $copyType=$assembly.GetType('MoOLVaMaster.MainForm',$true)
+  $copy=$copyType.GetMethod('WriteUsbCore',[Reflection.BindingFlags]'NonPublic,Static')
+  if(-not $copy){throw 'Product copy method not found'}
+  $items=[IO.Directory]::GetFiles($source,'*',[IO.SearchOption]::AllDirectories)
+  $guard=[Action]{}
+  $progress=New-Object 'System.Progress[System.Tuple[int,string]]'
+  $arguments=New-Object object[] 7
+  $arguments[0]=$source;$arguments[1]=$root;$arguments[2]=$items;$arguments[3]=(Join-Path $source 'sources\install.wim');$arguments[4]=$false;$arguments[5]=$guard;$arguments[6]=$progress
+  [void]$copy.Invoke($null,$arguments)
+  if(-not (Test-Path (Join-Path $root 'setup.exe')) -or -not (Test-Path (Join-Path $root 'sources\boot.wim')) -or -not (Test-Path (Join-Path $root 'efi\boot\bootx64.efi'))){throw 'Fixture ISO files were not copied correctly'}
+ } finally { if($mount){$mount.Dispose()} }
+ Set-Content -LiteralPath $resultPath -Value 'SUCCESS: product formatter and copy routine wrote fixture ISO to isolated FAT32 VHD; physical USB and UEFI boot not tested.' -Encoding UTF8
 }catch{
  Set-Content -LiteralPath $resultPath -Value ('UNAVAILABLE OR FAILED: '+$_.ToString()) -Encoding UTF8
 }finally{

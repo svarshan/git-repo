@@ -20,6 +20,8 @@ static class Program {
   if(args.Contains("--self-test")) return SelfTest.Run();
   string browserSmoke=args.FirstOrDefault(x=>x.StartsWith("--browser-smoke="));
   if(browserSmoke!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);var browser=new IsoBrowser("11",Path.GetTempPath(),null,browserSmoke.Substring(16));Application.Run(browser);return browser.Initialized?0:6;}
+  string browserLive10=args.FirstOrDefault(x=>x.StartsWith("--browser-live10="));
+  if(browserLive10!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);var browser=new IsoBrowser("10",Path.GetTempPath(),null,browserLive10.Substring(17),true);Application.Run(browser);return browser.Initialized?0:6;}
   string browserLive=args.FirstOrDefault(x=>x.StartsWith("--browser-live="));
   if(browserLive!=null){Application.EnableVisualStyles();Application.SetCompatibleTextRenderingDefault(false);var browser=new IsoBrowser("11",Path.GetTempPath(),null,browserLive.Substring(15),true);Application.Run(browser);return browser.Initialized?0:6;}
   string mountTest=args.FirstOrDefault(x=>x.StartsWith("--mount-test="));
