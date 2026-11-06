@@ -5,7 +5,10 @@ class VhdCopyProbe {
  [STAThread] static int Main(string[] args){
   if(args.Length!=3)return 2;
   try{
-   var asm=Assembly.LoadFrom(args[0]);var mountType=asm.GetType("MoOLVaMaster.IsoMount",true);
+   var asm=Assembly.LoadFrom(args[0]);var diskType=asm.GetType("MoOLVaMaster.UsbDisk",true);
+   var info=diskType.GetMethod("FromRoot",BindingFlags.Public|BindingFlags.Static).Invoke(null,new object[]{args[2]});
+   if(info==null||(uint)diskType.GetField("VolumeSerial").GetValue(info)==0)throw new Exception("WMI could not resolve VHD volume");
+   var mountType=asm.GetType("MoOLVaMaster.IsoMount",true);
    using(var mount=(IDisposable)Activator.CreateInstance(mountType,new object[]{args[1]})){
     string source=(string)mountType.GetProperty("Root").GetValue(mount,null),target=args[2];
     var core=asm.GetType("MoOLVaMaster.MainForm",true).GetMethod("WriteUsbCore",BindingFlags.NonPublic|BindingFlags.Static);

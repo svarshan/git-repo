@@ -40,6 +40,14 @@ jobs:
         run: |
           $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList '--self-test' -Wait -PassThru
           if($p.ExitCode -ne 0){throw "Self-test failed: $($p.ExitCode)"}
+      - name: Probe Windows Update without installation
+        shell: powershell
+        run: |
+          $log=Join-Path (Resolve-Path dist).Path 'Windows-Update-Probe.txt'
+          $arg='--wua-probe="'+$log+'"'
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.1-Portable.exe).Path -ArgumentList $arg -PassThru
+          if(-not $p.WaitForExit(90000)){Stop-Process -Id $p.Id -Force;Set-Content -Path $log -Value 'TIMEOUT: Windows Update search did not finish'}
+          if(Test-Path $log){Get-Content $log}else{Set-Content -Path $log -Value 'UNAVAILABLE: probe exited without output'}
       - name: Test native ISO mounting
         shell: powershell
         run: |
@@ -53,9 +61,12 @@ jobs:
           if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force; Set-Content ($iso+'.result.txt') 'TIMEOUT: ISO mount'}
           if(Test-Path ($iso+'.result.txt')){Copy-Item ($iso+'.result.txt') dist/ISO-Mount-Test.txt}else{Set-Content dist/ISO-Mount-Test.txt 'UNAVAILABLE: no result'}
           Get-Content dist/ISO-Mount-Test.txt
+          if(-not (Select-String -Path dist/ISO-Mount-Test.txt -SimpleMatch 'SUCCESS:' -Quiet)){throw 'ISO mount test did not succeed'}
       - name: Test formatter on isolated virtual disk
         shell: powershell
-        run: ./windows-master-native/tests/VhdFormatTest.ps1
+        run: |
+          ./windows-master-native/tests/VhdFormatTest.ps1
+          if(-not (Select-String -Path dist/VHD-Format-Test.txt -SimpleMatch 'SUCCESS:' -Quiet)){throw 'Virtual disk test did not succeed'}
       - name: Inspect Microsoft page in built-in window
         shell: powershell
         run: |

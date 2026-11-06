@@ -46,6 +46,7 @@ static class SelfTest { public static int Run(){
  if(!Rules.MicrosoftLink("https://software.download.prss.microsoft.com/path")||!Rules.MicrosoftLink("https://go.microsoft.com/fwlink/?linkid=1")||Rules.MicrosoftLink("https://microsoft.com.evil.test/a")||Rules.MicrosoftLink("http://microsoft.com/")||Rules.MicrosoftLink("https://user@microsoft.com/"))return 2;
  if(!Rules.Firmware("HP BIOS update")||!Rules.Firmware("device firmware")||Rules.Firmware("Realtek Audio driver"))return 3;
  if(!MainForm.TestCopyCore())return 5;
+ if(!UsbDisk.SafetySelfTest())return 6;
  return 0;
  }catch{return 9;}
 }}
@@ -81,11 +82,12 @@ sealed class MainForm:Form {
  IEnumerable<string> RecentIso(){var items=new List<string>();try{string f=Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),"MoOLVa","iso-history.txt");if(File.Exists(f))items.AddRange(File.ReadAllLines(f).Where(File.Exists));items.AddRange(Directory.GetFiles(IsoFolder(),"*.iso"));}catch{}return items.Distinct(StringComparer.OrdinalIgnoreCase).Take(30);}
  void StartIsoBrowser(string version){try{using(var browser=new IsoBrowser(version,IsoFolder(),RememberIso)){browser.ShowDialog(this);}}catch(Exception e){MessageBox.Show("Не удалось открыть страницу Microsoft: "+e.Message);}}
  void WindowsPage(){var f=BeginPage("Windows 10 / 11 и флешка","Выберите ISO в приложении, скачайте его с Microsoft и запишите на USB.");
- AddButton(f,"Скачать ISO Windows 11 внутри MoOLVa",()=>StartIsoBrowser("11"),true);
- AddButton(f,"Скачать ISO Windows 10 внутри MoOLVa",()=>StartIsoBrowser("10"));
+ Action reload=null;
+ AddButton(f,"Скачать ISO Windows 11 внутри MoOLVa",()=>{StartIsoBrowser("11");if(reload!=null)reload();},true);
+ AddButton(f,"Скачать ISO Windows 10 внутри MoOLVa",()=>{StartIsoBrowser("10");if(reload!=null)reload();});
  f.Controls.Add(Label("Мои ISO. Загрузки сохраняются в выбранную папку; можно добавить собственный образ."));
- var list=new ListBox{Width=750,Height=130,HorizontalScrollbar=true};f.Controls.Add(list);
- Action reload=()=>{list.Items.Clear();foreach(string item in RecentIso())list.Items.Add(item);if(list.Items.Count>0)list.SelectedIndex=0;};reload();
+ var list=new ListBox{Width=750,Height=130,HorizontalScrollbar=true,BackColor=panel,ForeColor=Color.White,BorderStyle=BorderStyle.FixedSingle};f.Controls.Add(list);
+ reload=()=>{list.Items.Clear();foreach(string item in RecentIso())list.Items.Add(item);if(list.Items.Count>0)list.SelectedIndex=0;};reload();
  AddButton(f,"Обновить список ISO",reload);
  AddButton(f,"Добавить собственный ISO",()=>{using(var d=new OpenFileDialog{Filter="ISO-образы|*.iso"})if(d.ShowDialog()==DialogResult.OK){RememberIso(d.FileName);reload();}});
  AddButton(f,"Выбрать папку для ISO",()=>{using(var d=new FolderBrowserDialog{SelectedPath=IsoFolder(),Description="Папка для загрузки ISO"})if(d.ShowDialog()==DialogResult.OK){SetIsoFolder(d.SelectedPath);reload();}});
