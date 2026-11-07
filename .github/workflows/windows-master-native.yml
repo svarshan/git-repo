@@ -1,7 +1,7 @@
 name: MoOLVa Windows Master 4.0-preview Native
 on:
   push:
-    branches: [windows-master-native-4-0-preview]
+    branches: [windows-master-native-4-0-preview, windows-master-4-0-verify-usb]
     paths:
       - 'windows-master-native/**'
       - '.github/workflows/windows-master-native.yml'
