@@ -21,7 +21,7 @@ class VhdCopyProbe {
     verify.Invoke(null,verifyArgs);
     string damaged=Path.Combine(target,"setup.exe");byte[] bytes=File.ReadAllBytes(damaged);
     if(bytes.Length==0)throw new Exception("Empty fixture");
-    bytes[0]^=0xff;File.WriteAllBytes(damaged,bytes);
+    bytes[0]^=0xff;File.SetAttributes(damaged,FileAttributes.Normal);File.WriteAllBytes(damaged,bytes);
     bool detected=false;
     try{verify.Invoke(null,verifyArgs);}catch(TargetInvocationException ex){if(ex.InnerException is IOException)detected=true;else throw;}
     if(!detected)throw new Exception("Same-size corruption was not detected");
