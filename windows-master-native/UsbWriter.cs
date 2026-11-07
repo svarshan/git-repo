@@ -68,8 +68,8 @@ sealed class UsbWriter:Form {
   var after=UsbDisk.CheckedTarget(chosen.Root);if(!chosen.SameDevice(after)||after.VolumeSerial==chosen.VolumeSerial||new DriveInfo(chosen.Root).DriveFormat!="FAT32"||new DriveInfo(chosen.Root).VolumeLabel!="MOOLVA_WIN")throw new IOException("Не удалось подтвердить результат форматирования. Запись остановлена.");
   Guard(after,path,true);var serial=after.VolumeSerial;var pr=new Progress<Tuple<int,string>>(p=>{progress.Value=Math.Max(0,Math.Min(100,p.Item1));Print(p.Item2);});
   Print("Копирование установочных файлов...");await Task.Run(()=>MainForm.WriteUsb(from,after.Root,files,wim,split,serial,pr));
-  Print("Проверка размеров записанных файлов...");await Task.Run(()=>VerifyFiles(from,after.Root,files,wim,split,serial));
-  progress.Value=100;Print("Файлы записаны и размеры проверены. Необходимо проверить фактическую загрузку через UEFI.");MessageBox.Show("Запись завершена. Проверьте загрузку флешки на тестовом компьютере.");
+  Print("Проверка размеров и SHA-256 записанных файлов. Это может занять продолжительное время...");await Task.Run(()=>VerifyFiles(from,after.Root,files,wim,split,serial));
+  progress.Value=100;Print(split?"Файлы проверены по SHA-256, кроме разделённого install.wim: для него проверено наличие первой части. Проверьте загрузку UEFI.":"Файлы проверены по SHA-256. Проверьте фактическую загрузку через UEFI.");MessageBox.Show("Запись завершена. Проверьте загрузку флешки на тестовом компьютере.");
  }catch(Exception ex){Print("Операция не завершена: "+ex.Message);MessageBox.Show("Операция не завершена: "+ex.Message+"\r\nЕсли форматирование уже началось, носитель может быть пустым или содержать неполные файлы.");}
  finally{if(mounted!=null)mounted.Dispose();busy=false;start.Enabled=true;refresh.Enabled=true;choose.Enabled=true;target.Enabled=true;}
  }
@@ -84,7 +84,9 @@ sealed class UsbWriter:Form {
   }finally{try{File.Delete(file);}catch{}}
  }
  static void VerifyFiles(string source,string dest,string[] files,string wim,bool split,uint serial){
-  foreach(var file in files){if(MainForm.VolumeSerial(dest)!=serial)throw new IOException("Флешка изменилась при проверке.");if(split&&String.Equals(file,wim,StringComparison.OrdinalIgnoreCase))continue;string result=Path.Combine(dest,file.Substring(source.Length));if(!File.Exists(result)||new FileInfo(result).Length!=new FileInfo(file).Length)throw new IOException("Не совпал размер файла: "+file);}
+  foreach(var file in files){if(MainForm.VolumeSerial(dest)!=serial)throw new IOException("Флешка изменилась при проверке.");if(split&&String.Equals(file,wim,StringComparison.OrdinalIgnoreCase))continue;string result=Path.Combine(dest,file.Substring(source.Length));if(!File.Exists(result)||new FileInfo(result).Length!=new FileInfo(file).Length)throw new IOException("Не совпал размер файла: "+file);
+  using(var sourceStream=File.OpenRead(file))using(var destinationStream=File.OpenRead(result))using(var sha=SHA256.Create()){byte[] originalHash=sha.ComputeHash(sourceStream);byte[] copiedHash=sha.ComputeHash(destinationStream);if(!originalHash.SequenceEqual(copiedHash))throw new IOException("Не совпадает SHA-256 файла: "+file);}
+  if(MainForm.VolumeSerial(dest)!=serial)throw new IOException("Флешка изменилась при проверке.");}
   if(split&&!File.Exists(Path.Combine(dest,@"sources\install.swm")))throw new IOException("Не найдена первая часть install.swm.");
  }
  sealed class WindowsPrincipalAdapter {public bool Admin{get{using(var id=System.Security.Principal.WindowsIdentity.GetCurrent())return new System.Security.Principal.WindowsPrincipal(id).IsInRole(System.Security.Principal.WindowsBuiltInRole.Administrator);}}}
