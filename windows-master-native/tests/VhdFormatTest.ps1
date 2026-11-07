@@ -22,7 +22,7 @@ try {
  if($volume.FileSystemLabel -ne 'MOOLVA_TEST' -or $part.DiskNumber -ne $number -or $diskAgain.Count -ne 1 -or $diskAgain[0].Number -ne $number){throw 'Refusing: fixture identity mismatch'}
  $root=$letter+':\'
  Set-Content -Path (Join-Path $root 'fixture.txt') -Value 'test data' -Encoding ASCII
- $assembly=[Reflection.Assembly]::LoadFrom((Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path)
+ $assembly=[Reflection.Assembly]::LoadFrom((Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path)
  $type=$assembly.GetType('MoOLVaMaster.UsbWriter',$true)
  $method=$type.GetMethod('FormatVolumeUnchecked',[Reflection.BindingFlags]'NonPublic,Static')
  if(-not $method){throw 'Format method not found'}
@@ -35,7 +35,7 @@ try {
   $csc=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
   & $csc /nologo /target:exe ("/out:$probe") '.\windows-master-native\tests\VhdCopyProbe.cs'
   if($LASTEXITCODE -ne 0){throw 'Could not compile the copy probe'}
-  $exePath=(Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).ProviderPath
+  $exePath=(Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).ProviderPath
   $isoPath=(Resolve-Path fixture.iso).ProviderPath
   $testOutput=(& $probe $exePath $isoPath $root 2>&1 | Out-String)
   if($LASTEXITCODE -ne 0){throw ('Fixture ISO copy failed: '+$testOutput)}

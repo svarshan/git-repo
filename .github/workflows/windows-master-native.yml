@@ -1,7 +1,7 @@
-name: MoOLVa Windows Master 3.3-preview Native
+name: MoOLVa Windows Master 4.0-preview Native
 on:
   push:
-    branches: [windows-master-native-3-3-preview]
+    branches: [windows-master-native-4-0-preview]
     paths:
       - 'windows-master-native/**'
       - '.github/workflows/windows-master-native.yml'
@@ -32,20 +32,20 @@ jobs:
           $x86=Get-ChildItem $pkg -Recurse -File -Filter WebView2Loader.dll | Where-Object {$_.FullName -match '(win-x86|native[\\/]x86)[\\/]'} | Select-Object -First 1
           if(-not (Test-Path $core) -or -not (Test-Path $winforms) -or -not $x64 -or -not $x86){throw 'WebView2 SDK files missing'}
           $csc=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-          $args=@('/nologo','/target:winexe','/platform:anycpu','/codepage:65001','/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll','/reference:System.Management.dll','/reference:System.Web.Extensions.dll','/reference:Microsoft.CSharp.dll',("/reference:$core"),("/reference:$winforms"),'/out:dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe',("/resource:$core,Microsoft.Web.WebView2.Core.dll"),("/resource:$winforms,Microsoft.Web.WebView2.WinForms.dll"),("/resource:$($x64.FullName),WebView2Loader-x64.dll"),("/resource:$($x86.FullName),WebView2Loader-x86.dll"),'.\windows-master-native\Program.cs','.\windows-master-native\Bootstrap.cs','.\windows-master-native\IsoBrowser.cs','.\windows-master-native\NativeIsoWizard.cs','.\windows-master-native\IsoMount.cs','.\windows-master-native\UsbWriter.cs')
+          $args=@('/nologo','/target:winexe','/platform:anycpu','/codepage:65001','/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll','/reference:System.Management.dll','/reference:System.Web.Extensions.dll','/reference:Microsoft.CSharp.dll',("/reference:$core"),("/reference:$winforms"),'/out:dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe',("/resource:$core,Microsoft.Web.WebView2.Core.dll"),("/resource:$winforms,Microsoft.Web.WebView2.WinForms.dll"),("/resource:$($x64.FullName),WebView2Loader-x64.dll"),("/resource:$($x86.FullName),WebView2Loader-x86.dll"),'.\windows-master-native\Program.cs','.\windows-master-native\Bootstrap.cs','.\windows-master-native\IsoBrowser.cs','.\windows-master-native\NativeIsoWizard.cs','.\windows-master-native\IsoMount.cs','.\windows-master-native\UsbWriter.cs')
           & $csc @args
           if($LASTEXITCODE -ne 0){throw 'Compilation failed'}
       - name: Run safety self tests
         shell: powershell
         run: |
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList '--self-test' -Wait -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList '--self-test' -Wait -PassThru
           if($p.ExitCode -ne 0){throw "Self-test failed: $($p.ExitCode)"}
       - name: Probe Windows Update without installation
         shell: powershell
         run: |
           $log=Join-Path (Resolve-Path dist).Path 'Windows-Update-Probe.txt'
           $arg='--wua-probe="'+$log+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(90000)){Stop-Process -Id $p.Id -Force;Set-Content -Path $log -Value 'TIMEOUT: Windows Update search did not finish'}
           if(Test-Path $log){Get-Content $log}else{Set-Content -Path $log -Value 'UNAVAILABLE: probe exited without output'}
       - name: Test native ISO mounting
@@ -57,7 +57,7 @@ jobs:
           if($LASTEXITCODE -ne 0){throw 'ISO fixture generation failed'}
           $iso=(Resolve-Path fixture.iso).Path
           $arg='--mount-test="'+$iso+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force; Set-Content ($iso+'.result.txt') 'TIMEOUT: ISO mount'}
           if(Test-Path ($iso+'.result.txt')){Copy-Item ($iso+'.result.txt') dist/ISO-Mount-Test.txt}else{Set-Content dist/ISO-Mount-Test.txt 'UNAVAILABLE: no result'}
           Get-Content dist/ISO-Mount-Test.txt
@@ -72,7 +72,7 @@ jobs:
         run: |
           $shot=Join-Path (Resolve-Path dist).Path 'Microsoft-ISO-Page-Test.png'
           $arg='--browser-live="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force;Set-Content ($shot+'.status.txt') 'TIMEOUT: Microsoft page'}
           if(Test-Path ($shot+'.status.txt')){Get-Content ($shot+'.status.txt')}else{Set-Content ($shot+'.status.txt') 'UNAVAILABLE: no result'}
       - name: Inspect Windows 10 page
@@ -80,7 +80,7 @@ jobs:
         run: |
           $shot=Join-Path (Resolve-Path dist).Path 'Microsoft-Windows10-Page-Test.png'
           $arg='--browser-live10="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force;Set-Content ($shot+'.status.txt') 'TIMEOUT: Microsoft page'}
           if(Test-Path ($shot+'.status.txt')){Get-Content ($shot+'.status.txt')}else{Set-Content ($shot+'.status.txt') 'UNAVAILABLE: no result'}
       - name: Probe ISO download handoff without full download
@@ -89,7 +89,7 @@ jobs:
           foreach($version in @('10','11')) {
             $log=Join-Path (Resolve-Path dist).Path ('ISO-Download-Probe-'+$version+'.txt')
             $arg='--download-probe'+$version+'="'+$log+'"'
-            $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+            $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
             if(-not $p.WaitForExit(130000)){Stop-Process -Id $p.Id -Force;Set-Content $log 'TIMEOUT: ISO handoff probe'}
             if(Test-Path $log){Get-Content $log}else{Set-Content $log 'UNAVAILABLE: probe exited without output'}
           }
@@ -99,48 +99,48 @@ jobs:
           foreach($version in @('10','11')) {
             $log=Join-Path (Resolve-Path dist).Path ('Native-ISO-Wizard-Probe-'+$version+'.txt')
             $arg='--wizard-probe'+$version+'="'+$log+'"'
-            $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+            $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
             if(-not $p.WaitForExit(150000)){Stop-Process -Id $p.Id -Force;Set-Content $log 'TIMEOUT: native ISO wizard'}
             if(Test-Path $log){Get-Content $log}else{Set-Content $log 'UNAVAILABLE: no result'}
           }
       - name: Capture native ISO wizard
         shell: powershell
         run: |
-          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.3-preview-ISO-wizard.png'
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-4.0-preview-ISO-wizard.png'
           $arg='--wizard-screenshot="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(60000)){Stop-Process -Id $p.Id -Force;throw 'Native wizard screenshot timed out'}
           if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Native wizard screenshot failed'}
       - name: Test embedded WebView2 window
         shell: powershell
         run: |
-          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.3-preview-ISO-window.png'
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-4.0-preview-ISO-window.png'
           $arg='--browser-smoke="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(45000)){Stop-Process -Id $p.Id -Force;throw 'WebView2 test timed out'}
           if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){if(Test-Path ($shot+'.error.txt')){Get-Content ($shot+'.error.txt')};throw 'WebView2 window failed'}
       - name: Capture application window
         shell: powershell
         run: |
-          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.3-preview-Window.png'
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-4.0-preview-Window.png'
           $arg='--screenshot="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Window test timed out'}
           if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Screenshot failed'}
       - name: Capture Windows selection page
         shell: powershell
         run: |
-          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.3-preview-Windows.png'
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-4.0-preview-Windows.png'
           $arg='--screenshot="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList @('--windows',$arg) -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList @('--windows',$arg) -PassThru
           if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Windows page test timed out'}
           if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Windows screenshot failed'}
       - name: Capture driver window
         shell: powershell
         run: |
-          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-3.3-preview-Drivers.png'
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-4.0-preview-Drivers.png'
           $arg='--screenshot="'+$shot+'"'
-          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-3.3-preview-Portable.exe).Path -ArgumentList @('--drivers',$arg) -PassThru
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList @('--drivers',$arg) -PassThru
           if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Driver screenshot timed out'}
           if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Driver screenshot failed'}
       - name: Package instructions and license
@@ -151,7 +151,7 @@ jobs:
           if($license){Copy-Item $license.FullName dist/WebView2-LICENSE.txt}
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Windows-Master-3.3-preview-Portable
+          name: MoOLVa-Windows-Master-4.0-preview-Portable
           path: dist/
           if-no-files-found: error
           retention-days: 30

@@ -1,4 +1,4 @@
-MoOLVa Windows Master 3.3-preview Portable — предварительная версия
+MoOLVa Windows Master 4.0-preview Portable — предварительная версия
 Самостоятельный C#/.NET Framework 4.8 EXE без PowerShell. Нужны Windows 10/11 и Microsoft Edge WebView2 Runtime. Программа сохраняет параметры и служебный профиль в профиле Windows; установка MoOLVa не требуется.
 
 СКАЧИВАНИЕ ISO
