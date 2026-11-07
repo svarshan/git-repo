@@ -127,6 +127,14 @@ jobs:
           $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
           if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Window test timed out'}
           if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Screenshot failed'}
+      - name: Capture service cards window
+        shell: powershell
+        run: |
+          $shot=Join-Path (Resolve-Path dist).Path 'MoOLVa-4.1-Cards.png'
+          $arg='--cards-screenshot="'+$shot+'"'
+          $p=Start-Process (Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path -ArgumentList $arg -PassThru
+          if(-not $p.WaitForExit(30000)){Stop-Process -Id $p.Id -Force;throw 'Cards screenshot timed out'}
+          if($p.ExitCode -ne 0 -or -not (Test-Path $shot)){throw 'Cards screenshot failed'}
       - name: Capture Windows selection page
         shell: powershell
         run: |

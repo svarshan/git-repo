@@ -37,6 +37,8 @@ static class Program {
   string probe=args.FirstOrDefault(x=>x.StartsWith("--wua-probe="));
   if(probe!=null){try{int n=MainForm.ProbeWua();File.WriteAllText(probe.Substring(12),"SUCCESS: Windows Update search completed; count="+n);return 0;}catch(Exception e){File.WriteAllText(probe.Substring(12),"UNAVAILABLE: "+e.ToString());return 4;}}
   Application.EnableVisualStyles(); Application.SetCompatibleTextRenderingDefault(false);
+  string cardsShot=args.FirstOrDefault(x=>x.StartsWith("--cards-screenshot="));
+  if(cardsShot!=null){string path=cardsShot.Substring("--cards-screenshot=".Length);using(var cards=new ServiceCards("Тестовые сведения о компьютере",()=>"Тестовое событие")){cards.Shown+=(s,e)=>{try{using(var image=new Bitmap(cards.Width,cards.Height)){cards.DrawToBitmap(image,new Rectangle(0,0,image.Width,image.Height));image.Save(path,ImageFormat.Png);}}finally{cards.Close();}};Application.Run(cards);}return File.Exists(path)?0:6;}
   string usbArg=args.FirstOrDefault(x=>x.StartsWith("--usb="));
   var app=new MainForm(args.Contains("--drivers"),usbArg==null?null:usbArg.Substring(6),args.Contains("--windows"));
   string shot=args.FirstOrDefault(x=>x.StartsWith("--screenshot="));
