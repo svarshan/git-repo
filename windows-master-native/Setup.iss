@@ -1,7 +1,7 @@
 [Setup]
 AppId={{F9271E53-1B63-4A95-A49C-F6525D18C4F4}
 AppName=MoOLVa Windows Master
-AppVersion=4.5-preview
+AppVersion=4.6-preview
 AppPublisher=MoOLVa
 DefaultDirName={localappdata}\Programs\MoOLVa Windows Master
 DefaultGroupName=MoOLVa Windows Master

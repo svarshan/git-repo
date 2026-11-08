@@ -1,7 +1,7 @@
-name: MoOLVa Windows Master 4.5-preview Native
+name: MoOLVa Windows Master 4.6-preview Native
 on:
   push:
-    branches: [windows-master-native-4-0-preview, windows-master-4-0-verify-usb, windows-master-4-1-reliable, windows-master-4-2-reinstall-preview, windows-master-4-5-preview]
+    branches: [windows-master-native-4-0-preview, windows-master-4-0-verify-usb, windows-master-4-1-reliable, windows-master-4-2-reinstall-preview, windows-master-4-5-preview, windows-master-4-6-usb]
     paths:
       - 'windows-master-native/**'
       - '.github/workflows/windows-master-native.yml'
@@ -62,6 +62,32 @@ jobs:
           if(Test-Path ($iso+'.result.txt')){Copy-Item ($iso+'.result.txt') dist/ISO-Mount-Test.txt}else{Set-Content dist/ISO-Mount-Test.txt 'UNAVAILABLE: no result'}
           Get-Content dist/ISO-Mount-Test.txt
           if(-not (Select-String -Path dist/ISO-Mount-Test.txt -SimpleMatch 'SUCCESS:' -Quiet)){throw 'ISO mount test did not succeed'}
+      - name: Test real split WIM header validation
+        shell: powershell
+        run: |
+          $dir=Join-Path $env:RUNNER_TEMP ('MoOLVa-WimTest-'+[guid]::NewGuid().ToString('N'))
+          New-Item -ItemType Directory -Force -Path $dir,(Join-Path $dir 'input'),(Join-Path $dir 'split') | Out-Null
+          try {
+            $payload=Join-Path $dir 'input/payload.bin'
+            python -c "import os,sys; f=open(sys.argv[1],'wb'); [(f.write(os.urandom(1048576))) for i in range(64)]; f.close()" $payload
+            if($LASTEXITCODE -ne 0){throw 'Failed to create WIM test data'}
+            $wim=Join-Path $dir 'test.wim'; $first=Join-Path $dir 'split/install.swm'
+            & dism.exe /English /Capture-Image ("/ImageFile:$wim") ("/CaptureDir:$dir/input") /Name:Fixture /Compress:fast | Out-Null
+            if($LASTEXITCODE -ne 0){throw 'WIM capture failed'}
+            & dism.exe /English /Split-Image ("/ImageFile:$wim") ("/SWMFile:$first") /FileSize:50 | Out-Null
+            if($LASTEXITCODE -ne 0){throw 'WIM split failed'}
+            if(-not (Test-Path (Join-Path $dir 'split/install2.swm'))){throw 'WIM did not split into at least two parts'}
+            $asm=[Reflection.Assembly]::LoadFrom((Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path)
+            $method=$asm.GetType('MoOLVaMaster.SplitParts',$true).GetMethod('Validate',[Reflection.BindingFlags]'Public,Static')
+            $guard=[Action]{}
+            $count=$method.Invoke($null,@((Join-Path $dir 'split'),$guard))
+            if($count -lt 2){throw 'Split part validation returned an invalid count'}
+            Remove-Item (Join-Path $dir 'split/install2.swm')
+            $detected=$false
+            try{[void]$method.Invoke($null,@((Join-Path $dir 'split'),$guard))}catch [System.Reflection.TargetInvocationException]{$detected=$true}
+            if(-not $detected){throw 'Missing split part was not detected'}
+            Set-Content dist/Split-WIM-Test.txt 'SUCCESS: DISM generated SWM parts validated; missing part detected; full payload integrity not verified.' -Encoding UTF8
+          } finally {Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue}
       - name: Test formatter on isolated virtual disk
         shell: powershell
         run: |
@@ -181,7 +207,7 @@ jobs:
           Set-Content dist/Installer-Test.txt 'SUCCESS: install, EXE self-test and uninstall on Windows runner' -Encoding UTF8
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Windows-Master-4.5-preview
+          name: MoOLVa-Windows-Master-4.6-preview
           path: dist/
           if-no-files-found: error
           retention-days: 30
