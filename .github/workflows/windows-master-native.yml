@@ -80,11 +80,15 @@ jobs:
             $asm=[Reflection.Assembly]::LoadFrom((Resolve-Path dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe).Path)
             $method=$asm.GetType('MoOLVaMaster.SplitParts',$true).GetMethod('Validate',[Reflection.BindingFlags]'Public,Static')
             $guard=[Action]{}
-            $count=$method.Invoke($null,@((Join-Path $dir 'split'),$guard))
+            $splitDir=[string](Join-Path $dir 'split')
+            $invokeArgs=New-Object 'object[]' 2
+            $invokeArgs[0]=$splitDir
+            $invokeArgs[1]=$guard
+            $count=$method.Invoke($null,$invokeArgs)
             if($count -lt 2){throw 'Split part validation returned an invalid count'}
             Remove-Item (Join-Path $dir 'split/install2.swm')
             $detected=$false
-            try{[void]$method.Invoke($null,@((Join-Path $dir 'split'),$guard))}catch [System.Reflection.TargetInvocationException]{$detected=$true}
+            try{[void]$method.Invoke($null,$invokeArgs)}catch [System.Reflection.TargetInvocationException]{$detected=$true}
             if(-not $detected){throw 'Missing split part was not detected'}
             Set-Content dist/Split-WIM-Test.txt 'SUCCESS: DISM generated SWM parts validated; missing part detected; full payload integrity not verified.' -Encoding UTF8
           } finally {Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue}
