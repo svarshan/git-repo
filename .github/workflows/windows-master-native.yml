@@ -1,7 +1,7 @@
 name: MoOLVa Windows Master 4.0-preview Native
 on:
   push:
-    branches: [windows-master-native-4-0-preview, windows-master-4-0-verify-usb, windows-master-4-1-reliable]
+    branches: [windows-master-native-4-0-preview, windows-master-4-0-verify-usb, windows-master-4-1-reliable, windows-master-4-2-reinstall-preview]
     paths:
       - 'windows-master-native/**'
       - '.github/workflows/windows-master-native.yml'
@@ -32,7 +32,7 @@ jobs:
           $x86=Get-ChildItem $pkg -Recurse -File -Filter WebView2Loader.dll | Where-Object {$_.FullName -match '(win-x86|native[\\/]x86)[\\/]'} | Select-Object -First 1
           if(-not (Test-Path $core) -or -not (Test-Path $winforms) -or -not $x64 -or -not $x86){throw 'WebView2 SDK files missing'}
           $csc=Join-Path $env:WINDIR 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-          $args=@('/nologo','/target:winexe','/platform:anycpu','/codepage:65001','/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll','/reference:System.Management.dll','/reference:System.Web.Extensions.dll','/reference:Microsoft.CSharp.dll',("/reference:$core"),("/reference:$winforms"),'/out:dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe',("/resource:$core,Microsoft.Web.WebView2.Core.dll"),("/resource:$winforms,Microsoft.Web.WebView2.WinForms.dll"),("/resource:$($x64.FullName),WebView2Loader-x64.dll"),("/resource:$($x86.FullName),WebView2Loader-x86.dll"),'.\windows-master-native\Program.cs','.\windows-master-native\Bootstrap.cs','.\windows-master-native\IsoBrowser.cs','.\windows-master-native\NativeIsoWizard.cs','.\windows-master-native\IsoMount.cs','.\windows-master-native\UsbWriter.cs','.\windows-master-native\ServiceCards.cs')
+          $args=@('/nologo','/target:winexe','/platform:anycpu','/codepage:65001','/reference:System.Windows.Forms.dll','/reference:System.Drawing.dll','/reference:System.Management.dll','/reference:System.Web.Extensions.dll','/reference:Microsoft.CSharp.dll',("/reference:$core"),("/reference:$winforms"),'/out:dist/MoOLVa-Windows-Master-4.0-preview-Portable.exe',("/resource:$core,Microsoft.Web.WebView2.Core.dll"),("/resource:$winforms,Microsoft.Web.WebView2.WinForms.dll"),("/resource:$($x64.FullName),WebView2Loader-x64.dll"),("/resource:$($x86.FullName),WebView2Loader-x86.dll"),'.\windows-master-native\Program.cs','.\windows-master-native\Bootstrap.cs','.\windows-master-native\IsoBrowser.cs','.\windows-master-native\NativeIsoWizard.cs','.\windows-master-native\IsoMount.cs','.\windows-master-native\UsbWriter.cs','.\windows-master-native\ServiceCards.cs','.\windows-master-native\ReinstallTools.cs')
           & $csc @args
           if($LASTEXITCODE -ne 0){throw 'Compilation failed'}
       - name: Run safety self tests
