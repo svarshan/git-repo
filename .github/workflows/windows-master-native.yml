@@ -88,7 +88,7 @@ jobs:
             if($count -lt 2){throw 'Split part validation returned an invalid count'}
             Remove-Item (Join-Path $dir 'split/install2.swm')
             $detected=$false
-            try{[void]$method.Invoke($null,$invokeArgs)}catch [System.Reflection.TargetInvocationException]{$detected=$true}
+            try{[void]$method.Invoke($null,$invokeArgs)}catch {if($_.Exception.ToString().Contains('install2.swm')){$detected=$true}else{throw}}
             if(-not $detected){throw 'Missing split part was not detected'}
             Set-Content dist/Split-WIM-Test.txt 'SUCCESS: DISM generated SWM parts validated; missing part detected; full payload integrity not verified.' -Encoding UTF8
           } finally {Remove-Item -LiteralPath $dir -Recurse -Force -ErrorAction SilentlyContinue}
