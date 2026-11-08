@@ -1,4 +1,4 @@
-name: MoOLVa Windows Master 4.0-preview Native
+name: MoOLVa Windows Master 4.5-preview Native
 on:
   push:
     branches: [windows-master-native-4-0-preview, windows-master-4-0-verify-usb, windows-master-4-1-reliable, windows-master-4-2-reinstall-preview, windows-master-4-5-preview]
@@ -181,7 +181,7 @@ jobs:
           Set-Content dist/Installer-Test.txt 'SUCCESS: install, EXE self-test and uninstall on Windows runner' -Encoding UTF8
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Windows-Master-4.0-preview-Portable
+          name: MoOLVa-Windows-Master-4.5-preview
           path: dist/
           if-no-files-found: error
           retention-days: 30

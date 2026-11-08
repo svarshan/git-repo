@@ -17,6 +17,7 @@ Name: "russian"; MessagesFile: "compiler:Languages\Russian.isl"
 [Files]
 Source: "..\dist\MoOLVa-Windows-Master-4.0-preview-Portable.exe"; DestDir: "{app}"; DestName: "MoOLVa-Windows-Master.exe"; Flags: ignoreversion
 Source: "README.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\dist\WebView2-LICENSE.txt"; DestDir: "{app}"; Flags: ignoreversion skipifsourcedoesntexist
 [Icons]
 Name: "{group}\MoOLVa Windows Master"; Filename: "{app}\MoOLVa-Windows-Master.exe"
 Name: "{autodesktop}\MoOLVa Windows Master"; Filename: "{app}\MoOLVa-Windows-Master.exe"; Tasks: desktopicon
