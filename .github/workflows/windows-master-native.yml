@@ -1,7 +1,7 @@
 name: MoOLVa Windows Master 4.0-preview Native
 on:
   push:
-    branches: [windows-master-native-4-0-preview, windows-master-4-0-verify-usb, windows-master-4-1-reliable, windows-master-4-2-reinstall-preview]
+    branches: [windows-master-native-4-0-preview, windows-master-4-0-verify-usb, windows-master-4-1-reliable, windows-master-4-2-reinstall-preview, windows-master-4-5-preview]
     paths:
       - 'windows-master-native/**'
       - '.github/workflows/windows-master-native.yml'
@@ -157,6 +157,28 @@ jobs:
           Copy-Item windows-master-native/README.txt dist/README.txt
           $license=Get-ChildItem packages/Microsoft.Web.WebView2.1.0.2903.40 -Filter LICENSE* -File | Select-Object -First 1
           if($license){Copy-Item $license.FullName dist/WebView2-LICENSE.txt}
+      - name: Build and test Windows installer
+        shell: powershell
+        run: |
+          $compiler = Join-Path ${env:ProgramFiles(x86)} 'Inno Setup 6/ISCC.exe'
+          if(-not (Test-Path $compiler)){throw 'Inno Setup 6 compiler is unavailable'}
+          & $compiler windows-master-native/Setup.iss
+          if($LASTEXITCODE -ne 0){throw 'Setup compilation failed'}
+          $installer=(Resolve-Path dist/MoOLVa-Windows-Master-4.5-Preview-Setup.exe).Path
+          $testDir=Join-Path $env:RUNNER_TEMP ('MoOLVa-InstallTest-'+[guid]::NewGuid().ToString('N'))
+          $installArgs=@('/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART',('/DIR="'+$testDir+'"'))
+          $p=Start-Process $installer -ArgumentList $installArgs -Wait -PassThru
+          if($p.ExitCode -ne 0){throw "Setup returned $($p.ExitCode)"}
+          $installed=Join-Path $testDir 'MoOLVa-Windows-Master.exe'
+          if(-not (Test-Path $installed)){throw 'Installed EXE missing'}
+          $test=Start-Process $installed -ArgumentList '--self-test' -Wait -PassThru
+          if($test.ExitCode -ne 0){throw "Installed EXE self-test failed: $($test.ExitCode)"}
+          $uninstall=Join-Path $testDir 'unins000.exe'
+          if(-not (Test-Path $uninstall)){throw 'Uninstaller missing'}
+          $p=Start-Process $uninstall -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART' -Wait -PassThru
+          if($p.ExitCode -ne 0){throw "Uninstall returned $($p.ExitCode)"}
+          if(Test-Path $installed){throw 'Uninstall did not remove installed EXE'}
+          Set-Content dist/Installer-Test.txt 'SUCCESS: install, EXE self-test and uninstall on Windows runner' -Encoding UTF8
       - uses: actions/upload-artifact@v4
         with:
           name: MoOLVa-Windows-Master-4.0-preview-Portable
