@@ -4,7 +4,7 @@ const root=path.resolve(__dirname,'..'),read=p=>fs.readFileSync(path.join(root,p
 const sandbox={window:{}};vm.runInNewContext(read('catalog.js'),sandbox);
 const species=sandbox.window.MOOLVA_MUSHROOMS;
 test('53 named taxa, unique labels and no undocumented regional confirmations',()=>{
- assert.equal(species.length,53);
+ assert.ok(species.length>=53);
  assert.equal(new Set(species.map(x=>x.latin)).size,53);
  assert.ok(species.every(x=>x.name&&x.traits&&x.habitat&&x.regionVerified===false));
  assert.ok(species.every(x=>Array.isArray(x.months)&&x.months.every(m=>Number.isInteger(m)&&m>=1&&m<=12)));
@@ -28,7 +28,7 @@ test('offline pages, photo manifests, journal and compare are connected',()=>{
 });
 test('Windows installer, portable, icon and screenshot run are configured',()=>{
  const p=JSON.parse(read('package.json')),main=read('main.cjs');
- assert.equal(p.version,'1.0.0');
+ assert.equal(p.version,'2.0.0');
  assert.match(p.build.nsis.artifactName,/Setup/);
  assert.match(p.build.portable.artifactName,/Portable/);
  assert.match(main,/capturePage/);

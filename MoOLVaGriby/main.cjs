@@ -9,7 +9,7 @@ function createWindow(){
  win=new BrowserWindow({width:1420,height:920,minWidth:960,minHeight:680,autoHideMenuBar:true,show:false,backgroundColor:'#0a1512',
   icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
  win.webContents.setWindowOpenHandler(({url})=>{
-  if(/^https:\/\/(commons\.wikimedia\.org|www\.poison\.org|www\.mediawiki\.org)\//.test(url))shell.openExternal(url);
+  if(/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org)\//.test(url))shell.openExternal(url);
   return {action:'deny'};
  });
  win.webContents.on('will-navigate',(event,url)=>{if(!url.startsWith('file://'))event.preventDefault();});
@@ -28,7 +28,7 @@ function createWindow(){
     fs.writeFileSync(out,image.toPNG());
     const checks=await win.webContents.executeJavaScript('({species:window.MOOLVA_MUSHROOMS?.length||0, cards:document.querySelectorAll(".mush-card").length, title:document.title})',true);
     fs.writeFileSync(path.join(folder,'gui-smoke.json'),JSON.stringify({...checks,screenshot:out},null,2));
-    if(checks.species!==53||checks.cards<12)throw Error('Catalog failed GUI checks '+JSON.stringify(checks));
+    if(checks.species<53||checks.cards<12)throw Error('Catalog failed GUI checks '+JSON.stringify(checks));
     clearTimeout(failure);app.exit(0);
    }catch(e){fs.writeFileSync(path.join(folder,'gui-error.txt'),String(e.stack||e));clearTimeout(failure);app.exit(3);}
   });

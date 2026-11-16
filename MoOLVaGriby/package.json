@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "1.0.0",
-  "description": "MoOLVa Griby PRO MAX — educational offline fungus atlas of central Russia",
+  "version": "2.0.0",
+  "description": "MoOLVa Griby 2.0 PRO MAX — offline mushroom field atlas with sourced regional data",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -29,7 +29,13 @@
       "main.cjs",
       "media/photos/**/*",
       "package.json",
-      "build/moolva-griby.ico"
+      "build/moolva-griby.ico",
+      "core20.js",
+      "upgrade20.js",
+      "upgrade20.css",
+      "region20.js",
+      "photos-gallery20.js",
+      "media/gallery/**/*"
     ],
     "asar": true,
     "win": {
@@ -54,10 +60,10 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-1.0-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-2.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-1.0-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-2.0-Portable-${arch}.exe"
     }
   }
 }
