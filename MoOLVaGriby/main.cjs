@@ -26,9 +26,14 @@ function createWindow(){
     const image=await win.webContents.capturePage();
     const out=path.join(folder,'01-glavnaya.png');
     fs.writeFileSync(out,image.toPNG());
-    const checks=await win.webContents.executeJavaScript('({species:window.MOOLVA_MUSHROOMS?.length||0, cards:document.querySelectorAll(".mush-card").length, title:document.title})',true);
+    const checks=await win.webContents.executeJavaScript('({species:window.MOOLVA_MUSHROOMS?.length||0, cards:document.querySelectorAll(".mush-card").length,features:!!window.MoOLVa20, title:document.title})',true);
     fs.writeFileSync(path.join(folder,'gui-smoke.json'),JSON.stringify({...checks,screenshot:out},null,2));
-    if(checks.species<53||checks.cards<12)throw Error('Catalog failed GUI checks '+JSON.stringify(checks));
+    if(checks.species<53||checks.cards<12||!checks.features)throw Error('Catalog failed GUI checks '+JSON.stringify(checks));
+    for(const [name,target] of [['02-opredelitel.png','id20'],['03-karta-nablyudenii.png','geo20'],['04-foto-pomoshchnik.png','photo20']]){
+      await win.webContents.executeJavaScript('document.querySelector('+JSON.stringify('[data-stage20="'+target+'"]')+').click()');
+      await new Promise(r=>setTimeout(r,200));
+      fs.writeFileSync(path.join(folder,name),(await win.webContents.capturePage()).toPNG());
+    }
     clearTimeout(failure);app.exit(0);
    }catch(e){fs.writeFileSync(path.join(folder,'gui-error.txt'),String(e.stack||e));clearTimeout(failure);app.exit(3);}
   });
