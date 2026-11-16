@@ -30,7 +30,7 @@ FAMILIES={
  'Hymenochaetaceae','Lycoperdaceae','Hydnangiaceae','Omphalotaceae'
 }
 MACRO_GENERA=set('Agaricus Amanita Armillaria Auricularia Boletus Butyriboletus Calocera Calvatia Cantharellus Chlorophyllum Clavaria Clavulina Clavulinopsis Clitocybe Collybia Coprinellus Coprinopsis Coprinus Cortinarius Craterellus Cystoderma Cystolepiota Dacrymyces Entoloma Exidia Flammulina Fomes Fomitopsis Ganoderma Geastrum Gomphidius Gomphus Gyromitra Hebeloma Helvella Hericium Hydnum Hygrocybe Hygrophorus Hypholoma Imleria Inocybe Inonotus Kuehneromyces Lactarius Lactifluus Laetiporus Leccinum Lepiota Leucocoprinus Lycoperdon Lyophyllum Macrolepiota Marasmius Melanoleuca Morchella Mycena Omphalotus Otidea Paxillus Peziza Phallus Pholiota Pleurotus Pluteus Polyporus Psathyrella Ramaria Russula Sarcoscypha Sarcodon Schizophyllum Scleroderma Strobilurus Stropharia Suillus Tapinella Trametes Tricholoma Tremella Tylopilus Xerocomellus Xerocomus Volvopluteus Volvariella'.split())
-BINOMIAL=re.compile(r'^[A-Z][a-z-]+ [a-z-]+
+BINOMIAL=re.compile(r'^[A-Z][a-z-]+ [a-z-]+$')
 MAX_SPECIES=300
 
 def get(endpoint,params=None):
