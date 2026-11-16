@@ -44,3 +44,12 @@ background:#142c21;border:1px solid #3f6648;border-radius:12px;padding:17px;marg
 @media(max-width:1050px){.p20-geo-layout,.p20-anatomy-layout{grid-template-columns:1fr}.p20-months,.p20-bars{grid-template-columns:repeat(6,1fr)}}
 @media(max-width:740px){.p20-grid3{grid-template-columns:1fr}.p20-stat-panels{grid-template-columns:1fr 1fr}.p20-bars{grid-template-columns:repeat(6,1fr)}.p20-top-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.p20-page{min-height:0}}
 @media print{.sidebar,.alert,.p20-tools,.p20-top-links,.header-right{display:none!important}.content{padding:0}.page{display:none!important}#stats20{display:block!important;color:#000;background:#fff}.p20-stat,.p20-note{color:#000;background:#fff}}
+
+/* 2.0.1 navigation and photo QA polish */
+.sidebar{overflow-y:auto;scrollbar-width:thin;scrollbar-color:#55745d transparent}
+.sidebar nav{flex:0 0 auto}
+.p20-qa-rows{margin-top:14px;max-height:290px;overflow-y:auto;display:grid;gap:7px}
+.p20-qa-row{padding:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap;background:#1b3d2d;border:1px solid #476b50;border-radius:8px}
+.p20-qa-row b{min-width:145px}.p20-qa-row span{font-size:11px;color:#c4d8c8}
+.p20-qa-row button{background:#2d553e;color:#ecf4eb;border:1px solid #7b9c7d;border-radius:7px;padding:7px 9px}
+@media(max-width:760px){.sidebar{overflow-y:visible;max-height:none}}

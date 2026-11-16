@@ -3,6 +3,7 @@ const {app,BrowserWindow,shell}=require('electron');
 const path=require('node:path');
 const fs=require('node:fs');
 app.setAppUserModelId('ru.moolva.griby');
+app.commandLine.appendSwitch('lang','ru-RU');
 if(!app.requestSingleInstanceLock()){app.quit();process.exit(0);}
 let win;
 function createWindow(){
