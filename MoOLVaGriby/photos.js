@@ -1,0 +1,1 @@
+window.MOOLVA_PHOTOS={};
