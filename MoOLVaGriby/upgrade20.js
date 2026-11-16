@@ -53,6 +53,10 @@
   if(goButtons.length){const commands=document.createElement('div');commands.className='p20-top-links';
     commands.innerHTML='<button data-goto20="id20">⌕ Определить признаки</button><button data-goto20="photo20">▧ Фото-помощник</button><button data-goto20="geo20">⌖ Карта</button><button data-goto20="field20">◉ В лесу</button>';
     goButtons[0].append(commands);}
+  const aboutSection=document.querySelector('#about .aboutbox');
+  if(aboutSection){const updates=document.createElement('section');updates.className='p20-qa';
+    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 2.0.0</div>';
+    aboutSection.append(updates);}
   const photoReview=()=>{try{return JSON.parse(localStorage.getItem(reviewKey)||'{}')}catch{return {}}};
   const personalGeo=()=>{try{const x=JSON.parse(localStorage.getItem(geoKey)||'[]');return Array.isArray(x)?x.filter(o=>Number.isFinite(o.lat)&&Number.isFinite(o.lon)).slice(-300):[]}catch{return []}};
   const oldData=()=>{try{return JSON.parse(localStorage.getItem(oldKey)||'{}')}catch{return {}}};
@@ -157,13 +161,17 @@
     detail.querySelector('.detail-content')?.append(meta);
   }
   function renderQuality20(){
-    const parent=$('quality');if(!parent||parent.querySelector('#p20-qa-center'))return;
-    const q=core.quality(base,photos,gallery);
-    const extra=document.createElement('div');extra.id='p20-qa-center';extra.className='p20-qa';
-    extra.innerHTML='<h3>Центр качества PRO 2.0</h3><p>Фотоотчёт основан на источнике и лицензии, не на экспертной визуальной идентификации.</p>'+
-    '<div class="p20-mini-stats"><div><b>'+q.photoSpecies+'/'+q.species+'</b><span>фото для вида</span></div><div><b>'+q.galleryFiles+'</b><span>дополнительные кадры</span></div><div><b>0</b><span>экспертно подтверждено</span></div></div>'+
-    '<button class="p20-action" id="p20-audit-export">Экспорт проверки фото JSON</button>';
-    parent.prepend(extra);
+    const parent=$('quality');if(!parent)return;
+    const q=core.quality(base,photos,gallery),marks=photoReview(),checked=Object.values(marks).filter(v=>v==='checked').length,
+     issues=Object.values(marks).filter(v=>v==='issue').length;
+    let extra=$('p20-qa-center');
+    if(!extra){extra=document.createElement('div');extra.id='p20-qa-center';extra.className='p20-qa';parent.prepend(extra);}
+    extra.innerHTML='<h3>Центр качества PRO 2.0</h3><p>Фотоотчёт основан на источнике и лицензии, не на экспертной визуальной идентификации. Ваши отметки остаются личными и не являются сертификацией.</p>'+
+    '<div class="p20-mini-stats"><div><b>'+q.photoSpecies+'/'+q.species+'</b><span>видов с фото</span></div><div><b>'+q.galleryFiles+'</b><span>дополнительных кадров</span></div><div><b>'+checked+'</b><span>лично просмотрено</span></div><div><b>'+issues+'</b><span>ошибки по вашим отметкам</span></div></div>'+
+    '<button class="p20-action" id="p20-audit-export">Экспорт проверки фото JSON</button>'+
+    '<div class="p20-qa-rows">'+base.slice(0,120).map(b=>'<div class="p20-qa-row"><b>'+html(b.name)+'</b><span>'+ (core.eligiblePhoto(photos[b.latin])?'фото есть':'фото отсутствует')+'</span>'+
+    '<button data-review20="checked" data-latin20="'+html(b.latin)+'">✓ Просмотрел</button><button data-review20="issue" data-latin20="'+html(b.latin)+'">! Ошибка</button>'+
+    '<span>'+html(marks[b.latin]||'не проверено')+'</span></div>').join('')+'</div>';
   }
   function events(){
     document.addEventListener('click',ev=>{
@@ -205,6 +213,24 @@
     viewer.observe($('detail'),{childList:true}); // No subtree observation: avoids recursive gallery injection.
     document.addEventListener('click',ev=>{if(ev.target.closest('[data-page="quality"]'))requestAnimationFrame(renderQuality20);});
     document.addEventListener('click',ev=>{if(ev.target?.id==='p20-audit-export'){const data={version:'2.0.0',created:new Date().toISOString(),audit:core.quality(base,photos,gallery),visualVerification:'not independently completed',personalReviews:photoReview()};download('MoOLVa-Griby-Photo-Audit.json',JSON.stringify(data,null,2),'application/json');}});
+    document.addEventListener('click',ev=>{
+      const b=ev.target.closest('[data-review20]');if(!b)return;const latin=b.dataset.latin20;
+      if(!byLatin.has(latin)||!['checked','issue'].includes(b.dataset.review20))return;
+      try{const r=photoReview();r[latin]=b.dataset.review20;localStorage.setItem(reviewKey,JSON.stringify(r));renderQuality20();toast('Личная отметка сохранена');}
+      catch{toast('Не удалось записать отметку');}
+    });
+    $('p20-update-check')?.addEventListener('click',async ()=>{
+      const status=$('p20-update-status');status.textContent='Проверка публичного релиза…';
+      try{const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),9000);
+        let response;try{response=await fetch('https://api.github.com/repos/svarshan/git-repo/releases/latest',{signal:controller.signal,cache:'no-store'});}
+        finally{clearTimeout(timeout);}
+        if(!response.ok)throw Error('Публичный релиз пока не найден');
+        const info=await response.json(),url=info.html_url;
+        if(!/^https:\/\/github\.com\/svarshan\/git-repo\/releases\/tag\//.test(url||''))throw Error('Некорректный источник обновления');
+        status.replaceChildren();status.append(document.createTextNode('Доступный публичный релиз: '+String(info.tag_name||'неизвестен')+' · '));
+        const link=document.createElement('a');link.href=url;link.textContent='Открыть безопасную страницу загрузки';link.target='_blank';link.rel='noopener noreferrer';status.append(link);
+      }catch{status.textContent='Публичный релиз не найден или нет подключения. Текущая версия продолжает работать офлайн.';}
+    });
     window.addEventListener('pagehide',cleanUploads);
   }
   events();renderQuality20();
