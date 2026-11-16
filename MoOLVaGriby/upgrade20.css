@@ -1,0 +1,46 @@
+
+/* MoOLVa Griby 2.0 PRO MAX — additive field and verification tools */
+.p20-version{font-size:11px;color:#92bca5;border-top:1px solid #315344;margin:12px 0 0;padding:14px;display:grid;gap:6px}
+.p20-version b{color:#f3bb75}.p20-top-links{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0 0}
+.p20-top-links button{background:#1c402d;color:#d9e9d4;border:1px solid #437052;border-radius:8px;padding:8px 10px;font-size:12px}
+.p20-page{min-height:450px}.p20-hero,.p20-upload,.p20-note,.p20-message,.p20-hit,.p20-stat,.p20-qa{
+background:#142c21;border:1px solid #3f6648;border-radius:12px;padding:17px;margin-bottom:13px;color:#cce1cc;line-height:1.55}
+.p20-hero{padding:24px;background:linear-gradient(125deg,#244e30,#143c31)}.p20-hero h2{margin:0;color:#fff;font-size:28px}
+.p20-note{border-left:4px solid #e6b56d;color:#f3d8ad;background:#2d2e22}
+.p20-tools{display:flex;gap:10px;flex-wrap:wrap;margin:17px 0}
+.p20-tools button,.p20-action,.p20-part,.p20-muted{padding:11px 15px;border-radius:9px;border:1px solid #71a17d;background:#24523a;color:#f5f8ed;font-weight:650}
+.p20-muted{background:#273c31;border-color:#6b8978;color:#ccdec9}.p20-tools button:hover,.p20-action:hover{background:#316945}
+.p20-grid3{display:grid;grid-template-columns:repeat(3,minmax(180px,1fr));gap:15px}
+.p20-grid3 label,.p20-geo-side label{display:grid;gap:6px;font-weight:600;color:#dbe9d6}
+.p20-grid3 input,.p20-grid3 select,.p20-geo-side input,.p20-geo-side select{border:1px solid #4a7153;border-radius:8px;color:#eef8ed;background:#10251c;padding:12px;min-width:0}
+.p20-results{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:11px;margin:15px 0}
+.p20-hit{display:flex;flex-direction:column;margin:0;gap:6px}
+.p20-hit b{font-size:16px;color:#fff}.p20-hit i{font-size:12px;color:#a1c1ab}.p20-hit span{font-size:12px;color:#e6bb88}
+.p20-hit button{background:#24543c;color:white;border:1px solid #527959;border-radius:8px;padding:8px 12px;align-self:start}
+.p20-hit img{width:100%;height:145px;object-fit:contain;background:#0d2019;border-radius:8px}
+.p20-upload input{font-size:14px;max-width:100%}
+.p20-upload-preview{display:flex;gap:9px;flex-wrap:wrap}
+.p20-upload-preview img{max-height:150px;max-width:210px;object-fit:contain;border-radius:10px;border:1px solid #639070}
+.p20-months{display:grid;grid-template-columns:repeat(12,minmax(35px,1fr));gap:5px}.p20-months button{background:#234a33;color:#fff;border:1px solid #5b8060;padding:11px 5px;border-radius:6px}
+.p20-bars{display:grid;grid-template-columns:repeat(12,minmax(35px,1fr));gap:8px;margin:25px 0}
+.p20-bars>div{display:flex;flex-direction:column;align-items:center;gap:7px;color:#abc3ac;font-size:12px}.p20-bar{height:180px;width:100%;max-width:44px;background:#203b2e;border:1px solid #42694a;display:flex;align-items:end;overflow:hidden;border-radius:8px}
+.p20-bar i{display:block;width:100%;background:linear-gradient(#f3c384,#347c55);min-height:0}
+.p20-geo-layout{display:grid;grid-template-columns:minmax(300px,1.6fr) minmax(230px,1fr);gap:16px}
+.p20-map{border:1px solid #47664c;border-radius:12px;overflow:hidden;background:#10271f}
+.p20-map svg{display:block;width:100%;height:auto}.p20-map circle{cursor:pointer}.p20-map circle:hover{stroke:#fff;stroke-width:3}
+.p20-geo-side{background:#132a21;border:1px solid #49674a;border-radius:12px;padding:15px;display:grid;gap:12px}
+.p20-geo-side h3{margin:10px 0 0}.p20-geo-side form{display:grid;gap:10px}
+.p20-stat-panels{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:20px 0}
+.p20-stat{display:flex;flex-direction:column;gap:7px;margin:0}.p20-stat strong{font-size:28px;color:#f8c991}.p20-stat span{font-size:12px}.p20-wide{grid-column:1/-1}
+.p20-anatomy-layout{display:grid;grid-template-columns:minmax(280px,1fr) 1fr;gap:18px}.p20-anatomy-layout svg{background:#163c2d;border:1px solid #58755a;border-radius:15px;width:100%;max-width:480px}
+.p20-qa{margin:24px 0}.p20-qa h3{color:#fff}.p20-mini-stats{display:flex;gap:12px;flex-wrap:wrap;margin:14px 0}
+.p20-mini-stats>div{display:grid;gap:4px;padding:12px 20px;background:#1e422c;border-radius:8px}
+.p20-mini-stats b{font-size:23px;color:#fff}.p20-mini-stats span{font-size:12px}
+.p20-gallery{margin:15px 0;padding:15px;background:#133426;border-radius:12px;display:flex;gap:12px;flex-wrap:wrap}
+.p20-gallery h3,.p20-gallery>p{width:100%;margin:4px 0}.p20-gallery figure{margin:0;width:min(100%,185px);display:grid;gap:6px;font-size:10px;color:#bdcdbd}
+.p20-gallery figure img{width:100%;height:135px;object-fit:contain;background:#0c241a;border-radius:8px}
+.griby-field button{min-height:49px;font-size:16px}.griby-field input,.griby-field select{min-height:52px;font-size:17px}
+.griby-field .sidebar{width:255px}.griby-field .card-body h3{font-size:19px}.griby-field .mush-image{height:190px}
+@media(max-width:1050px){.p20-geo-layout,.p20-anatomy-layout{grid-template-columns:1fr}.p20-months,.p20-bars{grid-template-columns:repeat(6,1fr)}}
+@media(max-width:740px){.p20-grid3{grid-template-columns:1fr}.p20-stat-panels{grid-template-columns:1fr 1fr}.p20-bars{grid-template-columns:repeat(6,1fr)}.p20-top-links{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.p20-page{min-height:0}}
+@media print{.sidebar,.alert,.p20-tools,.p20-top-links,.header-right{display:none!important}.content{padding:0}.page{display:none!important}#stats20{display:block!important;color:#000;background:#fff}.p20-stat,.p20-note{color:#000;background:#fff}}
