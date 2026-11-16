@@ -29,7 +29,7 @@
   }
   function card(b){
     return '<article class="mush-card"><button class="mush-image" data-open="'+escapeHTML(b.id)+'">'+mediaHTML(b)+(hazard(b.risk)?'<span class="hazard '+(b.risk==='смертельно-ядовитый'?'deadly':'')+'">'+escapeHTML(hazardLabel(b))+'</span>':'')+'</button>'+
-    '<div class="card-body"><h3>'+escapeHTML(b.name)+'</h3><div class="latin">'+escapeHTML(b.latin)+'</div><div class="card-meta"><span class="chip">'+escapeHTML(b.group)+'</span><span class="chip">'+(b.months.length?escapeHTML(b.months[0])+'–'+escapeHTML(b.months[b.months.length-1])+' мес.':'сезон не указан')</span></div><p>'+escapeHTML(b.traits)+'</p></div>'+
+    '<div class="card-body"><h3>'+escapeHTML(b.name)+'</h3><div class="latin">'+escapeHTML(b.latin)+'</div><div class="card-meta"><span class="chip">'+escapeHTML(b.group)+'</span><span class="chip">'+(b.months.length?escapeHTML(b.months[0])+'–'+escapeHTML(b.months[b.months.length-1])+' мес.':'сезон не указан')+'</span></div><p>'+escapeHTML(b.traits)+'</p></div>'+
     '<div class="card-foot"><button data-open="'+escapeHTML(b.id)+'">Открыть паспорт →</button><button class="fav '+(state.favorites.has(b.id)?'isfav':'')+'" title="Избранное" aria-label="Избранное" data-fav="'+escapeHTML(b.id)+'">'+(state.favorites.has(b.id)?'♥':'♡')+'</button></div></article>';
   }
   function filt(){
