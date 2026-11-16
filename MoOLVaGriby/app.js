@@ -1,6 +1,9 @@
 'use strict';
 (() => {
   const birds = Array.isArray(window.MOOLVA_MUSHROOMS) ? window.MOOLVA_MUSHROOMS : [];
+  const regionAdded=Array.isArray(window.MOOLVA_EXTRA_SPECIES20)?window.MOOLVA_EXTRA_SPECIES20:[];
+  const latinKnown=new Set(birds.map(x=>x.latin));
+  for(const item of regionAdded){if(window.MoOLVa20Core?.safeSpecies(item)&&typeof item.id==='string'&&!latinKnown.has(item.latin)){birds.push(item);latinKnown.add(item.latin);}}
   const photos = window.MOOLVA_PHOTOS && typeof window.MOOLVA_PHOTOS === 'object' ? window.MOOLVA_PHOTOS : {};
   const byId = new Map(birds.map(b=>[b.id,b])), byLatin=new Map(birds.map(b=>[b.latin,b]));
   const $ = s => document.querySelector(s);
@@ -26,7 +29,7 @@
   }
   function card(b){
     return '<article class="mush-card"><button class="mush-image" data-open="'+escapeHTML(b.id)+'">'+mediaHTML(b)+(hazard(b.risk)?'<span class="hazard '+(b.risk==='смертельно-ядовитый'?'deadly':'')+'">'+escapeHTML(hazardLabel(b))+'</span>':'')+'</button>'+
-    '<div class="card-body"><h3>'+escapeHTML(b.name)+'</h3><div class="latin">'+escapeHTML(b.latin)+'</div><div class="card-meta"><span class="chip">'+escapeHTML(b.group)+'</span><span class="chip">'+escapeHTML(b.months[0])+'–'+escapeHTML(b.months[b.months.length-1])+' мес.</span></div><p>'+escapeHTML(b.traits)+'</p></div>'+
+    '<div class="card-body"><h3>'+escapeHTML(b.name)+'</h3><div class="latin">'+escapeHTML(b.latin)+'</div><div class="card-meta"><span class="chip">'+escapeHTML(b.group)+'</span><span class="chip">'+(b.months.length?escapeHTML(b.months[0])+'–'+escapeHTML(b.months[b.months.length-1])+' мес.':'сезон не указан')</span></div><p>'+escapeHTML(b.traits)+'</p></div>'+
     '<div class="card-foot"><button data-open="'+escapeHTML(b.id)+'">Открыть паспорт →</button><button class="fav '+(state.favorites.has(b.id)?'isfav':'')+'" title="Избранное" aria-label="Избранное" data-fav="'+escapeHTML(b.id)+'">'+(state.favorites.has(b.id)?'♥':'♡')+'</button></div></article>';
   }
   function filt(){
@@ -49,7 +52,7 @@
   const headings={catalog:['Грибной атлас','Изучайте виды и опасные двойники, сохраняйте наблюдения'],
    compare:['Сравнение грибов','Изучайте отличия похожих видов'],diary:['Дневник грибника','Ваши собственные наблюдения, сохранённые локально'],
    map:['Мои места','Личные находки без выдуманных географических точек'],favorites:['Избранное','Сохранённые виды из энциклопедии'],
-   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','Офлайн-атлас MoOLVa Грибы 1.0 PRO MAX']};
+   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','Офлайн-атлас MoOLVa Грибы 2.0 PRO MAX']};
   function nav(next){if(!headings[next])return;stopSpeech();closeDetail();page=next;
     document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));
     document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('selected',x.dataset.page===page));
@@ -63,14 +66,14 @@
   function closeDetail(){if(currentId===null)return;stopSpeech();$('#overlay').hidden=true;document.body.style.overflow='';currentId=null;}
   function openDetail(id){
     const b=byId.get(id);if(!b)return;closeDetail();currentId=id;
-    const similar=byLatin.get(b.similar),period=b.months.map(m=>months[m-1]).join(', ');
+    const similar=byLatin.get(b.similar),period=b.months.length?b.months.map(m=>months[m-1]).join(', '):'недостаточно достоверных данных';
     const dangerous=hazard(b.risk),riskText=dangerous?'<div class="red-warning"><b>'+escapeHTML(hazardLabel(b))+'</b> — не собирайте для употребления. Некоторые токсины вызывают отсроченные симптомы.</div>':'<div class="note">Справочный статус не означает, что найденный вами гриб безопасен для употребления. Возможны похожие ядовитые виды.</div>';
     $('#detail').innerHTML='<div class="detail-header"><span class="eyebrow">ПАСПОРТ ВИДА · ГРИБНОЙ АТЛАС</span><h2>'+escapeHTML(b.name)+'</h2><div class="latin">'+escapeHTML(b.latin)+'</div></div><div class="detail-photo">'+mediaHTML(b,'detail')+'</div>'+
       '<div class="detail-content"><div class="detail-pills"><span class="chip">'+escapeHTML(b.group)+'</span><span class="chip">'+escapeHTML(hazardLabel(b))+'</span></div>'+
       riskText+'<h3>Внешние признаки</h3><p>'+escapeHTML(b.traits)+'</p><h3>Местообитание</h3><p>'+escapeHTML(b.habitat)+'. <b>Наличие этого вида в конкретной точке Нижегородской области не подтверждено.</b></p>'+
       '<h3>Ориентировочный сезон</h3><p>'+escapeHTML(period)+'. Сроки зависят от погоды и природной зоны, не являются прогнозом.</p>'+
       '<h3>Похожие виды и двойники</h3><p>'+(similar?escapeHTML(similar.name)+' — '+escapeHTML(similar.latin):escapeHTML(b.similar||'Требуется сравнение у специалиста'))+'. По отдельному внешнему признаку определять гриб нельзя.</p>'+
-      '<h3>Фотография и первоисточник</h3>'+sourceLink(b)+'<p class="photo-credit">Таксономию и статус сверяйте с научными справочниками и региональными гербарными данными. '+(b.regionVerified?'Есть региональное подтверждение':'Региональное присутствие не аттестовано в версии 1.0')+'.</p>'+
+      '<h3>Фотография и первоисточник</h3>'+sourceLink(b)+'<p class="photo-credit">Таксономию и статус сверяйте с научными справочниками и региональными гербарными данными. '+(b.regionEvidence?'Публикации сообщества: '+escapeHTML(b.regionEvidence.count)+' сообщений в регионе (не экспертное подтверждение вида)':'Региональное присутствие не аттестовано')+'.</p>'+
       '<div class="detail-actions"><button class="primary" data-fav="'+escapeHTML(b.id)+'">'+(state.favorites.has(b.id)?'♥ В избранном':'♡ В избранное')+'</button>'+
       (similar?'<button data-compare="'+escapeHTML(b.id)+'">⇄ Сравнить с двойником</button>':'')+
       '<button data-speak="'+escapeHTML(b.id)+'">▷ Озвучить описание</button><button data-stop>■ Стоп</button><button data-observe="'+escapeHTML(b.id)+'">＋ Записать находку</button></div></div>';
@@ -90,7 +93,7 @@
     const b=byId.get(entry.speciesId);return '<article class="diaryrow"><div><h3>'+escapeHTML(b?.name||'Неизвестный вид')+'</h3><p>'+escapeHTML(entry.date)+' · '+escapeHTML(entry.place)+'</p><p>'+escapeHTML(entry.notes||'Нет заметок')+'</p><small class="muted">Определение предварительное · личная запись</small></div><button data-delete="'+escapeHTML(entry.id)+'">Удалить</button></article>';
   }).join(''):'<div class="empty">В дневнике пока нет записей. Добавьте первую находку выше.</div>';}
   function renderMap(){const entries=state.diary.slice().reverse();$('#mapItems').innerHTML=entries.length?entries.map(x=>'<div class="place"><div><h3>⌖ '+escapeHTML(x.place)+'</h3><p>'+escapeHTML(x.date)+' · '+escapeHTML(byId.get(x.speciesId)?.name||'Гриб')+'</p></div><span class="chip">Моё наблюдение</span></div>').join(''):'<div class="empty">Географических точек пока нет. Добавьте место в дневник — здесь появится его название.</div>';}
-  function renderQuality(){const list=birds.map(b=>({b,p:safePhoto(b)}));const present=list.filter(x=>x.p).length;$('#qualityStats').innerHTML='<div><span>Всего видов</span><strong>'+birds.length+'</strong><small>учебные карточки</small></div><div><span>Файлов фотографий</span><strong>'+present+'</strong><small>из Wikimedia Commons</small></div><div><span>Без фото</span><strong>'+(birds.length-present)+'</strong><small>не подменяются</small></div><div><span>Экспертно подтверждено</span><strong>0</strong><small>визуальный аудит ещё требуется</small></div>';
+  function renderQuality(){const list=birds.map(b=>({b,p:safePhoto(b)}));const present=list.filter(x=>x.p).length;$('#qualityStats').innerHTML='<div><span>Всего видов</span><strong>'+birds.length+'</strong><small>учебные карточки</small></div><div><span>Файлов фотографий</span><strong>'+present+'</strong><small>из Commons и iNaturalist</small></div><div><span>Без фото</span><strong>'+(birds.length-present)+'</strong><small>не подменяются</small></div><div><span>Экспертно подтверждено</span><strong>0</strong><small>визуальный аудит ещё требуется</small></div>';
     $('#qualityItems').innerHTML=list.map(x=>'<div class="qualityrow"><div><b>'+escapeHTML(x.b.name)+'</b> <span>· '+escapeHTML(x.b.latin)+'</span></div><span>'+(x.p?'Файл есть · нужен визуальный аудит':'Нет лицензированного фото')+'</span><button data-open="'+escapeHTML(x.b.id)+'">Паспорт</button></div>').join('');}
   function handleClick(e){const t=e.target.closest('button,[data-close]');if(!t)return;
     if(t.dataset.page){nav(t.dataset.page);return;}

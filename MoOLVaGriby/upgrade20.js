@@ -197,13 +197,14 @@
         if(!window.confirm('Заменить текущие избранное и дневник данными из резервной копии?'))return;
         localStorage.setItem(oldKey,JSON.stringify(parsed));toast('Резерв восстановлен. Перезапустите приложение для обновления исходного дневника.');}
       catch{toast('Ошибка восстановления резервной копии');}});
-    $('p20-upload').addEventListener('change',e=>{cleanUploads();const files=[...(e.target.files||[])].slice(0,3);selectedFiles=files.filter(f=>f.size<=10_000_000&&/^image\/(png|jpeg|webp)$/.test(f.type));if(selectedFiles.length!==files.length)toast('Часть неподходящих файлов пропущена');
+    $('p20-upload').addEventListener('change',e=>{const files=[...(e.target.files||[])].slice(0,3);cleanUploads();selectedFiles=files.filter(f=>f.size<=10_000_000&&/^image\/(png|jpeg|webp)$/.test(f.type));if(selectedFiles.length!==files.length)toast('Часть неподходящих файлов пропущена');
       uploadURLs=selectedFiles.map(f=>URL.createObjectURL(f));$('p20-preview').innerHTML=uploadURLs.map(url=>'<img src="'+html(url)+'" alt="Личная фотография">').join('');});
     $('p20-analyse').addEventListener('click',photoCompare);$('p20-photo-clear').addEventListener('click',cleanUploads);
     document.addEventListener('click',ev=>{if(ev.target.closest('[data-open]'))requestAnimationFrame(integrateDetail);});
     const viewer=new MutationObserver(()=>{if($('overlay')&&!$('overlay').hidden)integrateDetail();});
     viewer.observe($('detail'),{childList:true}); // No subtree observation: avoids recursive gallery injection.
     document.addEventListener('click',ev=>{if(ev.target.closest('[data-page="quality"]'))requestAnimationFrame(renderQuality20);});
+    document.addEventListener('click',ev=>{if(ev.target?.id==='p20-audit-export'){const data={version:'2.0.0',created:new Date().toISOString(),audit:core.quality(base,photos,gallery),visualVerification:'not independently completed',personalReviews:photoReview()};download('MoOLVa-Griby-Photo-Audit.json',JSON.stringify(data,null,2),'application/json');}});
     window.addEventListener('pagehide',cleanUploads);
   }
   events();renderQuality20();
