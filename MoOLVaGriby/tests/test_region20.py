@@ -20,6 +20,13 @@ class TestRegionSafety(unittest.TestCase):
  def test_genera_whitelist(self):
   self.assertIn('Boletus',region_atlas20.MACRO_GENERA)
   self.assertNotIn('Aspergillus',region_atlas20.MACRO_GENERA)
+ def test_geojson_coordinates_public_only(self):
+  obs={'id':100,'quality_grade':'research','geojson':{'type':'Point','coordinates':[44.05,56.33]},'obscured':False,'geoprivacy':None,'taxon_geoprivacy':None,'positional_accuracy':100}
+  self.assertEqual(region_atlas20.public_coordinates(obs),(56.33,44.05))
+  self.assertIsNone(region_atlas20.public_coordinates({**obs,'coordinates_obscured':True}))
+  self.assertIsNone(region_atlas20.public_coordinates({**obs,'taxon_geoprivacy':'obscured'}))
+  self.assertIsNone(region_atlas20.public_coordinates({**obs,'geojson':{'coordinates':[100,0]}}))
+  self.assertIsNone(region_atlas20.public_coordinates({**obs,'quality_grade':'casual'}))
  def test_gallery_strict_media(self):
   self.assertFalse(photo_gallery20.eligible({'id':2,'license_code':'cc-by-nc','url':'https://inaturalist-open-data.s3.amazonaws.com/photos/2/medium.jpg'}))
   self.assertTrue(photo_gallery20.eligible({'id':2,'license_code':'cc-by','url':'https://inaturalist-open-data.s3.amazonaws.com/photos/2/medium.jpg'}))

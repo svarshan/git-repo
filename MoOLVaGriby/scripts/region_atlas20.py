@@ -74,6 +74,31 @@ def default_output(reason,place=None):
             'evidenceCount':0,'recordCount':0,'species':[],'observations':[],
             'notes':'No unpublished coordinates, invented records, or unverified edible mushroom labels.'}
 
+def public_coordinates(obs):
+    """Return only openly published, non-obscured geographic coordinates.
+    iNaturalist v1 may return geometry in geojson.coordinates rather than
+    flat latitude / longitude fields. Never fall back to private_location."""
+    if obs.get('obscured') or obs.get('coordinates_obscured'):
+        return None
+    if obs.get('geoprivacy') not in (None,'open','') or obs.get('taxon_geoprivacy') not in (None,'open',''):
+        return None
+    if obs.get('quality_grade') not in (None,'research'):
+        return None
+    geo=obs.get('geojson') or {}
+    point=geo.get('coordinates') if isinstance(geo,dict) else None
+    try:
+        if isinstance(point,(list,tuple)) and len(point)>=2:
+            lon,lat=float(point[0]),float(point[1])
+        else:
+            lat,lon=float(obs.get('latitude')),float(obs.get('longitude'))
+        accuracy=int(obs.get('positional_accuracy') or 0)
+    except (ValueError,TypeError):
+        return None
+    if not (BOUNDS[0]<=lat<=BOUNDS[1] and BOUNDS[2]<=lon<=BOUNDS[3]):
+        return None
+    if accuracy>10000:return None
+    return lat,lon
+
 def gather():
     text=BASE.read_text(encoding='utf8').strip()
     prefix='window.MOOLVA_MUSHROOMS='
@@ -114,20 +139,15 @@ def gather():
     observations=[]
     for page in [1,2,3]:
         data=get('/observations',{'place_id':place['id'],'taxon_id':47170,
-            'quality_grade':'research','geo':'true','per_page':200,'page':page,
+            'quality_grade':'research','has[]':'geo','per_page':200,'page':page,
             'order_by':'observed_on','order':'desc'})
         for x in data.get('results') or []:
             taxon=x.get('taxon') or {}
             name=taxon.get('name') or ''
             if not BINOMIAL.fullmatch(name) or taxon.get('rank')!='species':continue
-            if x.get('obscured') or x.get('geoprivacy') not in (None,'open'):continue
-            if x.get('taxon_geoprivacy') not in (None,'open'):continue
-            try:
-                lat,lon=float(x.get('latitude')),float(x.get('longitude'))
-                accuracy=int(x.get('positional_accuracy') or 0)
-            except (ValueError,TypeError):continue
-            if not(BOUNDS[0]<=lat<=BOUNDS[1] and BOUNDS[2]<=lon<=BOUNDS[3]):continue
-            if accuracy>10000:continue
+            point=public_coordinates(x)
+            if not point:continue
+            lat,lon=point
             date=str(x.get('observed_on') or '')
             try:month=int(date[5:7])
             except ValueError:month=0
