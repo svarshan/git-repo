@@ -17,7 +17,7 @@ from PIL import Image, ImageOps
 ROOT=Path(__file__).resolve().parents[1]
 MEDIA=ROOT/'media'/'photos'
 API='https://commons.wikimedia.org/w/api.php'
-HEADERS={'User-Agent':'MoOLVaGriby/1.0 (educational open-media attribution; github.com/svarshan/git-repo)'}
+HEADERS={'User-Agent':'MoOLVaGriby/2.0 (educational open-media attribution; github.com/svarshan/git-repo)'}
 BLOCKED=('microscop','spore','spores','illustrat','drawing','diagram','poster','book','painting','plate','section','cutaway','logo','icon','recipe','cooked','dish','herbarium','map of','stamp','coin')
 ALLOWED=('CC BY','CC-BY','CC0','PUBLIC DOMAIN','PD-','PDM')
 START=time.monotonic()
@@ -159,10 +159,16 @@ def main():
     prefix='window.MOOLVA_MUSHROOMS='
     if not text.startswith(prefix):raise ValueError('Invalid fungi catalog')
     species=json.loads(text[len(prefix):].rstrip(';'))
-    if len(species)!=53 or len(set(x['latin'] for x in species))!=53:
-        raise ValueError('Species catalog changed: expected exactly 53 taxa')
+    region_file=ROOT/'region20.js'
+    if region_file.exists():
+        for line in region_file.read_text(encoding='utf8').splitlines():
+            if line.startswith('window.MOOLVA_EXTRA_SPECIES20='):
+                species+=json.loads(line.split('=',1)[1].rstrip(';'))
+                break
+    if len(species)<53 or len(species)>300 or len(set(x['latin'] for x in species))!=len(species):
+        raise ValueError('Expected between 53 and 300 unique sourced mushroom species')
     deadline=time.monotonic()+int(os.getenv('MOOLVA_PHOTO_BUDGET_SECONDS','180'))
-    limit=int(os.getenv('MOOLVA_PHOTO_LIMIT','53'))
+    limit=max(53,min(100,int(os.getenv('MOOLVA_PHOTO_LIMIT','85'))))
     result={}
     misses=[]
     with concurrent.futures.ThreadPoolExecutor(max_workers=5) as pool:
