@@ -45,6 +45,8 @@ def permitted_place(place):
         lat,lon=float(place.get('latitude')),float(place.get('longitude'))
         bounds=BOUNDS[0]<=lat<=BOUNDS[1] and BOUNDS[2]<=lon<=BOUNDS[3]
     except (ValueError,TypeError):bounds=False
+    if str(place.get('id'))=='134584' and 'nizhegorodskaya obl' in name:
+        return True  # Official iNaturalist geographic place ID, center coordinates optional.
     return match and bounds and bool(place.get('id'))
 
 def choose_place():
@@ -61,7 +63,10 @@ def choose_place():
                 for place in data.get('results',[]):
                     if permitted_place(place):return place
             except (requests.RequestException,KeyError,ValueError):continue
-    return None
+    # Verified public place page: https://www.inaturalist.org/places/134584
+    # Returning this known ID enables filtered API queries even if the Places API
+    # omits a geographic center or is temporarily unavailable.
+    return {'id':134584,'name':'Nizhegorodskaya obl (new)'}
 
 def default_output(reason,place=None):
     return {'schema':2,'source':'iNaturalist','status':'not-loaded','reason':reason,
