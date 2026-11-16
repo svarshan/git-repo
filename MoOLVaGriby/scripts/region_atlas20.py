@@ -17,7 +17,7 @@ HEADERS={'User-Agent':'MoOLVaGriby/2.0 (offline regional species evidence; githu
 # Broad envelope only for additional validation. The actual place polygon must come
 # from iNaturalist's recognised Nizhny Novgorod Oblast place.
 BOUNDS=(54.1,58.2,41.2,48.2)
-PLACE_TERMS=('nizhny novgorod oblast','nizhny novgorod region','нижегородская область')
+PLACE_TERMS=('nizhegorodskaya obl','nizhny novgorod oblast','nizhny novgorod region','нижегородская область')
 FAMILIES={
  'Amanitaceae','Boletaceae','Suillaceae','Russulaceae','Cortinariaceae',
  'Tricholomataceae','Agaricaceae','Hygrophoraceae','Gomphaceae','Cantharellaceae',
@@ -48,7 +48,13 @@ def permitted_place(place):
     return match and bounds and bool(place.get('id'))
 
 def choose_place():
-    for term in ['Nizhny Novgorod Oblast','Nizhny Novgorod','Нижегородская область']:
+    # Published geographic place verified at www.inaturalist.org/places/134584
+    try:
+        result=get('/places/134584')
+        for place in result.get('results',[]):
+            if permitted_place(place):return place
+    except (requests.RequestException,KeyError,ValueError):pass
+    for term in ['Nizhegorodskaya obl','Nizhny Novgorod Oblast','Nizhny Novgorod','Нижегородская область']:
         for endpoint in ['/places/autocomplete','/places']:
             try:
                 data=get(endpoint,{'q':term,'per_page':30})
