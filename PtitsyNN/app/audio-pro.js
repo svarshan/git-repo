@@ -4,7 +4,7 @@ const active=new Set(),KEY='ptitsy-nn.audio-reports.v1';
 const make=(tag,cls,text)=>{const n=document.createElement(tag);if(cls)n.className=cls;if(text!==undefined)n.textContent=String(text);return n;};
 const add=(parent,...children)=>{for(const x of children)parent.appendChild(x);return parent;};
 const stamp=x=>Number.isFinite(x)&&x>=0?Math.floor(x/60)+':'+String(Math.floor(x%60)).padStart(2,'0'):'0:00';
-function stopAll(){for(const a of active){try{a.pause();a.currentTime=0;}catch{}}}
+function stopAll(){const players=[...active];active.clear();for(const a of players){try{a.pause();a.currentTime=0;}catch{}}}
 function reports(){try{const x=JSON.parse(localStorage.getItem(KEY)||'[]');return Array.isArray(x)?x:[];}catch{return [];}}
 function report(b,reason){
  const r=reports();
@@ -32,9 +32,21 @@ function player(b){
  const loop=make('input');loop.type='checkbox';loop.setAttribute('aria-label','Повтор');
  const label=(text,control)=>add(make('label','audio-pro-label',text+' '),control);
  add(root,add(make('div','audio-pro-options'),label('Громкость',volume),label('Скорость',speed),label('Повтор',loop)));
+ const segment=make('div','audio-pro-options');
+ const markA=make('button','audio-pro-report','Начало фрагмента');markA.type='button';
+ const markB=make('button','audio-pro-report','Конец фрагмента');markB.type='button';
+ const clearSegment=make('button','audio-pro-report','Сбросить фрагмент');clearSegment.type='button';
+ const segmentStatus=make('span','audio-pro-muted','Фрагмент не выбран');
+ let pointA=null,pointB=null;
+ markA.addEventListener('click',()=>{pointA=audio.currentTime||0;pointB=null;segmentStatus.textContent='Начало: '+stamp(pointA)+' · выберите конец';});
+ markB.addEventListener('click',()=>{const t=audio.currentTime||0;if(pointA===null||t<=pointA+.2){segmentStatus.textContent='Сначала выберите начало, затем конец';return;}pointB=t;audio.loop=false;loop.checked=false;segmentStatus.textContent='Повтор: '+stamp(pointA)+' – '+stamp(pointB);audio.currentTime=pointA;});
+ clearSegment.addEventListener('click',()=>{pointA=null;pointB=null;segmentStatus.textContent='Фрагмент не выбран';});
+ audio.addEventListener('timeupdate',()=>{if(pointA!==null&&pointB!==null&&audio.currentTime>=pointB)audio.currentTime=pointA;});
+ audio.addEventListener('emptied',()=>{pointA=null;pointB=null;segmentStatus.textContent='Фрагмент не выбран';});
+ add(root,add(segment,markA,markB,clearSegment,segmentStatus));
  const credit=b.audioCredits||{};
- root.appendChild(make('p','audio-pro-muted','Тип звука: '+(credit.vocalization||'не определён')+' · Источник: '+(credit.author||'не указан')+' · '+(credit.license||'не указана')+'. Технический контроль: '+(credit.audioQuality?'пройден':'данных нет')+'. Вид определён по метаданным; не проверен прослушиванием специалиста.'));
- if(credit.source&&/^https:\/\/(commons\.wikimedia\.org\/|xeno-canto\.org\/|freesound\.org\/|archive\.org\/)/.test(credit.source)){
+ root.appendChild(make('p','audio-pro-muted','Тип звука: '+(credit.vocalization||'не определён')+' · Источник: '+(credit.author||'не указан')+' · '+(credit.license||'не указана')+'. Технический контроль: '+(credit.audioQuality?'пройден':'данных нет')+'. Вид определён по метаданным; не проверен прослушиванием специалиста.'+(credit.audioProcessing?' Запись из 8.4 уже обрабатывалась; исходный файл автора может отсутствовать.':'')));
+ if(credit.source&&/^https:\/\/(commons\.wikimedia\.org\/|xeno-canto\.org\/|(?:www\.)?inaturalist\.org\/observations\/|freesound\.org\/|archive\.org\/)/.test(credit.source)){
   const link=make('a','audio-pro-source','Открыть источник ↗');link.href=credit.source;link.target='_blank';link.rel='noopener noreferrer';root.appendChild(link);
  }
  const select=make('select','audio-pro-problem');
@@ -50,8 +62,8 @@ function player(b){
   seek.value=d>0?String(Math.round(p/d*1000)):'0';
   play.textContent=audio.paused?'▶ Воспроизвести':'Ⅱ Пауза';
  }
- play.addEventListener('click',()=>{if(audio.paused){stopAll();audio.play().catch(()=>{result.textContent='Ошибка воспроизведения';refresh();});}else audio.pause();});
- audio.addEventListener('play',()=>{for(const other of active){if(other!==audio)other.pause();}refresh();});
+ play.addEventListener('click',()=>{if(audio.paused){stopAll();active.add(audio);audio.play().catch(()=>{active.delete(audio);result.textContent='Ошибка воспроизведения';refresh();});}else audio.pause();});
+ audio.addEventListener('play',()=>{for(const other of active){if(other!==audio){try{other.pause();other.currentTime=0;}catch{}}}active.add(audio);refresh();});
  for(const name of ['loadedmetadata','timeupdate','pause','ended'])audio.addEventListener(name,refresh);
  audio.addEventListener('error',()=>{result.textContent='Нет доступного аудиофайла';});
  seek.addEventListener('input',()=>{if(Number.isFinite(audio.duration)&&audio.duration>0)audio.currentTime=audio.duration*Number(seek.value)/1000;});
@@ -80,7 +92,7 @@ function mountCompare(host,birds,prefer){
  selectors[0].value=options.find(b=>b.id===prefer)?.id||options[0].id;
  selectors[1].value=options.find(b=>b.id!==selectors[0].value)?.id||options[1].id;
  const download=make('button','audio-pro-report','Скачать отчёт о проблемных записях');download.type='button';download.addEventListener('click',exportReports);
- add(host,toolbar,grid,make('p','audio-pro-muted','Записи воспроизводятся по очереди. Оригинальные файлы доступны без интернета; изменение скорости сохраняет высоту звука.'),download);
+ add(host,toolbar,grid,make('p','audio-pro-muted','Записи воспроизводятся по очереди и доступны без интернета; изменение скорости сохраняет высоту звука. Для некоторых записей исходник автора не сохранён.'),download);
  const refresh=changed=>{
   let a=options.find(b=>b.id===selectors[0].value)||options[0];
   let b=options.find(b=>b.id===selectors[1].value)||options[1];

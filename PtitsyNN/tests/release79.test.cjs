@@ -27,10 +27,10 @@ test('8.1 workflow creates real screenshots and report before publishing release
 });
 test('8.1 preserves setup, portable and legacy field records',()=>{
  const pkg=JSON.parse(read('package.json')),wf=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(pkg.version,'8.1.0');
- assert.ok(pkg.build.nsis.artifactName.startsWith('MoOLVa-8.1-Setup-'));
- assert.ok(pkg.build.portable.artifactName.startsWith('MoOLVa-8.1-Portable-'));
+ assert.match(pkg.version,/^8\.\d+\.\d+$/);
+ assert.ok(pkg.build.nsis.artifactName.startsWith('MoOLVa-'+pkg.version.replace(/\.0$/,'')+'-Setup-'));
+ assert.ok(pkg.build.portable.artifactName.startsWith('MoOLVa-'+pkg.version.replace(/\.0$/,'')+'-Portable-'));
  assert.match(read('app/app.js'),/ptitsy-nn\.journal\.v1/);
  assert.match(read('app/expedition77.js'),/ptitsy-nn\.expedition77/);
- assert.match(wf,/Ptitsy-NN-8\.1-Windows/);
+ assert.ok(wf.includes('Ptitsy-NN-'+pkg.version.replace(/\.0$/,'')+'-Windows'));
 });

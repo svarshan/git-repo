@@ -42,10 +42,10 @@ test('8.1 contains all ten additive interfaces, old journal remains',()=>{
 });
 test('8.1 packaging keeps Windows x64 portable and setup',()=>{
  const pkg=JSON.parse(read('package.json')),wf=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(pkg.version,'8.1.0');
- assert.equal(pkg.build.nsis.artifactName,'MoOLVa-8.1-Setup-${arch}.exe');
- assert.equal(pkg.build.portable.artifactName,'MoOLVa-8.1-Portable-${arch}.exe');
- assert.ok(wf.includes('Ptitsy-NN-8.1-Windows'));
+ assert.match(pkg.version,/^8\.\d+\.\d+$/);
+ assert.equal(pkg.build.nsis.artifactName,'MoOLVa-'+pkg.version.replace(/\.0$/,'')+'-Setup-${arch}.exe');
+ assert.equal(pkg.build.portable.artifactName,'MoOLVa-'+pkg.version.replace(/\.0$/,'')+'-Portable-${arch}.exe');
+ assert.ok(wf.includes('Ptitsy-NN-'+pkg.version.replace(/\.0$/,'')+'-Windows'));
  for(const script of ['ultra78-core.js','ultra78-ui.js','backup78.js'])assert.ok(wf.includes('node --check app/'+script));
  assert.ok(wf.includes('voices_298.py'));assert.ok(wf.includes('fill_missing76.py'));
 });
