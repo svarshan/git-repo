@@ -1,0 +1,122 @@
+[
+  {
+    "latin": "Limosa limosa",
+    "file": "limosa_limosa.jpg",
+    "sha256": "ec62b752c1da5669c86529343d828a97946079ee2769c5806c0420d5651dfad2",
+    "author": "Hans Hillewaert",
+    "license": "CC BY-SA 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Limosa_limosa_(calling).jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Gallinula chloropus",
+    "file": "gallinula_chloropus.jpg",
+    "sha256": "bfaa8df5b254ad50d8e7910d5f26b6ce867a9130078e4df582122105cf992e56",
+    "author": "Matthew Fainman",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Gallinula_chloropus_109736904.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Calidris ferruginea",
+    "file": "calidris_ferruginea.jpg",
+    "sha256": "1aba1dd3241d0000436a90718615f1bf73b8d469b543880ea534ab950ff48655",
+    "author": "JJ Harrison ( https://www.jjharrison.com.au/ )",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Calidris_ferruginea,_winter_adult,_Pak_Thale.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Circus macrourus",
+    "file": "circus_macrourus.jpg",
+    "sha256": "50b84b540ab61ac6c0c664364722725b111e1d99bc8a3643963dea8586a6d551",
+    "author": "Chinmayisk",
+    "license": "CC BY-SA 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Circus_macrourus_roosting_in_little_rann_of_kutch.JPG",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Phasianus colchicus",
+    "file": "phasianus_colchicus.jpg",
+    "sha256": "a4cf0d5e926679df9f95c1d90dc08722b87644b9de9a52cec178386cf7355691",
+    "author": "Gerard Blokhuis",
+    "license": "CC BY 3.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/3.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Phasianus_colchicus_-Netherlands-8a.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Hydroprogne caspia",
+    "file": "hydroprogne_caspia.jpg",
+    "sha256": "1310bfef285ba193029105f9aef2dfca73508ba6517380784a2549d52aaa4c6a",
+    "author": "Kevin Cole from Pacific Coast, USA ()",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Hydroprogne_caspia_in_flight.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Melanitta nigra",
+    "file": "melanitta_nigra.jpg",
+    "sha256": "3477c33e49931640d80afc2999050a5e67cf47d7710652f253ebb1db25f75579",
+    "author": "Vsevolod Rudyi",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Melanitta_nigra_278393468.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Melanitta fusca",
+    "file": "melanitta_fusca.jpg",
+    "sha256": "0a6b6e68e2c46b350cf6b7df52300c668698ce9f5f54dd3b4fe4da90f45bc34f",
+    "author": "Åsa Berndtsson",
+    "license": "CC BY 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Melanitta_fusca_1.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Tetrax tetrax",
+    "file": "tetrax_tetrax.jpg",
+    "sha256": "61b7399e822e0e811b3707d41f599b6b704d9ce418305c0b41b74dc9bd7bf3ce",
+    "author": "https://www.flickr.com/photos/francesco_veronesi/",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Tetrax_tetrax,_Castuera,_Estremadura,_Spain_1.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Lyrurus tetrix",
+    "file": "lyrurus_tetrix.jpg",
+    "sha256": "0132820ac23509c5865a2307250b5789aae9340d5d59a81acbb9b481ba1b96ee",
+    "author": "Ludovic Hirlimann from 's-Gravenhage, The Netherlands",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Lyrurus_tetrix_in_Larix_sibirica_Mongolia.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Locustella fluviatilis",
+    "file": "locustella_fluviatilis.jpg",
+    "sha256": "b35865965c59734a9e7baddc4cd0c6cfdb4fd46d89a8d4e7556c8ae1abe084cf",
+    "author": "Сергей Неклюдов",
+    "license": "CC BY 4.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by/4.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Locustella_fluviatilis_123791068.jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  },
+  {
+    "latin": "Phylloscopus sindianus",
+    "file": "phylloscopus_sindianus.jpg",
+    "sha256": "ae9bd002a19ef3bc8ba6511b9f1644608a1240517fa0d48e9d6a18003477bc65",
+    "author": "Imran Shah from Islamabad, Pakistan",
+    "license": "CC BY-SA 2.0",
+    "licenseUrl": "https://creativecommons.org/licenses/by-sa/2.0",
+    "source": "https://commons.wikimedia.org/wiki/File:Mountain_Chiffchaff_(Phylloscopus_sindianus)_(35799887584).jpg",
+    "photoReview": "Просмотрена фотография птицы; уменьшена и перекодирована в JPEG."
+  }
+]

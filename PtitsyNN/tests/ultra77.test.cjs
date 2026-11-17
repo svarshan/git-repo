@@ -32,12 +32,12 @@ test('8.1 desktop UI registers all data/offline panels and persists settings sep
 });
 test('8.1 preserves old journal and all versions; Windows artifact names exactly match package',()=>{
  const pkg=JSON.parse(read('package.json')),wf=read('../.github/workflows/ptitsy-nn-windows.yml');
- assert.equal(pkg.version,'8.1.0');
- assert.equal(pkg.build.nsis.artifactName,'MoOLVa-8.1-Setup-${arch}.exe');
- assert.equal(pkg.build.portable.artifactName,'MoOLVa-8.1-Portable-${arch}.exe');
+ assert.equal(pkg.version,'8.6.0');
+ assert.equal(pkg.build.nsis.artifactName,'MoOLVa-8.6-Setup-${arch}.exe');
+ assert.equal(pkg.build.portable.artifactName,'MoOLVa-8.6-Portable-${arch}.exe');
  assert.ok(read('app/app.js').includes('ptitsy-nn.journal.v1'));
  assert.ok(read('app/sidebar76.js').includes('ptitsy-nn.sidebar.v76'));
- assert.ok(wf.includes('Ptitsy-NN-8.1-Windows'));
+ assert.ok(wf.includes('Ptitsy-NN-8.6-Windows'));
  assert.ok(wf.includes('voices_298.py'));
  for(const s of ['core77.js','ui77.js','expedition77.js'])assert.ok(wf.includes('node --check app/'+s));
 });
