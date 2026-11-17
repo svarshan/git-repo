@@ -42,6 +42,8 @@
   if(!exp||!box||!section||d.getElementById('fm32-map'))return;
   const L=w.L;
   const $=id=>d.getElementById(id);
+  // Скрываем устаревший переключатель фоновой координатной схемы, если Leaflet установлен.
+  if(L&&$('exp-online'))$('exp-online').hidden=true;
   const bar=d.createElement('section');bar.id='fm32-toolbar';bar.className='fm32-toolbar';
   bar.innerHTML='<div class="fm32-header"><strong>🗺 Бесплатная карта с населёнными пунктами</strong><small>OpenStreetMap · без ключа и оплаты</small></div>'+
    '<p class="fm32-help">Колёсико мыши — масштаб; удерживайте мышь и перемещайте карту; кнопки + и − — увеличение. Нажмите на свободное место карты, чтобы заполнить координаты своей отметки.</p>'+
@@ -81,7 +83,8 @@
     const color=palette[p.kind]||'#dddddd';
     const marker=L.circleMarker([p.lat,p.lon],{radius:p.kind==='personal'?10:p.kind==='public-exact'?9:p.kind==='report'?8:6,
       color:'#1b2a21',weight:2,fillColor:color,fillOpacity:.97,keyboard:true,interactive:true});
-    marker.bindTooltip(present(p),{direction:'top',opacity:.96});
+    const safeTooltip=d.createElement('span');safeTooltip.textContent=present(p);
+    marker.bindTooltip(safeTooltip,{direction:'top',opacity:.96});
     marker.on('click',()=>{
       if(p.kind!=='public-exact'&&typeof exp.selectPoint==='function')exp.selectPoint(p);
       else if(w.MoOLVaGoogle31?.choose)w.MoOLVaGoogle31.choose(p);
