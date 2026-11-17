@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "3.2.0",
-  "description": "MoOLVa Грибы 3.2 — бесплатная интерактивная карта Leaflet/OpenStreetMap с населёнными пунктами, GPS и Google Maps links",
+  "version": "3.3.0",
+  "description": "MoOLVa Грибы 3.3 — постоянный пункт меню и настоящая бесплатная карта OpenStreetMap с проверенным Windows GUI",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -68,10 +68,10 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-3.2-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.3-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-3.2-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.3-Portable-${arch}.exe"
     }
   },
   "dependencies": {
