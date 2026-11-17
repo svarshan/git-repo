@@ -16,6 +16,11 @@
   if(!validCoord(lat,lon))return null;
   return 'https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(Number(lat).toFixed(6)+','+Number(lon).toFixed(6));
  }
+ function googleSatelliteUrl(lat,lon,zoom=16){
+  if(!validCoord(lat,lon))return null;
+  const z=Math.max(3,Math.min(21,Math.round(Number(zoom)||16)));
+  return 'https://www.google.com/maps/@?api=1&map_action=map&center='+encodeURIComponent(Number(lat).toFixed(6)+','+Number(lon).toFixed(6))+'&zoom='+z+'&basemap=satellite';
+ }
  function pointAccuracy(p){
   if(p?.kind==='public-exact')return 'Открытое GPS-наблюдение iNaturalist; заявленная точность координат ±'+Number(p.accuracyM)+' м. Вид и повторное появление грибов не гарантированы';
   if(p?.kind==='personal')return 'Точная личная GPS-отметка (если введённые координаты измерены верно)';
@@ -42,7 +47,7 @@
   control.innerHTML=
    '<div class="gm31-title"><strong>🛰 Google Maps · спутник и настоящие дороги</strong><span>Новый слой 3.1</span></div>'+
    '<p class="gm31-note">Google показывает местность с точными координатами, но не знает точных мест грибниц. Оранжевые — районы сообщений; зелёные — обобщённые записи; голубые — личные GPS; фиолетовые — публичные GPS-наблюдения с указанной точностью.</p>'+
-   '<div class="gm31-controls"><button id="gm31-google-selected" class="exp-button" disabled>↗ Выбранная точка в Google Maps</button>'+
+   '<div class="gm31-controls"><button id="gm31-google-selected" class="exp-button" disabled>↗ Выбранная точка в Google Maps</button><button id="gm31-satellite-selected" class="exp-button" disabled>🛰 Спутник Google без ключа</button>'+
    '<label class="gm31-key-label"><span>Google Maps JavaScript API key</span><input type="password" id="gm31-api-key" autocomplete="off" spellcheck="false" placeholder="Вставьте свой API-ключ (только для сеанса)"></label>'+
    '<button class="exp-button" id="gm31-enable">🛰 Показать спутник Google</button><button class="exp-button" id="gm31-hide" hidden>⇦ Офлайн-карта</button></div>'+
    '<p id="gm31-status" class="gm31-status" role="status">Без ключа работает открытие координат в Google Maps. Встроенная карта требует Google Cloud Billing и Maps JavaScript API. Ключ не сохраняется.</p>'+ 
@@ -94,6 +99,7 @@
    const button=$('gm31-google-selected');
    button.disabled=false;
    button.title=pointAccuracy(p);
+   $('gm31-satellite-selected').disabled=false;
    if(gm){gm.panTo({lat:Number(p.lat),lng:Number(p.lon)});gm.setZoom(p.kind==='personal'||p.kind==='public-exact'?15:11);}
    if(p.kind==='public-exact'){$('exp-info-title').textContent=p.latin+' · GPS-наблюдение';$('exp-info-text').textContent=p.date+' · GPS ±'+p.accuracyM+' м. Публичное наблюдение не гарантирует вид и наличие грибов сегодня.';$('exp-info-extra').innerHTML='';const src=d.createElement('a');src.href=p.source;src.rel='noopener noreferrer';src.target='_blank';src.textContent='↗ Оригинал наблюдения iNaturalist';$('exp-info-extra').append(src);}
    const panel=$('exp-info-extra');
@@ -147,6 +153,7 @@
   $('gm31-exact-list').innerHTML=exact.length?exact.slice(0,40).map((p,i)=>'<button class="gm31-exact-item" data-gm31-obs="'+i+'"><strong>'+p.latin+'</strong><span>'+p.date+' · GPS ±'+p.accuracyM+' м</span></button>').join(''):'<p>Нет опубликованных GPS-наблюдений с заявленной точностью до 100 м среди проверяемых распространённых видов в текущем региональном наборе.</p>';
   $('gm31-exact-list').addEventListener('click',e=>{const b=e.target.closest('[data-gm31-obs]');if(!b)return;const p=exact[Number(b.dataset.gm31Obs)];if(p)select(p);});
   $('gm31-google-selected').addEventListener('click',()=>{const u=picked&&googleUrl(picked.lat,picked.lon);if(u)w.open(u,'_blank','noopener,noreferrer');});
+  $('gm31-satellite-selected').addEventListener('click',()=>{const u=picked&&googleSatelliteUrl(picked.lat,picked.lon);if(u)w.open(u,'_blank','noopener,noreferrer');});
   $('gm31-enable').addEventListener('click',()=>loadGoogle($('gm31-api-key').value.trim()));
   $('gm31-hide').addEventListener('click',()=>{canvas.hidden=true;$('gm31-hide').hidden=true;$('gm31-enable').hidden=false;status('Офлайн-координатная схема включена. Google-карта скрыта.');});
   w.addEventListener('moolva:expedition-selected',e=>select(e.detail));
@@ -160,5 +167,5 @@
   });
   w.MoOLVaGoogle31={choose:select,getActive:()=>!canvas.hidden&&googleLoaded,getPoints:all,getExactCount:()=>exact.length,hasApiKey:()=>!!keyUsed};
  }
- return {validCoord,googleUrl,pointAccuracy,visiblePoints,exactPublicObservations,mount};
+ return {validCoord,googleUrl,googleSatelliteUrl,pointAccuracy,visiblePoints,exactPublicObservations,mount};
 });
