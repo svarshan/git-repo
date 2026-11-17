@@ -1,4 +1,4 @@
-name: MoOLVa Griby 3.2 PRO MAX - Windows Setup and Portable
+name: MoOLVa Griby 3.3 PRO MAX - Windows Setup and Portable
 concurrency:
   group: griby-windows-${{ github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
@@ -111,10 +111,11 @@ jobs:
           if (-not (Test-Path 'dist/evidence/05-expedition.png')) { throw 'Real expedition screenshot missing' }
           if (-not (Test-Path 'dist/evidence/06-google-maps.png')) { throw 'Google integration screenshot missing' }
           if (-not (Test-Path 'dist/evidence/07-free-interactive-map.png')) { throw 'Free map real screenshot missing' }
+          if (-not (Test-Path 'dist/evidence/08-visible-map-menu.png')) { throw 'Visible map menu screenshot missing' }
       - name: Validate EXEs and calculate SHA256
         shell: pwsh
         run: |
-          $files = @('dist/MoOLVa-Griby-3.2-Setup-x64.exe','dist/MoOLVa-Griby-3.2-Portable-x64.exe')
+          $files = @('dist/MoOLVa-Griby-3.3-Setup-x64.exe','dist/MoOLVa-Griby-3.3-Portable-x64.exe')
           $lines = @()
           foreach($p in $files) {
             if (-not (Test-Path $p)) { throw "Missing EXE: $p" }
@@ -127,23 +128,23 @@ jobs:
       - name: Setup EXE
         uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-3.2-Setup-EXE
-          path: MoOLVaGriby/dist/MoOLVa-Griby-3.2-Setup-x64.exe
+          name: MoOLVa-Griby-3.3-Setup-EXE
+          path: MoOLVaGriby/dist/MoOLVa-Griby-3.3-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Portable EXE
         uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-3.2-Portable-EXE
-          path: MoOLVaGriby/dist/MoOLVa-Griby-3.2-Portable-x64.exe
+          name: MoOLVa-Griby-3.3-Portable-EXE
+          path: MoOLVaGriby/dist/MoOLVa-Griby-3.3-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Real screenshot and audit evidence
         uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-3.2-Quality-Evidence
+          name: MoOLVa-Griby-3.3-Quality-Evidence
           path: |
             MoOLVaGriby/dist/SHA256SUMS.txt
             MoOLVaGriby/dist/evidence/*
@@ -157,6 +158,7 @@ jobs:
             MoOLVaGriby/README_3_0.md
             MoOLVaGriby/README_3_1.md
             MoOLVaGriby/README_3_2.md
+            MoOLVaGriby/README_3_3.md
             MoOLVaGriby/community30.js
           if-no-files-found: error
           retention-days: 30
@@ -166,16 +168,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v3.2.0'
+          $tag = 'v3.3.0'
           gh release view $tag --repo ${{ github.repository }} *> $null
           if ($LASTEXITCODE -eq 0) { Write-Host 'Public release already exists; no overwrite'; exit 0 }
-          gh release create $tag "dist/MoOLVa-Griby-3.2-Setup-x64.exe" "dist/MoOLVa-Griby-3.2-Portable-x64.exe" "dist/SHA256SUMS.txt" --repo ${{ github.repository }} --title 'MoOLVa Грибы 3.2 PRO MAX' --notes 'Офлайн-атлас; определения по фото не подтверждают безопасность грибов. Сборка проверена Windows GUI и SHA256.'
+          gh release create $tag "dist/MoOLVa-Griby-3.3-Setup-x64.exe" "dist/MoOLVa-Griby-3.3-Portable-x64.exe" "dist/SHA256SUMS.txt" --repo ${{ github.repository }} --title 'MoOLVa Грибы 3.3 PRO MAX' --notes 'Офлайн-атлас; определения по фото не подтверждают безопасность грибов. Сборка проверена Windows GUI и SHA256.'
           if ($LASTEXITCODE -ne 0) { throw 'Release creation failed' }
       - name: Diagnostics on failed build
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-3.2-Diagnostics
+          name: MoOLVa-Griby-3.3-Diagnostics
           path: |
             MoOLVaGriby/photo-report.json
             MoOLVaGriby/dist/evidence/*
