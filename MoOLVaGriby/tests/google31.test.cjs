@@ -8,6 +8,8 @@ test('Google Maps URLs work without API key for actual coordinates',()=>{
  const p={lat:56.35,lon:43.6,kind:'personal'};
  assert.equal(g.googleUrl(p.lat,p.lon),'https://www.google.com/maps/search/?api=1&query=56.350000%2C43.600000');
  assert.equal(g.googleUrl(90,0),null);
+ assert.equal(g.googleSatelliteUrl(56.35,43.6,16),'https://www.google.com/maps/@?api=1&map_action=map&center=56.350000%2C43.600000&zoom=16&basemap=satellite');
+ assert.equal(g.googleSatelliteUrl(91,0),null);
  assert.ok(g.pointAccuracy(p).includes('Точная личная'));
 });
 test('community place is labelled approximate and scientific observations remain aggregates',()=>{
