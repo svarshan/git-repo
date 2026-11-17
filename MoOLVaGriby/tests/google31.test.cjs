@@ -38,3 +38,12 @@ test('Google map integration is shipped, API key is never embedded and old data 
  assert.ok(!script.includes("localStorage.setItem('google"),'Google key must not be persisted');
  assert.ok(css.includes('.gm31-google-canvas'));
 });
+test('precise public observations require explicit measurement precision and common taxa',()=>{
+ const make=changes=>({id:1,grade:'research',latin:'Boletus edulis',lat:56.3,lon:43.7,date:'2026-09-10',accuracyM:25,obscured:false,source:'https://www.inaturalist.org/observations/123',...changes});
+ const exact=g.exactPublicObservations([make({}),make({id:2,latin:'Rare species'}),make({id:3,accuracyM:0}),make({id:4,accuracyM:450}),make({id:5,obscured:true}),make({id:6,source:'https://bad.example.org'})]);
+ assert.equal(exact.length,1);
+ assert.equal(exact[0].kind,'public-exact');
+ assert.match(g.pointAccuracy(exact[0]),/±25 м/);
+ const selected=g.visiblePoints({reportData:[],observationCells:[]},[],{reports:false,observations:false,personal:false,exact:true},exact);
+ assert.equal(selected.length,1);
+});
