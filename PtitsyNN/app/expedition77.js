@@ -85,6 +85,8 @@
   try{
    const data=JSON.parse(await file.text());
    if(data?.type!=='ptitsy-nn-expedition77'||data.version!==1||!data.labels||typeof data.labels!=='object'||Array.isArray(data.labels)||!Array.isArray(data.assets)||data.assets.length>2000)throw Error('Неверный формат архива.');
+   if(!window.MoOLVaAutoBackup?.create)throw Error('Автоматический архив недоступен');
+   await window.MoOLVaAutoBackup.create('before-restore');
    const ids=new Set(safeRead().map(x=>x.id));
    let updated=0,restored=0;
    for(const [id,value] of Object.entries(data.labels)){
