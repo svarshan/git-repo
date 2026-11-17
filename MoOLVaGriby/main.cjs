@@ -1,5 +1,5 @@
 'use strict';
-const {app,BrowserWindow,shell}=require('electron');
+const {app,BrowserWindow,shell,session}=require('electron');
 const path=require('node:path');
 const fs=require('node:fs');
 app.setAppUserModelId('ru.moolva.griby');
@@ -45,11 +45,24 @@ function createWindow(){
     fs.writeFileSync(path.join(folder,'google31-smoke.json'),JSON.stringify(googleChecks,null,2));
     if(!googleChecks.panel||!googleChecks.hasPrivateLink||!googleChecks.url.startsWith('https://www.google.com/maps/search/?api=1'))throw Error('Google Maps integration failed '+JSON.stringify(googleChecks));
     fs.writeFileSync(path.join(folder,'06-google-maps.png'),(await win.webContents.capturePage()).toPNG());
+    const freeMap=await win.webContents.executeJavaScript(`(async()=>{document.querySelector('[data-expedition30="open"]').click(); await new Promise(r=>setTimeout(r,800)); const api=window.MoOLVaFreeMap32; const map=api?.getMap?.(); const before=map?.getZoom()||0; const btnIn=document.querySelector('#fm32-map .leaflet-control-zoom-in'); const btnOut=document.querySelector('#fm32-map .leaflet-control-zoom-out'); const waitZoom=async(btn)=>{if(!map||!btn)return; const done=new Promise(resolve=>{map.once('zoomend',resolve);setTimeout(resolve,1400);});btn.click();await done;}; await waitZoom(btnIn); const after=map?.getZoom()||0; await waitZoom(btnOut); const afterOut=map?.getZoom()||0; return {leaflet:!!window.L, mapReady:!!map, before, after, afterOut, ...api?.getStatus?.(), townLabelsLayer:!!document.querySelector('#fm32-map .leaflet-tile-pane'), attribution:!!document.querySelector('#fm32-map .leaflet-control-attribution')};})()`,true);
+    fs.writeFileSync(path.join(folder,'free-map32-smoke.json'),JSON.stringify(freeMap,null,2));
+    if(!freeMap.leaflet||!freeMap.mapReady||freeMap.after!==freeMap.before+1||freeMap.afterOut!==freeMap.before||!freeMap.townLabelsLayer||!freeMap.attribution||freeMap.markerCount<10)
+      throw Error('Leaflet map or zoom failed '+JSON.stringify(freeMap));
+    fs.writeFileSync(path.join(folder,'07-free-interactive-map.png'),(await win.webContents.capturePage()).toPNG());
     clearTimeout(failure);app.exit(0);
    }catch(e){fs.writeFileSync(path.join(folder,'gui-error.txt'),String(e.stack||e));clearTimeout(failure);app.exit(3);}
   });
  }
 }
-app.whenReady().then(createWindow);
+app.whenReady().then(()=>{
+ const ses=session.defaultSession;
+ // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
+ ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{
+   details.requestHeaders['User-Agent']='MoOLVa-Griby/3.2 (+https://github.com/svarshan/git-repo)';
+   callback({requestHeaders:details.requestHeaders});
+ });
+ createWindow();
+});
 app.on('window-all-closed',()=>{if(process.platform!=='darwin')app.quit();});
 app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)createWindow();});
