@@ -28,7 +28,7 @@
  let picked=null,zoom=8,center={lat:56.35,lon:43.50},online=false;
  const entry=doc.createElement('button');entry.type='button';entry.dataset.expedition30='open';entry.innerHTML='<span>🧭</span> Экспедиция 3.2';nav.append(entry);
  const section=doc.createElement('section');section.className='page';section.id='expedition30';
- section.innerHTML='<div class="sectiontop"><div><span class="eyebrow">MoOLVa Грибы 3.0 · Нижегородская область</span><h2>Экспедиция · карта грибных мест</h2></div></div>'+
+ section.innerHTML='<div class="sectiontop"><div><span class="eyebrow">MoOLVa Грибы 3.2 · Нижегородская область</span><h2>Экспедиция · карта грибных мест</h2></div></div>'+
  '<div class="exp-warning">📍 <b>Геометки соцсетей — ориентиры у населённых пунктов, не координаты грибных полян.</b> Результаты 2026 года не гарантируют находок в другой день. Обозначения грибов не подтверждают их съедобность.</div>'+
  '<div class="exp-summary"><div><strong id="exp-count-reports"></strong><span>районов из сообщений грибников</span></div><div><strong id="exp-count-observations"></strong><span>обобщённых ячеек наблюдений</span></div><div><strong id="exp-count-personal"></strong><span>моих точек</span></div></div>'+
  '<div class="exp-toolbar"><label><input type="checkbox" id="exp-reports" checked> 🟠 Сообщения грибников</label><label><input type="checkbox" id="exp-observations" checked> 🟢 iNaturalist (обобщённо)</label><label><input type="checkbox" id="exp-personal" checked> 🔵 Мои места</label>'+
