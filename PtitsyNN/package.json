@@ -1,8 +1,8 @@
 {
   "name": "ptitsy-nizhny-novgorod",
-  "version": "8.1.0",
+  "version": "8.3.0",
   "private": true,
-  "description": "MoOLVa 8.1 PRO MAX: three-crop genuine Bird Vision ONNX, grounded bird comparisons, audio timeline, seasonal atlas, printable expedition report, repeated-error academy, SHA256 backup, strict 261-voice species nonregression, Windows GUI and real screenshot QA.",
+  "description": "MoOLVa 8.3 PRO MAX: source-grounded search and atlas, manual media QA, genuine licensed voices, offline AI noise profiles, SHA256 backups, branded Windows EXEs, automated release certification.",
   "main": "main.cjs",
   "license": "UNLICENSED",
   "scripts": {
@@ -22,6 +22,8 @@
     },
     "files": [
       "main.cjs",
+      "backup82.cjs",
+      "build/**/*",
       "preload.cjs",
       "vision80.cjs",
       "app/**/*",
@@ -45,7 +47,8 @@
           ]
         }
       ],
-      "signAndEditExecutable": false
+      "signAndEditExecutable": true,
+      "icon": "build/moolva.ico"
     },
     "nsis": {
       "oneClick": false,
@@ -54,10 +57,10 @@
       "createDesktopShortcut": true,
       "createStartMenuShortcut": true,
       "runAfterFinish": false,
-      "artifactName": "MoOLVa-8.1-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-8.3-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-8.1-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-8.3-Portable-${arch}.exe"
     },
     "publish": null,
     "asarUnpack": [

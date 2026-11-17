@@ -23,7 +23,7 @@ function birdCard(b){
  '<div class="actions"><button data-open="'+esc(b.id)+'">Подробнее →</button>'+
  '<button data-fav="'+esc(b.id)+'">'+(favs.has(b.id)?'♥ В избранном':'♡ Сохранить')+'</button></div></div></article>';
 }
-function currentList(){const q=$('#search').value.toLocaleLowerCase('ru').replace(/ё/g,'е').trim(),g=$('#group').value,type=$('#only').value;return birds.filter(b=>{
+function currentList(){const q=$('#search').value,g=$('#group').value,type=$('#only').value;if(window.MoOLVa83Core?.search)return window.MoOLVa83Core.search(birds,q,{group:g,only:type});return birds.filter(b=>{
 if(q&&!(b.name+' '+b.latin).toLocaleLowerCase('ru').replace(/ё/g,'е').includes(q))return false;
 if(g==='other'&&b.group)return false;
 if(g!=='all'&&g!=='other'&&g!==b.group)return false;
@@ -145,7 +145,7 @@ $('#exportJSON').addEventListener('click',()=>download('observations.json',JSON.
 $('#exportCSV').addEventListener('click',exportCSV);
 for(const id of ['#journalSearch','#journalBirdFilter','#journalSort'])$(id).addEventListener(id==='#journalSearch'?'input':'change',renderJournal);
 $('#importJSON').addEventListener('click',()=>$('#importFile').click());
-$('#importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file||file.size>5e6)return toast('Неправильный файл');try{const obj=JSON.parse(await file.text());if(obj.type!=='ptitsy-nn-journal'||obj.version!==1||!Array.isArray(obj.observations)||obj.observations.length>20000||obj.observations.some(x=>!x||typeof x.id!=='string'||!byId.has(x.birdId)||!x.date||!x.place||!Number.isInteger(x.count)||x.count<1||x.count>99999))throw Error('Неверная структура');if(confirm('Заменить текущий дневник данными файла?')){journal=obj.observations;save('ptitsy-nn.journal.v1',journal);renderJournal();toast('Дневник восстановлен');}}catch(err){toast('Ошибка импорта: '+err.message);}e.target.value='';});
+$('#importFile').addEventListener('change',async e=>{const file=e.target.files[0];if(!file||file.size>5e6)return toast('Неправильный файл');try{const obj=JSON.parse(await file.text());if(obj.type!=='ptitsy-nn-journal'||obj.version!==1||!Array.isArray(obj.observations)||obj.observations.length>20000||obj.observations.some(x=>!x||typeof x.id!=='string'||!byId.has(x.birdId)||!x.date||!x.place||!Number.isInteger(x.count)||x.count<1||x.count>99999))throw Error('Неверная структура');if(confirm('Заменить текущий дневник данными файла?')){if(!window.MoOLVaAutoBackup?.create)throw Error('Автоматический архив недоступен');await window.MoOLVaAutoBackup.create('before-restore');journal=obj.observations;save('ptitsy-nn.journal.v1',journal);renderJournal();toast('Дневник восстановлен');}}catch(err){toast('Ошибка импорта: '+err.message);}e.target.value='';});
 document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#overlay').hidden)close();if(e.ctrlKey&&e.key.toLowerCase()==='f'){e.preventDefault();switchPage('catalog');$('#search').focus();}});
 counters();renderCatalog();window.__APP_TEST__={species:birds.length,photos:birds.filter(b=>b.imageFile).length,audio:birds.filter(b=>b.audioFile).length};
 })();
