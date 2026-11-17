@@ -36,7 +36,7 @@
  function decode(url,kind){
   if(typeof url!=='string'||url.length>8e6)return null;
   const match=url.match(/^data:(image\/(?:jpeg|png|webp)|audio\/(?:mpeg|wav|ogg|webm|mp4));base64,([A-Za-z0-9+/=]+)$/);
-  if(!match||!match[1].startsWith(kind+'/'))return null;
+  if(!match||!match[1].startsWith((kind==='photo'?'image':'audio')+'/'))return null;
   const raw=atob(match[2]);if(raw.length>(kind==='photo'?3:5)*1024*1024)return null;
   const bytes=new Uint8Array(raw.length);for(let i=0;i<raw.length;i++)bytes[i]=raw.charCodeAt(i);
   return new Blob([bytes],{type:match[1]});
@@ -61,7 +61,7 @@
    if(!core.validStateArchive(archive))throw Error('Содержимое архива не прошло проверку');
    archive.integrity={algorithm:'SHA-256',value:await fingerprint(unsigned(archive))};
    const u=URL.createObjectURL(new Blob([JSON.stringify(archive)],{type:'application/json;charset=utf-8'}));
-   const a=document.createElement('a');a.href=u;a.download='MoOLVa-8.1-Verified-Backup-'+new Date().toISOString().slice(0,10)+'.json';
+   const a=document.createElement('a');a.href=u;a.download='MoOLVa-8.2-Verified-Backup-'+new Date().toISOString().slice(0,10)+'.json';
    document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(u),4000);
    say('Архив SHA-256 готов: '+Object.keys(stores).length+' наборов данных, '+assets.length+' записей с вложениями. Сохраните файл в надёжном месте.');
   }catch(error){say('Не удалось создать архив: '+(error.message||error));}
@@ -98,6 +98,10 @@
     assets.push(obj);
    }
    if(!confirm('Резервная копия проверена. Восстановить '+Object.keys(archive.stores).length+' групп настроек/данных и '+assets.length+' наборов вложений? Существующие значения этих ключей будут заменены.')){say('Восстановление отменено.');return;}
+   // Mandatory pre-restore copy of the current data, including media attachments.
+   if(!window.MoOLVaAutoBackup?.create)throw Error('Автоматическое резервирование недоступно. Восстановление запрещено.');
+   try{await window.MoOLVaAutoBackup.create('before-restore');}
+   catch(e){throw Error('Не удалось сохранить старые данные перед восстановлением: '+(e.message||e));}
    // 8.1: snapshot original localStorage, commit values, then use ONE atomic IDB transaction.
    // On IDB abort, restore old localStorage. A process crash between stores cannot be perfectly atomic;
    // the user keeps the original archive as the recovery source.

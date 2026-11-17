@@ -48,7 +48,7 @@ function candidates(logits,labels){
  return pick.map(([i,v])=>({label:labels[i],score:Math.round(Math.exp(v-max)/sum*10000)/100})).filter(x=>x.score>0);
 }
 function window(){
- const w=new BrowserWindow({title:'MoOLVa 8.1 — Орнитологический интеллект',width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,show:!evidenceMode,
+ const w=new BrowserWindow({title:'MoOLVa 8.2 — Орнитологический интеллект',icon:path.join(__dirname,'build','moolva.png'),width:1480,height:920,minWidth:820,minHeight:580,backgroundColor:'#07101d',autoHideMenuBar:true,show:!evidenceMode,
   webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true,offscreen:evidenceMode,preload:path.join(__dirname,'preload.cjs')}});
  w.webContents.on('will-navigate',e=>e.preventDefault());
  w.webContents.setWindowOpenHandler(({url})=>{try{
@@ -150,11 +150,15 @@ async function captureReleaseEvidence(win){
     window.confirm=originalConfirm;
    }
   })()`);
+  const autoDir=path.join(app.getPath('userData'),'MoOLVa-AutoBackups');
+  const savedCopies=fs.existsSync(autoDir)?fs.readdirSync(autoDir).filter(n=>/^MoOLVa-.*\.json$/.test(n)):[];
+  if(!savedCopies.length)throw Error('8.2 local automatic backup was not created on the real Windows EXE');
+  const autoBackupEvidence={files:savedCopies.length,local:true,verified:true};
   const visionSmoke=await win.webContents.executeJavaScript('window.BirdVision?.diagnostics()');
   if(!visionSmoke?.ok||visionSmoke.classes<200)throw Error('Real local image model did not pass native ONNX inference');
   const evidence={type:'MoOLVa-real-windows-screenshots',version:require('./package.json').version,
    runtime:'Electron packaged Windows executable',captureMethod:'Chromium webContents.capturePage (offscreen)',
-   os:process.platform,packaged:app.isPackaged,modelAvailable:modelStatus().available,visionModelVerified:visionSmoke,photoPipelineVerified:{passes:photoPipeline.imageCrops,candidates:photoPipeline.top.length},guiInteractions,backupSmoke,catalog:data,
+   os:process.platform,packaged:app.isPackaged,autoBackup:autoBackupEvidence,modelAvailable:modelStatus().available,visionModelVerified:visionSmoke,photoPipelineVerified:{passes:photoPipeline.imageCrops,candidates:photoPipeline.top.length},guiInteractions,backupSmoke,catalog:data,
    screenshots:captured,createdAt:new Date().toISOString()};
   if(!evidence.modelAvailable)throw Error('Offline Perch v2 files absent in executable');
   fs.writeFileSync(path.join(out,'gui-smoke.json'),JSON.stringify(evidence,null,2),'utf8');
@@ -168,6 +172,10 @@ async function captureReleaseEvidence(win){
 
 app.whenReady().then(()=>{
  registerVision80({app,ipcMain,nativeImage,isTrusted});
+ ipcMain.handle('moolva-backup82-save',(event,archive,reason)=>{
+  if(!isTrusted(event.sender))throw Error('Недоверенный источник резервирования');
+  return require('./backup82.cjs').saveBackup(path.join(app.getPath('userData'),'MoOLVa-AutoBackups'),archive,reason);
+ });
  session.defaultSession.setPermissionRequestHandler((wc,permission,callback,details)=>{
   const mediaTypes=Array.isArray(details?.mediaTypes)?details.mediaTypes:[];
   const audioOnly=!mediaTypes.includes('video')&&(mediaTypes.length===0||mediaTypes.includes('audio'));
