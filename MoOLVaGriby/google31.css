@@ -14,3 +14,6 @@
 .gm31-google-canvas[hidden]{display:none!important}
 #gm31-google-selected:disabled{opacity:.6}
 @media(max-width:760px){.gm31-key-label{order:2;flex-basis:100%}.gm31-controls button{flex-grow:1}}
+
+/* Google branding/copyright must stay unobstructed: hide legacy controls while Google is active. */
+.exp-map:has(.gm31-google-canvas:not([hidden])) .exp-map-controls{display:none}
