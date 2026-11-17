@@ -117,6 +117,8 @@ $('#atlas5BackupFile')?.addEventListener('change',async e=>{
   if(file.size>5_000_000)throw Error('Файл превышает 5 МБ.');
   const content=JSON.parse(await file.text()),clean=validate(content);
   if(!confirm('Архив прошёл проверку. Заменить текущий дневник, избранное и настройки? Сначала рекомендуется экспортировать текущий архив.'))return;
+  if(!window.MoOLVaAutoBackup?.create)throw Error('Автоматический архив недоступен');
+  await window.MoOLVaAutoBackup.create('before-restore');
   const originals=Object.fromEntries(Object.values(SAVED).map(k=>[k,localStorage.getItem(k)]));
   try{
    for(const [name,key] of Object.entries(SAVED))localStorage.setItem(key,JSON.stringify(clean[name]));

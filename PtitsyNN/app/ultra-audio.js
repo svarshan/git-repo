@@ -106,6 +106,9 @@ function render(host,bird,audio){
  const root=txt('section','ultra-tracks');
  const heading=txt('div','ultra-title','Голоса ULTRA · звуковые дорожки');
  const choose=txt('select','ultra-choose');choose.setAttribute('aria-label','Выбор звуковой дорожки');
+ const version=txt('select','ultra-choose');version.setAttribute('aria-label','Вариант записи');
+ for(const [value,label] of [['base','Запись до очистки'],['clean','Очищенный вариант']]){const o=txt('option','',label);o.value=value;version.appendChild(o);}
+ const versionLabel=attach(txt('label','ultra-small','Вариант звучания '),version);
  const hint=txt('p','ultra-small','Основная запись и дополнительные записи из свободных фонотек отмечены отдельно. Свои файлы не проверены и не включаются в распространяемый EXE.');
  const player=audio||txt('audio');
  const ownPlayer=!audio;
@@ -116,33 +119,36 @@ function render(host,bird,audio){
  const deleteBtn=txt('button','ultra-delete','Удалить выбранную свою запись');deleteBtn.type='button';deleteBtn.hidden=true;
  const status=txt('p','ultra-small','');
  attach(importLabel,input);
- attach(root,heading,choose,view.box,hint,importLabel,deleteBtn,status);
+ attach(root,heading,choose,versionLabel,view.box,hint,importLabel,deleteBtn,status);
  if(ownPlayer)root.insertBefore(player,view.box);
  host.appendChild(root);
  let owned=[],liveUrl=null,selected='packaged:0';
  function tracks(){
   const built=[];
   if(bird.audioFile)built.push({id:'packaged:0',name:'Основная · '+(bird.audioCredits?.vocalization||'голос птицы'),
-    path:bird.audioFile,credit:bird.audioCredits||{},own:false});
+    path:bird.audioFile,cleanPath:bird.audioCleanFile85,credit:bird.audioCredits||{},own:false});
   for(const [i,t] of (Array.isArray(bird.audioTracks)?bird.audioTracks:[]).entries()){
    if(t&&typeof t.path==='string'&&t.path.startsWith('media/audio/'))
-    built.push({id:'packaged:'+(i+1),name:'Дополнительная '+(i+1)+' · '+(t.credit?.vocalization||'голос птицы'),path:t.path,credit:t.credit||{},own:false});
+    built.push({id:'packaged:'+(i+1),name:'Дополнительная '+(i+1)+' · '+(t.credit?.vocalization||'голос птицы'),path:t.path,cleanPath:t.cleanPath85,credit:t.credit||{},own:false});
   }
   for(const t of owned)built.push({id:'own:'+t.id,name:'Мой файл · '+t.name,blob:t.blob,own:true,credit:{}});
   return built;
  }
  function loadTrack(id,all){
   const t=all.find(v=>v.id===id)||all[0];
-  if(!t){player.pause();player.removeAttribute('src');player.load();status.textContent='Записей пока нет. Можно импортировать свой файл.';deleteBtn.hidden=true;return;}
+  if(!t){player.pause();player.removeAttribute('src');player.load();status.textContent='Записей пока нет. Можно импортировать свой файл.';deleteBtn.hidden=true;version.disabled=true;return;}
   player.pause();
+  const canClean=typeof t.cleanPath==='string'&&t.cleanPath.startsWith('media/audio/');
+  version.disabled=!canClean;
+  if(!canClean)version.value='base';
   if(liveUrl){URL.revokeObjectURL(liveUrl);releases.delete(liveUrl);liveUrl=null;}
   if(t.blob){liveUrl=URL.createObjectURL(t.blob);releases.add(liveUrl);player.src=liveUrl;}
-  else player.src=t.path;
+  else player.src=version.value==='clean'&&canClean?t.cleanPath:t.path;
   player.load();
   selected=t.id;
   deleteBtn.hidden=!t.own;
   status.textContent=t.own?'Личная запись: вид и качество не проверены. Файл доступен только в этом приложении.':
-   ('Источник: '+(t.credit.source||'не указан')+' · '+(t.credit.license||'лицензия не указана')+' · проверка вида по метаданным, не на слух.');
+   ('Источник: '+(t.credit.source||'не указан')+' · '+(t.credit.license||'лицензия не указана')+' · проверка вида по метаданным, не на слух.'+(t.credit.audioProcessing?' Предыдущая версия уже обрабатывалась.':''));
  }
  function fill(){
   const all=tracks();
@@ -154,6 +160,7 @@ function render(host,bird,audio){
   loadTrack(chosen,all);
  }
  choose.addEventListener('change',()=>loadTrack(choose.value,tracks()));
+ version.addEventListener('change',()=>loadTrack(choose.value,tracks()));
  input.addEventListener('change',async()=>{
   const file=input.files?.[0];input.value='';
   if(!file)return;
