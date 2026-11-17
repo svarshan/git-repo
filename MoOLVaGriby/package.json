@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "3.0.0",
-  "description": "MoOLVa Griby 3.0 PRO MAX — community mushroom map, regional observations and private GPX expedition tracks",
+  "version": "3.1.0",
+  "description": "MoOLVa Griby 3.1 — Google Maps URL integration and optional satellite layer with expedition GPS observations",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -38,7 +38,9 @@
       "media/gallery/**/*",
       "community30.js",
       "expedition30.js",
-      "expedition30.css"
+      "expedition30.css",
+      "google31.js",
+      "google31.css"
     ],
     "asar": true,
     "win": {
@@ -63,10 +65,10 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-3.0-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.1-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-3.0-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.1-Portable-${arch}.exe"
     }
   }
 }

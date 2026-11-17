@@ -153,6 +153,7 @@ def gather():
             except ValueError:month=0
             observations.append({'id':int(x['id']),'latin':name,'lat':lat,'lon':lon,
                 'date':date,'month':month,'grade':'research','obscured':False,
+                'accuracyM':int(x.get('positional_accuracy') or 0),
                 'source':'https://www.inaturalist.org/observations/'+str(x['id'])})
         if len(data.get('results') or [])<200 or len(observations)>=300:break
         time.sleep(.7)
