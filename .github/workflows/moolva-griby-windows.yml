@@ -1,4 +1,7 @@
 name: MoOLVa Griby 3.1 PRO MAX - Windows Setup and Portable
+concurrency:
+  group: griby-windows-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 on:
   pull_request:
     branches: [master]
