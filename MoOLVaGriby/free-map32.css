@@ -1,0 +1,21 @@
+/* MoOLVa Грибы 3.2 — полноценная бесплатная подложка Leaflet + OSM */
+.fm32-toolbar{border:1px solid #406d50;border-radius:14px;background:#122c23;padding:16px 17px;margin:14px 0 13px}
+.fm32-header{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.fm32-header strong{font-size:18px;color:#f5d5a8}
+.fm32-header small{color:#b5dfc6;font-weight:700}
+.fm32-help{font-size:12px;color:#c1d5c8;line-height:1.55;margin:9px 0 12px}
+.fm32-tools{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.fm32-tools input{flex:1 1 250px;min-width:160px;background:#0c2118;color:#f5eee2;border:1px solid #53745a;border-radius:9px;padding:12px}
+.fm32-tools button{min-height:40px}
+.fm32-status{color:#a7d8b8;font-size:12px;margin:12px 0 0;line-height:1.4}
+.fm32-map{position:absolute;inset:0;z-index:2;background:#dbe5db}
+.fm32-map[hidden]{display:none!important}
+.fm32-map.leaflet-container{font:13px/1.5 Segoe UI,Arial,sans-serif}
+.fm32-map .leaflet-control-attribution{font-size:11px!important}
+.fm32-map .leaflet-control-zoom a{background:#fff;color:#1b3526;width:36px;height:36px;line-height:36px;font-size:23px}
+.fm32-map .leaflet-control-zoom a:hover{background:#ecf1eb}
+.fm32-map .leaflet-tooltip{background:#173629;color:#f2f5ea;white-space:normal;max-width:340px;border:1px solid #5b7f62;box-shadow:0 4px 16px #0005}
+.fm32-map .leaflet-tooltip:before{border-top-color:#173629}
+#exp-map:has(.fm32-map:not([hidden])) .exp-map-controls,
+#exp-map:has(.fm32-map:not([hidden])) .exp-map-attrib{display:none}
+@media(max-width:750px){.fm32-header{display:grid}.fm32-tools input{flex-basis:100%}}
