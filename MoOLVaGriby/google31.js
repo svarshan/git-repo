@@ -45,14 +45,14 @@
   const control=d.createElement('div');
   control.id='gm31-panel';
   control.innerHTML=
-   '<div class="gm31-title"><strong>🛰 Google Maps · дополнительная интеграция с ключом</strong><span>Новый слой 3.1</span></div>'+
+   '<div class="gm31-title"><strong>🛰 Дополнительно: Google Maps / спутник</strong><span>Новый слой 3.1</span></div>'+
    '<p class="gm31-note">Google показывает местность с точными координатами, но не знает точных мест грибниц. Оранжевые — районы сообщений; зелёные — обобщённые записи; голубые — личные GPS; фиолетовые — публичные GPS-наблюдения с указанной точностью.</p>'+
    '<div class="gm31-controls"><button id="gm31-google-selected" class="exp-button" disabled>↗ Выбранная точка в Google Maps</button><button id="gm31-satellite-selected" class="exp-button" disabled>🛰 Спутник Google без ключа</button>'+
    '<label class="gm31-key-label"><span>Google Maps JavaScript API key</span><input type="password" id="gm31-api-key" autocomplete="off" spellcheck="false" placeholder="Вставьте свой API-ключ (только для сеанса)"></label>'+
    '<button class="exp-button" id="gm31-enable">🛰 Показать спутник Google</button><button class="exp-button" id="gm31-hide" hidden>⇦ Офлайн-карта</button></div>'+
    '<p id="gm31-status" class="gm31-status" role="status">Без ключа работает открытие координат в Google Maps. Встроенная карта требует Google Cloud Billing и Maps JavaScript API. Ключ не сохраняется.</p>'+ 
    '<div class="gm31-exact"><label><input id="gm31-exact-checkbox" type="checkbox"> 🟣 Показывать публичные GPS-наблюдения распространённых грибов (точность 1–100 м)</label><p>Только открытые научно-гражданские наблюдения с датами и источником. GPS-точка не означает, что там сейчас есть грибы.</p><div id="gm31-exact-list"></div></div>';
-  page.querySelector('.exp-map-shell').before(control);
+  page.querySelector('.exp-map-shell').after(control);
   const canvas=d.createElement('div');canvas.className='gm31-google-canvas';canvas.id='gm31-google-canvas';canvas.hidden=true;
   mapBox.append(canvas);
   const $=id=>d.getElementById(id);
