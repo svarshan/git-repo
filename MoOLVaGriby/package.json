@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "3.1.0",
-  "description": "MoOLVa Griby 3.1 — Google Maps URL integration and optional satellite layer with expedition GPS observations",
+  "version": "3.2.0",
+  "description": "MoOLVa Грибы 3.2 — бесплатная интерактивная карта Leaflet/OpenStreetMap с населёнными пунктами, GPS и Google Maps links",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -40,7 +40,10 @@
       "expedition30.js",
       "expedition30.css",
       "google31.js",
-      "google31.css"
+      "google31.css",
+      "free-map32.js",
+      "free-map32.css",
+      "node_modules/leaflet/dist/**/*"
     ],
     "asar": true,
     "win": {
@@ -65,10 +68,13 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-3.1-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.2-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-3.1-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.2-Portable-${arch}.exe"
     }
+  },
+  "dependencies": {
+    "leaflet": "1.9.4"
   }
 }
