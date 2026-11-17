@@ -1,0 +1,17 @@
+/* MoOLVa 8.4 accessible offline field panel */
+.m84-panel{background:#0e283d;border:1px solid #476e86;border-radius:15px;padding:17px;margin:15px 0;color:#e3f3ff}
+.m84-panel h2{font-size:19px;margin:0 0 10px}
+.m84-panel input,.m84-panel select{padding:9px 11px;min-height:39px;border:1px solid #577790;background:#091e2f;color:#f1f8ff;border-radius:9px}
+.m84-panel input[type="search"]{min-width:220px;flex:2}
+.m84-bar{display:flex;flex-wrap:wrap;gap:9px;align-items:center;margin:11px 0}
+.m84-panel button{padding:9px 12px;border:1px solid #6b97ac;border-radius:9px;background:#184b65;color:#f0f9ff;cursor:pointer}
+.m84-panel button:hover{background:#28607a}
+.m84-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:11px;max-height:440px;overflow:auto}
+.m84-item{padding:12px;border:1px solid #42647a;border-radius:11px;display:flex;flex-direction:column;gap:8px}
+.m84-item img{height:120px;max-width:100%;object-fit:contain}
+.m84-item p{font-size:13px;margin:0;color:#cadfea}
+.m84-item audio{width:100%}
+.m84-candidate{display:flex;justify-content:space-between;align-items:center;gap:9px;padding:8px;border-bottom:1px solid #38556e}
+.m84-missing{max-height:140px;overflow:auto;font-size:12px}
+.m84-line{padding:3px;border-bottom:1px solid #28465a}
+@media(max-width:600px){.m84-panel{padding:10px}.m84-panel input[type="search"]{min-width:0;width:100%}}

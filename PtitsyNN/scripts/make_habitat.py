@@ -113,75 +113,101 @@ def scan():
         ("CC_BY_4_0","2024,2026"), ("CC0_1_0","2017,2020"),
         ("CC0_1_0","2021,2023"), ("CC0_1_0","2024,2026"),
     ]
+    def accept_record(r):
+        nonlocal accepted
+        if not valid_region(r):
+            rejected["outside_region_or_unverified_province"]+=1
+            return
+        latin = name_key(r.get("species"))
+        b_id = catalog_names.get(latin)
+        if not b_id:
+            rejected["not_catalog_species"]+=1
+            return
+        if r.get("occurrenceStatus") == "ABSENT":
+            rejected["absence"]+=1
+            return
+        seen_licenses[str(r.get("license") or "")]+=1
+        if not license_allowed(r.get("license")):
+            rejected["license"]+=1
+            return
+        if r.get("informationWithheld") or r.get("dataGeneralizations"):
+            rejected["redacted_data"]+=1
+            return
+        issues=set(r.get("issues") or ())
+        if issues.intersection(EXCLUDED_ISSUES):
+            rejected["geospatial"]+=1
+            return
+        uncertainty=r.get("coordinateUncertaintyInMeters")
+        if uncertainty and float(uncertainty)>5000:
+            rejected["imprecise"]+=1
+            return
+        yr = r.get("year")
+        if not isinstance(yr,int) or yr<2016 or yr>int(TODAY[:4]):
+            rejected["date"]+=1
+            return
+        try:
+            lat=float(r["decimalLatitude"])
+            lon=float(r["decimalLongitude"])
+        except (TypeError, ValueError, KeyError):
+            rejected["no_coords"]+=1
+            return
+        if not (GEO["south"]<=lat<=GEO["north"] and GEO["west"]<=lon<=GEO["east"]):
+            rejected["outside_bbox"]+=1
+            return
+        row=math.floor((lat-GEO["south"])/GRID_LAT)
+        col=math.floor((lon-GEO["west"])/GRID_LON)
+        key=(row,col,b_id)
+        counts[key]+=1
+        years[key].add(yr)
+        date_label = str(r.get("eventDate") or str(yr))[:10]
+        dates[key].add(date_label)
+        month = r.get("month")
+        if isinstance(month,int) and 1 <= month <= 12:
+            monthly[key][month] += 1
+            monthly_dates[key][month].add(date_label)
+        labels[b_id]=latin
+        accepted+=1
+
+    failures=0; successful_pages=0; source_name="GBIF occurrence/search"
+    source_url="https://www.gbif.org/occurrence/search?country=RU&taxon_key=212"
     for page in range(MAX_PAGES):
         source_license,source_years=cohorts[page % len(cohorts)]
         offset=(page // len(cohorts))*LIMIT
-        data=get("https://api.gbif.org/v1/occurrence/search",
-                 {**qs,"license":source_license,"year":source_years,"offset":offset},timeout=30).json()
-        records=data.get("results",[])
-        if not isinstance(records,list):
-            raise RuntimeError("Malformed GBIF occurrence data")
-        queried+=len(records)
-        if page == 0 and records:
-            a=records[0]
-            print("GBIF first record fields:",{k:a.get(k) for k in ("species","scientificName","stateProvince","gadm","license","year","coordinateUncertaintyInMeters","issues")})
-        for r in records:
-            if not valid_region(r):
-                rejected["outside_region_or_unverified_province"]+=1
-                continue
-            latin = name_key(r.get("species"))
-            b_id = catalog_names.get(latin)
-            if not b_id:
-                rejected["not_catalog_species"]+=1
-                continue
-            if r.get("occurrenceStatus") == "ABSENT":
-                rejected["absence"]+=1
-                continue
-            seen_licenses[str(r.get("license") or "")]+=1
-            if not license_allowed(r.get("license")):
-                rejected["license"]+=1
-                continue
-            if r.get("informationWithheld") or r.get("dataGeneralizations"):
-                rejected["redacted_data"]+=1
-                continue
-            issues=set(r.get("issues") or ())
-            if issues.intersection(EXCLUDED_ISSUES):
-                rejected["geospatial"]+=1
-                continue
-            uncertainty=r.get("coordinateUncertaintyInMeters")
-            if uncertainty and float(uncertainty)>5000:
-                rejected["imprecise"]+=1
-                continue
-            yr = r.get("year")
-            if not isinstance(yr,int) or yr<2016 or yr>int(TODAY[:4]):
-                rejected["date"]+=1
-                continue
-            try:
-                lat=float(r["decimalLatitude"])
-                lon=float(r["decimalLongitude"])
-            except (TypeError, ValueError, KeyError):
-                rejected["no_coords"]+=1
-                continue
-            if not (GEO["south"]<=lat<=GEO["north"] and GEO["west"]<=lon<=GEO["east"]):
-                rejected["outside_bbox"]+=1
-                continue
-            row=math.floor((lat-GEO["south"])/GRID_LAT)
-            col=math.floor((lon-GEO["west"])/GRID_LON)
-            key=(row,col,b_id)
-            counts[key]+=1
-            years[key].add(yr)
-            date_label = str(r.get("eventDate") or str(yr))[:10]
-            dates[key].add(date_label)
-            month = r.get("month")
-            if isinstance(month,int) and 1 <= month <= 12:
-                monthly[key][month] += 1
-                monthly_dates[key][month].add(date_label)
-            labels[b_id]=latin
-            accepted+=1
-        print(f"GBIF page {page+1}: scanned {queried}; accepted {accepted}; last page {len(records)}")
-        if data.get("endOfRecords") or len(records)<LIMIT:
+        try:
+            data=get("https://api.gbif.org/v1/occurrence/search",
+                     {**qs,"license":source_license,"year":source_years,"offset":offset},
+                     retries=1,timeout=18).json()
+        except (requests.RequestException,ValueError,RuntimeError) as exc:
+            failures+=1
+            print("GBIF cohort unavailable",page+1,str(exc)[:180],flush=True)
+            if failures>=3:break
             continue
-
+        records=data.get("results",[]) if isinstance(data,dict) else None
+        if not isinstance(records,list):
+            failures+=1
+            if failures>=3:break
+            continue
+        successful_pages+=1
+        queried+=len(records)
+        for record in records:
+            accept_record(record)
+        print(f"GBIF page {page+1}: scanned {queried}; accepted {accepted}; last page {len(records)}",flush=True)
+    def has_publishable_cells():
+        return any(n>=3 and len(dates[k])>=2 for k,n in counts.items())
+    if not has_publishable_cells():
+        # Retain only real observed coordinates; source boundaries are
+        # verified by the iNaturalist region, not a bounding-box guess.
+        from habitat_fallback84 import fetch, PLACE_URL
+        alternative,checked,issues=fetch(get)
+        if alternative:
+            counts.clear();years.clear();dates.clear();labels.clear();monthly.clear();monthly_dates.clear()
+            accepted=0;queried=checked
+            for record in alternative:accept_record(record)
+            source_name="iNaturalist research-grade CC observations, Nizhegorodskaya obl (place 134584)"
+            source_url=PLACE_URL
+        if not has_publishable_cells():
+            raise RuntimeError("No verified multi-day bird occurrence zones from GBIF or iNaturalist; release blocked rather than inventing dots")
+    print("HABITAT data source",source_name,"observed records",accepted,flush=True)
     print("GBIF filtering diagnostics:", dict(rejected))
     print("GBIF license distribution within regional catalog records:",dict(seen_licenses))
     # Mask unusual or one-off points; never ship individual source coordinates.
@@ -205,8 +231,9 @@ def scan():
         cells.append(dict(lat=lat,lon=lon,species=species[:35],total=sum(x["n"] for x in species)))
     cells.sort(key=lambda x:-x["total"])
     return dict(
-        generated=TODAY, source="GBIF occurrence/search", attribution="GBIF.org (aggregated records; dataset authorship retained at source)",
-        sourceUrl="https://www.gbif.org/occurrence/search?country=RU&taxon_key=212",
+        generated=TODAY, source=source_name, attribution=("GBIF.org" if source_name.startswith("GBIF") else "iNaturalist.org")+
+        " (aggregated records; source authorship retained on the originating platform)",
+        sourceUrl=source_url,
         geographicSource=MAP_SOURCE,
         geographicAuthor=MAP_AUTHOR,
         geographicLicenseUrl=MAP_LICENSE_URL,

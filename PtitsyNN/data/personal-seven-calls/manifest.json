@@ -1,0 +1,128 @@
+[
+  {
+    "latin": "Clanga clanga",
+    "id": "19688",
+    "file": "clanga-clanga-xc19688.mp3",
+    "source": "https://xeno-canto.org/19688",
+    "author": "David Farrow",
+    "license": "https://creativecommons.org/licenses/by-nc-sa/3.0/",
+    "quality": "A",
+    "type": "call",
+    "metrics": {
+      "seconds": 14.16,
+      "meanDb": -17.7,
+      "peakDb": -0.0,
+      "silenceFraction": 0.07
+    },
+    "sha256": "676c5791286c1faf15c5aa466edb5cb1dd89ee08c2f030df89e379ab91407599",
+    "note": "Преобразовано в моно MP3; некоммерческая лицензия CC BY-NC-SA. Вид и отсутствие посторонних звуков требуют проверки пользователем."
+  },
+  {
+    "latin": "Larus hyperboreus",
+    "id": "432754",
+    "file": "larus-hyperboreus-xc432754.mp3",
+    "source": "https://xeno-canto.org/432754",
+    "author": "Stanislas Wroza",
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "quality": "A",
+    "type": "alarm call, call, flight call",
+    "metrics": {
+      "seconds": 36.24,
+      "meanDb": -26.3,
+      "peakDb": -1.1,
+      "silenceFraction": 0.0
+    },
+    "sha256": "7b99f7bf1254354d13efb12648ffa19e72c2ede783c5cea8c1fb7285f6c16bee",
+    "note": "Преобразовано в моно MP3; некоммерческая лицензия CC BY-NC-SA. Вид и отсутствие посторонних звуков требуют проверки пользователем."
+  },
+  {
+    "latin": "Gallinago media",
+    "id": "800049",
+    "file": "gallinago-media-xc800049.mp3",
+    "source": "https://xeno-canto.org/800049",
+    "author": "Stanislas Wroza",
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "quality": "A",
+    "type": "flight call",
+    "metrics": {
+      "seconds": 13.85,
+      "meanDb": -33.4,
+      "peakDb": -3.2,
+      "silenceFraction": 0.0
+    },
+    "sha256": "8d7e3299e2c63d3b946b6f1c05f440033b11515d821cec0381a3d1b8fc05d2f5",
+    "note": "Преобразовано в моно MP3; некоммерческая лицензия CC BY-NC-SA. Вид и отсутствие посторонних звуков требуют проверки пользователем."
+  },
+  {
+    "latin": "Calidris minuta",
+    "id": "765719",
+    "file": "calidris-minuta-xc765719.mp3",
+    "source": "https://xeno-canto.org/765719",
+    "author": "Stanislas Wroza",
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "quality": "A",
+    "type": "flight call, smooth calls",
+    "metrics": {
+      "seconds": 40.27,
+      "meanDb": -34.7,
+      "peakDb": -6.3,
+      "silenceFraction": 0.0
+    },
+    "sha256": "c92995bfd30e3aa5d5242dfb2535547dc405f8561ba3e4c733955bc4f73ca50b",
+    "note": "Преобразовано в моно MP3; некоммерческая лицензия CC BY-NC-SA. Вид и отсутствие посторонних звуков требуют проверки пользователем."
+  },
+  {
+    "latin": "Circus pygargus",
+    "id": "1075280",
+    "file": "circus-pygargus-xc1075280.mp3",
+    "source": "https://xeno-canto.org/1075280",
+    "author": "Stanislas Wroza",
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "quality": "A",
+    "type": "call, song",
+    "metrics": {
+      "seconds": 12.53,
+      "meanDb": -38.0,
+      "peakDb": -11.2,
+      "silenceFraction": 0.437
+    },
+    "sha256": "08528dd0fbb81088b16eb9a1b4a6803e196618719d75922b45bc37c2c0dd1c69",
+    "note": "Преобразовано в моно MP3; некоммерческая лицензия CC BY-NC-SA. Вид и отсутствие посторонних звуков требуют проверки пользователем."
+  },
+  {
+    "latin": "Mergellus albellus",
+    "id": "1167398",
+    "file": "mergellus-albellus-xc1167398.mp3",
+    "source": "https://xeno-canto.org/1167398",
+    "author": "Stanislas Wroza",
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "quality": "A",
+    "type": "song",
+    "metrics": {
+      "seconds": 33.49,
+      "meanDb": -33.2,
+      "peakDb": -0.0,
+      "silenceFraction": 0.012
+    },
+    "sha256": "302fb8feab0b8eb51d6954515a8c1de50b91a4eacec29abb45eb469c69d62e5c",
+    "note": "Преобразовано в моно MP3; некоммерческая лицензия CC BY-NC-SA. Вид и отсутствие посторонних звуков требуют проверки пользователем."
+  },
+  {
+    "latin": "Circus macrourus",
+    "id": "471461",
+    "file": "circus-macrourus-xc471461.mp3",
+    "source": "https://xeno-canto.org/471461",
+    "author": "Stanislas Wroza",
+    "license": "https://creativecommons.org/licenses/by-nc-sa/4.0/",
+    "quality": "A",
+    "type": "alarm call, call, flight call, song",
+    "metrics": {
+      "seconds": 30.43,
+      "meanDb": -37.4,
+      "peakDb": -3.0,
+      "silenceFraction": 0.572
+    },
+    "sha256": "f189f45dd43b8c7fac5d5af4c3debc270ef57cbf6e8ea79d6d45aafb292c4d5e",
+    "note": "Преобразовано в моно MP3; некоммерческая лицензия CC BY-NC-SA. Вид и отсутствие посторонних звуков требуют проверки пользователем."
+  }
+]

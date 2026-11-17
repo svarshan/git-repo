@@ -52,7 +52,7 @@ def screenshots():
         raise ValueError('Real packaged Windows Electron screenshot evidence absent')
     if smoke.get('catalog',{}).get('species')!=298 or smoke.get('modelAvailable') is not True or not smoke.get('visionModelVerified',{}).get('ok'):
         raise ValueError('Packaged screenshot runtime lacks catalog or Perch model')
-    names=['01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png']
+    names=['01-glavnaya.png','02-bird-ai.png','03-karta-oblasti.png','04-encyclopedia.png','05-polevoi-dnevnik.png','06-audiolaboratoriya.png','07-intelligence-center.png','08-pro-max-8.6.png']
     rows=smoke.get('screenshots',[])
     if [x.get('name') for x in rows]!=names:raise ValueError('Some actual application sections were not captured')
     result=[]
@@ -84,11 +84,26 @@ def finalize():
     coverage=json.loads((BASE/'data'/'coverage.json').read_text(encoding='utf-8-sig'))
     voices=json.loads((DIST/'voice-inventory.json').read_text(encoding='utf-8'))
     version=json.loads((BASE/'package.json').read_text(encoding='utf-8'))['version']
-    if smoke.get('version')!=version or version!='8.1.0':raise ValueError('Executable version differs from release')
+    if smoke.get('version')!=version or version!='8.6.0':raise ValueError('Executable version differs from release')
     if voices['withPrimaryVoice']!=coverage.get('birdCalls'):raise ValueError('Coverage changed after inventory')
+    if coverage.get('species')!=298 or coverage.get('photos')!=298 or coverage.get('articles')!=298:
+        raise ValueError('8.4 integrity gate: missing species, real photos, or articles')
+    for required in ['audio-review83.csv','audio-review83.md','audio-review82.csv','audio-review82.md']:
+        if not (DIST/required).is_file():raise ValueError('8.4 mandatory audio QA appendix missing: '+required)
+    review=coverage.get('photo82') or {}
+    if int(review.get('suspectedEggs',-1))!=0:raise ValueError('8.4 detected unresolved egg/nest image metadata')
     guard=json.loads((DIST/'voice-regression.json').read_text(encoding='utf-8'))
     if guard['newlyMissingPreviouslyPresent'] or guard['currentBirdCalls']<261:raise ValueError('Audio nonregression certificate invalid')
+    if guard['currentBirdCalls']<265:raise ValueError('8.5 voice count below 8.4 benchmark of 265')
+    for required in ['audio-audit85.csv','audio-audit85.json','clean-variants85.json','candidate-review86.csv','candidate-review86.json']:
+        if not (DIST/required).is_file():raise ValueError('8.5 mandatory audio appendix missing: '+required)
+    if not (DIST/'voice-sources84.csv').is_file() or not (DIST/'voice-goal84.json').is_file():
+        raise ValueError('8.4 source audit absent')
+    locked={'Asio otus','Otis tarda','Pica pica'}
+    if locked.intersection(coverage.get('missingAudio',[])):raise ValueError('Lost one of the 3 historically recovered 8.2 species')
     if smoke.get('photoPipelineVerified',{}).get('passes')!=3:raise ValueError('Three real crop ONNX passes not completed')
+    if not smoke.get('autoBackup',{}).get('verified') or smoke['autoBackup'].get('files',0)<1:
+        raise ValueError('Real packaged Windows app did not save an automatic local backup')
     if smoke.get('guiInteractions',{}).get('compareCards')!=2:raise ValueError('Compare GUI control smoke failed')
     backup=smoke.get('backupSmoke') or {}
     if backup.get('validArchive')!='restored' or backup.get('alteredArchive')!='rejected':
@@ -97,6 +112,7 @@ def finalize():
     report={'version':version,'status':'PASS','automatedTests':checks,
        'gui':{'packaged':True,'system':'Windows GitHub Actions','photoPipeline':smoke['photoPipelineVerified'],'controls':smoke['guiInteractions'],'backupSmoke':backup,'screenshots':shots,'method':smoke['captureMethod'],
               'limitations':'Actual packaged Electron captured with offscreen Chromium; not an interactive user desktop test.'},
+       'goal298':{'target':298,'remaining':298-coverage.get('birdCalls',0)},
        'catalog':{'species':coverage.get('species'),'photos':coverage.get('photos'),'voices':coverage.get('birdCalls'),
                   'articles':coverage.get('articles'),'missingVoices':voices['missingPrimaryVoice'],'baseline79Voices':guard['baselineBirdCalls'],'lostPriorSpecies':guard['newlyMissingPreviouslyPresent']},
        'notTested':['User microphone and sound hardware','Restore operation on personal datasets','Independent model accuracy']}
