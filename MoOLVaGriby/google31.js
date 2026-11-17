@@ -45,7 +45,7 @@
   const control=d.createElement('div');
   control.id='gm31-panel';
   control.innerHTML=
-   '<div class="gm31-title"><strong>🛰 Google Maps · спутник и настоящие дороги</strong><span>Новый слой 3.1</span></div>'+
+   '<div class="gm31-title"><strong>🛰 Google Maps · дополнительная интеграция с ключом</strong><span>Новый слой 3.1</span></div>'+
    '<p class="gm31-note">Google показывает местность с точными координатами, но не знает точных мест грибниц. Оранжевые — районы сообщений; зелёные — обобщённые записи; голубые — личные GPS; фиолетовые — публичные GPS-наблюдения с указанной точностью.</p>'+
    '<div class="gm31-controls"><button id="gm31-google-selected" class="exp-button" disabled>↗ Выбранная точка в Google Maps</button><button id="gm31-satellite-selected" class="exp-button" disabled>🛰 Спутник Google без ключа</button>'+
    '<label class="gm31-key-label"><span>Google Maps JavaScript API key</span><input type="password" id="gm31-api-key" autocomplete="off" spellcheck="false" placeholder="Вставьте свой API-ключ (только для сеанса)"></label>'+
@@ -131,6 +131,7 @@
    googleLoaded=true;mapReady=true;canvas.hidden=false;
    $('gm31-hide').hidden=false;$('gm31-enable').hidden=true;
    paint();
+   w.dispatchEvent(new w.CustomEvent('moolva:google-map-enabled'));
   }
   function loadGoogle(key){
    if(googleLoaded){canvas.hidden=false;$('gm31-hide').hidden=false;$('gm31-enable').hidden=true;paint();return;}
@@ -155,7 +156,7 @@
   $('gm31-google-selected').addEventListener('click',()=>{const u=picked&&googleUrl(picked.lat,picked.lon);if(u)w.open(u,'_blank','noopener,noreferrer');});
   $('gm31-satellite-selected').addEventListener('click',()=>{const u=picked&&googleSatelliteUrl(picked.lat,picked.lon);if(u)w.open(u,'_blank','noopener,noreferrer');});
   $('gm31-enable').addEventListener('click',()=>loadGoogle($('gm31-api-key').value.trim()));
-  $('gm31-hide').addEventListener('click',()=>{canvas.hidden=true;$('gm31-hide').hidden=true;$('gm31-enable').hidden=false;status('Офлайн-координатная схема включена. Google-карта скрыта.');});
+  $('gm31-hide').addEventListener('click',()=>{canvas.hidden=true;$('gm31-hide').hidden=true;$('gm31-enable').hidden=false;status('Возвращаем бесплатную карту OpenStreetMap.');w.dispatchEvent(new w.CustomEvent('moolva:google-map-hidden'));});
   w.addEventListener('moolva:expedition-selected',e=>select(e.detail));
   w.addEventListener('moolva:expedition-data-changed',()=>{if(googleLoaded)paint();});
   w.addEventListener('moolva:expedition-shown',()=>{if(googleLoaded){w.requestAnimationFrame(()=>{gm.setCenter(gm.getCenter());paint();});}});
