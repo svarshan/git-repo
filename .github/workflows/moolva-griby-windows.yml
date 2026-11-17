@@ -1,4 +1,4 @@
-name: MoOLVa Griby 2.0 PRO MAX - Windows Setup and Portable
+name: MoOLVa Griby 3.0 PRO MAX - Windows Setup and Portable
 on:
   pull_request:
     branches: [master]
@@ -43,6 +43,8 @@ jobs:
           node --check upgrade20.js
           node --check region20.js
           node --check photos-gallery20.js
+          node --check community30.js
+          node --check expedition30.js
           npm test
           python -m unittest discover -s tests -p 'test_*.py'
       - name: Build evidence-linked regional fungal list
@@ -101,10 +103,11 @@ jobs:
             throw "Real GUI smoke failed: $($job.ExitCode)"
           }
           if (-not (Test-Path 'dist/evidence/01-glavnaya.png')) { throw 'Real screenshot missing' }
+          if (-not (Test-Path 'dist/evidence/05-expedition.png')) { throw 'Real expedition screenshot missing' }
       - name: Validate EXEs and calculate SHA256
         shell: pwsh
         run: |
-          $files = @('dist/MoOLVa-Griby-2.0-Setup-x64.exe','dist/MoOLVa-Griby-2.0-Portable-x64.exe')
+          $files = @('dist/MoOLVa-Griby-3.0-Setup-x64.exe','dist/MoOLVa-Griby-3.0-Portable-x64.exe')
           $lines = @()
           foreach($p in $files) {
             if (-not (Test-Path $p)) { throw "Missing EXE: $p" }
@@ -117,23 +120,23 @@ jobs:
       - name: Setup EXE
         uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-2.0-Setup-EXE
-          path: MoOLVaGriby/dist/MoOLVa-Griby-2.0-Setup-x64.exe
+          name: MoOLVa-Griby-3.0-Setup-EXE
+          path: MoOLVaGriby/dist/MoOLVa-Griby-3.0-Setup-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Portable EXE
         uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-2.0-Portable-EXE
-          path: MoOLVaGriby/dist/MoOLVa-Griby-2.0-Portable-x64.exe
+          name: MoOLVa-Griby-3.0-Portable-EXE
+          path: MoOLVaGriby/dist/MoOLVa-Griby-3.0-Portable-x64.exe
           compression-level: 0
           if-no-files-found: error
           retention-days: 30
       - name: Real screenshot and audit evidence
         uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-2.0-Quality-Evidence
+          name: MoOLVa-Griby-3.0-Quality-Evidence
           path: |
             MoOLVaGriby/dist/SHA256SUMS.txt
             MoOLVaGriby/dist/evidence/*
@@ -144,6 +147,8 @@ jobs:
             MoOLVaGriby/photos-gallery20.js
             MoOLVaGriby/region20.js
             MoOLVaGriby/README_2_0.md
+            MoOLVaGriby/README_3_0.md
+            MoOLVaGriby/community30.js
           if-no-files-found: error
           retention-days: 30
       - name: Publish public Windows EXEs on merged master
@@ -152,16 +157,16 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v2.0.0'
+          $tag = 'v3.0.0'
           gh release view $tag --repo ${{ github.repository }} *> $null
           if ($LASTEXITCODE -eq 0) { Write-Host 'Public release already exists; no overwrite'; exit 0 }
-          gh release create $tag "dist/MoOLVa-Griby-2.0-Setup-x64.exe" "dist/MoOLVa-Griby-2.0-Portable-x64.exe" "dist/SHA256SUMS.txt" --repo ${{ github.repository }} --title 'MoOLVa Грибы 2.0 PRO MAX' --notes 'Офлайн-атлас; определения по фото не подтверждают безопасность грибов. Сборка проверена Windows GUI и SHA256.'
+          gh release create $tag "dist/MoOLVa-Griby-3.0-Setup-x64.exe" "dist/MoOLVa-Griby-3.0-Portable-x64.exe" "dist/SHA256SUMS.txt" --repo ${{ github.repository }} --title 'MoOLVa Грибы 3.0 PRO MAX' --notes 'Офлайн-атлас; определения по фото не подтверждают безопасность грибов. Сборка проверена Windows GUI и SHA256.'
           if ($LASTEXITCODE -ne 0) { throw 'Release creation failed' }
       - name: Diagnostics on failed build
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-2.0-Diagnostics
+          name: MoOLVa-Griby-3.0-Diagnostics
           path: |
             MoOLVaGriby/photo-report.json
             MoOLVaGriby/dist/evidence/*

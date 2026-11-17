@@ -1,0 +1,147 @@
+/* MoOLVa 3.0. Publicly reported community areas, NOT exact picking coordinates. Dates are publication dates. */
+window.MOOLVA_COMMUNITY30=[
+  {
+    "id": "frolishchi",
+    "name": "Фролищи",
+    "area": "Володарский округ",
+    "lat": 56.423127,
+    "lon": 42.652737,
+    "approxKm": 12,
+    "species": "Белые грибы, лисички",
+    "reported": "2026-09-09",
+    "source": "https://www.nn.ru/text/gorod/2026/09/09/76632838/",
+    "details": "Публичные сообщения участников сообщества о результатах сбора в лесах около посёлка"
+  },
+  {
+    "id": "bor",
+    "name": "Бор",
+    "area": "городской округ Бор",
+    "lat": 56.3581,
+    "lon": 44.0748,
+    "approxKm": 15,
+    "species": "Опята, белые грибы",
+    "reported": "2026-09-13",
+    "source": "https://niann.ru/?id=644925",
+    "details": "Упоминаются находки в окрестностях Бора, без координат конкретной поляны"
+  },
+  {
+    "id": "shumilovo",
+    "name": "Шумилово",
+    "area": "Богородский округ",
+    "lat": 56.131382,
+    "lon": 43.658883,
+    "approxKm": 8,
+    "species": "Опята",
+    "reported": "2026-09-13",
+    "source": "https://niann.ru/?id=644925",
+    "details": "Публикация пересказывает сообщения грибников о сборе осенних опят"
+  },
+  {
+    "id": "tumbotino",
+    "name": "За Тумботином",
+    "area": "Павловский округ",
+    "lat": 55.99611,
+    "lon": 43.0206,
+    "approxKm": 12,
+    "species": "Опята",
+    "reported": "2026-09-13",
+    "source": "https://niann.ru/?id=644925",
+    "details": "Сообщали о находках за посёлком; направление не определено точнее"
+  },
+  {
+    "id": "oranki",
+    "name": "Оранки",
+    "area": "Богородский округ",
+    "lat": 55.895869,
+    "lon": 43.715481,
+    "approxKm": 9,
+    "species": "Белые грибы, подосиновики",
+    "reported": "2026-08-10",
+    "source": "https://nn.aif.ru/society/nizhegorodcy-nazvali-samye-gribnye-mesta-regiona",
+    "details": "По пересказу сообщения грибницы о сборе корзин в окрестностях села"
+  },
+  {
+    "id": "lunskoe",
+    "name": "Лунское озеро",
+    "area": "Нижний Новгород",
+    "lat": 56.390284,
+    "lon": 43.799999,
+    "approxKm": 4,
+    "species": "Подосиновики, белые грибы",
+    "reported": "2026-08-10",
+    "source": "https://nn.aif.ru/society/nizhegorodcy-nazvali-samye-gribnye-mesta-regiona",
+    "details": "Наблюдение рядом с озером; точная точка в публикации не указана"
+  },
+  {
+    "id": "balakhna",
+    "name": "Балахна",
+    "area": "Балахнинский округ",
+    "lat": 56.48989,
+    "lon": 43.60114,
+    "approxKm": 12,
+    "species": "Белые грибы, лисички",
+    "reported": "2026-08-10",
+    "source": "https://nn.aif.ru/society/nizhegorodcy-nazvali-samye-gribnye-mesta-regiona",
+    "details": "Пользователь сообщил о находках в Балахне без указания лесного квартала"
+  },
+  {
+    "id": "gidrotorf",
+    "name": "Гидроторф",
+    "area": "Балахнинский округ",
+    "lat": 56.474444,
+    "lon": 43.541389,
+    "approxKm": 9,
+    "species": "Грибы, вид не уточнён",
+    "reported": "2026-08-28",
+    "source": "https://www.nn.ru/text/food/2026/08/28/76613871/",
+    "details": "Посёлок назван в материале о направлениях грибного сбора"
+  },
+  {
+    "id": "mulino",
+    "name": "Мулино",
+    "area": "Володарский округ",
+    "lat": 56.288646,
+    "lon": 42.921361,
+    "approxKm": 11,
+    "species": "Грибы, вид не уточнён",
+    "reported": "2026-08-28",
+    "source": "https://www.nn.ru/text/food/2026/08/28/76613871/",
+    "details": "Отмечены леса рядом с Мулино; отметка у населённого пункта"
+  },
+  {
+    "id": "reshetikha",
+    "name": "Решетиха",
+    "area": "Володарский округ",
+    "lat": 56.217155,
+    "lon": 43.290317,
+    "approxKm": 8,
+    "species": "Волнушки, подберёзовики, сыроежки",
+    "reported": "2026-09-13",
+    "source": "https://niann.ru/?id=644925",
+    "details": "В пересказе обсуждения грибных мест упоминается посёлок Решетиха"
+  },
+  {
+    "id": "lukino",
+    "name": "Лукино",
+    "area": "Балахнинский округ",
+    "lat": 56.44125,
+    "lon": 43.62956,
+    "approxKm": 9,
+    "species": "Волнушки, подберёзовики, сыроежки",
+    "reported": "2026-09-13",
+    "source": "https://niann.ru/?id=644925",
+    "details": "Сообщение о месте между Лукино и озером Костичево. Направление не отображено точной точкой"
+  },
+  {
+    "id": "osinki",
+    "name": "Осинки",
+    "area": "Семёновский округ",
+    "lat": 56.73134,
+    "lon": 44.29853,
+    "approxKm": 10,
+    "species": "Белые грибы",
+    "reported": "2026-09-26",
+    "source": "https://nn.aif.ru/society/nizhegorodcam-rasskazali-gde-luchshe-vsego-sobirat-belye-griby",
+    "details": "В публикации говорится о белых грибах и сухих лесах близ деревни"
+  }
+];

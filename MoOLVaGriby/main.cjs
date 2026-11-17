@@ -10,7 +10,7 @@ function createWindow(){
  win=new BrowserWindow({width:1420,height:920,minWidth:960,minHeight:680,autoHideMenuBar:true,show:false,backgroundColor:'#0a1512',
   icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
  win.webContents.setWindowOpenHandler(({url})=>{
-  if(/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org)\//.test(url))shell.openExternal(url);
+  if(/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org)\//.test(url))shell.openExternal(url);
   return {action:'deny'};
  });
  win.webContents.on('will-navigate',(event,url)=>{if(!url.startsWith('file://'))event.preventDefault();});
@@ -35,6 +35,12 @@ function createWindow(){
       await new Promise(r=>setTimeout(r,200));
       fs.writeFileSync(path.join(folder,name),(await win.webContents.capturePage()).toPNG());
     }
+    await win.webContents.executeJavaScript("document.querySelector('[data-expedition30=\"open\"]').click()");
+    await new Promise(r=>setTimeout(r,250));
+    fs.writeFileSync(path.join(folder,'05-expedition.png'),(await win.webContents.capturePage()).toPNG());
+    const expedition=await win.webContents.executeJavaScript("({shown:document.querySelector('#expedition30')?.classList.contains('active'),reports:window.MoOLVaExpedition30?.reportData?.length||0,pins:document.querySelectorAll('#exp-map-pins .exp-pin').length})",true);
+    fs.writeFileSync(path.join(folder,'expedition-smoke.json'),JSON.stringify(expedition,null,2));
+    if(!expedition.shown||expedition.reports<10||expedition.pins<10)throw Error('Expedition map failed GUI checks '+JSON.stringify(expedition));
     clearTimeout(failure);app.exit(0);
    }catch(e){fs.writeFileSync(path.join(folder,'gui-error.txt'),String(e.stack||e));clearTimeout(failure);app.exit(3);}
   });
