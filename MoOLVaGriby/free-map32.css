@@ -19,3 +19,10 @@
 #exp-map:has(.fm32-map:not([hidden])) .exp-map-controls,
 #exp-map:has(.fm32-map:not([hidden])) .exp-map-attrib{display:none}
 @media(max-width:750px){.fm32-header{display:grid}.fm32-tools input{flex-basis:100%}}
+
+
+/* 3.3 static fallback screen: the map section is present before optional scripts */
+.exp-map-placeholder{position:absolute;inset:0;background:linear-gradient(145deg,#143b30,#1b543e);color:#f1e8d5;display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:30px;gap:12px}
+.exp-map-placeholder strong{font-size:22px;color:#f7ca88}
+.exp-map-placeholder p{max-width:410px;color:#d0e4d0;line-height:1.55}
+.exp-map-placeholder a{color:#ffd1a0;text-decoration:underline}
