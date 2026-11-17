@@ -43,8 +43,8 @@
  main.append(section);
  const $=id=>doc.getElementById(id);
  function setCounts(){$('exp-count-reports').textContent=reportData.length;$('exp-count-observations').textContent=obs.length;$('exp-count-personal').textContent=mine.length;}
- function save(){localStorage.setItem(pointKey,JSON.stringify(mine));localStorage.setItem(trackKey,JSON.stringify(track));setCounts();}
- function show(){doc.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x===section));doc.querySelectorAll('.sidebar button').forEach(x=>x.classList.toggle('selected',x===entry));$('heading').textContent='Экспедиция 3.0';$('subtitle').textContent='Публичные сообщения, обобщённые наблюдения и личные маршруты';draw();w.scrollTo(0,0);}
+ function save(){localStorage.setItem(pointKey,JSON.stringify(mine));localStorage.setItem(trackKey,JSON.stringify(track));setCounts();w.dispatchEvent(new w.CustomEvent('moolva:expedition-data-changed'));}
+ function show(){doc.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x===section));doc.querySelectorAll('.sidebar button').forEach(x=>x.classList.toggle('selected',x===entry));$('heading').textContent='Экспедиция 3.0';$('subtitle').textContent='Публичные сообщения, обобщённые наблюдения и личные маршруты';draw();w.dispatchEvent(new w.CustomEvent('moolva:expedition-shown'));w.scrollTo(0,0);}
  entry.addEventListener('click',show);
  const box=$('exp-map');let mapW=900,mapH=560;
  function worldPx(lat,lon,z){const size=256*Math.pow(2,z),clamp=Math.max(-85.0511,Math.min(85.0511,lat)),r=clamp*Math.PI/180;return{x:(lon+180)/360*size,y:(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*size};}
@@ -71,7 +71,7 @@
  else if(p.kind==='observations'){$('exp-info-text').textContent='В этой обобщённой геоячейке опубликовано наблюдений: '+p.count+'. Примеры научных названий: '+p.names.join(', ')+'. Данные не являются картой съедобности.';
  $('exp-info-extra').innerHTML='<p>Примерная сетка, точные координаты исходных наблюдений не показываются.</p><a href="https://www.inaturalist.org/observations?place_id=134584&taxon_id=47170" target="_blank" rel="noopener noreferrer">iNaturalist ↗</a>';}
  else{$('exp-info-text').textContent='Приватная точка: '+p.lat.toFixed(5)+', '+p.lon.toFixed(5)+'. '+p.note;
- $('exp-info-extra').innerHTML='<button type="button" data-exp-delete="'+esc(p.id)+'" class="exp-button">Удалить точку</button>';}
+ $('exp-info-extra').innerHTML='<button type="button" data-exp-delete="'+esc(p.id)+'" class="exp-button">Удалить точку</button>';} w.dispatchEvent(new w.CustomEvent('moolva:expedition-selected',{detail:p}));
  }
  function list(){let q=$('exp-search').value.toLowerCase().trim();$('exp-reports-list').innerHTML=reportData.filter(x=>(x.name+' '+x.area+' '+x.species).toLowerCase().includes(q)).sort((a,b)=>b.reported.localeCompare(a.reported)).map(x=>'<button type="button" data-exp-report="'+esc(x.id)+'"><b>'+esc(x.name)+'</b><span>'+esc(x.species)+' · '+esc(x.reported)+'</span><small>'+esc(x.area)+' · приблизительный район</small></button>').join('')||'<p>Ничего не найдено</p>';
  $('exp-personal-list').innerHTML=mine.map(x=>'<div class="exp-private-row">'+esc(x.name)+' · '+x.lat.toFixed(4)+', '+x.lon.toFixed(4)+'</div>').join('');setCounts();}
@@ -103,7 +103,7 @@
  catch(err){$('exp-private-status').textContent='Импорт отменён: '+err.message;}finally{e.target.value='';}});
  w.addEventListener('resize',()=>{if(section.classList.contains('active'))draw();});
  setCounts();list();
- w.MoOLVaExpedition30={show,reportData,observationCells:obs};
+ w.MoOLVaExpedition30={show,reportData,observationCells:obs,selectPoint:choose,getSelection:()=>picked};
  }
  return {bounds,validCoordinate,acceptedReport,projected,aggregate,importPoint,xmlEscape,gpx,mount};
 });
