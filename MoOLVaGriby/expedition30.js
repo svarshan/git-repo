@@ -26,13 +26,13 @@
  let track=fromStorage(trackKey).filter(x=>validCoordinate(x.lat,x.lon)).slice(-5000);
  let enabled={reports:true,observations:true,personal:true};
  let picked=null,zoom=8,center={lat:56.35,lon:43.50},online=false;
- const entry=doc.createElement('button');entry.type='button';entry.dataset.expedition30='open';entry.innerHTML='<span>🧭</span> Экспедиция 3.0';nav.append(entry);
+ const entry=doc.createElement('button');entry.type='button';entry.dataset.expedition30='open';entry.innerHTML='<span>🧭</span> Экспедиция 3.2';nav.append(entry);
  const section=doc.createElement('section');section.className='page';section.id='expedition30';
  section.innerHTML='<div class="sectiontop"><div><span class="eyebrow">MoOLVa Грибы 3.0 · Нижегородская область</span><h2>Экспедиция · карта грибных мест</h2></div></div>'+
  '<div class="exp-warning">📍 <b>Геометки соцсетей — ориентиры у населённых пунктов, не координаты грибных полян.</b> Результаты 2026 года не гарантируют находок в другой день. Обозначения грибов не подтверждают их съедобность.</div>'+
  '<div class="exp-summary"><div><strong id="exp-count-reports"></strong><span>районов из сообщений грибников</span></div><div><strong id="exp-count-observations"></strong><span>обобщённых ячеек наблюдений</span></div><div><strong id="exp-count-personal"></strong><span>моих точек</span></div></div>'+
  '<div class="exp-toolbar"><label><input type="checkbox" id="exp-reports" checked> 🟠 Сообщения грибников</label><label><input type="checkbox" id="exp-observations" checked> 🟢 iNaturalist (обобщённо)</label><label><input type="checkbox" id="exp-personal" checked> 🔵 Мои места</label>'+
- '<button id="exp-online" class="exp-button">🌐 Подключить карту OSM</button><button id="exp-reset-view" class="exp-button">⌖ Вся область</button></div>'+
+ '<button id="exp-online" class="exp-button">Схема без дорог (резерв)</button><button id="exp-reset-view" class="exp-button">⌖ Вся область</button></div>'+
  '<div class="exp-map-shell"><div class="exp-map" id="exp-map" role="application" aria-label="Интерактивная карта грибных мест"><div id="exp-tiles" class="exp-tiles"></div><div class="exp-grid" id="exp-grid"></div><div id="exp-map-pins" class="exp-map-pins"></div><div class="exp-map-controls"><button id="exp-zoom-in" aria-label="Увеличить">+</button><button id="exp-zoom-out" aria-label="Уменьшить">−</button></div><div class="exp-map-attrib" id="exp-attribution">Офлайн-схема координат · Без подложки дорог</div></div>'+
  '<div class="exp-map-info"><h3 id="exp-info-title">Выберите отметку</h3><p id="exp-info-text">Нажмите на точку для просмотра даты, описания и источника. Колёсико увеличивает карту; мышью можно перемещать.</p><div id="exp-info-extra"></div></div></div>'+
  '<div class="exp-details"><div class="exp-panel"><h3>Публичные сообщения грибников</h3><p>Отметки сформированы из публикаций, пересказывающих открытые сообщения во ВКонтакте. Географический якорь — центр названного поселения. Сортировка по дате публикации.</p><input id="exp-search" placeholder="Найти район или гриб…"><div id="exp-reports-list" class="exp-reports-list"></div></div>'+
@@ -44,7 +44,7 @@
  const $=id=>doc.getElementById(id);
  function setCounts(){$('exp-count-reports').textContent=reportData.length;$('exp-count-observations').textContent=obs.length;$('exp-count-personal').textContent=mine.length;}
  function save(){localStorage.setItem(pointKey,JSON.stringify(mine));localStorage.setItem(trackKey,JSON.stringify(track));setCounts();w.dispatchEvent(new w.CustomEvent('moolva:expedition-data-changed'));}
- function show(){doc.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x===section));doc.querySelectorAll('.sidebar button').forEach(x=>x.classList.toggle('selected',x===entry));$('heading').textContent='Экспедиция 3.0';$('subtitle').textContent='Публичные сообщения, обобщённые наблюдения и личные маршруты';draw();w.dispatchEvent(new w.CustomEvent('moolva:expedition-shown'));w.scrollTo(0,0);}
+ function show(){doc.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x===section));doc.querySelectorAll('.sidebar button').forEach(x=>x.classList.toggle('selected',x===entry));$('heading').textContent='Экспедиция 3.2';$('subtitle').textContent='Публичные сообщения, обобщённые наблюдения и личные маршруты';draw();w.dispatchEvent(new w.CustomEvent('moolva:expedition-shown'));w.scrollTo(0,0);}
  entry.addEventListener('click',show);
  const box=$('exp-map');let mapW=900,mapH=560;
  function worldPx(lat,lon,z){const size=256*Math.pow(2,z),clamp=Math.max(-85.0511,Math.min(85.0511,lat)),r=clamp*Math.PI/180;return{x:(lon+180)/360*size,y:(1-Math.log(Math.tan(r)+1/Math.cos(r))/Math.PI)/2*size};}
