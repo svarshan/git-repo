@@ -1,4 +1,4 @@
-/* MoOLVa Грибы 3.2 — штатная бесплатная карта с Leaflet и OpenStreetMap.
+/* MoOLVa Грибы 3.3 — штатная бесплатная карта с Leaflet и OpenStreetMap.
    Leaflet поставляется вместе с EXE; картографические тайлы загружаются
    ТОЛЬКО при открытии Экспедиции и не сохраняются массово или офлайн.
    Публичные сообщения из соцсетей — приблизительные окрестности поселений.
@@ -38,8 +38,24 @@
   return out;
  }
  function mount(w) {
-  const d=w.document, exp=w.MoOLVaExpedition30, box=d.getElementById('exp-map'), section=d.getElementById('expedition30');
-  if(!exp||!box||!section||d.getElementById('fm32-map'))return;
+  const d=w.document, box=d.getElementById('exp-map'), section=d.getElementById('expedition30');
+  if(!box||!section||d.getElementById('fm32-map'))return;
+  // Даже если необязательная «Экспедиция» не инициализируется, базовая карта остаётся доступна.
+  const fallbackExp={
+    reportData:Array.isArray(w.MOOLVA_COMMUNITY30)?w.MOOLVA_COMMUNITY30:[],
+    observationCells:w.MoOLVaExpeditionCore30?.aggregate?.(w.MOOLVA_REGION_OBS20||[])||[],
+    show:()=>{
+      d.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x===section));
+      d.querySelectorAll('.sidebar button').forEach(x=>x.classList.toggle('selected',x.id==='primary-map-nav'));
+      if(d.getElementById('heading'))d.getElementById('heading').textContent='Карта грибных мест';
+      if(d.getElementById('subtitle'))d.getElementById('subtitle').textContent='Бесплатная карта с населёнными пунктами';
+      w.dispatchEvent(new w.CustomEvent('moolva:expedition-shown'));
+    }
+  };
+  const exp=w.MoOLVaExpedition30||fallbackExp;
+  if(!w.MoOLVaExpedition30)d.addEventListener('click',e=>{
+    if(e.target.closest('[data-expedition30="open"]')){e.preventDefault();fallbackExp.show();}
+  },true);
   const L=w.L;
   const $=id=>d.getElementById(id);
   // Скрываем устаревший переключатель фоновой координатной схемы, если Leaflet установлен.
