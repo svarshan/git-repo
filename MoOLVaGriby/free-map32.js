@@ -44,6 +44,19 @@
   const $=id=>d.getElementById(id);
   // Скрываем устаревший переключатель фоновой координатной схемы, если Leaflet установлен.
   if(L&&$('exp-online'))$('exp-online').hidden=true;
+  // Главный вход в карту теперь находится сверху, а старая схема отдельно обозначена как архив.
+  const nav=d.querySelector('.sidebar nav'),expEntry=nav?.querySelector('[data-expedition30="open"]');
+  if(nav&&expEntry){nav.insertBefore(expEntry,nav.children[1]||null);expEntry.innerHTML='<span>🗺</span> Карта грибных мест';}
+  const oldMapEntry=nav?.querySelector('[data-stage20="geo20"]');
+  if(oldMapEntry)oldMapEntry.innerHTML='<span>⌖</span> Схема наблюдений';
+  for(const btn of d.querySelectorAll('[data-goto20="geo20"]'))btn.textContent='🗺 Карта грибных мест';
+  // Даже старые кнопки «Карта» ведут в работающую Экспедицию, не к координатной сетке.
+  d.addEventListener('click',e=>{
+    const link=e.target.closest('[data-goto20="geo20"]');
+    if(!link)return;
+    e.preventDefault();e.stopImmediatePropagation();
+    exp.show();
+  },true);
   const bar=d.createElement('section');bar.id='fm32-toolbar';bar.className='fm32-toolbar';
   bar.innerHTML='<div class="fm32-header"><strong>🗺 Бесплатная карта с населёнными пунктами</strong><small>OpenStreetMap · без ключа и оплаты</small></div>'+
    '<p class="fm32-help">Колёсико мыши — масштаб; удерживайте мышь и перемещайте карту; кнопки + и − — увеличение. Нажмите на свободное место карты, чтобы заполнить координаты своей отметки.</p>'+
@@ -136,6 +149,10 @@
   function show() {
     if(!section.classList.contains('active'))return;
     openMap();
+    // Начальный экран Экспедиции сразу открывается на карте и её инструментах.
+    w.requestAnimationFrame(()=>w.requestAnimationFrame(()=>{
+      if(section.classList.contains('active'))bar.scrollIntoView({block:'start',behavior:'auto'});
+    }));
   }
   // Можно искать по локальному словарю из реальных 12 районов.
   function findTown(){
