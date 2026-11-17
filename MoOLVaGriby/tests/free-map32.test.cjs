@@ -39,7 +39,9 @@ test('offline Leaflet asset is packaged and labels/zoom are controlled by real m
  assert.ok(css.includes('.fm32-map'));
  const main=read('main.cjs'),wf=read('../.github/workflows/moolva-griby-windows.yml');
  assert.ok(main.includes('07-free-interactive-map.png'));
- assert.ok(main.includes('map?.zoomIn()'));
+ assert.ok(main.includes(".leaflet-control-zoom-in"));
+ assert.ok(main.includes(".leaflet-control-zoom-out"));
+ assert.ok(main.includes("zoomend"));
  assert.ok(main.includes("MoOLVa-Griby/3.2"));
  assert.ok(wf.includes("07-free-interactive-map.png"));
 });
