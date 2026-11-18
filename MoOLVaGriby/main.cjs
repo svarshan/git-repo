@@ -96,10 +96,10 @@ function createWindow(){
         rendered=tiles.some(hasGeography);
       }
       const packs=await window.MoOLVaMaps?.list();
-      return {status:archive.status,signature,rendered,tileCount:tiles.length,packCount:packs?.length||0,semenov:center.lat>56.76&&center.lat<56.82&&center.lng>44.45&&center.lng<44.54,...map.getStatus()};
+      return {status:archive.status,signature,rendered,tileCount:tiles.length,packCount:packs?.length||0,packPanelVisible:!document.getElementById('fm34-packs').hidden,semenov:center.lat>56.76&&center.lat<56.82&&center.lng>44.45&&center.lng<44.54,...map.getStatus()};
     })()`,true);
     fs.writeFileSync(path.join(folder,'09-offline-map.json'),JSON.stringify(offline,null,2));
-    if(offline.status!==206||offline.signature!=='PMTiles'||!offline.rendered||!offline.semenov||offline.online||offline.localityCount<1000||offline.packCount!==6)
+    if(offline.status!==206||offline.signature!=='PMTiles'||!offline.rendered||!offline.semenov||offline.online||offline.localityCount<1000||offline.packCount!==6||!offline.packPanelVisible)
       throw Error('Offline map failed '+JSON.stringify(offline));
     fs.writeFileSync(path.join(folder,'07-free-interactive-map.png'),(await win.webContents.capturePage()).toPNG());
     fs.writeFileSync(path.join(folder,'08-visible-map-menu.png'),(await win.webContents.capturePage()).toPNG());
@@ -115,7 +115,10 @@ app.whenReady().then(()=>{
  const packs=createMapPacks(path.join(app.getPath('userData'),'maps-20261116'));
  for(const [channel,action] of Object.entries({'maps:list':packs.list,'maps:download':packs.start,'maps:pause':packs.pause})) {
    ipcMain.handle(channel,(event,id)=>{
-     if(event.sender!==win?.webContents || event.senderFrame?.url!==entryUrl) return null;
+     const caller=event.senderFrame;
+     const top=event.sender.mainFrame;
+     // Chromium can expand a Windows short path before exposing the frame URL.
+     if(event.sender!==win?.webContents || !caller || !caller.url.startsWith('file:') || caller.routingId!==top.routingId || caller.processId!==top.processId) return null;
      return action(id);
    });
  }

@@ -15,6 +15,7 @@ jobs:
     timeout-minutes: 15
     permissions:
       contents: write
+      actions: read
     defaults:
       run:
         working-directory: MoOLVaGriby
@@ -23,7 +24,18 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Reuse public 3.4 build data when available
+        id: reuse
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh run download 44350263245 --name griby34-build-data --dir bundle
+          test -s bundle/maps/nizhny-novgorod.pmtiles
+          test -s bundle/offline-localities.js
+          test -s bundle/build/moolva-griby.ico
       - name: Prepare the map overview and six downloadable packs
+        if: steps.reuse.outcome != 'success'
         run: |
           set -euo pipefail
           npm ci --ignore-scripts --no-audit --no-fund
@@ -32,6 +44,7 @@ jobs:
           python3 scripts/build-map-packs.py --pmtiles "$RUNNER_TEMP/griby-tools/pmtiles" --seed "$RUNNER_TEMP/griby-tools/region.pmtiles" --details "$RUNNER_TEMP/griby-tools/packs" --overview bundle/maps/nizhny-novgorod.pmtiles
           node scripts/offline-localities.mjs "$RUNNER_TEMP/griby-tools/region.pmtiles" bundle/offline-localities.js
       - name: Recover attributed media from the verified 3.3 release
+        if: steps.reuse.outcome != 'success'
         run: |
           set -euo pipefail
           curl -fL --retry 3 -o "$RUNNER_TEMP/griby-tools/griby33.exe" https://github.com/svarshan/git-repo/releases/download/v3.3.0/MoOLVa-Griby-3.3-Portable-x64.exe
@@ -44,6 +57,7 @@ jobs:
           node node_modules/@electron/asar/bin/asar.js extract "$RUNNER_TEMP/griby-tools/app.asar" "$RUNNER_TEMP/griby-tools/griby33-app"
           cp -a "$RUNNER_TEMP/griby-tools/griby33-app/"{media,build,photos.js,photos-gallery20.js,region20.js} bundle/
       - name: Publish attributed map packs for in-app download
+        if: steps.reuse.outcome != 'success'
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
