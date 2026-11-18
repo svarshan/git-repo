@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "3.4.0",
-  "description": "MoOLVa Грибы 3.4 — офлайн-карта и навигатор Нижегородской области",
+  "version": "3.5.0",
+  "description": "MoOLVa Грибы 3.5 — офлайн-карта и навигатор Нижегородской области",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -75,10 +75,10 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-3.4-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.5-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-3.4-Full-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.5-Full-Portable-${arch}.exe"
     },
     "extraResources": [
       {

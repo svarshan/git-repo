@@ -36,7 +36,7 @@ test('additive advanced field tools, GUI smoke, release artifact paths are prese
  for(const name of ['field20','id20','photo20','calendar20','geo20','stats20','anatomy20','protected20'])assert.ok(js.includes(name),name);
  assert.ok(js.includes('note='));assert.ok(js.includes('imageHistogram'));assert.ok(js.includes('safeBackup'));
  assert.ok(html.includes('region20.js')&&html.includes('core20.js')&&html.includes('upgrade20.js'));
- assert.equal(pkg.version,'3.4.0');assert.match(pkg.build.nsis.artifactName,/3\.4-Setup/);assert.match(pkg.build.portable.artifactName,/3\.4-Full-Portable/);
+ assert.equal(pkg.version,'3.5.0');assert.match(pkg.build.nsis.artifactName,/3\.5-Setup/);assert.match(pkg.build.portable.artifactName,/3\.5-Full-Portable/);
  assert.ok(pkg.build.files.includes('media/gallery/**/*'));
  assert.match(main,/capturePage/);
  assert.match(reg,/quality_grade/);

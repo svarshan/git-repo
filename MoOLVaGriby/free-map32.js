@@ -61,7 +61,7 @@
   if(L&&$('exp-online'))$('exp-online').hidden=true;
   // Главный вход в карту теперь находится сверху, а старая схема отдельно обозначена как архив.
   const nav=d.querySelector('.sidebar nav'),expEntry=nav?.querySelector('[data-expedition30="open"]');
-  if(nav&&expEntry){nav.insertBefore(expEntry,nav.children[1]||null);expEntry.innerHTML='<span>🗺</span> Карта грибных мест';}
+  if(nav&&expEntry){nav.insertBefore(expEntry,nav.children[1]||null);expEntry.innerHTML='<span>🗺</span> Карта';}
   const oldMapEntry=nav?.querySelector('[data-stage20="geo20"]');
   if(oldMapEntry)oldMapEntry.innerHTML='<span>⌖</span> Схема наблюдений';
   for(const btn of d.querySelectorAll('[data-goto20="geo20"]'))btn.textContent='🗺 Карта грибных мест';
@@ -73,7 +73,7 @@
     exp.show();
   },true);
   const bar=d.createElement('section');bar.id='fm32-toolbar';bar.className='fm32-toolbar';
-  bar.innerHTML='<div class="fm32-header"><strong>🗺 Карта Нижегородской области</strong><small id="fm32-source">Офлайн · карта встроена</small></div>'+
+  bar.innerHTML='<div class="fm32-header"><strong>Карта Нижегородской области</strong><small id="fm32-source">Офлайн · карта встроена</small></div>'+
    '<p class="fm32-help">Колёсико мыши — масштаб; удерживайте мышь и перемещайте карту; кнопки + и − — увеличение. Нажмите на свободное место карты, чтобы заполнить координаты своей отметки.</p>'+
    '<div class="fm32-tools"><input id="fm32-town" type="search" aria-label="Населённый пункт" placeholder="Населённый пункт: Бор, Балахна, Фролищи…" autocomplete="off">'+
    '<button type="button" id="fm32-find" class="exp-button">⌕ Найти</button><button type="button" id="fm32-reset" class="exp-button">⌖ Вся область</button>'+
@@ -85,7 +85,13 @@
    '<div class="fm32-tools fm34-row"><label for="fm34-species">Находки</label><input type="search" id="fm34-species" placeholder="Русское или латинское название" autocomplete="off">'+
    '<select id="fm34-age" aria-label="Период"><option value="">За всё время</option><option value="7">За 7 дней</option><option value="30">За 30 дней</option><option value="90">За 90 дней</option><option value="year">За этот год</option></select></div>'+
    '<p role="status" id="fm32-status" class="fm32-status">Открывается встроенная карта…</p>';
-  section.querySelector('.exp-map-shell').before(bar);
+  const shell=section.querySelector('.exp-map-shell');
+  section.prepend(bar,shell);
+  const optionsPanel=d.createElement('details');
+  optionsPanel.className='map-options';
+  const summary=d.createElement('summary');summary.textContent='Участки и фильтры находок';
+  optionsPanel.append(summary,...bar.querySelectorAll('.fm34-row'));
+  shell.after(optionsPanel);
   const surface=d.createElement('div');surface.id='fm32-map';surface.className='fm32-map';surface.hidden=true;
   box.append(surface);
   const towns=(exp.reportData||[]).filter(x=>valid(x.lat,x.lon));
@@ -113,7 +119,7 @@
   }
   function status(text){$('fm32-status').textContent=text;}
   let map=null,tiles=null,markers=null,circles=null,trackLayer=null,searchMarker=null;
-  let loadedTiles=0,failedTiles=0,googleActive=false,online=!w.protomapsL;
+  let loadedTiles=0,failedTiles=0,googleActive=false,online=!w.protomapsL || (w.navigator.onLine && w.localStorage.getItem('moolva-map-mode')!=='offline');
   let activePack=null, packs=[];
   function getLastPlace(){try{return JSON.parse(w.localStorage.getItem('moolva-griby-last-place')||'null');}catch{return null;}}
   $('fm32-last').disabled=!getLastPlace();
@@ -150,11 +156,19 @@
    if(route.length>1)trackLayer.addLayer(L.polyline(route.map(p=>[p.lat,p.lon]),{color:'#70c9f7',weight:3}));
    status('Отметок на карте: '+points.length+'. Оранжевые круги показывают окрестности находок.');
   }
+  let loadTimeout;
+  function useOffline(){
+   if(!online||!w.protomapsL)return;
+   online=false;setBasemap();
+   $('fm32-source').textContent='Офлайн · подробная карта области. Онлайн-карта недоступна.';
+  }
+  w.addEventListener('offline',()=>{if(map)useOffline();});
   function setBasemap() {
-   if(tiles)tiles.remove();
+   w.clearTimeout(loadTimeout);
+   if(tiles){tiles.off();tiles.remove();}
    loadedTiles=0;failedTiles=0;
    $('fm32-source').textContent=online?'Онлайн · OpenStreetMap':activePack?`Офлайн · ${activePack.name}`:'Офлайн · подробная карта области';
-   $('fm32-switch').textContent=online?'Перейти к офлайн-карте':'Перейти к онлайн-карте';
+   $('fm32-switch').textContent=online?'Включить офлайн-карту':'Включить OpenStreetMap';
    $('fm32-switch').disabled=!w.protomapsL;
    const options={minZoom:6,maxZoom:19,keepBuffer:2,updateWhenIdle:true,noWrap:true};
    if(online){
@@ -167,11 +181,17 @@
     tiles=w.protomapsL.leafletLayer({...options,bounds,url,flavor:'light',lang:'ru',maxDataZoom:14,
      attribution:legal+' · <a href="https://protomaps.com/" target="_blank" rel="noopener noreferrer">Protomaps</a>'});
    }
-   tiles.on('tileload',()=>{loadedTiles++;});
-   tiles.on('tileerror',()=>{
-    failedTiles++;
-    if(online&&failedTiles>=3&&loadedTiles===0)status('Онлайн-карта недоступна. Можно переключиться на встроенную офлайн-карту.');
+   const layer=tiles;
+   tiles.on('tileload',()=>{
+    if(tiles!==layer)return;
+    loadedTiles++;w.clearTimeout(loadTimeout);
    });
+   tiles.on('tileerror',()=>{
+    if(tiles!==layer)return;
+    failedTiles++;
+    if(online&&failedTiles>=3&&loadedTiles===0)w.queueMicrotask(()=>{if(tiles===layer)useOffline();});
+   });
+   if(online)loadTimeout=w.setTimeout(()=>{if(tiles===layer&&!loadedTiles)useOffline();},6500);
    tiles.addTo(map);
   }
   const packSelect=$('fm34-pack'), packButton=$('fm34-download');
@@ -284,7 +304,9 @@
   $('fm32-switch').addEventListener('click',()=>{
    if(!map||!w.protomapsL)return;
    if(googleActive)restore();
-   online=!online;setBasemap();redraw();
+   online=!online;
+   w.localStorage.setItem('moolva-map-mode',online?'online':'offline');
+   setBasemap();redraw();
   });
   $('fm32-open-external').addEventListener('click',()=>{
     const c=map?map.getCenter():{lat:56.35,lng:43.5};

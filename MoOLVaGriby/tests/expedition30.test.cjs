@@ -36,9 +36,9 @@ test('private points require real geographic coordinates and GPX escapes user la
  assert.match(g,/&lt;private&gt;/);
  assert.match(g,/<trkpt lat="56.35" lon="43.55"/);
 });
-test('version 3.4 is packaged with map assets and screenshot smoke checks',()=>{
+test('version 3.5 is packaged with map assets and screenshot smoke checks',()=>{
  const pkg=JSON.parse(read('package.json')),html=read('index.html'),main=read('main.cjs'),css=read('expedition30.css');
- assert.equal(pkg.version,'3.4.0');
+ assert.equal(pkg.version,'3.5.0');
  for(const n of ['community30.js','expedition30.js','expedition30.css'])assert.ok(pkg.build.files.includes(n),n);
  assert.ok(html.includes('<script src="expedition30.js"></script>'));
  assert.ok(main.includes('05-expedition.png'));

@@ -30,13 +30,17 @@
   const heading=txt=>'<div class="sectiontop"><div><span class="eyebrow">MoOLVa ГРИБЫ · PRO MAX 2.0</span><h2>'+html(txt)+'</h2></div></div>';
   for(const chapter of chapters){
     const button=document.createElement('button');button.type='button';button.dataset.stage20=chapter.id;
-    button.innerHTML='<span>'+chapter.icon+'</span> '+html(chapter.title);nav.append(button);
+    button.innerHTML='<span>'+chapter.icon+'</span> '+html(chapter.title);document.getElementById('more-pages').append(button);
     const section=document.createElement('section');section.className='page p20-page';section.id=chapter.id;
     section.innerHTML=heading(chapter.title)+pageData[chapter.id];main.append(section);
   }
-  const version=document.createElement('div');version.className='p20-version';
-  version.innerHTML='<b>MoOLVa Грибы 2.0</b><span>Региональные данные: '+html((window.MOOLVA_REGION_META20||{}).status||'не получены')+'</span>';
-  document.querySelector('.sidebar').append(version);
+  const more=document.getElementById('more-nav');
+  nav.addEventListener('click',event=>{
+    const button=event.target.closest('button');
+    if(!button)return;
+    if(more.contains(button))more.querySelector('summary').focus();
+    more.open=false;
+  });
   function show(id){if(!chapters.some(x=>x.id===id))return;
     window.speechSynthesis?.cancel?.();
     document.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x.id===id));
@@ -55,7 +59,7 @@
     goButtons[0].append(commands);}
   const aboutSection=document.querySelector('#about .aboutbox');
   if(aboutSection){const updates=document.createElement('section');updates.className='p20-qa';
-    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 2.0.0</div>';
+    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 3.5.0</div>';
     aboutSection.append(updates);}
   const photoReview=()=>{try{return JSON.parse(localStorage.getItem(reviewKey)||'{}')}catch{return {}}};
   const personalGeo=()=>{try{const x=JSON.parse(localStorage.getItem(geoKey)||'[]');return Array.isArray(x)?x.filter(o=>Number.isFinite(o.lat)&&Number.isFinite(o.lon)).slice(-300):[]}catch{return []}};

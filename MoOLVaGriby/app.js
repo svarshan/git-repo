@@ -52,10 +52,10 @@
   const headings={catalog:['Грибной атлас','Изучайте виды и опасные двойники, сохраняйте наблюдения'],
    compare:['Сравнение грибов','Изучайте отличия похожих видов'],diary:['Дневник грибника','Ваши собственные наблюдения, сохранённые локально'],
    map:['Мои места','Личные находки без выдуманных географических точек'],favorites:['Избранное','Сохранённые виды из энциклопедии'],
-   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','Офлайн-атлас MoOLVa Грибы 2.0 PRO MAX']};
+   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 3.5 · атлас и карта']};
   function nav(next){if(!headings[next])return;stopSpeech();closeDetail();page=next;
     document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));
-    document.querySelectorAll('[data-page]').forEach(x=>x.classList.toggle('selected',x.dataset.page===page));
+    document.querySelectorAll('.sidebar nav button').forEach(x=>x.classList.toggle('selected',x.dataset.page===page));
     $('#heading').textContent=headings[page][0];$('#subtitle').textContent=headings[page][1];
     if(page==='catalog')renderCatalog();if(page==='favorites')renderFav();if(page==='compare')renderCompare();
     if(page==='diary')renderDiary();if(page==='map')renderMap();if(page==='quality')renderQuality();

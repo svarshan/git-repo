@@ -26,6 +26,7 @@ if(process.env.PORTABLE_EXECUTABLE_DIR && !app.commandLine.hasSwitch('user-data-
 }
 if(!evidenceFlag&&!app.requestSingleInstanceLock()){app.quit();process.exit(0);}
 let win;
+let allowLiveMap=false;
 function createWindow(){
  win=new BrowserWindow({width:1420,height:920,minWidth:960,minHeight:680,autoHideMenuBar:true,show:false,backgroundColor:'#0a1512',
   icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
@@ -38,7 +39,7 @@ function createWindow(){
  win.once('ready-to-show',()=>win.show());
  if(evidenceFlag){
   const folder=evidenceFlag.slice('--moolva-evidence-dir='.length);
-  const failure=setTimeout(()=>{fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'gui-error.txt'),'Electron screenshot timed out');app.exit(2);},30000);
+  const failure=setTimeout(()=>{fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'gui-error.txt'),'Electron screenshot timed out');app.exit(2);},65000);
   win.webContents.once('did-finish-load',async()=>{
    try{
     await new Promise(resolve=>setTimeout(resolve,1400));
@@ -53,12 +54,13 @@ function createWindow(){
       const btn=document.querySelector('#primary-map-nav');
       const page=document.querySelector('main > #expedition30');
       const rect=btn?.getBoundingClientRect();
-      return {buttonExists:!!btn, buttonLabel:btn?.textContent.trim()||'', mapPageExists:!!page,
+      return {visibleEntries:[...document.querySelectorAll('#nav > button,#nav > details > summary')].filter(e=>e.getBoundingClientRect().height>0).length,
+        buttonExists:!!btn, buttonLabel:btn?.textContent.trim()||'', mapPageExists:!!page,
         displayed:!!btn && !!rect && rect.width>30 && rect.height>18 && rect.top>=0 && rect.bottom<=window.innerHeight,
         secondInNav:btn?.parentElement?.querySelectorAll('button')?.[1]===btn};
     })()`,true);
     fs.writeFileSync(path.join(folder,'08-static-menu-check.json'),JSON.stringify(staticNav,null,2));
-    if(!staticNav.buttonExists||!staticNav.mapPageExists||!staticNav.displayed||!staticNav.secondInNav||!staticNav.buttonLabel.includes('Карта грибных мест'))
+    if(!staticNav.buttonExists||!staticNav.mapPageExists||!staticNav.displayed||!staticNav.secondInNav||!staticNav.buttonLabel.includes('Карта') || staticNav.visibleEntries!==4)
       throw Error('Main map menu is missing or invisible '+JSON.stringify(staticNav));
     for(const [name,target] of [['02-opredelitel.png','id20'],['03-karta-nablyudenii.png','geo20'],['04-foto-pomoshchnik.png','photo20']]){
       await win.webContents.executeJavaScript('document.querySelector('+JSON.stringify('[data-stage20="'+target+'"]')+').click()');
@@ -117,6 +119,25 @@ function createWindow(){
       throw Error('Offline map failed '+JSON.stringify(offline));
     fs.writeFileSync(path.join(folder,'07-free-interactive-map.png'),(await win.webContents.capturePage()).toPNG());
     fs.writeFileSync(path.join(folder,'08-visible-map-menu.png'),(await win.webContents.capturePage()).toPNG());
+    allowLiveMap=true;
+    const live=await win.webContents.executeJavaScript(`(async()=>{
+      const more=document.querySelector('#more-nav');
+      more.querySelector('summary').click();
+      const item=more.querySelector('[data-stage20="calendar20"]');
+      if(!more.open || item.getBoundingClientRect().height===0)throw Error('Expanded menu is inaccessible');
+      item.click();
+      if(!document.querySelector('#calendar20.page.active')||more.open)throw Error('Calendar navigation failed');
+      document.querySelector('#primary-map-nav').click();
+      document.querySelector('#fm32-switch').click();
+      for(let i=0;i<120;i++){
+       const img=[...document.querySelectorAll('#fm32-map img.leaflet-tile-loaded')].find(x=>x.naturalWidth===256&&x.src.startsWith('https://tile.openstreetmap.org/'));
+       if(img&&MoOLVaFreeMap32.getStatus().online)return {tile:img.src,width:img.naturalWidth,zoom:MoOLVaFreeMap32.getMap().getZoom(),menu:true};
+       await new Promise(r=>setTimeout(r,100));
+      }
+      throw Error('OpenStreetMap rendering failed: '+JSON.stringify(MoOLVaFreeMap32.getStatus()));
+    })()`,true);
+    fs.writeFileSync(path.join(folder,'10-online-map.json'),JSON.stringify(live,null,2));
+    fs.writeFileSync(path.join(folder,'10-online-map.png'),(await win.webContents.capturePage()).toPNG());
     clearTimeout(failure);app.exit(0);
    }catch(e){fs.writeFileSync(path.join(folder,'gui-error.txt'),String(e.stack||e));clearTimeout(failure);app.exit(3);}
   });
@@ -124,7 +145,7 @@ function createWindow(){
 }
 app.whenReady().then(()=>{
  const ses=session.defaultSession;
- if(evidenceFlag)ses.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*']},(_details,callback)=>callback({cancel:true}));
+ if(evidenceFlag)ses.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*']},(details,callback)=>callback({cancel:!(allowLiveMap && new URL(details.url).hostname==='tile.openstreetmap.org')}));
  const mapFile=path.join(app.isPackaged ? process.resourcesPath : __dirname,'maps','nizhny-novgorod.pmtiles');
  ipcMain.handle('maps:list',(event)=>{
    const caller=event.senderFrame,top=event.sender.mainFrame;
@@ -138,7 +159,7 @@ app.whenReady().then(()=>{
  });
  // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
  ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{
-   details.requestHeaders['User-Agent']='MoOLVa-Griby/3.4 (+https://github.com/svarshan/git-repo)';
+   details.requestHeaders['User-Agent']='MoOLVa-Griby/3.5 (+https://github.com/svarshan/git-repo)';
    callback({requestHeaders:details.requestHeaders});
  });
  createWindow();

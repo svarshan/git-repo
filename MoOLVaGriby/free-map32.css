@@ -36,3 +36,15 @@
 .p34-dialog{max-width:560px;color:#f5eee2;background:#122c23;border:1px solid #406d50;border-radius:14px;padding:22px}
 .p34-dialog::backdrop{background:#000a}
 .p34-trip-panel{margin-top:12px}
+
+#more-nav summary,.map-options summary{cursor:pointer;color:#d8e8db;padding:11px 15px;font-weight:600;border-radius:8px}
+#more-nav summary:hover,.map-options summary:hover{background:#1c382b}
+#more-pages{display:grid;gap:2px;margin-left:9px;border-left:1px solid #385647;padding-left:5px}
+#more-nav:has(button.selected)>summary{color:#f5d5a8}
+.sidebar nav button{padding:10px 12px;min-height:40px}
+.map-options{margin:12px 0 18px;background:#132a22;border:1px solid #40624d;border-radius:12px}
+.map-options .fm34-row{padding:0 12px 12px}
+#expedition30:has(.fm32-map)>.sectiontop{display:none}
+#exp-map:has(.fm32-map:not([hidden])) :is(.exp-tiles,.exp-map-pins,.exp-grid,.exp-track){visibility:hidden;pointer-events:none}
+@media(min-width:761px){.sidebar{width:198px}.sidebar nav{align-content:start}}
+@media(max-width:760px){.sidebar nav{display:grid;grid-template-columns:repeat(3,auto) 1fr;align-items:start;overflow:visible}.sidebar nav:has(#more-nav[open]){grid-template-columns:repeat(3,1fr)}#more-nav[open]{grid-column:1/-1}}
