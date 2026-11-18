@@ -30,7 +30,7 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download 44350263245 --name griby34-build-data --dir bundle
+          gh run download 44354591620 --name griby34-build-data --dir bundle
           test -s bundle/maps/nizhny-novgorod.pmtiles
           test -s bundle/offline-localities.js
           test -s bundle/build/moolva-griby.ico
@@ -59,6 +59,7 @@ jobs:
       - name: Bundle the full zoom 5–14 regional map
         run: |
           set -euo pipefail
+          if [ "$(od -An -tu1 -j101 -N1 bundle/maps/nizhny-novgorod.pmtiles 2>/dev/null | tr -d ' ')" = 14 ]; then exit 0; fi
           tools_dir="$RUNNER_TEMP/griby-tools"
           mkdir -p "$tools_dir"
           if [ ! -s "$tools_dir/region.pmtiles" ]; then
@@ -105,12 +106,12 @@ jobs:
         run: |
           $exe = (Resolve-Path 'dist/MoOLVa-Griby-3.4-Full-Portable-x64.exe').Path
           $dir = Join-Path (Get-Location).Path 'dist/evidence'
-          $profile = Join-Path $env:RUNNER_TEMP 'moolva-griby-34-qa'
-          $proc = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList @("`"--moolva-evidence-dir=$dir`"", "`"--user-data-dir=$profile`"")
+          $proc = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList @("`"--moolva-evidence-dir=$dir`"")
           if ($proc.ExitCode -ne 0) { Get-Content "$dir/gui-error.txt" -ErrorAction SilentlyContinue; throw "Portable exited with $($proc.ExitCode)" }
           if (-not (Test-Path "$dir/09-offline-map.json")) { throw 'Missing offline map verification' }
           if (-not (Test-Path "$dir/07-free-interactive-map.png")) { throw 'Missing interactive map screenshot' }
           if (-not (Test-Path "$dir/08-visible-map-menu.png")) { throw 'Missing Windows screenshot' }
+          if (-not (Test-Path 'dist/MoOLVa-Griby-Data/Local Storage')) { throw 'Portable profile missing next to EXE' }
           Get-FileHash $exe -Algorithm SHA256 | Format-List | Out-File -Encoding utf8 'dist/SHA256.txt'
       - uses: actions/upload-artifact@v4
         with:

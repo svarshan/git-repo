@@ -44,5 +44,5 @@ test('Windows GUI QA requires visible map button, selected navigation and a map 
  const pkg=JSON.parse(read('package.json'));
  assert.equal(pkg.version,'3.4.0');
  assert.match(pkg.build.nsis.artifactName,/3\.4-Setup/);
- assert.match(pkg.build.portable.artifactName,/3\.4-Portable/);
+ assert.match(pkg.build.portable.artifactName,/3\.4-Full-Portable/);
 });
