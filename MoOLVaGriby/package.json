@@ -78,7 +78,7 @@
       "artifactName": "MoOLVa-Griby-3.4-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-3.4-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.4-Full-Portable-${arch}.exe"
     },
     "extraResources": [
       {

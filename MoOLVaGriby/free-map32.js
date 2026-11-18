@@ -81,7 +81,7 @@
    '<button type="button" id="fm32-switch" class="exp-button">Перейти к онлайн-карте</button>'+
    '<button type="button" id="fm32-open-external" class="exp-button">↗ Открыть OpenStreetMap</button></div>'+
    '<div id="fm32-results" class="fm32-results" hidden></div>'+
-   '<div id="fm34-packs" class="fm32-tools fm34-row" hidden><label for="fm34-pack">Подробная карта</label><select id="fm34-pack"></select><button type="button" class="exp-button" id="fm34-download">Скачать участок</button><small id="fm34-pack-status" role="status"></small></div>'+
+   '<div id="fm34-packs" class="fm32-tools fm34-row" hidden><label for="fm34-pack">Подробная карта</label><select id="fm34-pack"></select><button type="button" class="exp-button" id="fm34-download">Открыть участок</button><small id="fm34-pack-status" role="status"></small></div>'+
    '<div class="fm32-tools fm34-row"><label for="fm34-species">Находки</label><input type="search" id="fm34-species" placeholder="Русское или латинское название" autocomplete="off">'+
    '<select id="fm34-age" aria-label="Период"><option value="">За всё время</option><option value="7">За 7 дней</option><option value="30">За 30 дней</option><option value="90">За 90 дней</option><option value="year">За этот год</option></select></div>'+
    '<p role="status" id="fm32-status" class="fm32-status">Открывается встроенная карта…</p>';
@@ -114,7 +114,7 @@
   function status(text){$('fm32-status').textContent=text;}
   let map=null,tiles=null,markers=null,circles=null,trackLayer=null,searchMarker=null;
   let loadedTiles=0,failedTiles=0,googleActive=false,online=!w.protomapsL;
-  let activePack=null, packs=[], poll=null;
+  let activePack=null, packs=[];
   function getLastPlace(){try{return JSON.parse(w.localStorage.getItem('moolva-griby-last-place')||'null');}catch{return null;}}
   $('fm32-last').disabled=!getLastPlace();
   function removeLayers() {
@@ -153,7 +153,7 @@
   function setBasemap() {
    if(tiles)tiles.remove();
    loadedTiles=0;failedTiles=0;
-   $('fm32-source').textContent=online?'Онлайн · OpenStreetMap':activePack?`Офлайн · ${activePack.name}`:'Офлайн · обзорная карта';
+   $('fm32-source').textContent=online?'Онлайн · OpenStreetMap':activePack?`Офлайн · ${activePack.name}`:'Офлайн · подробная карта области';
    $('fm32-switch').textContent=online?'Перейти к офлайн-карте':'Перейти к онлайн-карте';
    $('fm32-switch').disabled=!w.protomapsL;
    const options={minZoom:6,maxZoom:19,keepBuffer:2,updateWhenIdle:true,noWrap:true};
@@ -163,8 +163,8 @@
    }else{
     const bounds=activePack?[[activePack.bounds[1],activePack.bounds[0]],[activePack.bounds[3],activePack.bounds[2]]]:offlineExtent;
     map.setMaxBounds(bounds);
-    const url=activePack?`moolva-map://offline/${activePack.id}.pmtiles`:w.location.protocol==='file:'?mapArchive:new URL('maps/nizhny-novgorod.pmtiles',w.location.href).href;
-    tiles=w.protomapsL.leafletLayer({...options,bounds,url,flavor:'light',lang:'ru',maxDataZoom:activePack?14:8,
+    const url=w.location.protocol==='file:'?mapArchive:new URL('maps/nizhny-novgorod.pmtiles',w.location.href).href;
+    tiles=w.protomapsL.leafletLayer({...options,bounds,url,flavor:'light',lang:'ru',maxDataZoom:14,
      attribution:legal+' · <a href="https://protomaps.com/" target="_blank" rel="noopener noreferrer">Protomaps</a>'});
    }
    tiles.on('tileload',()=>{loadedTiles++;});
@@ -178,9 +178,7 @@
   function refreshPackControls(){
    const item=packs.find(p=>p.id===packSelect.value);
    if(!item)return;
-   packButton.textContent={ready:'Открыть участок',downloading:'Пауза',paused:'Продолжить',error:'Продолжить'}[item.state]||'Скачать участок';
-   const progress=item.total?` · ${Math.floor(100*item.received/item.total)}%`:item.received?` · ${(item.received/1048576).toFixed(1)} МБ` : '';
-   $('fm34-pack-status').textContent=item.error||({ready:'Сохранён на компьютере',downloading:'Загрузка',paused:'На паузе'}[item.state]||'')+progress;
+   $('fm34-pack-status').textContent='Все шесть участков встроены';
   }
   async function loadPacks(){
    if(!w.MoOLVaMaps)return;
@@ -198,18 +196,9 @@
   packButton.addEventListener('click',async()=>{
    const item=packs.find(p=>p.id===packSelect.value);
    if(!item||!map)return;
-   if(item.state==='ready'){
-    if(googleActive)$('gm31-hide')?.click();
-    online=false;activePack=item;setBasemap();
-    map.fitBounds([[item.bounds[1],item.bounds[0]],[item.bounds[3],item.bounds[2]]],{animate:false,maxZoom:12});
-    return;
-   }
-   if(item.state==='downloading'){await w.MoOLVaMaps.pause(item.id);return;}
-   if(poll)return;
-   item.state='downloading';refreshPackControls();
-   poll=w.setInterval(loadPacks,600);
-   try{await w.MoOLVaMaps.download(item.id);}catch{status('Команда загрузки недоступна.');}
-   finally{w.clearInterval(poll);poll=null;await loadPacks();}
+   if(googleActive)$('gm31-hide')?.click();
+   online=false;activePack=item;setBasemap();
+   map.fitBounds([[item.bounds[1],item.bounds[0]],[item.bounds[3],item.bounds[2]]],{animate:false,maxZoom:12});
   });
   function openMap() {
    if(!L) {

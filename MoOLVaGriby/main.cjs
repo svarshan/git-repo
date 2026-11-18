@@ -4,7 +4,7 @@ const path=require('node:path');
 const fs=require('node:fs');
 const {pathToFileURL}=require('node:url');
 const {readMapRange}=require('./offline-map-file.cjs');
-const {createMapPacks}=require('./map-packs.cjs');
+const regions=require('./map-regions.json');
 const entry=path.join(__dirname,'index.html');
 const entryUrl=pathToFileURL(entry).href;
 protocol.registerSchemesAsPrivileged([{
@@ -13,6 +13,17 @@ protocol.registerSchemesAsPrivileged([{
 app.setAppUserModelId('ru.moolva.griby');
 app.commandLine.appendSwitch('lang','ru-RU');
 const evidenceFlag=process.argv.find(x=>x.startsWith('--moolva-evidence-dir='));
+if(process.env.PORTABLE_EXECUTABLE_DIR && !app.commandLine.hasSwitch('user-data-dir')){
+ const profile=path.join(process.env.PORTABLE_EXECUTABLE_DIR,'MoOLVa-Griby-Data');
+ try {
+  fs.mkdirSync(profile,{recursive:true});
+  fs.accessSync(profile,fs.constants.W_OK);
+  app.setPath('userData',profile);
+ } catch {
+  require('electron').dialog.showErrorBox('MoOLVa Грибы','Нет доступа для записи рядом с EXE. Перенесите программу в папку, где можно сохранять личные находки.');
+  app.exit(1);process.exit(1);
+ }
+}
 if(!evidenceFlag&&!app.requestSingleInstanceLock()){app.quit();process.exit(0);}
 let win;
 function createWindow(){
@@ -96,6 +107,9 @@ function createWindow(){
         rendered=tiles.some(hasGeography);
       }
       const packs=await window.MoOLVaMaps?.list();
+      if(packs?.length!==6 || !packs.every(p=>p.state==='ready'))throw Error('Missing bundled map coverage');
+      const header=await fetch('moolva-map://offline/nizhny-novgorod.pmtiles',{headers:{Range:'bytes=0-126'}});
+      if(header.status!==206 || new Uint8Array(await header.arrayBuffer())[101]!==14)throw Error('Full detail map missing');
       return {status:archive.status,signature,rendered,tileCount:tiles.length,packCount:packs?.length||0,packPanelVisible:!document.getElementById('fm34-packs').hidden,semenov:center.lat>56.76&&center.lat<56.82&&center.lng>44.45&&center.lng<44.54,...map.getStatus()};
     })()`,true);
     fs.writeFileSync(path.join(folder,'09-offline-map.json'),JSON.stringify(offline,null,2));
@@ -112,22 +126,15 @@ app.whenReady().then(()=>{
  const ses=session.defaultSession;
  if(evidenceFlag)ses.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*']},(_details,callback)=>callback({cancel:true}));
  const mapFile=path.join(app.isPackaged ? process.resourcesPath : __dirname,'maps','nizhny-novgorod.pmtiles');
- const packs=createMapPacks(path.join(app.getPath('userData'),'maps-20261116'));
- for(const [channel,action] of Object.entries({'maps:list':packs.list,'maps:download':packs.start,'maps:pause':packs.pause})) {
-   ipcMain.handle(channel,(event,id)=>{
-     const caller=event.senderFrame;
-     const top=event.sender.mainFrame;
-     // Chromium can expand a Windows short path before exposing the frame URL.
-     if(event.sender!==win?.webContents || !caller || !caller.url.startsWith('file:') || caller.routingId!==top.routingId || caller.processId!==top.processId) return null;
-     return action(id);
-   });
- }
+ ipcMain.handle('maps:list',(event)=>{
+   const caller=event.senderFrame,top=event.sender.mainFrame;
+   if(event.sender!==win?.webContents || !caller || !caller.url.startsWith('file:') || caller.routingId!==top.routingId || caller.processId!==top.processId) return [];
+   return regions.map(region=>({...region,state:'ready'}));
+ });
  protocol.handle('moolva-map',request=>{
    const url=new URL(request.url);
-   const match=/^\/([a-z]+)\.pmtiles$/.exec(url.pathname);
-   const file=url.pathname==='/nizhny-novgorod.pmtiles'?mapFile:packs.filename(match?.[1]);
-   if(url.host!=='offline'||url.search||request.method!=='GET'||!file)return new Response(null,{status:404});
-   return readMapRange(file,request.headers.get('Range'));
+   if(url.host!=='offline'||url.pathname!=='/nizhny-novgorod.pmtiles'||url.search||request.method!=='GET')return new Response(null,{status:404});
+   return readMapRange(mapFile,request.headers.get('Range'));
  });
  // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
  ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{

@@ -1,7 +1,7 @@
-name: MoOLVa Griby 3.4 - offline maps and Windows Portable
+name: MoOLVa Griby 3.4 Full - offline maps and Windows Portable
 on:
   push:
-    branches: [feature/moolva-griby-3.4-offline-navigation]
+    branches: [feature/moolva-griby-3.4-full-portable]
     paths: ['MoOLVaGriby/**', '.github/workflows/moolva-griby-windows.yml']
   workflow_dispatch:
 permissions:
@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     permissions:
-      contents: write
+      contents: read
       actions: read
     defaults:
       run:
@@ -56,18 +56,17 @@ jobs:
           test "$status" -le 1
           node node_modules/@electron/asar/bin/asar.js extract "$RUNNER_TEMP/griby-tools/app.asar" "$RUNNER_TEMP/griby-tools/griby33-app"
           cp -a "$RUNNER_TEMP/griby-tools/griby33-app/"{media,build,photos.js,photos-gallery20.js,region20.js} bundle/
-      - name: Publish attributed map packs for in-app download
-        if: steps.reuse.outcome != 'success'
-        env:
-          GH_TOKEN: ${{ github.token }}
+      - name: Bundle the full zoom 5–14 regional map
         run: |
           set -euo pipefail
-          tag=moolva-griby-maps-20261116
-          if gh release view "$tag" --json assets --jq '.assets | length' > "$RUNNER_TEMP/griby-tools/release-count" 2>/dev/null; then
-            test "$(cat "$RUNNER_TEMP/griby-tools/release-count")" -eq 8
-          else
-            gh release create "$tag" "$RUNNER_TEMP/griby-tools/packs/"* --target "$GITHUB_SHA" --latest=false --title 'MoOLVa Грибы · офлайн-карты от 16 ноября 2026' --notes 'Данные OpenStreetMap contributors. Protomaps Basemap, ODbL 1.0. В комплекте каталог SHA-256 и атрибуция.'
+          tools_dir="$RUNNER_TEMP/griby-tools"
+          mkdir -p "$tools_dir"
+          if [ ! -s "$tools_dir/region.pmtiles" ]; then
+            curl -fL --retry 3 https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz | tar -xz -C "$tools_dir"
+            "$tools_dir/pmtiles" extract https://build.protomaps.com/20261116.pmtiles "$tools_dir/region.pmtiles" --bbox=41.55,54.38,47.85,58.22 --minzoom=5 --maxzoom=14
           fi
+          "$tools_dir/pmtiles" verify "$tools_dir/region.pmtiles"
+          cp "$tools_dir/region.pmtiles" bundle/maps/nizhny-novgorod.pmtiles
       - uses: actions/upload-artifact@v4
         with:
           name: griby34-build-data
@@ -104,7 +103,7 @@ jobs:
       - name: Run the Portable EXE in a fresh Windows profile
         timeout-minutes: 4
         run: |
-          $exe = (Resolve-Path 'dist/MoOLVa-Griby-3.4-Portable-x64.exe').Path
+          $exe = (Resolve-Path 'dist/MoOLVa-Griby-3.4-Full-Portable-x64.exe').Path
           $dir = Join-Path (Get-Location).Path 'dist/evidence'
           $profile = Join-Path $env:RUNNER_TEMP 'moolva-griby-34-qa'
           $proc = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList @("`"--moolva-evidence-dir=$dir`"", "`"--user-data-dir=$profile`"")
@@ -115,8 +114,8 @@ jobs:
           Get-FileHash $exe -Algorithm SHA256 | Format-List | Out-File -Encoding utf8 'dist/SHA256.txt'
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-3.4-Portable-x64
-          path: MoOLVaGriby/dist/MoOLVa-Griby-3.4-Portable-x64.exe
+          name: MoOLVa-Griby-3.4-Full-Portable-x64
+          path: MoOLVaGriby/dist/MoOLVa-Griby-3.4-Full-Portable-x64.exe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
