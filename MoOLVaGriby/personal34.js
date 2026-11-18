@@ -38,9 +38,9 @@
       trips.push({id:crypto.randomUUID(),name:'Маршрут из резервной копии',date:dateToday(),notes:'',track:incoming.track});
     }
     return {
-      basic:{favorites:[...new Set([...array(previous.basic.favorites),...incoming.basic.favorites])],diary:merge(previous.basic.diary,incoming.basic.diary)},
-      points:merge(previous.points,incoming.points),track:previous.track.length?previous.track:incoming.track,
-      geo:merge(previous.geo,incoming.geo,x=>x.id||`${x.lat}/${x.lon}/${x.label}`),trips
+      basic:{favorites:[...new Set([...array(previous.basic.favorites),...incoming.basic.favorites])],diary:merge(previous.basic.diary,incoming.basic.diary).slice(-1000)},
+      points:merge(previous.points,incoming.points).slice(-600),track:previous.track.length?previous.track:incoming.track,
+      geo:merge(previous.geo,incoming.geo,x=>x.id||`${x.lat}/${x.lon}/${x.label}`).slice(-300),trips
     };
   }
   function commit(state) {

@@ -84,17 +84,22 @@ function createWindow(){
       document.querySelector('#fm32-find').click();
       [...document.querySelectorAll('#fm32-results button')].find(button=>button.textContent.startsWith('Семёнов · город'))?.click();
       const center=map.getMap().getCenter();
-      for(let i=0;i<25&&!map.getStatus().loadedTiles;i++)await new Promise(r=>setTimeout(r,80));
-      const tiles=[...document.querySelectorAll('#fm32-map .leaflet-tile-loaded')].filter(x=>x.tagName==='CANVAS');
-      const rendered=tiles.some(x=>{
+      const hasGeography=x=>{
         const pixels=x.getContext('2d').getImageData(0,0,x.width,x.height).data;
         for(let i=4;i<pixels.length;i+=4)if(pixels[i]!==pixels[0]||pixels[i+1]!==pixels[1]||pixels[i+2]!==pixels[2])return true;
         return false;
-      });
-      return {status:archive.status,signature,rendered,tileCount:tiles.length,semenov:center.lat>56.76&&center.lat<56.82&&center.lng>44.45&&center.lng<44.54,...map.getStatus()};
+      };
+      let tiles=[],rendered=false;
+      for(let i=0;i<50&&!rendered;i++){
+        await new Promise(r=>setTimeout(r,100));
+        tiles=[...document.querySelectorAll('#fm32-map canvas.leaflet-tile-loaded')].filter(x=>x.width&&x.height);
+        rendered=tiles.some(hasGeography);
+      }
+      const packs=await window.MoOLVaMaps?.list();
+      return {status:archive.status,signature,rendered,tileCount:tiles.length,packCount:packs?.length||0,semenov:center.lat>56.76&&center.lat<56.82&&center.lng>44.45&&center.lng<44.54,...map.getStatus()};
     })()`,true);
     fs.writeFileSync(path.join(folder,'09-offline-map.json'),JSON.stringify(offline,null,2));
-    if(offline.status!==206||offline.signature!=='PMTiles'||!offline.rendered||!offline.semenov||offline.online||offline.localityCount<1000)
+    if(offline.status!==206||offline.signature!=='PMTiles'||!offline.rendered||!offline.semenov||offline.online||offline.localityCount<1000||offline.packCount!==6)
       throw Error('Offline map failed '+JSON.stringify(offline));
     fs.writeFileSync(path.join(folder,'07-free-interactive-map.png'),(await win.webContents.capturePage()).toPNG());
     fs.writeFileSync(path.join(folder,'08-visible-map-menu.png'),(await win.webContents.capturePage()).toPNG());
