@@ -28,7 +28,7 @@ test('offline pages, photo manifests, journal and compare are connected',()=>{
 });
 test('Windows installer, portable, icon and screenshot run are configured',()=>{
  const p=JSON.parse(read('package.json')),main=read('main.cjs');
- assert.equal(p.version,'3.3.0');
+ assert.equal(p.version,'3.4.0');
  assert.match(p.build.nsis.artifactName,/Setup/);
  assert.match(p.build.portable.artifactName,/Portable/);
  assert.match(main,/capturePage/);

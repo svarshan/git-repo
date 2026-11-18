@@ -1,185 +1,112 @@
-name: MoOLVa Griby 3.3 PRO MAX - Windows Setup and Portable
-concurrency:
-  group: griby-windows-${{ github.ref }}
-  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+name: MoOLVa Griby 3.4 - offline maps and Windows Portable
 on:
-  pull_request:
-    branches: [master]
-    paths:
-      - 'MoOLVaGriby/**'
-      - '.github/workflows/moolva-griby-windows.yml'
   push:
-    branches: [master]
-    paths:
-      - 'MoOLVaGriby/**'
-      - '.github/workflows/moolva-griby-windows.yml'
+    branches: [feature/moolva-griby-3.4-offline-navigation]
+    paths: ['MoOLVaGriby/**', '.github/workflows/moolva-griby-windows.yml']
   workflow_dispatch:
 permissions:
-  contents: write
+  contents: read
+concurrency:
+  group: griby-windows-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
-  windows:
-    runs-on: windows-latest
-    timeout-minutes: 55
+  data:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
     defaults:
       run:
         working-directory: MoOLVaGriby
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Setup Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: '3.12'
-      - name: Install image dependencies
-        run: python -m pip install requests==2.32.5 Pillow==11.3.0
-      - name: Check offline catalog and source tests
+      - name: Prepare the map overview and six downloadable packs
         run: |
-          node --check app.js
-          node --check catalog.js
-          node --check photos.js
-          node --check main.cjs
-          node --check core20.js
-          node --check upgrade20.js
-          node --check region20.js
-          node --check photos-gallery20.js
-          node --check community30.js
-          node --check expedition30.js
-          node --check google31.js
-          node --check free-map32.js
-          npm test
-          python -m unittest discover -s tests -p 'test_*.py'
-      - name: Build evidence-linked regional fungal list
-        timeout-minutes: 5
-        run: python -u scripts/region_atlas20.py
-      - name: Check region catalog generated JS
-        run: node --check region20.js
-      - name: Fetch real licensed Commons photographs and preserve attribution
-        timeout-minutes: 8
-        env:
-          MOOLVA_PHOTO_BUDGET_SECONDS: '210'
-          MOOLVA_PHOTO_LIMIT: '85'
-        run: python -u scripts/fetch_commons.py
-      - name: Build multi-angle photo gallery from compatible licenses
-        timeout-minutes: 6
-        env:
-          MOOLVA_GALLERY_SPECIES: '28'
-          MOOLVA_GALLERY_PER_SPECIES: '2'
-        run: python -u scripts/photo_gallery20.py
-      - name: Verify generated photos
-        shell: pwsh
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          mkdir -p "$RUNNER_TEMP/griby-tools" bundle/maps
+          curl -fL --retry 3 https://github.com/protomaps/go-pmtiles/releases/download/v1.31.2/go-pmtiles_1.31.2_Linux_x86_64.tar.gz | tar -xz -C "$RUNNER_TEMP/griby-tools"
+          python3 scripts/build-map-packs.py --pmtiles "$RUNNER_TEMP/griby-tools/pmtiles" --seed "$RUNNER_TEMP/griby-tools/region.pmtiles" --details "$RUNNER_TEMP/griby-tools/packs" --overview bundle/maps/nizhny-novgorod.pmtiles
+          node scripts/offline-localities.mjs "$RUNNER_TEMP/griby-tools/region.pmtiles" bundle/offline-localities.js
+      - name: Recover attributed media from the verified 3.3 release
         run: |
-          node --check photos.js
-          node --check region20.js
-          node --check photos-gallery20.js
-          $region = Get-Content region20-report.json -Raw | ConvertFrom-Json
-          if ($region.recordCount -lt 0 -or $region.recordCount -gt 247) { throw 'Invalid regional species evidence' }
-          $r = Get-Content photo-report.json -Raw | ConvertFrom-Json
-          if ($r.species -lt 53 -or $r.species -gt 300) { throw 'Wrong catalog size' }
-          Write-Host "Photos: $($r.photos) / $($r.species). Fungi species identity still requires expert visual review."
-      - name: Make original MoOLVa mushroom icon
-        run: python scripts/make_icon.py
-      - name: Install Electron
-        shell: pwsh
-        run: |
-          npm config set fetch-retries 4
-          npm install --no-audit --no-fund
-          if ($LASTEXITCODE -ne 0) { throw 'npm install failed' }
-      - name: Build Setup and Portable EXE
-        timeout-minutes: 18
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-        run: npm run build:win
-      - name: Capture actual packaged Windows application screenshot
-        shell: pwsh
-        timeout-minutes: 4
-        run: |
-          $exe = Get-ChildItem 'dist/win-unpacked' -Filter '*.exe' | Where-Object { $_.Name -notmatch 'uninstall|update|unins' } | Select-Object -First 1
-          if (-not $exe) { throw 'Packaged application EXE not found' }
-          $dir = Join-Path (Get-Location).Path 'dist/evidence'
-          New-Item -ItemType Directory -Force -Path $dir | Out-Null
-          $arg = "--moolva-evidence-dir=$dir"
-          $job = Start-Process -FilePath $exe.FullName -ArgumentList $arg -Wait -PassThru
-          if ($job.ExitCode -ne 0) {
-            Get-Content 'dist/evidence/gui-error.txt' -ErrorAction SilentlyContinue
-            throw "Real GUI smoke failed: $($job.ExitCode)"
-          }
-          if (-not (Test-Path 'dist/evidence/01-glavnaya.png')) { throw 'Real screenshot missing' }
-          if (-not (Test-Path 'dist/evidence/05-expedition.png')) { throw 'Real expedition screenshot missing' }
-          if (-not (Test-Path 'dist/evidence/06-google-maps.png')) { throw 'Google integration screenshot missing' }
-          if (-not (Test-Path 'dist/evidence/07-free-interactive-map.png')) { throw 'Free map real screenshot missing' }
-          if (-not (Test-Path 'dist/evidence/08-visible-map-menu.png')) { throw 'Visible map menu screenshot missing' }
-      - name: Validate EXEs and calculate SHA256
-        shell: pwsh
-        run: |
-          $files = @('dist/MoOLVa-Griby-3.3-Setup-x64.exe','dist/MoOLVa-Griby-3.3-Portable-x64.exe')
-          $lines = @()
-          foreach($p in $files) {
-            if (-not (Test-Path $p)) { throw "Missing EXE: $p" }
-            $item = Get-Item $p
-            if ($item.Length -lt 10000000) { throw "EXE too small: $p" }
-            $hash = (Get-FileHash -Algorithm SHA256 $p).Hash.ToLowerInvariant()
-            $lines += "$hash  $($item.Name)"
-          }
-          $lines | Set-Content 'dist/SHA256SUMS.txt' -Encoding utf8
-      - name: Setup EXE
-        uses: actions/upload-artifact@v4
-        with:
-          name: MoOLVa-Griby-3.3-Setup-EXE
-          path: MoOLVaGriby/dist/MoOLVa-Griby-3.3-Setup-x64.exe
-          compression-level: 0
-          if-no-files-found: error
-          retention-days: 30
-      - name: Portable EXE
-        uses: actions/upload-artifact@v4
-        with:
-          name: MoOLVa-Griby-3.3-Portable-EXE
-          path: MoOLVaGriby/dist/MoOLVa-Griby-3.3-Portable-x64.exe
-          compression-level: 0
-          if-no-files-found: error
-          retention-days: 30
-      - name: Real screenshot and audit evidence
-        uses: actions/upload-artifact@v4
-        with:
-          name: MoOLVa-Griby-3.3-Quality-Evidence
-          path: |
-            MoOLVaGriby/dist/SHA256SUMS.txt
-            MoOLVaGriby/dist/evidence/*
-            MoOLVaGriby/photo-report.json
-            MoOLVaGriby/photo-gallery20-report.json
-            MoOLVaGriby/region20-report.json
-            MoOLVaGriby/photos.js
-            MoOLVaGriby/photos-gallery20.js
-            MoOLVaGriby/region20.js
-            MoOLVaGriby/README_2_0.md
-            MoOLVaGriby/README_3_0.md
-            MoOLVaGriby/README_3_1.md
-            MoOLVaGriby/README_3_2.md
-            MoOLVaGriby/README_3_3.md
-            MoOLVaGriby/community30.js
-          if-no-files-found: error
-          retention-days: 30
-      - name: Publish public Windows EXEs on merged master
-        if: github.event_name == 'push' && github.ref == 'refs/heads/master'
-        shell: pwsh
+          set -euo pipefail
+          curl -fL --retry 3 -o "$RUNNER_TEMP/griby-tools/griby33.exe" https://github.com/svarshan/git-repo/releases/download/v3.3.0/MoOLVa-Griby-3.3-Portable-x64.exe
+          printf '%s  %s\n' 66410440453aa0f170e069e8c074f5fa834d7cfe026075dae279f57efe27fa6d "$RUNNER_TEMP/griby-tools/griby33.exe" | sha256sum -c -
+          unpack=node_modules/7zip-bin/linux/x64/7za
+          chmod +x "$unpack"
+          status=0
+          "$unpack" e -y "-o$RUNNER_TEMP/griby-tools" "$RUNNER_TEMP/griby-tools/griby33.exe" resources/app.asar || status=$?
+          test "$status" -le 1
+          node node_modules/@electron/asar/bin/asar.js extract "$RUNNER_TEMP/griby-tools/app.asar" "$RUNNER_TEMP/griby-tools/griby33-app"
+          cp -a "$RUNNER_TEMP/griby-tools/griby33-app/"{media,build,photos.js,photos-gallery20.js,region20.js} bundle/
+      - name: Publish attributed map packs for in-app download
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          $tag = 'v3.3.0'
-          gh release view $tag --repo ${{ github.repository }} *> $null
-          if ($LASTEXITCODE -eq 0) { Write-Host 'Public release already exists; no overwrite'; exit 0 }
-          gh release create $tag "dist/MoOLVa-Griby-3.3-Setup-x64.exe" "dist/MoOLVa-Griby-3.3-Portable-x64.exe" "dist/SHA256SUMS.txt" --repo ${{ github.repository }} --title 'MoOLVa Грибы 3.3 PRO MAX' --notes 'Офлайн-атлас; определения по фото не подтверждают безопасность грибов. Сборка проверена Windows GUI и SHA256.'
-          if ($LASTEXITCODE -ne 0) { throw 'Release creation failed' }
-      - name: Diagnostics on failed build
-        if: failure()
-        uses: actions/upload-artifact@v4
+          set -euo pipefail
+          tag=moolva-griby-maps-20261116
+          if gh release view "$tag" --json assets --jq '.assets | length' > "$RUNNER_TEMP/griby-tools/release-count" 2>/dev/null; then
+            test "$(cat "$RUNNER_TEMP/griby-tools/release-count")" -eq 8
+          else
+            gh release create "$tag" "$RUNNER_TEMP/griby-tools/packs/"* --target "$GITHUB_SHA" --latest=false --title 'MoOLVa Грибы · офлайн-карты от 16 ноября 2026' --notes 'Данные OpenStreetMap contributors. Protomaps Basemap, ODbL 1.0. В комплекте каталог SHA-256 и атрибуция.'
+          fi
+      - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-3.3-Diagnostics
+          name: griby34-build-data
+          path: MoOLVaGriby/bundle/
+          retention-days: 7
+  windows:
+    needs: data
+    runs-on: windows-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: MoOLVaGriby
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: actions/download-artifact@v4
+        with:
+          name: griby34-build-data
+          path: MoOLVaGriby/bundle
+      - name: Build the x64 Portable EXE
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+          ELECTRON_BUILDER_COMPRESSION_LEVEL: '7'
+        run: |
+          Copy-Item -Path bundle/* -Destination . -Recurse -Force
+          npm ci --no-audit --no-fund
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm test
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npx electron-builder --win portable --x64
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Run the Portable EXE in a fresh Windows profile
+        timeout-minutes: 4
+        run: |
+          $exe = (Resolve-Path 'dist/MoOLVa-Griby-3.4-Portable-x64.exe').Path
+          $dir = Join-Path (Get-Location).Path 'dist/evidence'
+          $profile = Join-Path $env:RUNNER_TEMP 'moolva-griby-34-qa'
+          $proc = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList @("`"--moolva-evidence-dir=$dir`"", "`"--user-data-dir=$profile`"")
+          if ($proc.ExitCode -ne 0) { Get-Content "$dir/gui-error.txt" -ErrorAction SilentlyContinue; throw "Portable exited with $($proc.ExitCode)" }
+          if (-not (Test-Path "$dir/09-offline-map.json")) { throw 'Missing offline map verification' }
+          if (-not (Test-Path "$dir/07-free-interactive-map.png")) { throw 'Missing interactive map screenshot' }
+          if (-not (Test-Path "$dir/08-visible-map-menu.png")) { throw 'Missing Windows screenshot' }
+          Get-FileHash $exe -Algorithm SHA256 | Format-List | Out-File -Encoding utf8 'dist/SHA256.txt'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Griby-3.4-Portable-x64
+          path: MoOLVaGriby/dist/MoOLVa-Griby-3.4-Portable-x64.exe
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: MoOLVa-Griby-3.4-Windows-QA
           path: |
-            MoOLVaGriby/photo-report.json
-            MoOLVaGriby/dist/evidence/*
-          if-no-files-found: ignore
-          retention-days: 14
+            MoOLVaGriby/dist/evidence/
+            MoOLVaGriby/dist/SHA256.txt

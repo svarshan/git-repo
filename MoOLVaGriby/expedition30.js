@@ -24,11 +24,12 @@
  function fromStorage(key){try{const x=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(x)?x:[];}catch{return [];}}
  let mine=fromStorage(pointKey).map(importPoint).filter(Boolean).slice(-600);
  let track=fromStorage(trackKey).filter(x=>validCoordinate(x.lat,x.lon)).slice(-5000);
+ let trackPreview=null;
  let enabled={reports:true,observations:true,personal:true};
  let picked=null,zoom=8,center={lat:56.35,lon:43.50},online=false;
  const entry=doc.getElementById('primary-map-nav')||doc.createElement('button');entry.type='button';entry.dataset.expedition30='open';entry.innerHTML='<span>🗺</span> Карта грибных мест';if(!entry.isConnected)nav.insertBefore(entry,nav.children[1]||null);
  const section=doc.getElementById('expedition30')||doc.createElement('section');section.className='page';section.id='expedition30';section.dataset.gribyMounted='yes';
- section.innerHTML='<div class="sectiontop"><div><span class="eyebrow">MoOLVa Грибы 3.3 · Нижегородская область</span><h2>Экспедиция · карта грибных мест</h2></div></div>'+
+ section.innerHTML='<div class="sectiontop"><div><span class="eyebrow">MoOLVa Грибы 3.4 · Нижегородская область</span><h2>Экспедиция · карта грибных мест</h2></div></div>'+
  '<div class="exp-warning">📍 <b>Геометки соцсетей — ориентиры у населённых пунктов, не координаты грибных полян.</b> Результаты 2026 года не гарантируют находок в другой день. Обозначения грибов не подтверждают их съедобность.</div>'+
  '<div class="exp-summary"><div><strong id="exp-count-reports"></strong><span>районов из сообщений грибников</span></div><div><strong id="exp-count-observations"></strong><span>обобщённых ячеек наблюдений</span></div><div><strong id="exp-count-personal"></strong><span>моих точек</span></div></div>'+
  '<div class="exp-toolbar"><label><input type="checkbox" id="exp-reports" checked> 🟠 Сообщения грибников</label><label><input type="checkbox" id="exp-observations" checked> 🟢 iNaturalist (обобщённо)</label><label><input type="checkbox" id="exp-personal" checked> 🔵 Мои места</label>'+
@@ -39,11 +40,18 @@
  '<div class="exp-panel"><h3>Мои грибные места и маршруты</h3><p>Эти записи остаются на вашем ПК. Публичным источникам координаты не отправляются.</p>'+
  '<form id="exp-my-form" class="exp-form"><input id="exp-my-name" required maxlength="90" placeholder="Название места"><div class="exp-two"><input id="exp-my-lat" type="number" required step="any" min="54.1" max="58.2" placeholder="Широта"><input id="exp-my-lon" type="number" required step="any" min="41.2" max="48.2" placeholder="Долгота"></div><input id="exp-my-note" maxlength="500" placeholder="Что нашли (необязательно)"><button class="primary" type="submit">＋ Сохранить личную точку</button></form>'+
  '<div class="exp-ops"><button class="exp-button" id="exp-gps">⌖ Определить мои координаты</button><button class="exp-button" id="exp-json-out">⇩ Резерв JSON</button><button class="exp-button" id="exp-gpx-out">⇩ Экспорт GPX</button><label class="exp-upload">⇧ Импорт GPX / JSON<input type="file" id="exp-import" accept=".gpx,.json,application/json,application/gpx+xml" hidden></label><button class="exp-button" id="exp-clear-track">Сбросить маршрут</button></div><p id="exp-private-status"></p><div id="exp-personal-list"></div></div></div>'+
- '<div class="exp-footnote">Источники: публикации СМИ со ссылками в карточках; научно-гражданские наблюдения iNaturalist — только открытые геоданные с обобщением по сетке ~10–20 км. Подключаемый дорожный слой: © OpenStreetMap contributors. Офлайн доступны отметки и координатная схема, <b>полноценные офлайн-тайлы пока не включены</b>. Для GPX используйте треки, полученные законно и с разрешением владельца.</div>';
+ '<div class="exp-footnote">Источники: публикации СМИ со ссылками в карточках; научно-гражданские наблюдения iNaturalist — только открытые геоданные с обобщением по сетке ~10–20 км. Встроенная офлайн-карта: © OpenStreetMap contributors · Protomaps, данные от 16 ноября 2026 г. (ODbL). Для GPX используйте треки, полученные законно и с разрешением владельца.</div>';
  if(!section.isConnected)main.append(section);
  const $=id=>doc.getElementById(id);
  function setCounts(){$('exp-count-reports').textContent=reportData.length;$('exp-count-observations').textContent=obs.length;$('exp-count-personal').textContent=mine.length;}
- function save(){localStorage.setItem(pointKey,JSON.stringify(mine));localStorage.setItem(trackKey,JSON.stringify(track));setCounts();w.dispatchEvent(new w.CustomEvent('moolva:expedition-data-changed'));}
+ function save(){localStorage.setItem(pointKey,JSON.stringify(mine));localStorage.setItem(trackKey,JSON.stringify(track));trackPreview=null;setCounts();w.dispatchEvent(new w.CustomEvent('moolva:expedition-data-changed'));}
+ function markCar(lat,lon){
+  const car=importPoint({id:'car-parking',name:'Машина',lat,lon,note:'Указано по центру карты.'});
+  if(!car)return false;
+  const next=[...mine.filter(point=>point.id!==car.id),car].slice(-600);
+  localStorage.setItem(pointKey,JSON.stringify(next));mine=next;list();draw();choose(car);
+  w.dispatchEvent(new w.CustomEvent('moolva:expedition-data-changed'));return true;
+ }
  function show(){doc.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x===section));doc.querySelectorAll('.sidebar button').forEach(x=>x.classList.toggle('selected',x===entry));$('heading').textContent='Карта грибных мест';$('subtitle').textContent='Публичные сообщения, обобщённые наблюдения и личные маршруты';draw();w.dispatchEvent(new w.CustomEvent('moolva:expedition-shown'));w.scrollTo(0,0);}
  doc.addEventListener('click',e=>{const b=e.target.closest('[data-expedition30="open"]');if(b){e.preventDefault();show();}},true);
  const box=$('exp-map');let mapW=900,mapH=560;
@@ -86,8 +94,9 @@
  $('exp-online').addEventListener('click',()=>{online=!online;$('exp-online').textContent=online?'🌐 Выключить онлайн-карту':'🌐 Подключить карту OSM';draw();});
  $('exp-reset-view').addEventListener('click',()=>zoomTo(56.35,43.5,8));
  $('exp-zoom-in').addEventListener('click',()=>zoomAt(1));$('exp-zoom-out').addEventListener('click',()=>zoomAt(-1));
- box.addEventListener('wheel',e=>{e.preventDefault();zoomAt(e.deltaY<0?1:-1);},{passive:false});
- let drag=null;box.addEventListener('pointerdown',e=>{if(e.target.closest('button'))return;drag={x:e.clientX,y:e.clientY,c:worldPx(center.lat,center.lon,zoom)};box.setPointerCapture(e.pointerId);});
+ // Интерактивный слой Leaflet сам обрабатывает колёсико и указатель.
+ box.addEventListener('wheel',e=>{if(e.target.closest('#fm32-map'))return;e.preventDefault();zoomAt(e.deltaY<0?1:-1);},{passive:false});
+ let drag=null;box.addEventListener('pointerdown',e=>{if(e.target.closest('button, #fm32-map'))return;drag={x:e.clientX,y:e.clientY,c:worldPx(center.lat,center.lon,zoom)};box.setPointerCapture(e.pointerId);});
  box.addEventListener('pointermove',e=>{if(!drag)return;const next=fromPx(drag.c.x+drag.x-e.clientX,drag.c.y+drag.y-e.clientY,zoom);center={lat:Math.max(bounds.south,Math.min(bounds.north,next.lat)),lon:Math.max(bounds.west,Math.min(bounds.east,next.lon))};draw();});
  box.addEventListener('pointerup',()=>{drag=null;});box.addEventListener('pointercancel',()=>{drag=null;});
  $('exp-my-form').addEventListener('submit',e=>{e.preventDefault();const p=importPoint({name:$('exp-my-name').value,lat:Number($('exp-my-lat').value),lon:Number($('exp-my-lon').value),note:$('exp-my-note').value});if(!p){$('exp-private-status').textContent='Проверьте координаты Нижегородской области';return;}mine.push(p);mine=mine.slice(-600);save();list();draw();choose(p);$('exp-my-name').value='';$('exp-my-note').value='';$('exp-private-status').textContent='Точка сохранена локально';});
@@ -103,7 +112,10 @@
  catch(err){$('exp-private-status').textContent='Импорт отменён: '+err.message;}finally{e.target.value='';}});
  w.addEventListener('resize',()=>{if(section.classList.contains('active'))draw();});
  setCounts();list();
- w.MoOLVaExpedition30={show,reportData,observationCells:obs,selectPoint:choose,getSelection:()=>picked};
+ w.MoOLVaExpedition30={show,reportData,observationCells:obs,selectPoint:choose,getSelection:()=>picked,markCar,
+  getTrack:()=>track.slice(),getDisplayTrack:()=>trackPreview||track,
+  previewTrack:points=>{trackPreview=points.filter(p=>validCoordinate(p?.lat,p?.lon));w.MoOLVaFreeMap32?.fitTrack(trackPreview);}
+ };
  }
  return {bounds,validCoordinate,acceptedReport,projected,aggregate,importPoint,xmlEscape,gpx,mount};
 });

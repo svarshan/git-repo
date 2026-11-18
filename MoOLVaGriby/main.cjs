@@ -1,24 +1,32 @@
 'use strict';
-const {app,BrowserWindow,shell,session}=require('electron');
+const {app,BrowserWindow,shell,session,protocol,ipcMain}=require('electron');
 const path=require('node:path');
 const fs=require('node:fs');
+const {pathToFileURL}=require('node:url');
+const {readMapRange}=require('./offline-map-file.cjs');
+const {createMapPacks}=require('./map-packs.cjs');
+const entry=path.join(__dirname,'index.html');
+const entryUrl=pathToFileURL(entry).href;
+protocol.registerSchemesAsPrivileged([{
+ scheme:'moolva-map', privileges:{standard:true,secure:true,supportFetchAPI:true,corsEnabled:true}
+}]);
 app.setAppUserModelId('ru.moolva.griby');
 app.commandLine.appendSwitch('lang','ru-RU');
-if(!app.requestSingleInstanceLock()){app.quit();process.exit(0);}
+const evidenceFlag=process.argv.find(x=>x.startsWith('--moolva-evidence-dir='));
+if(!evidenceFlag&&!app.requestSingleInstanceLock()){app.quit();process.exit(0);}
 let win;
 function createWindow(){
  win=new BrowserWindow({width:1420,height:920,minWidth:960,minHeight:680,autoHideMenuBar:true,show:false,backgroundColor:'#0a1512',
-  icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
+  icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
  win.webContents.setWindowOpenHandler(({url})=>{
-  if(/^https:\/\/www\.google\.com\/maps\//.test(url)||/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org)\//.test(url))shell.openExternal(url);
+  if(/^https:\/\/www\.google\.com\/maps\//.test(url)||/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org|protomaps\.com)\//.test(url))shell.openExternal(url);
   return {action:'deny'};
  });
- win.webContents.on('will-navigate',(event,url)=>{if(!url.startsWith('file://'))event.preventDefault();});
- win.loadFile(path.join(__dirname,'index.html'));
+ win.webContents.on('will-navigate',(event,url)=>{if(url!==entryUrl)event.preventDefault();});
+ win.loadFile(entry);
  win.once('ready-to-show',()=>win.show());
- const flag=process.argv.find(x=>x.startsWith('--moolva-evidence-dir='));
- if(flag){
-  const folder=flag.slice('--moolva-evidence-dir='.length);
+ if(evidenceFlag){
+  const folder=evidenceFlag.slice('--moolva-evidence-dir='.length);
   const failure=setTimeout(()=>{fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'gui-error.txt'),'Electron screenshot timed out');app.exit(2);},30000);
   win.webContents.once('did-finish-load',async()=>{
    try{
@@ -68,6 +76,26 @@ function createWindow(){
     fs.writeFileSync(path.join(folder,'free-map32-smoke.json'),JSON.stringify(freeMap,null,2));
     if(!freeMap.leaflet||!freeMap.mapReady||freeMap.after!==freeMap.before+1||freeMap.afterOut!==freeMap.before||!freeMap.townLabelsLayer||!freeMap.attribution||freeMap.markerCount<10)
       throw Error('Leaflet map or zoom failed '+JSON.stringify(freeMap));
+    const offline=await win.webContents.executeJavaScript(`(async()=>{
+      const map=window.MoOLVaFreeMap32;
+      const archive=await fetch('moolva-map://offline/nizhny-novgorod.pmtiles',{headers:{Range:'bytes=0-6'}});
+      const signature=await archive.text();
+      document.querySelector('#fm32-town').value='Семёнов';
+      document.querySelector('#fm32-find').click();
+      [...document.querySelectorAll('#fm32-results button')].find(button=>button.textContent.startsWith('Семёнов · город'))?.click();
+      const center=map.getMap().getCenter();
+      for(let i=0;i<25&&!map.getStatus().loadedTiles;i++)await new Promise(r=>setTimeout(r,80));
+      const tiles=[...document.querySelectorAll('#fm32-map .leaflet-tile-loaded')].filter(x=>x.tagName==='CANVAS');
+      const rendered=tiles.some(x=>{
+        const pixels=x.getContext('2d').getImageData(0,0,x.width,x.height).data;
+        for(let i=4;i<pixels.length;i+=4)if(pixels[i]!==pixels[0]||pixels[i+1]!==pixels[1]||pixels[i+2]!==pixels[2])return true;
+        return false;
+      });
+      return {status:archive.status,signature,rendered,tileCount:tiles.length,semenov:center.lat>56.76&&center.lat<56.82&&center.lng>44.45&&center.lng<44.54,...map.getStatus()};
+    })()`,true);
+    fs.writeFileSync(path.join(folder,'09-offline-map.json'),JSON.stringify(offline,null,2));
+    if(offline.status!==206||offline.signature!=='PMTiles'||!offline.rendered||!offline.semenov||offline.online||offline.localityCount<1000)
+      throw Error('Offline map failed '+JSON.stringify(offline));
     fs.writeFileSync(path.join(folder,'07-free-interactive-map.png'),(await win.webContents.capturePage()).toPNG());
     fs.writeFileSync(path.join(folder,'08-visible-map-menu.png'),(await win.webContents.capturePage()).toPNG());
     clearTimeout(failure);app.exit(0);
@@ -77,9 +105,25 @@ function createWindow(){
 }
 app.whenReady().then(()=>{
  const ses=session.defaultSession;
+ if(evidenceFlag)ses.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*']},(_details,callback)=>callback({cancel:true}));
+ const mapFile=path.join(app.isPackaged ? process.resourcesPath : __dirname,'maps','nizhny-novgorod.pmtiles');
+ const packs=createMapPacks(path.join(app.getPath('userData'),'maps-20261116'));
+ for(const [channel,action] of Object.entries({'maps:list':packs.list,'maps:download':packs.start,'maps:pause':packs.pause})) {
+   ipcMain.handle(channel,(event,id)=>{
+     if(event.sender!==win?.webContents || event.senderFrame?.url!==entryUrl) return null;
+     return action(id);
+   });
+ }
+ protocol.handle('moolva-map',request=>{
+   const url=new URL(request.url);
+   const match=/^\/([a-z]+)\.pmtiles$/.exec(url.pathname);
+   const file=url.pathname==='/nizhny-novgorod.pmtiles'?mapFile:packs.filename(match?.[1]);
+   if(url.host!=='offline'||url.search||request.method!=='GET'||!file)return new Response(null,{status:404});
+   return readMapRange(file,request.headers.get('Range'));
+ });
  // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
  ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{
-   details.requestHeaders['User-Agent']='MoOLVa-Griby/3.3 (+https://github.com/svarshan/git-repo)';
+   details.requestHeaders['User-Agent']='MoOLVa-Griby/3.4 (+https://github.com/svarshan/git-repo)';
    callback({requestHeaders:details.requestHeaders});
  });
  createWindow();

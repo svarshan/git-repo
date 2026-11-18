@@ -3,3 +3,8 @@ dist/
 build/*.ico
 __pycache__/
 *.pyc
+dist-*/
+maps/*.pmtiles
+media/
+bundle/
+offline-localities.js

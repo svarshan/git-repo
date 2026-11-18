@@ -26,3 +26,13 @@
 .exp-map-placeholder strong{font-size:22px;color:#f7ca88}
 .exp-map-placeholder p{max-width:410px;color:#d0e4d0;line-height:1.55}
 .exp-map-placeholder a{color:#ffd1a0;text-decoration:underline}
+
+.fm32-results{display:flex;gap:7px;flex-wrap:wrap;margin-top:10px}
+.fm32-results[hidden]{display:none}
+.fm34-row{margin-top:10px}
+.fm34-row[hidden],.p34-trip-panel [hidden],.p34-dialog [hidden]{display:none!important}
+.fm34-row select,.p34-trip-panel textarea{background:#0c2118;color:#f5eee2;border:1px solid #53745a;border-radius:9px;padding:10px}
+.fm34-row small{color:#b5dfc6}
+.p34-dialog{max-width:560px;color:#f5eee2;background:#122c23;border:1px solid #406d50;border-radius:14px;padding:22px}
+.p34-dialog::backdrop{background:#000a}
+.p34-trip-panel{margin-top:12px}

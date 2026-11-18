@@ -118,7 +118,7 @@
     $('#showMore').addEventListener('click',()=>{visible+=18;renderCatalog();});
     for(const id of ['pickA','pickB'])document.getElementById(id).addEventListener('change',renderCompare);
     $('#heroSearch').addEventListener('click',()=>{$('#search').focus();$('#search').scrollIntoView({behavior:'smooth',block:'center'});});
-    $('#backupBtn').addEventListener('click',exportData);$('#exportDiary').addEventListener('click',exportData);
+    $('#backupBtn').addEventListener('click',()=>window.MoOLVaBackup34?window.MoOLVaBackup34.show():exportData());$('#exportDiary').addEventListener('click',exportData);
     $('#resetAll').addEventListener('click',()=>{if(!confirm('Точно удалить все ваши записи и избранное?'))return;state={favorites:new Set(),diary:[]};save();renderStats();renderDiary();toast('Личные записи очищены');});
     $('#diaryForm').addEventListener('submit',e=>{e.preventDefault();const speciesId=$('#obsSpecies').value,place=$('#obsPlace').value.trim(),date=$('#obsDate').value,notes=$('#obsNote').value.trim();
       if(!byId.has(speciesId)||!place||!date)return;

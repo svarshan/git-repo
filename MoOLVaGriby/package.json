@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "3.3.0",
-  "description": "MoOLVa Грибы 3.3 — постоянный пункт меню и настоящая бесплатная карта OpenStreetMap с проверенным Windows GUI",
+  "version": "3.4.0",
+  "description": "MoOLVa Грибы 3.4 — офлайн-карта и навигатор Нижегородской области",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -43,7 +43,14 @@
       "google31.css",
       "free-map32.js",
       "free-map32.css",
-      "node_modules/leaflet/dist/**/*"
+      "node_modules/leaflet/dist/**/*",
+      "offline-map-file.cjs",
+      "offline-localities.js",
+      "node_modules/protomaps-leaflet/dist/protomaps-leaflet.js",
+      "map-packs.cjs",
+      "map-regions.json",
+      "preload.cjs",
+      "personal34.js"
     ],
     "asar": true,
     "win": {
@@ -68,13 +75,24 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-3.3-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-3.4-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-3.3-Portable-${arch}.exe"
-    }
+      "artifactName": "MoOLVa-Griby-3.4-Portable-${arch}.exe"
+    },
+    "extraResources": [
+      {
+        "from": "maps/nizhny-novgorod.pmtiles",
+        "to": "maps/nizhny-novgorod.pmtiles"
+      }
+    ],
+    "electronLanguages": [
+      "ru",
+      "en-US"
+    ]
   },
   "dependencies": {
-    "leaflet": "1.9.4"
+    "leaflet": "1.9.4",
+    "protomaps-leaflet": "5.1.0"
   }
 }
