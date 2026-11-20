@@ -10,13 +10,15 @@
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   const safePhoto=b=>{const x=photos[b.latin];return x&&/^media\/photos\/[A-Za-z0-9_-]+\.jpg$/.test(x.file)?x:null;};
   const latinTranslate = text => String(text).toLowerCase().replace(/[ё]/g,'е').replace(/[а-я]/g,c=>({'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ы':'y','э':'e','ю':'yu','я':'ya','ь':'','ъ':''}[c]||c)).normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
+  const atlas=window.MoOLVaAtlas40;
+  const searchAtlas=atlas.makeSearch(birds,latinTranslate);
   const months=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
   const storeKey='moolva-griby-1.0-data';
   function load(){try{const data=JSON.parse(localStorage.getItem(storeKey)||'{}');return {
    favorites:new Set(Array.isArray(data.favorites)?data.favorites.filter(x=>byId.has(x)):[]),
    diary:Array.isArray(data.diary)?data.diary.filter(x=>x&&typeof x==='object'&&byId.has(x.speciesId)).slice(-1000):[]};}
    catch{return {favorites:new Set(),diary:[]};}}
-  let state=load(),page='catalog',visible=18,query='',currentId=null;
+  let state=load(),page='catalog',visible=18,currentId=null;
   function save(){try{localStorage.setItem(storeKey,JSON.stringify({favorites:[...state.favorites],diary:state.diary}));return true;}catch{toast('Не удалось записать данные на диск');return false;}}
   function toast(text){const box=$('#toast');box.textContent=text;box.classList.add('visible');clearTimeout(toast.t);toast.t=setTimeout(()=>box.classList.remove('visible'),3200);}
   function stopSpeech(){if('speechSynthesis' in window)window.speechSynthesis.cancel();}
@@ -34,15 +36,13 @@
   }
   function filt(){
     const group=$('#group').value,risk=$('#risk').value,month=Number($('#season').value);
-    const q=latinTranslate($('#search').value.trim());
-    return birds.filter(b=>{
+    const allowed=new Set(birds.filter(b=>{
       if(group&&b.group!==group)return false;
       if(risk==='danger'&&!hazard(b.risk))return false;
       if(risk==='reference'&&hazard(b.risk))return false;
-      if(month&&!b.months.includes(month))return false;
-      const searchable=latinTranslate([b.name,b.latin,b.group,b.traits,b.habitat].join(' '));
-      return !q||q.split(/\s+/).every(t=>searchable.includes(t));
-    }).sort((a,b)=>a.name.localeCompare(b.name,'ru'));
+      return !month||b.months.includes(month);
+    }));
+    return searchAtlas($('#search').value,allowed);
   }
   function renderCatalog(){const list=filt();$('#cards').innerHTML=list.slice(0,visible).map(card).join('')||'<div class="empty">По вашему запросу ничего не найдено.</div>';
     $('#resultCount').textContent=list.length+' из '+birds.length+' видов';
@@ -52,7 +52,7 @@
   const headings={catalog:['Грибной атлас','Изучайте виды и опасные двойники, сохраняйте наблюдения'],
    compare:['Сравнение грибов','Изучайте отличия похожих видов'],diary:['Дневник грибника','Ваши собственные наблюдения, сохранённые локально'],
    map:['Мои места','Личные находки без выдуманных географических точек'],favorites:['Избранное','Сохранённые виды из энциклопедии'],
-   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 3.5 · атлас и карта']};
+   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 4.0 · Умный атлас']};
   function nav(next){if(!headings[next])return;stopSpeech();closeDetail();page=next;
     document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));
     document.querySelectorAll('.sidebar nav button').forEach(x=>x.classList.toggle('selected',x.dataset.page===page));
@@ -67,10 +67,14 @@
   function openDetail(id){
     const b=byId.get(id);if(!b)return;closeDetail();currentId=id;
     const similar=byLatin.get(b.similar),period=b.months.length?b.months.map(m=>months[m-1]).join(', '):'недостаточно достоверных данных';
+    const terms=atlas.glossaryFor(b).map(key=>'<button type="button" data-atlas-term="'+key+'">'+escapeHTML(atlas.glossary[key].title)+'</button>').join('');
+    const names=atlas.aliases[b.id];
     const dangerous=hazard(b.risk),riskText=dangerous?'<div class="red-warning"><b>'+escapeHTML(hazardLabel(b))+'</b> — не собирайте для употребления. Некоторые токсины вызывают отсроченные симптомы.</div>':'<div class="note">Справочный статус не означает, что найденный вами гриб безопасен для употребления. Возможны похожие ядовитые виды.</div>';
     $('#detail').innerHTML='<div class="detail-header"><span class="eyebrow">ПАСПОРТ ВИДА · ГРИБНОЙ АТЛАС</span><h2>'+escapeHTML(b.name)+'</h2><div class="latin">'+escapeHTML(b.latin)+'</div></div><div class="detail-photo">'+mediaHTML(b,'detail')+'</div>'+
       '<div class="detail-content"><div class="detail-pills"><span class="chip">'+escapeHTML(b.group)+'</span><span class="chip">'+escapeHTML(hazardLabel(b))+'</span></div>'+
-      riskText+'<h3>Внешние признаки</h3><p>'+escapeHTML(b.traits)+'</p><h3>Местообитание</h3><p>'+escapeHTML(b.habitat)+'. <b>Наличие этого вида в конкретной точке Нижегородской области не подтверждено.</b></p>'+
+      riskText+(names?'<p><b>Другие названия:</b> '+escapeHTML(names.join(', '))+'</p>':'')+
+      '<h3>Внешние признаки</h3><p>'+escapeHTML(b.traits)+'</p>'+
+      (terms?'<div class="atlas40-term-links" aria-label="Термины из карточки">'+terms+'</div>':'')+'<h3>Местообитание</h3><p>'+escapeHTML(b.habitat)+'. <b>Наличие этого вида в конкретной точке Нижегородской области не подтверждено.</b></p>'+
       '<h3>Ориентировочный сезон</h3><p>'+escapeHTML(period)+'. Сроки зависят от погоды и природной зоны, не являются прогнозом.</p>'+
       '<h3>Похожие виды и двойники</h3><p>'+(similar?escapeHTML(similar.name)+' — '+escapeHTML(similar.latin):escapeHTML(b.similar||'Требуется сравнение у специалиста'))+'. По отдельному внешнему признаку определять гриб нельзя.</p>'+
       '<h3>Фотография и первоисточник</h3>'+sourceLink(b)+'<p class="photo-credit">Таксономию и статус сверяйте с научными справочниками и региональными гербарными данными. '+(b.regionEvidence?'Публикации сообщества: '+escapeHTML(b.regionEvidence.count)+' сообщений в регионе (не экспертное подтверждение вида)':'Региональное присутствие не аттестовано')+'.</p>'+
@@ -83,10 +87,23 @@
     const ru=window.speechSynthesis.getVoices().find(v=>v.lang.toLowerCase().startsWith('ru'));if(ru)utt.voice=ru;window.speechSynthesis.speak(utt);}
   function fav(id){if(!byId.has(id))return;state.favorites.has(id)?state.favorites.delete(id):state.favorites.add(id);save();
     renderCatalog();renderFav();if(currentId)openDetail(currentId);toast('Избранное обновлено');}
-  function renderCompare(){const a=byId.get($('#pickA').value)||birds[0],b=byId.get($('#pickB').value)||birds[1];if(!a||!b)return;
-    const panel=x=>'<div class="compare-panel">'+mediaHTML(x)+'<div class="body"><h3>'+escapeHTML(x.name)+'</h3><div class="latin">'+escapeHTML(x.latin)+'</div>'+ (hazard(x.risk)?'<div class="red-warning">'+escapeHTML(hazardLabel(x))+'</div>':'')+
-      '<dl><dt>Группа</dt><dd>'+escapeHTML(x.group)+'</dd><dt>Признаки</dt><dd>'+escapeHTML(x.traits)+'</dd><dt>Местообитание</dt><dd>'+escapeHTML(x.habitat)+'</dd><dt>Сезон (месяцы)</dt><dd>'+x.months.join(', ')+'</dd><dt>Статус</dt><dd>'+escapeHTML(hazardLabel(x))+'; не рекомендация к употреблению</dd></dl><button class="ghost" data-open="'+escapeHTML(x.id)+'">Подробнее →</button></div></div>';
-    $('#comparison').innerHTML=panel(a)+panel(b);}
+  function renderCompare(){
+    const a=byId.get($('#pickA').value)||birds[0],b=byId.get($('#pickB').value)||birds[1];
+    if(!a||!b)return;
+    const differences=$('#atlas40-differences').checked;
+    const panel=x=>'<div class="compare-panel">'+(differences?'':mediaHTML(x))+'<div class="body"><h3>'+escapeHTML(x.name)+'</h3><div class="latin">'+escapeHTML(x.latin)+'</div>'+
+      (hazard(x.risk)?'<div class="red-warning">'+escapeHTML(hazardLabel(x))+'</div>':'')+
+      (differences?'':'<dl><dt>Группа</dt><dd>'+escapeHTML(x.group)+'</dd><dt>Признаки</dt><dd>'+escapeHTML(x.traits)+'</dd><dt>Местообитание</dt><dd>'+escapeHTML(x.habitat)+'</dd><dt>Сезон (месяцы)</dt><dd>'+x.months.join(', ')+'</dd></dl>')+
+      '<button class="ghost" data-open="'+escapeHTML(x.id)+'">Подробнее →</button></div></div>';
+    $('#comparison').innerHTML=panel(a)+panel(b);
+    const rows=atlas.comparison(a,b,differences);
+    $('#atlas40-table').innerHTML=rows.length?
+      '<table><thead><tr><th scope="col">Признак</th><th scope="col">'+escapeHTML(a.name)+'</th><th scope="col">'+escapeHTML(b.name)+'</th></tr></thead><tbody>'+
+      rows.map(row=>'<tr data-trait="'+row.key+'"'+(row.differs?' class="is-different"':'')+'><th scope="row">'+escapeHTML(row.label)+
+        '</th><td>'+escapeHTML(row.a||'Нет данных')+'</td><td>'+escapeHTML(row.b||'Нет данных')+'</td></tr>').join('')+
+      '</tbody></table>':a.id===b.id?'<p class="note">Выберите два разных вида.</p>':'<p class="note">'+
+      (differences?'В структурированных признаках этой пары различия пока не описаны.':'Для этой пары доступны описания в карточках.')+'</p>';
+  }
   function exportData(){const json={app:'MoOLVa Грибы',schema:1,created:new Date().toISOString(),favorites:[...state.favorites],diary:state.diary};download('MoOLVa-Griby-Backup.json',JSON.stringify(json,null,2),'application/json');toast('Резервная копия сохранена в JSON');}
   function download(name,text,type){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}
   function renderDiary(){const items=state.diary.slice().reverse();$('#diaryItems').innerHTML=items.length?items.map(entry=>{
@@ -116,7 +133,7 @@
     document.addEventListener('click',handleClick);
     for(const id of ['search','group','risk','season'])document.getElementById(id).addEventListener(id==='search'?'input':'change',()=>{visible=18;renderCatalog();});
     $('#showMore').addEventListener('click',()=>{visible+=18;renderCatalog();});
-    for(const id of ['pickA','pickB'])document.getElementById(id).addEventListener('change',renderCompare);
+    for(const id of ['pickA','pickB','atlas40-differences'])document.getElementById(id).addEventListener('change',renderCompare);
     $('#heroSearch').addEventListener('click',()=>{$('#search').focus();$('#search').scrollIntoView({behavior:'smooth',block:'center'});});
     $('#backupBtn').addEventListener('click',()=>window.MoOLVaBackup34?window.MoOLVaBackup34.show():exportData());$('#exportDiary').addEventListener('click',exportData);
     $('#resetAll').addEventListener('click',()=>{if(!confirm('Точно удалить все ваши записи и избранное?'))return;state={favorites:new Set(),diary:[]};save();renderStats();renderDiary();toast('Личные записи очищены');});
@@ -124,7 +141,7 @@
       if(!byId.has(speciesId)||!place||!date)return;
       state.diary.push({id:(typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2)),speciesId,place:place.slice(0,100),date,notes:notes.slice(0,1000)});
       if(!save()){state.diary.pop();return;}$('#obsPlace').value='';$('#obsNote').value='';renderDiary();renderStats();toast('Наблюдение сохранено только на этом устройстве');});
-    window.addEventListener('keydown',e=>{if(e.key==='Escape')closeDetail();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();nav('catalog');$('#search').focus();}});
+    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#atlas40-glossary').open)closeDetail();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();nav('catalog');$('#search').focus();}});
     window.addEventListener('pagehide',stopSpeech);
     renderStats();renderCatalog();renderCompare();renderDiary();renderMap();
   }

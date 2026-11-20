@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "3.5.0",
-  "description": "MoOLVa Грибы 3.5 — офлайн-карта и навигатор Нижегородской области",
+  "version": "4.0.0",
+  "description": "MoOLVa Грибы 4.0 — Умный атлас",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -26,6 +26,9 @@
       "catalog.js",
       "photos.js",
       "app.js",
+      "smart-atlas40.js",
+      "smart-atlas-ui40.js",
+      "smart-atlas40.css",
       "main.cjs",
       "media/photos/**/*",
       "package.json",
@@ -75,10 +78,10 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-3.5-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-4.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-3.5-Full-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-4.0-Full-Portable-${arch}.exe"
     },
     "extraResources": [
       {

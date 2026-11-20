@@ -31,7 +31,7 @@ function createWindow(){
  win=new BrowserWindow({width:1420,height:920,minWidth:960,minHeight:680,autoHideMenuBar:true,show:false,backgroundColor:'#0a1512',
   icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
  win.webContents.setWindowOpenHandler(({url})=>{
-  if(/^https:\/\/www\.google\.com\/maps\//.test(url)||/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org|protomaps\.com)\//.test(url))shell.openExternal(url);
+  if(/^https:\/\/www\.google\.com\/maps\//.test(url)||/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org|www\.mushroomexpert\.com|protomaps\.com)\//.test(url))shell.openExternal(url);
   return {action:'deny'};
  });
  win.webContents.on('will-navigate',(event,url)=>{if(url!==entryUrl)event.preventDefault();});
@@ -67,6 +67,49 @@ function createWindow(){
       await new Promise(r=>setTimeout(r,200));
       fs.writeFileSync(path.join(folder,name),(await win.webContents.capturePage()).toPNG());
     }
+    const smartAtlas=await win.webContents.executeJavaScript(`(()=>{
+      const byId=id=>document.getElementById(id);
+      const click=selector=>document.querySelector(selector).click();
+      click('[data-page="catalog"]');
+      const search=byId('search');
+      const matches=(value,ids)=>{
+        search.value=value;
+        search.dispatchEvent(new Event('input'));
+        return ids.every(id=>byId('cards').querySelector('[data-open="'+id+'"]'));
+      };
+      const synonyms=matches('обабок',['g003','g004']);
+      const typo=matches('борвик',['g001']);
+      const phrase=matches('губка под шляпкой',['g001'])&&!byId('cards').querySelector('[data-open="g031"]');
+      matches('',[]);
+      click('[data-goto20="id20"]');
+      const first=byId('atlas40-question').querySelector('h3').textContent;
+      click('[data-atlas-answer="pores"]');
+      const next=byId('atlas40-question').querySelector('h3').textContent;
+      const adaptive=first!==next && byId('id20').classList.contains('active') &&
+        byId('atlas40-results').textContent.includes('Совпало') &&
+        !byId('atlas40-results').querySelector('[data-open="g031"]');
+      click('#atlas40-back');
+      const back=byId('atlas40-question').querySelector('h3').textContent===first;
+      click('[data-page="compare"]');
+      byId('pickA').value='g005';
+      byId('pickB').value='g006';
+      click('#atlas40-differences');
+      const rows=[...byId('atlas40-table').querySelectorAll('tbody tr')];
+      const differences=rows.length===1 && rows[0].dataset.trait==='ring' &&
+        rows[0].textContent.includes('Кольцо отсутствует');
+      click('#comparison [data-open="g005"]');
+      click('#detail [data-atlas-term="ring"]');
+      const dialog=byId('atlas40-glossary');
+      const glossary=dialog.open && byId('atlas40-term-name').textContent==='Кольцо' &&
+        byId('atlas40-diagram').dataset.part==='ring';
+      dialog.close();
+      click('#closeModal');
+      click('[data-page="compare"]');
+      return {synonyms,typo,phrase,adaptive,back,differences,glossary};
+    })()`,true);
+    fs.writeFileSync(path.join(folder,'11-smart-atlas.json'),JSON.stringify(smartAtlas,null,2));
+    if(!Object.values(smartAtlas).every(Boolean))throw Error('Smart Atlas GUI failed '+JSON.stringify(smartAtlas));
+    fs.writeFileSync(path.join(folder,'11-smart-atlas.png'),(await win.webContents.capturePage()).toPNG());
     await win.webContents.executeJavaScript("document.querySelector('#primary-map-nav').click()");
     await new Promise(r=>setTimeout(r,250));
     fs.writeFileSync(path.join(folder,'05-expedition.png'),(await win.webContents.capturePage()).toPNG());
@@ -159,7 +202,7 @@ app.whenReady().then(()=>{
  });
  // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
  ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{
-   details.requestHeaders['User-Agent']='MoOLVa-Griby/3.5 (+https://github.com/svarshan/git-repo)';
+   details.requestHeaders['User-Agent']='MoOLVa-Griby/4.0 (+https://github.com/svarshan/git-repo)';
    callback({requestHeaders:details.requestHeaders});
  });
  createWindow();

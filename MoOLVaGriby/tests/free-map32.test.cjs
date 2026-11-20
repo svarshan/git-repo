@@ -24,7 +24,7 @@ test('source-layer toggles separate community approximation, public aggregate an
 });
 test('offline Leaflet asset is packaged and labels/zoom are controlled by real map engine',()=>{
  const p=JSON.parse(read('package.json')),html=read('index.html'),js=read('free-map32.js'),css=read('free-map32.css');
- assert.equal(p.version,'3.5.0');
+ assert.equal(p.version,'4.0.0');
  assert.equal(p.dependencies.leaflet,'1.9.4');
  assert.ok(p.build.files.includes('node_modules/leaflet/dist/**/*'));
  assert.ok(p.build.files.includes('free-map32.js'));
@@ -42,6 +42,6 @@ test('offline Leaflet asset is packaged and labels/zoom are controlled by real m
  assert.ok(main.includes(".leaflet-control-zoom-in"));
  assert.ok(main.includes(".leaflet-control-zoom-out"));
  assert.ok(main.includes("zoomend"));
- assert.ok(main.includes("MoOLVa-Griby/3.5"));
+ assert.ok(main.includes("MoOLVa-Griby/4.0"));
  assert.ok(wf.includes("07-free-interactive-map.png"));
 });

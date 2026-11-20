@@ -10,7 +10,7 @@
   const note='Сходство изображений и результаты определения по признакам не подтверждают вид и не означают, что гриб можно употреблять в пищу.';
   const chapters=[
    {id:'field20',title:'Полевой режим',icon:'◉',caption:'Крупные элементы для работы в лесу'},
-   {id:'id20',title:'Определитель',icon:'⌕',caption:'Варианты по наблюдаемым признакам — не экспертиза'},
+   {id:'id20',title:'Определитель',icon:'⌕',caption:'Уточняющие вопросы по внешним признакам'},
    {id:'photo20',title:'Помощник по фото',icon:'▧',caption:'Сравнение окраски снимков, не AI-определение'},
    {id:'calendar20',title:'Календарь',icon:'▦',caption:'Сезоны и опубликованные наблюдения'},
    {id:'geo20',title:'Карта области',icon:'⌖',caption:'Опубликованные наблюдения сообщества и ваши координаты'},
@@ -19,7 +19,7 @@
    {id:'protected20',title:'Охраняемые виды',icon:'♣',caption:'Охранный статус требует официальной проверки'}];
   const pageData={
    field20:'<div class="p20-hero"><h2>Лесной экран</h2><p>Увеличенные кнопки, быстрый поиск, сезон и офлайн-справочник. Для безопасности изучайте грибы, не делая вывод о пригодности к употреблению.</p><div class="p20-tools"><button class="p20-action" data-mode20>◉ Включить крупный интерфейс</button><button class="p20-action" data-goto20="id20">⌕ Определитель</button><button class="p20-action" data-goto20="photo20">▧ Фото-помощник</button><button class="p20-action" data-goto20="geo20">⌖ Места</button></div></div><div id="p20-field-status" class="p20-message"></div>',
-   id20:'<div class="p20-note">'+note+'</div><div class="p20-grid3"><label>Тип нижней поверхности<select id="p20-group"><option value="">Не знаю</option><option value="Трубчатые">Трубочки</option><option value="Пластинчатые">Пластинки</option><option value="Складчатые">Складки / жилки</option><option value="Шиповатые">Шипики</option><option value="Древесные">Растёт на древесине</option></select></label><label>Описание шляпки<input id="p20-cap" placeholder="Например, коричневая" maxlength="40"></label><label>Место находки<input id="p20-habitat" placeholder="Например, берёза" maxlength="40"></label></div><div class="p20-tools"><button class="p20-action" id="p20-find">Показать возможные виды</button><button class="p20-muted" id="p20-clear">Очистить</button></div><div id="p20-id-results" class="p20-results"></div>',
+   id20:'<div class="p20-note">Ориентиры для изучения видов. Съедобность находки оценивают отдельно с помощью специалиста.</div><div id="atlas40-wizard"><div id="atlas40-question"></div><div id="atlas40-results"></div></div>',
    photo20:'<div class="p20-note">'+note+' Функция версии 2.0 сравнивает общую цветовую палитру фотографий, а не использует обученную модель распознавания грибов. Не доверяйте похожей окраске при определении.</div><div class="p20-upload"><button class="p20-action" type="button" id="p20-pick-files">Выбрать фотографии</button><input type="file" id="p20-upload" accept="image/jpeg,image/png,image/webp" multiple hidden><p>Выберите до трёх изображений. Снимки остаются в приложении и никуда не загружаются.</p></div><div id="p20-preview" class="p20-upload-preview"></div><div class="p20-tools"><button class="p20-action" id="p20-analyse">Найти внешне похожие фото</button><button class="p20-muted" id="p20-photo-clear">Очистить изображения</button></div><div id="p20-photo-results" class="p20-results"></div>',
    calendar20:'<div class="p20-note">Месяцы на карточках — ориентировочная сезонность. Гистограмма по iNaturalist содержит только выборку опубликованных наблюдений, не прогноз урожая.</div><div id="p20-season" class="p20-months"></div><div id="p20-season-chart" class="p20-bars"></div><div id="p20-season-caption" class="p20-message"></div>',
    geo20:'<div class="p20-note">Географическая схема: широта и долгота. Точки публикуются участниками iNaturalist, не являются маршрутами к грибным местам. Скрытые и неточные координаты не показываются.</div><div class="p20-geo-layout"><div><div id="p20-map" class="p20-map"></div><div id="p20-map-note" class="p20-message"></div></div><div class="p20-geo-side"><label>Вид<select id="p20-map-species"><option value="">Все виды</option></select></label><label>Источник<select id="p20-map-source"><option value="all">Все точки</option><option value="published">Опубликованные</option><option value="personal">Мои</option></select></label><div id="p20-map-selection" class="p20-message">Нажмите на точку, чтобы увидеть её источник.</div><h3>Добавить личную геометку</h3><form id="p20-location-form"><label>Название места<input id="p20-loc-label" required maxlength="80" placeholder="Мой лес"></label><label>Широта<input type="number" id="p20-lat" min="54.1" max="58.2" step="0.000001" required placeholder="56.3"></label><label>Долгота<input type="number" id="p20-lon" min="41.2" max="48.2" step="0.000001" required placeholder="44.0"></label><button class="p20-action" type="submit">Сохранить только на моём ПК</button></form><button class="p20-muted" id="p20-export-geo">Экспорт личных точек</button></div></div>',
@@ -59,7 +59,7 @@
     goButtons[0].append(commands);}
   const aboutSection=document.querySelector('#about .aboutbox');
   if(aboutSection){const updates=document.createElement('section');updates.className='p20-qa';
-    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 3.5.0</div>';
+    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 4.0.0</div>';
     aboutSection.append(updates);}
   const photoReview=()=>{try{return JSON.parse(localStorage.getItem(reviewKey)||'{}')}catch{return {}}};
   const personalGeo=()=>{try{const x=JSON.parse(localStorage.getItem(geoKey)||'[]');return Array.isArray(x)?x.filter(o=>Number.isFinite(o.lat)&&Number.isFinite(o.lon)).slice(-300):[]}catch{return []}};
@@ -119,13 +119,6 @@
     volva:'Вольва: общий покров у основания ножки некоторых мухоморов. Основание важно видеть целиком; не вырывайте грибы ради проверки через приложение.',
     stem:'Ножка: сетка, чешуйки, цвет, полость и место крепления помогают описанию, но недостаточны для решения о съедобности.'
   };
-  function keyResults(){
-    const group=$('p20-group').value,cap=$('p20-cap').value.trim(),habitat=$('p20-habitat').value.trim();
-    if(!group&&!cap&&!habitat){$('p20-id-results').innerHTML='<div class="p20-message">Укажите хотя бы один признак. Если признак неизвестен, не угадывайте.</div>';return;}
-    const results=core.candidates(base,{fields:{group,cap,substrate:habitat}});$('p20-id-results').innerHTML=results.length?
-      results.map(x=>'<article class="p20-hit"><b>'+html(x.bird.name)+'</b><i>'+html(x.bird.latin)+'</i><p>'+html(x.bird.traits)+'</p><span>Только предположительное совпадение по тексту. '+html(core.explainRisk(x.bird))+'</span><button data-open="'+html(x.bird.id)+'">Паспорт</button></article>').join(''):
-      '<div class="p20-message">Ни одно описание не совпало. Не делайте вывод, что вид безопасен или отсутствует в регионе.</div>';
-  }
   let uploadURLs=[],selectedFiles=[];
   function cleanUploads(){for(const url of uploadURLs)URL.revokeObjectURL(url);uploadURLs=[];selectedFiles=[];$('p20-preview').replaceChildren();$('p20-upload').value='';}
   function imageHistogram(img){
@@ -187,8 +180,6 @@
       if(b.dataset.point20!==undefined){handlePoint(Number(b.dataset.point20));return;}
       if(b.dataset.mode20!==undefined){document.body.classList.toggle('griby-field');b.textContent=document.body.classList.contains('griby-field')?'◉ Вернуть обычный интерфейс':'◉ Включить крупный интерфейс';return;}
     });
-    $('p20-find').addEventListener('click',keyResults);
-    $('p20-clear').addEventListener('click',()=>{$('p20-group').value='';$('p20-cap').value='';$('p20-habitat').value='';$('p20-id-results').replaceChildren();});
     $('p20-map-source').addEventListener('change',drawMap);$('p20-map-species').addEventListener('change',drawMap);
     $('p20-location-form').addEventListener('submit',e=>{e.preventDefault();
       const lat=Number($('p20-lat').value),lon=Number($('p20-lon').value),label=$('p20-loc-label').value.trim();

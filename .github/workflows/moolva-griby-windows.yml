@@ -1,7 +1,7 @@
-name: MoOLVa Griby 3.5 Full - compact menu and OpenStreetMap and Windows Portable
+name: MoOLVa Griby 4.0 Smart Atlas - Windows Portable
 on:
   push:
-    branches: [feature/moolva-griby-3.5-compact-map]
+    branches: [feature/moolva-griby-4.0-smart-atlas]
     paths: ['MoOLVaGriby/**', '.github/workflows/moolva-griby-windows.yml']
   workflow_dispatch:
 permissions:
@@ -24,13 +24,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Reuse public 3.4 build data when available
+      - name: Reuse verified 3.5 build data when available
         id: reuse
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download 44354980923 --name griby34-build-data --dir bundle
+          gh run download 44759276167 --name griby34-build-data --dir bundle
           test -s bundle/maps/nizhny-novgorod.pmtiles
           test -s bundle/offline-localities.js
           test -s bundle/build/moolva-griby.ico
@@ -104,10 +104,12 @@ jobs:
       - name: Run the Portable EXE in a fresh Windows profile
         timeout-minutes: 4
         run: |
-          $exe = (Resolve-Path 'dist/MoOLVa-Griby-3.5-Full-Portable-x64.exe').Path
+          $exe = (Resolve-Path 'dist/MoOLVa-Griby-4.0-Full-Portable-x64.exe').Path
           $dir = Join-Path (Get-Location).Path 'dist/evidence'
           $proc = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList @("`"--moolva-evidence-dir=$dir`"")
           if ($proc.ExitCode -ne 0) { Get-Content "$dir/gui-error.txt" -ErrorAction SilentlyContinue; throw "Portable exited with $($proc.ExitCode)" }
+          if (-not (Test-Path "$dir/11-smart-atlas.json")) { throw 'Missing Smart Atlas verification' }
+          if (-not (Test-Path "$dir/11-smart-atlas.png")) { throw 'Missing Smart Atlas screenshot' }
           if (-not (Test-Path "$dir/09-offline-map.json")) { throw 'Missing offline map verification' }
           if (-not (Test-Path "$dir/07-free-interactive-map.png")) { throw 'Missing interactive map screenshot' }
           if (-not (Test-Path "$dir/08-visible-map-menu.png")) { throw 'Missing Windows screenshot' }
@@ -115,12 +117,12 @@ jobs:
           Get-FileHash $exe -Algorithm SHA256 | Format-List | Out-File -Encoding utf8 'dist/SHA256.txt'
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-3.5-Full-Portable-x64
-          path: MoOLVaGriby/dist/MoOLVa-Griby-3.5-Full-Portable-x64.exe
+          name: MoOLVa-Griby-4.0-Full-Portable-x64
+          path: MoOLVaGriby/dist/MoOLVa-Griby-4.0-Full-Portable-x64.exe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: MoOLVa-Griby-3.5-Windows-QA
+          name: MoOLVa-Griby-4.0-Windows-QA
           path: |
             MoOLVaGriby/dist/evidence/
             MoOLVaGriby/dist/SHA256.txt
@@ -137,31 +139,21 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: MoOLVa-Griby-3.5-Full-Portable-x64
+          name: MoOLVa-Griby-4.0-Full-Portable-x64
           path: current
       - uses: actions/download-artifact@v4
         with:
-          name: MoOLVa-Griby-3.5-Windows-QA
+          name: MoOLVa-Griby-4.0-Windows-QA
           path: qa
-      - name: Preserve the previous verified portable release
-        run: |
-          set -euo pipefail
-          tag=griby-3.4-full-backup
-          if ! gh release view "$tag" >/dev/null 2>&1; then
-            gh run download 44354980923 --name MoOLVa-Griby-3.4-Full-Portable-x64 --dir previous
-            exe=previous/MoOLVa-Griby-3.4-Full-Portable-x64.exe
-            echo "b4b173044c46ed436f37a58ca06e45dbf3f3a2d3372031c6299c1eb6bddfab88  $exe" | sha256sum -c -
-            gh release create "$tag" "$exe" --target 27d094b9494666972f04c22e1babd3b84d35171f --latest=false --title 'MoOLVa Грибы 3.4 Full · резервная копия' --notes 'Проверенная Portable-версия перед обновлением карты и меню.'
-          fi
       - name: Publish the Windows-tested full EXE
         run: |
           set -euo pipefail
-          tag=griby-v3.5.0-full
-          exe=current/MoOLVa-Griby-3.5-Full-Portable-x64.exe
+          tag=griby-v4.0.0-full
+          exe=current/MoOLVa-Griby-4.0-Full-Portable-x64.exe
           digest=$(sha256sum "$exe" | cut -d' ' -f1)
           grep -qi "$digest" qa/SHA256.txt
           if gh release view "$tag" >/dev/null 2>&1; then
             test "$(gh api "repos/$GH_REPO/git/ref/tags/$tag" --jq .object.sha)" = "$GITHUB_SHA"
           else
-            gh release create "$tag" "$exe" qa/evidence/10-online-map.png qa/SHA256.txt --target "$GITHUB_SHA" --latest=false --title 'MoOLVa Грибы 3.5 Full Portable' --notes 'Короткое меню, встроенная онлайн-карта OpenStreetMap и подробная офлайн-карта Нижегородской области. Для Windows x64. Личные данные хранятся рядом с EXE.'
+            gh release create "$tag" "$exe" qa/evidence/11-smart-atlas.png qa/SHA256.txt --target "$GITHUB_SHA" --latest=false --title 'MoOLVa Грибы 4.0 «Умный атлас» Portable' --notes 'Определитель с уточняющими вопросами, сравнение отличий, поиск по народным названиям и словарь признаков. Для Windows x64. Подробная офлайн-карта и профиль рядом с EXE.'
           fi
