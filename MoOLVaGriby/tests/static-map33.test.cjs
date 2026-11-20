@@ -42,7 +42,7 @@ test('Windows GUI QA requires visible map button, selected navigation and a map 
  const main=read('main.cjs');
  for(const token of ['08-static-menu-check.json','08-static-navigation.json','08-visible-map-menu.png','buttonExists','secondInNav','mapCanvasDisplayed','zoomend'])assert.ok(main.includes(token),token);
  const pkg=JSON.parse(read('package.json'));
- assert.equal(pkg.version,'4.0.0');
- assert.match(pkg.build.nsis.artifactName,/4\.0-Setup/);
- assert.match(pkg.build.portable.artifactName,/4\.0-Full-Portable/);
+ assert.equal(pkg.version,'4.0.1');
+ assert.match(pkg.build.nsis.artifactName,/4\.0\.1-Setup/);
+ assert.match(pkg.build.portable.artifactName,/4\.0\.1-Full-Portable/);
 });

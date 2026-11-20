@@ -30,7 +30,23 @@
     capColor: {
       label: 'Окраска шляпки',
       prompt: 'Какой основной цвет шляпки?',
-      values: {brown:'Коричневая / бурая', orange:'Оранжевая', red:'Красная', green:'Зеленоватая', pale:'Светлая / белая', pink:'Розовая', grey:'Серая'}
+      values: {brown:'Коричневая / бурая', orange:'Оранжевая', red:'Красная', green:'Зеленоватая', pale:'Светлая / белая', pink:'Розовая', grey:'Серая', yellow:'Жёлтая', dark:'Тёмная', redOrange:'Красно-оранжевая'}
+    },
+    poreTone: {
+      label: 'Цвет пор у зрелого гриба',
+      prompt: 'Какого цвета поры у зрелого гриба?',
+      values: {olive:'Желтовато-оливковые', pink:'Розовые', yellow:'Жёлтые'}
+    },
+    shape: {
+      label: 'Форма плодового тела',
+      prompt: 'Какой формы плодовое тело?',
+      values: {sphere:'Шаровидная', cells:'Ячеистая шляпка', lobes:'Извилисто-лопастная шляпка',
+        funnel:'Воронковидная', shelf:'Боковая полка', hoof:'Копытообразная', round:'Округлая', growth:'Растрескавшийся нарост'}
+    },
+    bodyTone: {
+      label: 'Окраска плодового тела',
+      prompt: 'Какой цвет преобладает у плодового тела?',
+      values: {dark:'Тёмная или чёрная', pale:'Светлая', multi:'Разноцветные зоны', sulphur:'Серно-жёлтая'}
     },
     gillShape: {
       label: 'Форма пластинок',
@@ -39,22 +55,31 @@
     }
   };
 
-  // Only traits stated in the base atlas or established by its structural group.
+  // Traits use the base atlas, structural groups, and the cited sources below.
   // Missing entries remain unknown; for example, a disappearing ring is never coded as absent.
   const profiles = {
-    g001:{stem:'net',capColor:'brown'}, g002:{stem:'net'}, g003:{stem:'scales',capColor:'brown'}, g004:{stem:'scales'},
-    g005:{cap:'slimy',ring:'yes',capColor:'brown'}, g006:{cap:'slimy',ring:'no'},
-    g007:{capColor:'brown'}, g008:{cap:'cracked'}, g010:{gillShape:'forked',capColor:'orange'},
-    g015:{capColor:'pale'}, g016:{capColor:'pink'}, g017:{capColor:'pale'}, g018:{cap:'slimy'},
+    g001:{stem:'net',capColor:'brown',poreTone:'olive'}, g002:{stem:'net',poreTone:'pink'},
+    g003:{stem:'scales',capColor:'brown'}, g004:{stem:'scales',capColor:'redOrange'},
+    g005:{cap:'slimy',ring:'yes',capColor:'brown'}, g006:{cap:'slimy',ring:'no',poreTone:'yellow'},
+    g007:{capColor:'brown',poreTone:'yellow'}, g008:{cap:'cracked'}, g010:{gillShape:'forked',capColor:'orange'},
+    g011:{shape:'funnel',bodyTone:'dark'},
+    g015:{capColor:'pale',shape:'funnel'}, g016:{capColor:'pink'}, g017:{capColor:'pale'}, g018:{cap:'slimy',capColor:'dark'},
     g019:{cap:'cracked',capColor:'green'}, g020:{volva:'no',capColor:'green'}, g021:{capColor:'red'}, g022:{volva:'no'},
     g024:{cap:'scaly',ring:'yes'}, g025:{cap:'scaly'},
     g026:{surface:'gills',gillShape:'down'}, g027:{surface:'gills'},
     g028:{surface:'gills',stem:'velvet',capColor:'orange'}, g029:{surface:'gills'}, g030:{surface:'gills',capColor:'brown'},
     g031:{ring:'yes',volva:'yes'}, g032:{ring:'yes',volva:'yes'},
-    g033:{cap:'flakes',capColor:'red'}, g034:{cap:'flakes',capColor:'brown'}, g036:{ring:'yes',volva:'yes'},
+    g033:{cap:'flakes',capColor:'red'}, g034:{cap:'flakes',capColor:'brown'}, g036:{ring:'yes',volva:'yes',capColor:'yellow'},
     g037:{gillShape:'down'}, g040:{gillShape:'down',capColor:'pale'},
-    g042:{cap:'cells'}, g043:{cap:'lobed'},
-    g046:{surface:'pores'}, g047:{surface:'pores'}, g048:{surface:'pores'}, g050:{surface:'pores'}, g053:{capColor:'grey'}
+    g042:{cap:'cells',shape:'cells'}, g043:{cap:'lobed',shape:'lobes'}, g044:{shape:'sphere'}, g045:{shape:'sphere'},
+    g046:{surface:'pores',shape:'shelf',bodyTone:'multi'}, g047:{surface:'pores',shape:'hoof'},
+    g048:{surface:'pores',shape:'round',bodyTone:'pale'}, g049:{shape:'growth',bodyTone:'dark'},
+    g050:{surface:'pores',shape:'shelf',bodyTone:'sulphur'}, g053:{capColor:'grey'}
+  };
+  const traitSources = {
+    g001:'https://www.mushroomexpert.com/boletus_edulis.html',
+    g002:'https://mushrooms.linnaeus.naturalis.nl/linnaeus_ng/app/views/species/nsr_taxon.php?id=100547',
+    g007:'https://www.mushroomexpert.com/imleria_badia.html'
   };
   const surfaces = {
     Трубчатые:'pores', Пластинчатые:'gills', Складчатые:'folds', Шиповатые:'spines',
@@ -182,7 +207,7 @@
     };
   }
 
-  const api = {questions, glossary, glossaryFor, aliases, labelValue, comparison, identify, makeSearch};
+  const api = {questions, glossary, glossaryFor, aliases, traitSources, labelValue, comparison, identify, makeSearch};
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (root) root.MoOLVaAtlas40 = api;
 })(typeof window === 'undefined' ? null : window);

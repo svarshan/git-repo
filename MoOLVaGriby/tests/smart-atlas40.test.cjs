@@ -30,7 +30,7 @@ test('incomplete or fragile traits do not become positive matches or false exclu
 test('differences compare two recorded values and omit missing entries',()=>{
   const rows=atlas.comparison(item('g005'),item('g006'),true);
   assert.deepEqual(rows.map(row=>row.key),['ring']);
-  assert.ok(atlas.comparison(item('g001'),item('g002'),true).length===0);
+  assert.deepEqual(atlas.comparison(item('g001'),item('g002'),true).map(row=>row.key),['poreTone']);
   assert.ok(atlas.glossaryFor(item('g031')).includes('volva'));
 });
 

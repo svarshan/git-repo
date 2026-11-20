@@ -31,7 +31,7 @@ function createWindow(){
  win=new BrowserWindow({width:1420,height:920,minWidth:960,minHeight:680,autoHideMenuBar:true,show:false,backgroundColor:'#0a1512',
   icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
  win.webContents.setWindowOpenHandler(({url})=>{
-  if(/^https:\/\/www\.google\.com\/maps\//.test(url)||/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org|www\.mushroomexpert\.com|protomaps\.com)\//.test(url))shell.openExternal(url);
+  if(/^https:\/\/www\.google\.com\/maps\//.test(url)||/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org|www\.mushroomexpert\.com|mushrooms\.linnaeus\.naturalis\.nl|protomaps\.com)\//.test(url))shell.openExternal(url);
   return {action:'deny'};
  });
  win.webContents.on('will-navigate',(event,url)=>{if(url!==entryUrl)event.preventDefault();});
@@ -97,6 +97,13 @@ function createWindow(){
       const rows=[...byId('atlas40-table').querySelectorAll('tbody tr')];
       const differences=rows.length===1 && rows[0].dataset.trait==='ring' &&
         rows[0].textContent.includes('Кольцо отсутствует');
+      byId('pickA').value='g001';
+      byId('pickB').value='g002';
+      byId('pickB').dispatchEvent(new Event('change'));
+      const maturePores=byId('atlas40-table').querySelector('[data-trait="poreTone"]').textContent.includes('Розовые');
+      byId('pickA').value='g005';
+      byId('pickB').value='g006';
+      byId('pickB').dispatchEvent(new Event('change'));
       click('#comparison [data-open="g005"]');
       click('#detail [data-atlas-term="ring"]');
       const dialog=byId('atlas40-glossary');
@@ -105,7 +112,7 @@ function createWindow(){
       dialog.close();
       click('#closeModal');
       click('[data-page="compare"]');
-      return {synonyms,typo,phrase,adaptive,back,differences,glossary};
+      return {synonyms,typo,phrase,adaptive,back,differences,maturePores,glossary};
     })()`,true);
     fs.writeFileSync(path.join(folder,'11-smart-atlas.json'),JSON.stringify(smartAtlas,null,2));
     if(!Object.values(smartAtlas).every(Boolean))throw Error('Smart Atlas GUI failed '+JSON.stringify(smartAtlas));
@@ -202,7 +209,7 @@ app.whenReady().then(()=>{
  });
  // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
  ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{
-   details.requestHeaders['User-Agent']='MoOLVa-Griby/4.0 (+https://github.com/svarshan/git-repo)';
+   details.requestHeaders['User-Agent']='MoOLVa-Griby/4.0.1 (+https://github.com/svarshan/git-repo)';
    callback({requestHeaders:details.requestHeaders});
  });
  createWindow();

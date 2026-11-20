@@ -52,7 +52,7 @@
   const headings={catalog:['Грибной атлас','Изучайте виды и опасные двойники, сохраняйте наблюдения'],
    compare:['Сравнение грибов','Изучайте отличия похожих видов'],diary:['Дневник грибника','Ваши собственные наблюдения, сохранённые локально'],
    map:['Мои места','Личные находки без выдуманных географических точек'],favorites:['Избранное','Сохранённые виды из энциклопедии'],
-   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 4.0 · Умный атлас']};
+   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 4.0.1 · Умный атлас']};
   function nav(next){if(!headings[next])return;stopSpeech();closeDetail();page=next;
     document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));
     document.querySelectorAll('.sidebar nav button').forEach(x=>x.classList.toggle('selected',x.dataset.page===page));
@@ -68,12 +68,13 @@
     const b=byId.get(id);if(!b)return;closeDetail();currentId=id;
     const similar=byLatin.get(b.similar),period=b.months.length?b.months.map(m=>months[m-1]).join(', '):'недостаточно достоверных данных';
     const terms=atlas.glossaryFor(b).map(key=>'<button type="button" data-atlas-term="'+key+'">'+escapeHTML(atlas.glossary[key].title)+'</button>').join('');
-    const names=atlas.aliases[b.id];
+    const names=atlas.aliases[b.id],traitSource=atlas.traitSources[b.id];
     const dangerous=hazard(b.risk),riskText=dangerous?'<div class="red-warning"><b>'+escapeHTML(hazardLabel(b))+'</b> — не собирайте для употребления. Некоторые токсины вызывают отсроченные симптомы.</div>':'<div class="note">Справочный статус не означает, что найденный вами гриб безопасен для употребления. Возможны похожие ядовитые виды.</div>';
     $('#detail').innerHTML='<div class="detail-header"><span class="eyebrow">ПАСПОРТ ВИДА · ГРИБНОЙ АТЛАС</span><h2>'+escapeHTML(b.name)+'</h2><div class="latin">'+escapeHTML(b.latin)+'</div></div><div class="detail-photo">'+mediaHTML(b,'detail')+'</div>'+
       '<div class="detail-content"><div class="detail-pills"><span class="chip">'+escapeHTML(b.group)+'</span><span class="chip">'+escapeHTML(hazardLabel(b))+'</span></div>'+
       riskText+(names?'<p><b>Другие названия:</b> '+escapeHTML(names.join(', '))+'</p>':'')+
       '<h3>Внешние признаки</h3><p>'+escapeHTML(b.traits)+'</p>'+
+      (traitSource?'<p class="photo-credit"><a href="'+escapeHTML(traitSource)+'" target="_blank" rel="noopener noreferrer">Источник дополнительных признаков ↗</a></p>':'')+
       (terms?'<div class="atlas40-term-links" aria-label="Термины из карточки">'+terms+'</div>':'')+'<h3>Местообитание</h3><p>'+escapeHTML(b.habitat)+'. <b>Наличие этого вида в конкретной точке Нижегородской области не подтверждено.</b></p>'+
       '<h3>Ориентировочный сезон</h3><p>'+escapeHTML(period)+'. Сроки зависят от погоды и природной зоны, не являются прогнозом.</p>'+
       '<h3>Похожие виды и двойники</h3><p>'+(similar?escapeHTML(similar.name)+' — '+escapeHTML(similar.latin):escapeHTML(b.similar||'Требуется сравнение у специалиста'))+'. По отдельному внешнему признаку определять гриб нельзя.</p>'+
