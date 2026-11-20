@@ -165,7 +165,8 @@
   w.addEventListener('offline',()=>{if(map)useOffline();});
   function setBasemap() {
    w.clearTimeout(loadTimeout);
-   if(tiles){tiles.off();tiles.remove();}
+   // Leaflet removes its map listeners when the layer emits its remove event.
+   if(tiles)tiles.remove();
    loadedTiles=0;failedTiles=0;
    $('fm32-source').textContent=online?'Онлайн · OpenStreetMap':activePack?`Офлайн · ${activePack.name}`:'Офлайн · подробная карта области';
    $('fm32-switch').textContent=online?'Включить офлайн-карту':'Включить OpenStreetMap';
