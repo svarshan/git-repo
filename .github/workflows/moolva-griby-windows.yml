@@ -1,7 +1,7 @@
-name: MoOLVa Griby 4.0.1 Smart Atlas - Windows Portable
+name: MoOLVa Griby 4.1.0 Stable Atlas - Windows Portable
 on:
   push:
-    branches: [feature/moolva-griby-4.0-smart-atlas]
+    branches: [feature/moolva-griby-4.1-stable-atlas]
     paths: ['MoOLVaGriby/**', '.github/workflows/moolva-griby-windows.yml']
   workflow_dispatch:
 permissions:
@@ -24,13 +24,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Reuse verified 3.5 build data when available
+      - name: Reuse verified 4.0.1 build data when available
         id: reuse
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download 44759276167 --name griby34-build-data --dir bundle
+          gh run download 44772755191 --name griby34-build-data --dir bundle
           test -s bundle/maps/nizhny-novgorod.pmtiles
           test -s bundle/offline-localities.js
           test -s bundle/build/moolva-griby.ico
@@ -104,7 +104,7 @@ jobs:
       - name: Run the Portable EXE in a fresh Windows profile
         timeout-minutes: 4
         run: |
-          $exe = (Resolve-Path 'dist/MoOLVa-Griby-4.0.1-Full-Portable-x64.exe').Path
+          $exe = (Resolve-Path 'dist/MoOLVa-Griby-4.1.0-Full-Portable-x64.exe').Path
           $dir = Join-Path (Get-Location).Path 'dist/evidence'
           $proc = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList @("`"--moolva-evidence-dir=$dir`"")
           if ($proc.ExitCode -ne 0) { Get-Content "$dir/gui-error.txt" -ErrorAction SilentlyContinue; throw "Portable exited with $($proc.ExitCode)" }
@@ -114,15 +114,47 @@ jobs:
           if (-not (Test-Path "$dir/07-free-interactive-map.png")) { throw 'Missing interactive map screenshot' }
           if (-not (Test-Path "$dir/08-visible-map-menu.png")) { throw 'Missing Windows screenshot' }
           if (-not (Test-Path 'dist/MoOLVa-Griby-Data/Local Storage')) { throw 'Portable profile missing next to EXE' }
+          if (-not (Test-Path "$dir/12-map-fallback.json")) { throw 'Missing partial tile fallback verification' }
           Get-FileHash $exe -Algorithm SHA256 | Format-List | Out-File -Encoding utf8 'dist/SHA256.txt'
+      - name: Upgrade a real 4.0.1 Portable profile and recover damaged data
+        timeout-minutes: 8
+        run: |
+          $exe = (Resolve-Path 'dist/MoOLVa-Griby-4.1.0-Full-Portable-x64.exe').Path
+          $evidence = (Resolve-Path 'dist/evidence').Path
+          $case = Join-Path $env:RUNNER_TEMP 'Профиль атласа'
+          New-Item -ItemType Directory -Force $case | Out-Null
+          $previous = Join-Path $case 'MoOLVa-Griby-4.0.1.exe'
+          $candidate = Join-Path $case 'MoOLVa-Griby-4.1.0.exe'
+          curl.exe -fLsS --retry 2 -o $previous https://github.com/svarshan/git-repo/releases/download/griby-v4.0.1-full/MoOLVa-Griby-4.0.1-Full-Portable-x64.exe
+          if ($LASTEXITCODE -ne 0) { throw 'Previous release download failed' }
+          if ((Get-FileHash $previous -Algorithm SHA256).Hash -ne 'CF63E59DF605C99F5DEC2F4325D0BBF1B8315ADEA122D6A985001D43070E500B') { throw 'Previous release hash mismatch' }
+          Copy-Item $exe $candidate
+          function Run-Atlas($file, $out, $extra) {
+            $arguments = @("`"--moolva-evidence-dir=$out`"")
+            if ($extra) { $arguments += "--moolva-profile-check=$extra" }
+            $proc = Start-Process -FilePath $file -PassThru -Wait -ArgumentList $arguments
+            if ($proc.ExitCode -ne 0) { Get-Content "$out/gui-error.txt" -ErrorAction SilentlyContinue; throw "Portable exited with $($proc.ExitCode)" }
+          }
+          Run-Atlas $previous (Join-Path $case 'legacy-qa') ''
+          Run-Atlas $candidate $evidence 'upgrade'
+          $profile = Join-Path $case 'MoOLVa-Griby-Data'
+          $backup = Join-Path $profile 'Backups'
+          $checkpoint = Get-Content (Join-Path $backup 'before-4.1.json') -Raw | ConvertFrom-Json
+          if ($checkpoint.values.'moolva-map-mode' -ne 'online') { throw 'Missing legacy map setting in checkpoint' }
+          $snapshots = @(Get-ChildItem $backup -Filter 'snapshot-*.json' | Sort-Object Name -Descending)
+          if ($snapshots.Count -lt 3) { throw 'Missing rolling snapshots' }
+          Set-Content -LiteralPath $snapshots[0].FullName -Value 'broken'
+          Rename-Item -LiteralPath (Join-Path $profile 'Local Storage') -NewName 'Local Storage damaged'
+          Run-Atlas $candidate $evidence 'recover'
+          if (-not (Test-Path "$evidence/13-profile.json")) { throw 'Missing profile recovery evidence' }
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-4.0.1-Full-Portable-x64
-          path: MoOLVaGriby/dist/MoOLVa-Griby-4.0.1-Full-Portable-x64.exe
+          name: MoOLVa-Griby-4.1.0-Full-Portable-x64
+          path: MoOLVaGriby/dist/MoOLVa-Griby-4.1.0-Full-Portable-x64.exe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: MoOLVa-Griby-4.0.1-Windows-QA
+          name: MoOLVa-Griby-4.1.0-Windows-QA
           path: |
             MoOLVaGriby/dist/evidence/
             MoOLVaGriby/dist/SHA256.txt
@@ -139,21 +171,21 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: MoOLVa-Griby-4.0.1-Full-Portable-x64
+          name: MoOLVa-Griby-4.1.0-Full-Portable-x64
           path: current
       - uses: actions/download-artifact@v4
         with:
-          name: MoOLVa-Griby-4.0.1-Windows-QA
+          name: MoOLVa-Griby-4.1.0-Windows-QA
           path: qa
       - name: Publish the Windows-tested full EXE
         run: |
           set -euo pipefail
-          tag=griby-v4.0.1-full
-          exe=current/MoOLVa-Griby-4.0.1-Full-Portable-x64.exe
+          tag=griby-v4.1.0-full
+          exe=current/MoOLVa-Griby-4.1.0-Full-Portable-x64.exe
           digest=$(sha256sum "$exe" | cut -d' ' -f1)
           grep -qi "$digest" qa/SHA256.txt
           if gh release view "$tag" >/dev/null 2>&1; then
             test "$(gh api "repos/$GH_REPO/git/ref/tags/$tag" --jq .object.sha)" = "$GITHUB_SHA"
           else
-            gh release create "$tag" "$exe" qa/evidence/11-smart-atlas.png qa/SHA256.txt --target "$GITHUB_SHA" --latest=false --title 'MoOLVa Грибы 4.0.1 «Умный атлас» Portable' --notes 'Определитель с уточняющими вопросами, сравнение отличий, поиск по народным названиям и словарь признаков. Для Windows x64. Подробная офлайн-карта и профиль рядом с EXE.'
+            gh release create "$tag" "$exe" qa/evidence/11-smart-atlas.png qa/evidence/12-map-fallback.json qa/evidence/13-profile.json qa/SHA256.txt --target "$GITHUB_SHA" --latest=false --title 'MoOLVa Грибы 4.1.0 «Стабильный атлас» Portable' --notes 'Резервные копии профиля, безопасный запуск, диагностика и переход на встроенную карту при сбоях загрузки. Portable для Windows x64.'
           fi

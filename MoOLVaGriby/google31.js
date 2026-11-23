@@ -5,7 +5,7 @@
 (function(root,factory){
  const api=factory();
  if(typeof module==='object'&&module.exports)module.exports=api;
- if(root){root.MoOLVaGoogle31Core=api;if(root.document)root.addEventListener('DOMContentLoaded',()=>api.mount(root));}
+ if(root){root.MoOLVaGoogle31Core=api;if(root.document&&!root.MoOLVaSafeMode)root.addEventListener('DOMContentLoaded',()=>api.mount(root));}
 })(typeof window!=='undefined'?window:null,function(){
  const LIMITS={south:54.1,north:58.2,west:41.2,east:48.2};
  function validCoord(lat,lon){

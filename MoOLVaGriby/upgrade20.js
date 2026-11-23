@@ -7,6 +7,7 @@
   const byLatin=new Map(base.map(b=>[b.latin,b])),byId=new Map(base.map(b=>[b.id,b]));
   const reviewKey='moolva-griby-v2-photo-review',geoKey='moolva-griby-v2-my-coordinates',oldKey='moolva-griby-1.0-data';
   const region=core.cleanObservations(window.MOOLVA_REGION_OBS20||[]),gallery=window.MOOLVA_GALLERY20||{},photos=window.MOOLVA_PHOTOS||{};
+  const safeMode=window.MoOLVaSafeMode;
   const note='Сходство изображений и результаты определения по признакам не подтверждают вид и не означают, что гриб можно употреблять в пищу.';
   const chapters=[
    {id:'field20',title:'Полевой режим',icon:'◉',caption:'Крупные элементы для работы в лесу'},
@@ -30,6 +31,7 @@
   const heading=txt=>'<div class="sectiontop"><div><span class="eyebrow">MoOLVa ГРИБЫ · PRO MAX 2.0</span><h2>'+html(txt)+'</h2></div></div>';
   for(const chapter of chapters){
     const button=document.createElement('button');button.type='button';button.dataset.stage20=chapter.id;
+    if(safeMode&&['photo20','geo20'].includes(chapter.id))button.hidden=true;
     button.innerHTML='<span>'+chapter.icon+'</span> '+html(chapter.title);document.getElementById('more-pages').append(button);
     const section=document.createElement('section');section.className='page p20-page';section.id=chapter.id;
     section.innerHTML=heading(chapter.title)+pageData[chapter.id];main.append(section);
@@ -41,7 +43,7 @@
     if(more.contains(button))more.querySelector('summary').focus();
     more.open=false;
   });
-  function show(id){if(!chapters.some(x=>x.id===id))return;
+  function show(id){if(!chapters.some(x=>x.id===id)||safeMode&&['photo20','geo20'].includes(id))return;
     window.speechSynthesis?.cancel?.();
     document.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x.id===id));
     document.querySelectorAll('.sidebar button').forEach(x=>x.classList.toggle('selected',x.dataset.stage20===id));
@@ -56,10 +58,12 @@
   const goButtons=document.querySelectorAll('.topmeta');
   if(goButtons.length){const commands=document.createElement('div');commands.className='p20-top-links';
     commands.innerHTML='<button data-goto20="id20">⌕ Определить признаки</button><button data-goto20="photo20">▧ Фото-помощник</button><button data-goto20="geo20">⌖ Карта</button><button data-goto20="field20">◉ В лесу</button>';
+    if(safeMode)commands.querySelectorAll('[data-goto20="photo20"],[data-goto20="geo20"]').forEach(button=>button.remove());
     goButtons[0].append(commands);}
+  if(safeMode)document.getElementById('primary-map-nav').hidden=true;
   const aboutSection=document.querySelector('#about .aboutbox');
   if(aboutSection){const updates=document.createElement('section');updates.className='p20-qa';
-    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 4.0.1</div>';
+    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 4.1.0</div>';
     aboutSection.append(updates);}
   const photoReview=()=>{try{return JSON.parse(localStorage.getItem(reviewKey)||'{}')}catch{return {}}};
   const personalGeo=()=>{try{const x=JSON.parse(localStorage.getItem(geoKey)||'[]');return Array.isArray(x)?x.filter(o=>Number.isFinite(o.lat)&&Number.isFinite(o.lon)).slice(-300):[]}catch{return []}};
@@ -146,6 +150,7 @@
     }catch(e){host.textContent='Не удалось обработать фотографию: '+String(e.message||e).slice(0,120);}
   }
   function integrateDetail(){
+    if(safeMode)return;
     const detail=$('detail');if(!detail||!detail.children.length||detail.querySelector('#p20-detail-gallery'))return;
     const latin=detail.querySelector('.latin')?.textContent?.trim(),b=byLatin.get(latin);if(!b)return;
     const entries=[photos[b.latin],...(Array.isArray(gallery[b.latin])?gallery[b.latin]:[])].filter(core.eligiblePhoto);
@@ -185,7 +190,7 @@
       const lat=Number($('p20-lat').value),lon=Number($('p20-lon').value),label=$('p20-loc-label').value.trim();
       if(!Number.isFinite(lat)||!Number.isFinite(lon)||lat<core.range.latMin||lat>core.range.latMax||lon<core.range.lonMin||lon>core.range.lonMax||!label){toast('Проверьте координаты и название');return;}
       const entries=personalGeo();entries.push({id:'mine-'+Date.now(),lat,lon,label:label.slice(0,80),kind:'personal'});
-      try{localStorage.setItem(geoKey,JSON.stringify(entries.slice(-300)));$('p20-loc-label').value='';drawMap();toast('Точка хранится только на этом устройстве');}
+      try{window.MoOLVaProfile41.setItem(geoKey,JSON.stringify(entries.slice(-300)));$('p20-loc-label').value='';drawMap();toast('Точка хранится только на этом устройстве');}
       catch{toast('Нет места для сохранения точки');}
     });
     $('p20-export-geo').addEventListener('click',()=>download('MoOLVa-Griby-My-Places.json',JSON.stringify(personalGeo(),null,2),'application/json'));
@@ -198,7 +203,7 @@
       try{const raw=JSON.parse(await f.text()),parsed=core.safeBackup(raw,base.map(x=>x.id));
         if(!parsed){toast('Неверный файл резервной копии');return;}
         if(!window.confirm('Заменить текущие избранное и дневник данными из резервной копии?'))return;
-        localStorage.setItem(oldKey,JSON.stringify(parsed));toast('Резерв восстановлен. Перезапустите приложение для обновления исходного дневника.');}
+        window.MoOLVaProfile41.setItem(oldKey,JSON.stringify(parsed));toast('Резерв восстановлен. Перезапустите приложение для обновления исходного дневника.');}
       catch{toast('Ошибка восстановления резервной копии');}});
     $('p20-pick-files').addEventListener('click',()=>$('p20-upload').click());
     $('p20-upload').addEventListener('change',e=>{const files=[...(e.target.files||[])].slice(0,3);cleanUploads();selectedFiles=files.filter(f=>f.size<=10_000_000&&/^image\/(png|jpeg|webp)$/.test(f.type));if(selectedFiles.length!==files.length)toast('Часть неподходящих файлов пропущена');
@@ -212,7 +217,7 @@
     document.addEventListener('click',ev=>{
       const b=ev.target.closest('[data-review20]');if(!b)return;const latin=b.dataset.latin20;
       if(!byLatin.has(latin)||!['checked','issue'].includes(b.dataset.review20))return;
-      try{const r=photoReview();r[latin]=b.dataset.review20;localStorage.setItem(reviewKey,JSON.stringify(r));renderQuality20();toast('Личная отметка сохранена');}
+      try{const r=photoReview();r[latin]=b.dataset.review20;window.MoOLVaProfile41.setItem(reviewKey,JSON.stringify(r));renderQuality20();toast('Личная отметка сохранена');}
       catch{toast('Не удалось записать отметку');}
     });
     $('p20-update-check')?.addEventListener('click',async ()=>{

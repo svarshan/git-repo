@@ -2,7 +2,7 @@
 'use strict';
 (function(root,factory){
  const api=factory(); if(typeof module==='object'&&module.exports)module.exports=api;
- if(root){root.MoOLVaExpeditionCore30=api; if(root.document)root.addEventListener('DOMContentLoaded',()=>api.mount(root));}
+ if(root){root.MoOLVaExpeditionCore30=api; if(root.document&&!root.MoOLVaSafeMode)root.addEventListener('DOMContentLoaded',()=>api.mount(root));}
 })(typeof window!=='undefined'?window:null,function(){
  const bounds={west:41.2,east:48.2,south:54.1,north:58.2};
  function validCoordinate(lat,lon){return Number.isFinite(Number(lat))&&Number.isFinite(Number(lon))&&Number(lat)>=bounds.south&&Number(lat)<=bounds.north&&Number(lon)>=bounds.west&&Number(lon)<=bounds.east;}
@@ -44,12 +44,12 @@
  if(!section.isConnected)main.append(section);
  const $=id=>doc.getElementById(id);
  function setCounts(){$('exp-count-reports').textContent=reportData.length;$('exp-count-observations').textContent=obs.length;$('exp-count-personal').textContent=mine.length;}
- function save(){localStorage.setItem(pointKey,JSON.stringify(mine));localStorage.setItem(trackKey,JSON.stringify(track));trackPreview=null;setCounts();w.dispatchEvent(new w.CustomEvent('moolva:expedition-data-changed'));}
+ function save(){window.MoOLVaProfile41.commit([[pointKey,JSON.stringify(mine)],[trackKey,JSON.stringify(track)]]);trackPreview=null;setCounts();w.dispatchEvent(new w.CustomEvent('moolva:expedition-data-changed'));}
  function markCar(lat,lon){
   const car=importPoint({id:'car-parking',name:'Машина',lat,lon,note:'Указано по центру карты.'});
   if(!car)return false;
   const next=[...mine.filter(point=>point.id!==car.id),car].slice(-600);
-  localStorage.setItem(pointKey,JSON.stringify(next));mine=next;list();draw();choose(car);
+  window.MoOLVaProfile41.setItem(pointKey,JSON.stringify(next));mine=next;list();draw();choose(car);
   w.dispatchEvent(new w.CustomEvent('moolva:expedition-data-changed'));return true;
  }
  function show(){doc.querySelectorAll('section.page').forEach(x=>x.classList.toggle('active',x===section));doc.querySelectorAll('.sidebar button').forEach(x=>x.classList.toggle('selected',x===entry));$('heading').textContent='Карта грибных мест';$('subtitle').textContent='Публичные сообщения, обобщённые наблюдения и личные маршруты';draw();w.dispatchEvent(new w.CustomEvent('moolva:expedition-shown'));w.scrollTo(0,0);}

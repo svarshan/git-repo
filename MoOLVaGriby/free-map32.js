@@ -4,7 +4,7 @@
   const api=factory();
   if(typeof module==='object' && module.exports) module.exports=api;
   if(root) { root.MoOLVaFreeMap32Core=api;
-    if(root.document)root.addEventListener('DOMContentLoaded',()=>api.mount(root)); }
+    if(root.document&&!root.MoOLVaSafeMode)root.addEventListener('DOMContentLoaded',()=>api.mount(root)); }
 })(typeof window!=='undefined'?window:null,function() {
  const bounds={minLat:54.1,maxLat:58.2,minLon:41.2,maxLon:48.2};
  const palette={report:'#f7aa53',observations:'#8bdb9c',personal:'#70c9f7','public-exact':'#ca9afa'};
@@ -157,6 +157,7 @@
    status('Отметок на карте: '+points.length+'. Оранжевые круги показывают окрестности находок.');
   }
   let loadTimeout;
+ function stopTimeout(){w.clearTimeout(loadTimeout);}
   function useOffline(){
    if(!online||!w.protomapsL)return;
    online=false;setBasemap();
@@ -164,7 +165,7 @@
   }
   w.addEventListener('offline',()=>{if(map)useOffline();});
   function setBasemap() {
-   w.clearTimeout(loadTimeout);
+   stopTimeout();
    // Leaflet removes its map listeners when the layer emits its remove event.
    if(tiles)tiles.remove();
    loadedTiles=0;failedTiles=0;
@@ -183,16 +184,36 @@
      attribution:legal+' · <a href="https://protomaps.com/" target="_blank" rel="noopener noreferrer">Protomaps</a>'});
    }
    const layer=tiles;
-   tiles.on('tileload',()=>{
-    if(tiles!==layer)return;
-    loadedTiles++;w.clearTimeout(loadTimeout);
+   const pending=new Set(), missing=new Set();
+   let received=0;
+   const assess=stalled=>{
+    if(tiles!==layer||!online)return;
+    const unavailable=missing.size+(stalled?pending.size:0);
+    if(unavailable>0&&unavailable>=received)useOffline();
+   };
+   layer.on('loading',()=>{
+    pending.clear();
+    missing.clear();
+    received=0;
+    if(!online)return;
+    stopTimeout();
+    loadTimeout=w.setTimeout(()=>assess(true),6500);
    });
-   tiles.on('tileerror',()=>{
-    if(tiles!==layer)return;
+   layer.on('tileloadstart',e=>pending.add(e.tile));
+   layer.on('tileunload',e=>{pending.delete(e.tile);missing.delete(e.tile);});
+   layer.on('tileload',e=>{
+    loadedTiles++;
+    if(pending.delete(e.tile))received++;
+   });
+   layer.on('tileerror',e=>{
     failedTiles++;
-    if(online&&failedTiles>=3&&loadedTiles===0)w.queueMicrotask(()=>{if(tiles===layer)useOffline();});
+    if(pending.delete(e.tile))missing.add(e.tile);
    });
-   if(online)loadTimeout=w.setTimeout(()=>{if(tiles===layer&&!loadedTiles)useOffline();},6500);
+   layer.on('load',()=>{
+    stopTimeout();
+    // Leaflet can still be finishing the load event while a new layer is mounted.
+    if(online)w.queueMicrotask(()=>assess(false));
+   });
    tiles.addTo(map);
   }
   const packSelect=$('fm34-pack'), packButton=$('fm34-download');
@@ -267,7 +288,7 @@
     searchMarker=L.circleMarker([place.lat,place.lon],{radius:7,color:'#153c38',fillColor:'#f7e4a0',fillOpacity:1,weight:2,interactive:false})
       .addTo(map).bindTooltip(label,{permanent:true,direction:'top',offset:[0,-6]});
     status('На карте: '+place.name+'.');
-    try{w.localStorage.setItem('moolva-griby-last-place',JSON.stringify({name:place.name,lat:place.lat,lon:place.lon}));$('fm32-last').disabled=false;}catch{}
+    try{w.MoOLVaProfile41.setItem('moolva-griby-last-place',JSON.stringify({name:place.name,lat:place.lat,lon:place.lon}));$('fm32-last').disabled=false;}catch{}
   }
   $('fm32-last').addEventListener('click',()=>{const place=getLastPlace();if(place&&valid(place.lat,place.lon))selectTown(place);});
   function nearbyTown(place){
@@ -306,7 +327,7 @@
    if(!map||!w.protomapsL)return;
    if(googleActive)restore();
    online=!online;
-   w.localStorage.setItem('moolva-map-mode',online?'online':'offline');
+   try{w.MoOLVaProfile41.setItem('moolva-map-mode',online?'online':'offline');}catch{ /* The map can still switch for this session. */ }
    setBasemap();redraw();
   });
   $('fm32-open-external').addEventListener('click',()=>{

@@ -1,7 +1,10 @@
 'use strict';
-const {app,BrowserWindow,shell,session,protocol,ipcMain}=require('electron');
+const {app,BrowserWindow,shell,session,protocol,ipcMain,dialog,clipboard}=require('electron');
 const path=require('node:path');
 const fs=require('node:fs');
+const os=require('node:os');
+const {randomUUID}=require('node:crypto');
+const {openProfile}=require('./profile41.cjs');
 const {pathToFileURL}=require('node:url');
 const {readMapRange}=require('./offline-map-file.cjs');
 const regions=require('./map-regions.json');
@@ -13,20 +16,77 @@ protocol.registerSchemesAsPrivileged([{
 app.setAppUserModelId('ru.moolva.griby');
 app.commandLine.appendSwitch('lang','ru-RU');
 const evidenceFlag=process.argv.find(x=>x.startsWith('--moolva-evidence-dir='));
+const safeFlag=process.argv.includes('--moolva-safe-mode');
+const profileCheck=evidenceFlag && process.argv.find(x=>x.startsWith('--moolva-profile-check='))?.split('=')[1];
 if(process.env.PORTABLE_EXECUTABLE_DIR && !app.commandLine.hasSwitch('user-data-dir')){
  const profile=path.join(process.env.PORTABLE_EXECUTABLE_DIR,'MoOLVa-Griby-Data');
  try {
   fs.mkdirSync(profile,{recursive:true});
-  fs.accessSync(profile,fs.constants.W_OK);
+  const probe=path.join(profile,'.write-'+randomUUID());
+  fs.closeSync(fs.openSync(probe,'wx'));
+  fs.unlinkSync(probe);
   app.setPath('userData',profile);
  } catch {
-  require('electron').dialog.showErrorBox('MoOLVa Грибы','Нет доступа для записи рядом с EXE. Перенесите программу в папку, где можно сохранять личные находки.');
+  dialog.showErrorBox('MoOLVa Грибы','Нет доступа для записи рядом с EXE. Перенесите программу в папку, где можно сохранять личные находки.');
   app.exit(1);process.exit(1);
  }
 }
 if(!evidenceFlag&&!app.requestSingleInstanceLock()){app.quit();process.exit(0);}
+const profilePath=app.getPath('userData');
+let existingProfile=fs.existsSync(path.join(profilePath,'Local Storage'));
+const profile=openProfile(profilePath,app.getVersion());
 let win;
 let allowLiveMap=false;
+let partialMap;
+let safeMode=safeFlag;
+let recoveryUsed=false;
+let launchWatchdog;
+let readyTimer;
+let profileError=false;
+let lastIssue='';
+
+function focusWindow(){
+ if(!win||win.isDestroyed())return;
+ if(win.isMinimized())win.restore();
+ win.show();
+ win.focus();
+}
+app.on('second-instance',focusWindow);
+
+function recordIssue(reason){
+ lastIssue=reason;
+ try{profile.issue(reason);}catch{profileError=true;}
+}
+function openAtlas(){
+ try{profile.begin(safeMode);}catch{profileError=true;}
+ clearTimeout(readyTimer);
+ clearTimeout(launchWatchdog);
+ if(!evidenceFlag||profileCheck)launchWatchdog=setTimeout(()=>recoverWindow('start-timeout'),15000);
+ win.loadFile(entry).catch(error=>{
+   if((!evidenceFlag||profileCheck)&&error.code!=='ERR_ABORTED')recoverWindow('page-load-failed');
+ });
+}
+function recoverWindow(reason){
+ recordIssue(reason);
+ clearTimeout(readyTimer);
+ clearTimeout(launchWatchdog);
+ if(!win||win.isDestroyed()||(evidenceFlag&&!profileCheck))return;
+ if(!safeMode&&!recoveryUsed){
+   recoveryUsed=true;
+   safeMode=true;
+   openAtlas();
+   return;
+ }
+ dialog.showErrorBox('MoOLVa Грибы','Не удалось открыть атлас. Закройте программу и повторите запуск. Резервные копии находятся в папке MoOLVa-Griby-Data/Backups.');
+ app.exit(2);
+}
+function checkRendererReady(){
+ clearTimeout(readyTimer);
+ readyTimer=setTimeout(()=>{
+   clearTimeout(launchWatchdog);
+   try{profile.ready();}catch{profileError=true;}
+ },1200);
+}
 function createWindow(){
  win=new BrowserWindow({width:1420,height:920,minWidth:960,minHeight:680,autoHideMenuBar:true,show:false,backgroundColor:'#0a1512',
   icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
@@ -35,9 +95,18 @@ function createWindow(){
   return {action:'deny'};
  });
  win.webContents.on('will-navigate',(event,url)=>{if(url!==entryUrl)event.preventDefault();});
- win.loadFile(entry);
  win.once('ready-to-show',()=>win.show());
- if(evidenceFlag){
+ win.webContents.on('did-finish-load',checkRendererReady);
+ win.webContents.on('render-process-gone',(_event,details)=>recoverWindow('renderer-'+details.reason));
+ win.on('unresponsive',()=>recordIssue('window-unresponsive'));
+ win.on('closed',()=>{
+   clearTimeout(readyTimer);
+   clearTimeout(launchWatchdog);
+   win=null;
+ });
+ if(profileCheck){
+  verifyPortableProfile(evidenceFlag.slice('--moolva-evidence-dir='.length));
+ }else if(evidenceFlag){
   const folder=evidenceFlag.slice('--moolva-evidence-dir='.length);
   const failure=setTimeout(()=>{fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'gui-error.txt'),'Electron screenshot timed out');app.exit(2);},65000);
   win.webContents.once('did-finish-load',async()=>{
@@ -188,19 +257,154 @@ function createWindow(){
     })()`,true);
     fs.writeFileSync(path.join(folder,'10-online-map.json'),JSON.stringify(live,null,2));
     fs.writeFileSync(path.join(folder,'10-online-map.png'),(await win.webContents.capturePage()).toPNG());
+    partialMap={allowed:0,cancelled:0,completed:0,request:null};
+    const fallback=await win.webContents.executeJavaScript(`(async()=>{
+      const api=window.MoOLVaFreeMap32;
+      const map=api.getMap();
+      map.setView([56.35,43.50],14,{animate:false});
+      const center=map.getCenter();
+      const zoom=map.getZoom();
+      for(let i=0;i<100;i++){
+        const saved=map.getCenter();
+        const status=api.getStatus();
+        if(!status.online&&document.querySelector('#fm32-map canvas.leaflet-tile-loaded')){
+          return {offline:true, zoomPreserved:map.getZoom()===zoom, centerPreserved:saved.distanceTo(center)<1};
+        }
+        await new Promise(r=>setTimeout(r,100));
+      }
+      throw Error('Partial coverage did not switch to the offline map '+JSON.stringify(api.getStatus()));
+    })()`,true);
+    const {allowed,cancelled,completed}=partialMap;
+    const fallbackReport={...fallback,allowed,cancelled,completed};
+    fs.writeFileSync(path.join(folder,'12-map-fallback.json'),JSON.stringify(fallbackReport,null,2));
+    if(!fallback.centerPreserved||!fallback.zoomPreserved||!partialMap.completed||!partialMap.cancelled)
+      throw Error('Partial map fallback failed '+JSON.stringify(fallbackReport));
     clearTimeout(failure);app.exit(0);
    }catch(e){fs.writeFileSync(path.join(folder,'gui-error.txt'),String(e.stack||e));clearTimeout(failure);app.exit(3);}
   });
  }
+ openAtlas();
+}
+function verifyPortableProfile(folder){
+ const fail=error=>{
+   fs.mkdirSync(folder,{recursive:true});
+   fs.writeFileSync(path.join(folder,'gui-error.txt'),String(error.stack||error));
+   app.exit(3);
+ };
+ const timeout=setTimeout(()=>fail(Error('Portable profile check timed out')),45000);
+ win.webContents.once('did-finish-load',async()=>{
+   try{
+     if(profileCheck==='upgrade'){
+       const legacy=await win.webContents.executeJavaScript("localStorage.getItem('moolva-map-mode')");
+       if(legacy!=='online')throw Error('4.0.1 map preference not retained: '+legacy);
+       const checkpoint=path.join(profilePath,'Backups','before-4.1.json');
+       if(!fs.existsSync(checkpoint))throw Error('Legacy checkpoint is missing');
+       await win.webContents.executeJavaScript(`(()=>{
+         const search=document.getElementById('search');
+         search.value='Boletus edulis';
+         search.dispatchEvent(new Event('input'));
+         document.querySelector('#cards [data-fav="g001"]').click();
+         MoOLVaProfile41.setItem('moolva-map-mode','offline');
+       })()`);
+       const saved=await win.webContents.executeJavaScript(`JSON.parse(localStorage.getItem('moolva-griby-1.0-data')).favorites.includes('g001')`);
+       if(!saved||profile.backupCount<3)throw Error('Changes were not backed up');
+       clearTimeout(timeout);
+       app.exit(0);
+       return;
+     }
+     if(profileCheck!=='recover')throw Error('Unknown profile check');
+     const recovered=await win.webContents.executeJavaScript(`(()=>{
+       const journal=JSON.parse(localStorage.getItem('moolva-griby-1.0-data'));
+       return journal?.favorites.includes('g001') &&
+         document.getElementById('profile41-status').textContent.includes('восстановлены');
+     })()`);
+     if(!recovered)throw Error('Favorite was not recovered from a valid older snapshot');
+     win.webContents.once('render-process-gone',()=>{
+       win.webContents.once('did-finish-load',async()=>{
+         try{
+           const safe=await win.webContents.executeJavaScript(`MoOLVaSafeMode &&
+             document.querySelector('#primary-map-nav').hidden &&
+             document.querySelector('#cards .mush-card') !== null`);
+           if(!safe)throw Error('Renderer crash did not open the safe atlas');
+           const report=await win.webContents.executeJavaScript('MoOLVaReliability.copyReport()');
+           if(!report||!clipboard.readText().includes('renderer-'))throw Error('Crash diagnostics unavailable');
+           fs.writeFileSync(path.join(folder,'13-profile.json'),JSON.stringify({
+             upgradedFrom:'4.0.1', restoredFavorite:recovered, safeModeAfterCrash:safe, copiedDiagnostics:report,
+             rollingSnapshots:profile.backupCount
+           },null,2));
+           clearTimeout(timeout);
+           app.exit(0);
+         }catch(error){fail(error);}
+       });
+     });
+     win.webContents.forcefullyCrashRenderer();
+   }catch(error){fail(error);}
+ });
 }
 app.whenReady().then(()=>{
  const ses=session.defaultSession;
- if(evidenceFlag)ses.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*']},(details,callback)=>callback({cancel:!(allowLiveMap && new URL(details.url).hostname==='tile.openstreetmap.org')}));
+ if(evidenceFlag)ses.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*']},(details,callback)=>{
+   const osm=new URL(details.url).hostname==='tile.openstreetmap.org';
+   if(!allowLiveMap||!osm)return callback({cancel:true});
+   if(!partialMap)return callback({cancel:false});
+   if(partialMap.allowed===0){
+     partialMap.allowed++;
+     partialMap.request=details.id;
+     callback({cancel:false});
+   }else{
+     partialMap.cancelled++;
+     callback({cancel:true});
+   }
+ });
+ if(evidenceFlag)ses.webRequest.onCompleted({urls:['https://tile.openstreetmap.org/*']},details=>{
+   if(partialMap?.request===details.id&&details.statusCode>=200&&details.statusCode<300)partialMap.completed++;
+ });
  const mapFile=path.join(app.isPackaged ? process.resourcesPath : __dirname,'maps','nizhny-novgorod.pmtiles');
- ipcMain.handle('maps:list',(event)=>{
-   const caller=event.senderFrame,top=event.sender.mainFrame;
-   if(event.sender!==win?.webContents || !caller || !caller.url.startsWith('file:') || caller.routingId!==top.routingId || caller.processId!==top.processId) return [];
-   return regions.map(region=>({...region,state:'ready'}));
+ safeMode=safeMode || (!evidenceFlag && profile.needsSafeMode);
+ function isAtlasFrame(event){
+   if(event.sender!==win?.webContents)return false;
+   const caller=event.senderFrame, top=event.sender.mainFrame;
+   return Boolean(caller && top && caller.url===entryUrl && caller.routingId===top.routingId && caller.processId===top.processId);
+ }
+ ipcMain.handle('maps:list',event=>isAtlasFrame(event) ? regions.map(region=>({...region,state:'ready'})) : []);
+ ipcMain.on('profile:config',event=>{
+   event.returnValue=isAtlasFrame(event) ? {keys:profile.keys,safe:safeMode} : null;
+ });
+ ipcMain.on('profile:bootstrap',(event,values)=>{
+   event.returnValue={values:{},error:true};
+   if(!isAtlasFrame(event))return;
+   try{
+     event.returnValue={...profile.bootstrap(values,existingProfile),error:profileError};
+     existingProfile=true;
+   }catch{profileError=true;recordIssue('backup-bootstrap-failed');}
+ });
+ ipcMain.on('profile:snapshot',(event,values)=>{
+   event.returnValue=false;
+   if(!isAtlasFrame(event))return;
+   try{
+     profile.save(values);
+     profileError=false;
+     event.returnValue=true;
+   }catch{profileError=true;recordIssue('backup-save-failed');}
+ });
+ ipcMain.on('profile:restart',event=>{
+   if(!isAtlasFrame(event)||!safeMode)return;
+   safeMode=false;
+   recoveryUsed=false;
+   openAtlas();
+ });
+ ipcMain.handle('profile:copy-report',event=>{
+   if(!isAtlasFrame(event))return false;
+   const portable=process.env.PORTABLE_EXECUTABLE_DIR ? 'переносной' : 'обычный';
+   clipboard.writeText([
+     'MoOLVa Грибы '+app.getVersion(),
+     'Система: '+process.platform+' '+os.release()+' ('+process.arch+')',
+     'Профиль: '+portable+(profileError ? ', ошибка записи' : ', доступен для записи'),
+     'Режим: '+(safeMode?'безопасный':'обычный'),
+     'Резервных копий: '+profile.backupCount,
+     'Последний сбой: '+(lastIssue||profile.lastIssue||'не зарегистрирован')
+   ].join('\n'));
+   return true;
  });
  protocol.handle('moolva-map',request=>{
    const url=new URL(request.url);
@@ -209,7 +413,7 @@ app.whenReady().then(()=>{
  });
  // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
  ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{
-   details.requestHeaders['User-Agent']='MoOLVa-Griby/4.0.1 (+https://github.com/svarshan/git-repo)';
+   details.requestHeaders['User-Agent']='MoOLVa-Griby/4.1.0 (+https://github.com/svarshan/git-repo)';
    callback({requestHeaders:details.requestHeaders});
  });
  createWindow();

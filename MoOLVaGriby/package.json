@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "4.0.1",
-  "description": "MoOLVa Грибы 4.0.1 — Умный атлас",
+  "version": "4.1.0",
+  "description": "MoOLVa Грибы 4.1.0 — Стабильный атлас",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -53,6 +53,8 @@
       "map-packs.cjs",
       "map-regions.json",
       "preload.cjs",
+      "profile41.cjs",
+      "profile-ui41.js",
       "personal34.js"
     ],
     "asar": true,
@@ -78,10 +80,10 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-4.0.1-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-4.1.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-4.0.1-Full-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-4.1.0-Full-Portable-${arch}.exe"
     },
     "extraResources": [
       {

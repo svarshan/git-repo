@@ -29,7 +29,7 @@ test('map layers can be hidden independently and malformed coordinates ignored',
 });
 test('Google map integration is shipped, API key is never embedded and old data untouched',()=>{
  const pkg=JSON.parse(read('package.json')),html=read('index.html'),script=read('google31.js'),main=read('main.cjs'),css=read('google31.css');
- assert.equal(pkg.version,'4.0.1');
+ assert.equal(pkg.version,'4.1.0');
  assert.ok(pkg.build.files.includes('google31.js'));
  assert.ok(pkg.build.files.includes('google31.css'));
  assert.ok(html.includes('<script src="google31.js"></script>'));

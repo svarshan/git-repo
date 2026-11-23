@@ -19,7 +19,7 @@
    diary:Array.isArray(data.diary)?data.diary.filter(x=>x&&typeof x==='object'&&byId.has(x.speciesId)).slice(-1000):[]};}
    catch{return {favorites:new Set(),diary:[]};}}
   let state=load(),page='catalog',visible=18,currentId=null;
-  function save(){try{localStorage.setItem(storeKey,JSON.stringify({favorites:[...state.favorites],diary:state.diary}));return true;}catch{toast('Не удалось записать данные на диск');return false;}}
+  function save(){try{window.MoOLVaProfile41.setItem(storeKey,JSON.stringify({favorites:[...state.favorites],diary:state.diary}));return true;}catch{toast('Не удалось записать данные на диск');return false;}}
   function toast(text){const box=$('#toast');box.textContent=text;box.classList.add('visible');clearTimeout(toast.t);toast.t=setTimeout(()=>box.classList.remove('visible'),3200);}
   function stopSpeech(){if('speechSynthesis' in window)window.speechSynthesis.cancel();}
   function hazard(risk){return risk==='смертельно-ядовитый'||risk==='ядовитый';}
@@ -52,7 +52,7 @@
   const headings={catalog:['Грибной атлас','Изучайте виды и опасные двойники, сохраняйте наблюдения'],
    compare:['Сравнение грибов','Изучайте отличия похожих видов'],diary:['Дневник грибника','Ваши собственные наблюдения, сохранённые локально'],
    map:['Мои места','Личные находки без выдуманных географических точек'],favorites:['Избранное','Сохранённые виды из энциклопедии'],
-   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 4.0.1 · Умный атлас']};
+   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 4.1.0 · Умный атлас']};
   function nav(next){if(!headings[next])return;stopSpeech();closeDetail();page=next;
     document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));
     document.querySelectorAll('.sidebar nav button').forEach(x=>x.classList.toggle('selected',x.dataset.page===page));
@@ -97,13 +97,18 @@
       (differences?'':'<dl><dt>Группа</dt><dd>'+escapeHTML(x.group)+'</dd><dt>Признаки</dt><dd>'+escapeHTML(x.traits)+'</dd><dt>Местообитание</dt><dd>'+escapeHTML(x.habitat)+'</dd><dt>Сезон (месяцы)</dt><dd>'+x.months.join(', ')+'</dd></dl>')+
       '<button class="ghost" data-open="'+escapeHTML(x.id)+'">Подробнее →</button></div></div>';
     $('#comparison').innerHTML=panel(a)+panel(b);
-    const rows=atlas.comparison(a,b,differences);
-    $('#atlas40-table').innerHTML=rows.length?
+    const available=atlas.comparison(a,b,false);
+    const missing=available.filter(row=>!row.a||!row.b);
+    const rows=differences?available.filter(row=>row.differs):available;
+    const incomplete=differences&&missing.length&&a.id!==b.id?'<p class="note">'+missing.map(row=>
+      escapeHTML(row.label)+' — нет описания у '+escapeHTML(row.a?b.name:a.name)).join('<br>')+'</p>':'';
+    const table=rows.length?
       '<table><thead><tr><th scope="col">Признак</th><th scope="col">'+escapeHTML(a.name)+'</th><th scope="col">'+escapeHTML(b.name)+'</th></tr></thead><tbody>'+
       rows.map(row=>'<tr data-trait="'+row.key+'"'+(row.differs?' class="is-different"':'')+'><th scope="row">'+escapeHTML(row.label)+
         '</th><td>'+escapeHTML(row.a||'Нет данных')+'</td><td>'+escapeHTML(row.b||'Нет данных')+'</td></tr>').join('')+
       '</tbody></table>':a.id===b.id?'<p class="note">Выберите два разных вида.</p>':'<p class="note">'+
       (differences?'В структурированных признаках этой пары различия пока не описаны.':'Для этой пары доступны описания в карточках.')+'</p>';
+    $('#atlas40-table').innerHTML=table+incomplete;
   }
   function exportData(){const json={app:'MoOLVa Грибы',schema:1,created:new Date().toISOString(),favorites:[...state.favorites],diary:state.diary};download('MoOLVa-Griby-Backup.json',JSON.stringify(json,null,2),'application/json');toast('Резервная копия сохранена в JSON');}
   function download(name,text,type){const url=URL.createObjectURL(new Blob([text],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),3000);}

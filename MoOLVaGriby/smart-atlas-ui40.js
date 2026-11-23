@@ -71,9 +71,10 @@
           (unknown.length ? '<p><b>Уточнить:</b> '+labels(unknown)+'</p>' : '')+
           '<button type="button" data-open="'+escape(item.id)+'">Открыть карточку</button></article>';
       }).join('');
-      results.innerHTML = '<p role="status">'+(result.ranked.length
-        ? 'Карточек с совпадениями: '+result.ranked.length
-        : 'Сочетание признаков не найдено. Можно вернуться и уточнить ответы.')+'</p>'+
+      const summary = result.ranked.length
+        ? (selected===1?'Недостаточно признаков для уверенного сравнения. ':'')+'Карточек с совпадениями: '+result.ranked.length
+        : 'Сочетание признаков не найдено. Можно вернуться и уточнить ответы.';
+      results.innerHTML = '<p role="status">'+summary+'</p>'+
         (result.undocumented ? '<p class="muted">У '+result.undocumented+' карточек нет сведений для проверки выбранных признаков.</p>' : '')+
         '<div class="p20-results">'+cards+'</div>'+
         (result.ranked.length>shown ? '<button type="button" id="atlas40-more">Показать ещё</button>' : '');

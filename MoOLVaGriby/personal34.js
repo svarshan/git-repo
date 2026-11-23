@@ -44,9 +44,7 @@
     };
   }
   function commit(state) {
-    const snapshot=Object.values(keys).map(key=>[key,localStorage.getItem(key)]);
-    try{for(const [name,key] of Object.entries(keys)) localStorage.setItem(key,JSON.stringify(state[name]));}
-    catch(error){for(const [key,value] of snapshot){if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}throw error;}
+    window.MoOLVaProfile41.commit(Object.entries(keys).map(([name,key]) => [key,JSON.stringify(state[name])]));
   }
   function exportAll(){
     const data={app:'MoOLVa Грибы',schema:34,created:new Date().toISOString(),data:current()};
@@ -114,7 +112,7 @@
       try{
         const trips=read(keys.trips,[]);
         trips.push({id:crypto.randomUUID(),name,date:dateToday(),notes:$('p34-trip-notes').value.trim(),track:cleanTrack(expedition.getTrack())});
-        localStorage.setItem(keys.trips,JSON.stringify(trips));
+        window.MoOLVaProfile41.setItem(keys.trips,JSON.stringify(trips));
         e.target.reset();e.target.hidden=true;render();$('p34-trip-status').textContent='Поездка сохранена в дневнике.';
       }catch{$('p34-trip-status').textContent='Не удалось сохранить поездку. Проверьте доступное место.';}
     });
