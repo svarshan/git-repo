@@ -1,0 +1,146 @@
+name: MoOLVa — Tierstimmenarchiv access investigation (public metadata)
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/ptitsy-8.6-pro-max]
+    paths:
+      - '.github/workflows/ptitsy-archive-probe.yml'
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 4
+    steps:
+      - name: Inspect anonymous archive pages for openly downloadable media
+        run: |
+          python - <<'PY'
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          import re
+          urls={
+            'snowy_owl':'https://suche.tierstimmenarchiv.de/?autologin=true&edit=-1&unique_id=TSA%3ANyctea_scandiaca_V_2133_21_2',
+            'lesser_grey_shrike':'https://suche.tierstimmenarchiv.de/search/showdetails.html?from_search=true&language=deutsch&unique_identifier=TSA%3ALanius_minor_Kr_54_07_1',
+            'ferruginous_duck':'https://suche.tierstimmenarchiv.de/search/showdetails.html?from_search=true&language=deutsch&unique_identifier=TSA%3AAythya_nyroca_Lue_65_2_1',
+            'search':'https://suche.tierstimmenarchiv.de/search/query.html?locality=Neusiedler+See&requested=species,locality,duration,description,usage_permission'
+          }
+          for name,url in urls.items():
+            try:
+              r=urlopen(Request(url,headers={'User-Agent':'MoOLVaBirdAtlas/8.6 public conservation audio research'}),timeout=15)
+              html=r.read(250000).decode('utf-8','replace')
+              print(name,'status',r.status,'bytes',len(html),'last_url',r.geturl()[:180])
+              matches=list(re.finditer(r'(?i)mp3|\.wav|\.ogg|download|audio|preview',html))
+              for match in matches[:16]:
+                region=re.sub(r'\s+',' ',html[max(0,match.start()-95):match.end()+180])
+                print('evidence',name,region[:260])
+            except Exception as e:
+              print(name,'error',type(e).__name__,str(e)[:130])
+          PY
+
+      - name: Verify CC license and direct audio delivery
+        run: |
+          python - <<'PY'
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          import re,html
+          ids=[
+            'TSA:Nyctea_scandiaca_V_2133_21_2',
+            'TSA:Lanius_minor_Kr_54_07_1',
+            'TSA:Aythya_nyroca_Lue_65_2_1'
+          ]
+          for ident in ids:
+            query=urlencode({'unique_identifier':ident,'from_search':'true','language':'deutsch'})
+            page='https://suche.tierstimmenarchiv.de/search/showdetails.html?'+query
+            try:
+              response=urlopen(Request(page,headers={'User-Agent':'MoOLVaBirdAtlas/8.6 (research)'}),timeout=15)
+              body=response.read(180000).decode('utf-8','replace')
+              sound=re.search(r'<audio[^>]+src="([^"]+)"',body,re.I)
+              links=re.findall(r'href="([^"]*(?:creativecommons\.org|license)[^"]*)"',body,re.I)
+              print('RECORD',ident,'status',response.status,'audio',sound.group(1) if sound else 'none')
+              print('LICENSE',ident,links[:7])
+              for marker in ['recordist','Recordist','Aufnahme','Krey','Lütgens','Verantwortlich','CC BY-SA','recorder']:
+                ix=body.find(marker)
+                if ix>=0:
+                  short=re.sub(r'<[^>]+>',' ',body[max(0,ix-125):ix+260])
+                  print('META',ident,marker,html.unescape(re.sub(r'\s+',' ',short))[:350])
+              if sound:
+                audio_url='https://suche.tierstimmenarchiv.de'+sound.group(1)
+                req=Request(audio_url,method='HEAD',headers={'User-Agent':'MoOLVaBirdAtlas/8.6'})
+                try:
+                  head=urlopen(req,timeout=15)
+                  print('AUDIO',ident,head.status,head.headers.get('Content-Type'),head.headers.get('Content-Length'))
+                except Exception as err:
+                  print('AUDIO',ident,'ERROR',type(err).__name__,str(err)[:140])
+            except Exception as err:
+              print('PAGE',ident,'ERROR',type(err).__name__,str(err)[:130])
+          PY
+
+      - name: Investigate public taxonomic search parameters
+        run: |
+          python - <<'PY'
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          from html.parser import HTMLParser
+          import re
+          class Fields(HTMLParser):
+            def handle_starttag(self,tag,attrs):
+              if tag not in ('input','select','form'):return
+              d=dict(attrs)
+              if any(w in (' '.join(str(x) for x in d.values())).lower() for w in ('taxon','species','latin','wissenschaft','artname')):
+                print('FORM FIELD',tag,{k:v for k,v in d.items() if k in ('id','name','action','placeholder','class')})
+          ua={'User-Agent':'MoOLVaBirdAtlas/8.6 public species recording research'}
+          base='https://suche.tierstimmenarchiv.de/'
+          page=urlopen(Request(base,headers=ua),timeout=15).read(180000).decode('utf-8','replace')
+          Fields().feed(page)
+          for param in ['species','species_name','taxon','scientific_name']:
+            q=urlencode({param:'Aquila heliaca','requested':'species,duration,usage_permission'})
+            try:
+              r=urlopen(Request(base+'search/query.html?'+q,headers=ua),timeout=15)
+              body=r.read(150000).decode('utf-8','replace')
+              print('QUERY',param,'url',r.geturl()[:140],'mentions',body.count('Aquila heliaca'),'len',len(body))
+            except Exception as e:
+              print('QUERY',param,type(e).__name__,str(e)[:90])
+          PY
+
+      - name: Identify exact archive search-result media IDs and license fields
+        run: |
+          python - <<'PY'
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          import re,html
+          for latin in ['Aquila heliaca','Lanius minor','Aythya nyroca','Bubo scandiacus','Anser erythropus']:
+            url='https://suche.tierstimmenarchiv.de/search/query.html?'+urlencode({'species':latin,'requested':'species,duration,description,usage_permission'})
+            body=urlopen(Request(url,headers={'User-Agent':'MoOLVaBirdAtlas/8.6 public conservation audio research'}),timeout=20).read(170000).decode('utf-8','replace')
+            ids=list(dict.fromkeys(re.findall(r'TSA:[A-Za-z0-9_\-]+',html.unescape(body))))
+            print('ARCHIVE SPECIES',latin,'ids',ids[:9],'ID_COUNT',len(ids))
+            for marker in ['unique_identifier=', 'showdetails.html','details.html','data-dbid','Aquila heliaca']:
+              pos=body.find(marker)
+              if pos>=0:print('ARCHIVE HTML',latin,marker,re.sub(r'\s+',' ',body[max(0,pos-170):pos+280])[:450])
+          PY
+
+      - name: Search historical scientific synonyms for the eight outstanding bird species
+        run: |
+          python - <<'PY'
+          from urllib.request import Request,urlopen
+          from urllib.parse import urlencode
+          import re,html
+          pairs={
+            'Calidris minuta':['Erolia minuta'],
+            'Circus pygargus':['Circus cineraceus','Circus montagui'],
+            'Gallinago media':['Capella media'],
+            'Ichthyaetus ichthyaetus':['Larus ichthyaetus'],
+            'Mergellus albellus':['Mergus albellus'],
+            'Tachyspiza brevipes':['Accipiter brevipes'],
+            'Circus macrourus':['Circus pallidus'],
+            'Larus hyperboreus':['Larus leucopterus'],
+          }
+          for current,aliases in pairs.items():
+            for name in aliases:
+              url='https://suche.tierstimmenarchiv.de/search/query.html?'+urlencode({'species':name,'requested':'species,duration,description,usage_permission'})
+              try:
+                body=urlopen(Request(url,headers={'User-Agent':'MoOLVaBirdAtlas/8.6 historical scientific-name audio search'}),timeout=16).read(170000).decode('utf-8','replace')
+                ids=list(dict.fromkeys(re.findall(r'TSA:[A-Za-z0-9_-]+',html.unescape(body))))
+                print('SYNONYM',current,name,'found',len(ids),'sample',ids[:5])
+              except Exception as e:
+                print('SYNONYM',current,name,'error',type(e).__name__,str(e)[:70])
+          PY

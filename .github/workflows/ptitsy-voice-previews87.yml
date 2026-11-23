@@ -1,0 +1,43 @@
+name: MoOLVa — Xeno-canto licensed audio previews (review only)
+on:
+  workflow_dispatch:
+  push:
+    branches: [feature/ptitsy-8.6-pro-max]
+    paths:
+      - 'PtitsyNN/scripts/stage_xeno87.py'
+      - '.github/workflows/ptitsy-voice-previews87.yml'
+permissions:
+  contents: read
+jobs:
+  safe-previews:
+    runs-on: ubuntu-latest
+    timeout-minutes: 18
+    defaults:
+      run:
+        working-directory: PtitsyNN
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install FFmpeg audio tools
+        run: python -m pip install imageio-ffmpeg==0.6.0
+      - name: Syntax and catalog checks
+        run: |
+          python -m py_compile scripts/stage_xeno87.py scripts/xeno_candidates87.py scripts/audit_audio.py
+          python -c "from scripts.xeno_candidates87 import catalog_missing; assert len(catalog_missing()) == 33"
+      - name: Download actual licensed files, transcode and technical QA
+        env:
+          XENO_CANTO_API_KEY: ${{ secrets.XENO_CANTO_API_KEY }}
+        run: python -u scripts/stage_xeno87.py --min 1
+      - name: Upload real playable audio previews and provenance
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: MoOLVa-Licensed-Voices-Review87
+          path: |
+            PtitsyNN/app/media/audio-candidates87/
+            PtitsyNN/app/candidate-voices87.js
+            PtitsyNN/dist/release-evidence/voice-candidates87.json
+          if-no-files-found: warn
+          retention-days: 30
