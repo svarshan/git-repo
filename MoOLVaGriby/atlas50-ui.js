@@ -112,7 +112,8 @@
   packageState.textContent='Пакет данных № '+data.version+' · групп: '+groups.length;
   function activate(current) {
     window.MoOLVaProfile41.setItem(packKey,JSON.stringify({current,previous:data}));
-    location.reload();
+    if(window.MoOLVaReliability?.reloadAtlas)window.MoOLVaReliability.reloadAtlas();
+    else location.reload();
   }
   fileInput.addEventListener('change',async ()=>{
     const file=fileInput.files[0];

@@ -320,8 +320,11 @@ function createWindow(){
     fs.writeFileSync(path.join(folder,'12-map-fallback.json'),JSON.stringify(fallbackReport,null,2));
     if(!fallback.centerPreserved||!fallback.zoomPreserved||!partialMap.completed||!partialMap.cancelled)
       throw Error('Partial map fallback failed '+JSON.stringify(fallbackReport));
-    const nextLoad=()=>new Promise(resolve=>win.webContents.once('did-finish-load',resolve));
-    let reloaded=nextLoad();
+    const nextLoad=action=>new Promise((resolve,reject)=>{
+      const timeout=setTimeout(()=>reject(Error('Atlas did not reload after '+action)),10000);
+      win.webContents.once('did-finish-load',()=>{clearTimeout(timeout);resolve();});
+    });
+    let reloaded=nextLoad('package import');
     await win.webContents.executeJavaScript(`(()=>{
       const payload={...MoOLVaAtlas50Current,version:2};
       const json=new File([JSON.stringify(payload)],'atlas-update.json',{type:'application/json'});
@@ -336,8 +339,8 @@ function createWindow(){
       !document.getElementById('atlas50-package-rollback').hidden &&
       document.querySelectorAll('#atlas50-group option').length===5`);
     if(!installed)throw Error('Atlas data package was not activated after reload');
-    reloaded=nextLoad();
-    await win.webContents.executeJavaScript("document.getElementById('atlas50-package-rollback').click()");
+    reloaded=nextLoad('package rollback');
+    await win.webContents.executeJavaScript("void setTimeout(() => document.getElementById('atlas50-package-rollback').click(),50)");
     await reloaded;
     const rolledBack=await win.webContents.executeJavaScript('MoOLVaAtlas50Current.version===1');
     if(!rolledBack)throw Error('Atlas data package rollback failed');
@@ -459,6 +462,9 @@ app.whenReady().then(()=>{
      }catch{profileError=true;recordIssue('backup-save-failed');}
    }
    event.returnValue=saved;
+ });
+ ipcMain.on('profile:reload-atlas',event=>{
+   if(isAtlasFrame(event))openAtlas();
  });
  ipcMain.on('profile:restart',event=>{
    if(!isAtlasFrame(event)||!safeMode)return;

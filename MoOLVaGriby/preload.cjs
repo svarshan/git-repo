@@ -30,5 +30,6 @@ contextBridge.exposeInMainWorld('MoOLVaReliability',{
     }
   },
   restart:()=>ipcRenderer.send('profile:restart'),
+  reloadAtlas:()=>ipcRenderer.send('profile:reload-atlas'),
   copyReport:()=>ipcRenderer.invoke('profile:copy-report')
 });
