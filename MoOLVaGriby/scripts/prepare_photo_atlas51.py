@@ -8,6 +8,7 @@ import json
 from pathlib import Path
 import re
 import time
+from urllib.error import HTTPError
 from urllib.request import Request, urlopen
 
 from PIL import Image, ImageOps
@@ -58,7 +59,7 @@ def validate_plan(plan):
                 photo_id = row["id"]
                 key = asset_key(row)
                 if (type(photo_id) is not int or photo_id <= 0 or key in seen
-                        or row["ext"] not in {"jpg", "jpeg", "png", "webp"}
+                        or row["ext"].lower() not in {"jpg", "jpeg", "png", "webp"}
                         or row["license"] not in LICENSES or not 0 < len(row["author"]) <= 240
                         or ("taxon" in row and TAXON_ALIASES.get(latin) != row["taxon"])):
                     raise ValueError(f"Invalid iNaturalist photo: {latin}")
@@ -100,8 +101,8 @@ def import_photo(row, root, local_source):
                         photo.save(file, quality=83, optimize=True)
                     break
                 except (OSError, ValueError) as exc:
-                    if attempt == 3:
-                        raise RuntimeError(f"Cannot download photo {key}") from exc
+                    if attempt == 3 or (isinstance(exc, HTTPError) and exc.code in {404, 410}):
+                        raise RuntimeError(f"{key}: {exc}") from exc
                     time.sleep(1 + attempt * 2)
     return {"file": relative, "source": source,
             **({"sourceTaxon": row["taxon"]} if "taxon" in row else {}),
@@ -122,9 +123,15 @@ def prepare(root, plan, local_source):
     photos = [
         row for records in plan["species"].values() for row in records if "legacy" not in row
     ]
+    unavailable = []
     with ThreadPoolExecutor(max_workers=12) as downloads:
-        for row, photo in zip(photos, downloads.map(lambda row: import_photo(row, root, local_source), photos)):
-            assets[asset_key(row)] = photo
+        pending = {asset_key(row): downloads.submit(import_photo, row, root, local_source) for row in photos}
+        for key, future in pending.items():
+            try:
+                assets[key] = future.result()
+            except RuntimeError as error:
+                unavailable.append(key)
+                print(f"Photo unavailable: {error}", flush=True)
     all_photos = {}
     for latin, records in plan["species"].items():
         photos = []
@@ -136,9 +143,12 @@ def prepare(root, plan, local_source):
                 if not entry or not (root / row["legacy"]).is_file():
                     raise RuntimeError(f"Missing previously attributed photo: {row['legacy']}")
                 photos.append({**entry, "view": row["view"], "viewBasis": row["basis"]})
-            else:
+            elif asset_key(row) in assets:
                 photos.append(assets[asset_key(row)])
         all_photos[latin] = photos
+    incomplete = [latin for latin, photos in all_photos.items() if len(photos) < 3]
+    if incomplete:
+        raise RuntimeError(f"Fewer than three usable photos: {', '.join(incomplete)}")
     views = lambda photos: sorted({p["view"] for p in photos if p["view"] != "general"})
     report = {
         "schema": 1, "catalogSpecies": len(all_photos),
@@ -151,6 +161,7 @@ def prepare(root, plan, local_source):
         "speciesWithUnderside": sum("underside" in views(p) for p in all_photos.values()),
         "photos": sum(map(len, all_photos.values())),
         "newPhotos": len(assets),
+        "unavailableSources": unavailable,
         "viewLabels": {"visual-estimate": "Ориентировочно", "source-caption": "По подписи автора",
                        "reviewed": "Просмотрен", "unclassified": "Ракурс не указан"},
         "species": [
