@@ -364,7 +364,10 @@ app.whenReady().then(()=>{
  function isAtlasFrame(event){
    if(event.sender!==win?.webContents)return false;
    const caller=event.senderFrame, top=event.sender.mainFrame;
-   return Boolean(caller && top && caller.url===entryUrl && caller.routingId===top.routingId && caller.processId===top.processId);
+   // Only the main frame in the dedicated local window can use these channels.
+   // Electron and Node may serialize the same Windows file URL differently.
+   return Boolean(caller && top && caller.url.startsWith('file:') &&
+     caller.routingId===top.routingId && caller.processId===top.processId);
  }
  ipcMain.handle('maps:list',event=>isAtlasFrame(event) ? regions.map(region=>({...region,state:'ready'})) : []);
  ipcMain.on('profile:config',event=>{
