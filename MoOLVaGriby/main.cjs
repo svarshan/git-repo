@@ -318,7 +318,8 @@ function verifyPortableProfile(folder){
        return journal?.favorites.includes('g001') &&
          document.getElementById('profile41-status').textContent.includes('восстановлены');
      })()`);
-     if(!recovered)throw Error('Favorite was not recovered from a valid older snapshot');
+     if(!recovered)throw Error('Favorite was not recovered from a valid older snapshot; '+
+       await win.webContents.executeJavaScript("document.getElementById('profile41-status').textContent"));
      win.webContents.once('render-process-gone',()=>{
        win.webContents.once('did-finish-load',async()=>{
          try{
@@ -374,21 +375,27 @@ app.whenReady().then(()=>{
    event.returnValue=isAtlasFrame(event) ? {keys:profile.keys,safe:safeMode} : null;
  });
  ipcMain.on('profile:bootstrap',(event,values)=>{
-   event.returnValue={values:{},error:true};
-   if(!isAtlasFrame(event))return;
+   if(!isAtlasFrame(event)){
+     event.returnValue={values:{},error:true};
+     return;
+   }
+   let result={values:{},error:true};
    try{
-     event.returnValue={...profile.bootstrap(values,existingProfile),error:profileError};
+     result={...profile.bootstrap(values,existingProfile),error:profileError};
      existingProfile=true;
    }catch{profileError=true;recordIssue('backup-bootstrap-failed');}
+   event.returnValue=result;
  });
  ipcMain.on('profile:snapshot',(event,values)=>{
-   event.returnValue=false;
-   if(!isAtlasFrame(event))return;
-   try{
-     profile.save(values);
-     profileError=false;
-     event.returnValue=true;
-   }catch{profileError=true;recordIssue('backup-save-failed');}
+   let saved=false;
+   if(isAtlasFrame(event)){
+     try{
+       profile.save(values);
+       profileError=false;
+       saved=true;
+     }catch{profileError=true;recordIssue('backup-save-failed');}
+   }
+   event.returnValue=saved;
  });
  ipcMain.on('profile:restart',event=>{
    if(!isAtlasFrame(event)||!safeMode)return;
