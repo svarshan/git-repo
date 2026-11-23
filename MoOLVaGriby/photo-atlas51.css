@@ -1,0 +1,12 @@
+.photo51-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:12px;margin:12px 0}
+#p20-detail-gallery .photo51-grid figure{min-width:0;margin:0;padding:9px;border:1px solid #426250;border-radius:9px;background:#142b22}
+.photo51-grid figure button{display:block;width:100%;padding:0;border:0;overflow:hidden;border-radius:7px;background:#0c1d17;cursor:zoom-in}
+#p20-detail-gallery .photo51-grid img{display:block;width:100%;height:168px;object-fit:contain;border-radius:0}
+.photo51-grid figcaption{overflow-wrap:anywhere;padding-top:8px}
+.photo51-grid figcaption b{color:#f4d6a1}
+.photo51-viewer{width:min(980px,calc(100vw - 32px));max-height:calc(100vh - 30px);color:#eaf1e9;background:#10241c;border:1px solid #628571;border-radius:13px;padding:16px}
+.photo51-viewer::backdrop{background:#040b08e8}
+.photo51-viewer header,.photo51-controls{display:flex;align-items:center;justify-content:space-between;gap:12px}
+.photo51-viewer h2{margin:0 0 10px}
+.photo51-viewer img{display:block;width:100%;height:min(62vh,575px);object-fit:contain;background:#091610;border-radius:9px}
+.photo51-controls{margin-top:12px}

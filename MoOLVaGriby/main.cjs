@@ -108,7 +108,7 @@ function createWindow(){
   verifyPortableProfile(evidenceFlag.slice('--moolva-evidence-dir='.length));
  }else if(evidenceFlag){
   const folder=evidenceFlag.slice('--moolva-evidence-dir='.length);
-  const failure=setTimeout(()=>{fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'gui-error.txt'),'Electron screenshot timed out');app.exit(2);},65000);
+  const failure=setTimeout(()=>{fs.mkdirSync(folder,{recursive:true});fs.writeFileSync(path.join(folder,'gui-error.txt'),'Electron screenshot timed out');app.exit(2);},85000);
   win.webContents.once('did-finish-load',async()=>{
    try{
     await new Promise(resolve=>setTimeout(resolve,1400));
@@ -227,6 +227,49 @@ function createWindow(){
     if(!Object.values(encyclopedia).every(Boolean))throw Error('Encyclopedia GUI failed '+JSON.stringify(encyclopedia));
     await win.webContents.executeJavaScript("document.querySelector('#atlas50-comparison').scrollIntoView()");
     fs.writeFileSync(path.join(folder,'14-encyclopedia.png'),(await win.webContents.capturePage()).toPNG());
+    const photos=await win.webContents.executeJavaScript(`(async()=>{
+      const find=id=>document.getElementById(id);
+      const catalog=window.MOOLVA_MUSHROOMS;
+      const atlas=window.MOOLVA_ATLAS_PHOTOS51;
+      const button=document.querySelector('[data-page="catalog"]');
+      const search=find('search');
+      const showGallery=async latin=>{
+        button.click();
+        search.value=latin;
+        search.dispatchEvent(new Event('input'));
+        document.querySelector('#cards [data-open]').click();
+        await new Promise(requestAnimationFrame);
+        return find('p20-detail-gallery');
+      };
+      const addition=catalog.find(x=>!window.MOOLVA_PHOTOS[x.latin] && atlas[x.latin]?.length>=3);
+      const added=await showGallery(addition.latin);
+      const newlyIllustrated=added.querySelectorAll('figure').length>=3;
+      find('closeModal').click();
+      const gallery=await showGallery('Boletus edulis');
+      const cards=[...gallery.querySelectorAll('figure')];
+      cards[0].querySelector('button').click();
+      const dialog=find('photo51-viewer');
+      const img=find('photo51-full');
+      await img.decode();
+      const first=img.src;
+      const localImage=img.naturalWidth>0 && new URL(first).protocol==='file:';
+      find('photo51-next').click();
+      await img.decode();
+      const navigation=img.src!==first && find('photo51-position').textContent.startsWith('2 ') && img.naturalWidth>0;
+      const credits=Boolean(find('photo51-credit').querySelector('a[href^="https://"]')) &&
+        cards.every(card=>card.querySelector('figcaption').textContent.includes('CC'));
+      const distinctViews=new Set(atlas['Boletus edulis'].map(x=>x.view).filter(x=>x!=='general')).size>=2;
+      return {catalogCoveredByReport:catalog.length===290 &&
+        catalog.every(x=>Array.isArray(atlas[x.latin])),
+        newlyIllustrated,localImage,navigation,credits,distinctViews,opened:dialog.open,multiple:cards.length>=3};
+    })()`,true);
+    fs.writeFileSync(path.join(folder,'15-photo-atlas.json'),JSON.stringify(photos,null,2));
+    if(!Object.values(photos).every(Boolean))throw Error('Photo atlas GUI failed '+JSON.stringify(photos));
+    fs.writeFileSync(path.join(folder,'15-photo-atlas.png'),(await win.webContents.capturePage()).toPNG());
+    await win.webContents.executeJavaScript(`document.querySelector('#photo51-viewer').close();
+      document.querySelector('#closeModal').click();
+      document.querySelector('#search').value='';
+      document.querySelector('#search').dispatchEvent(new Event('input'));`);
     await win.webContents.executeJavaScript("document.querySelector('#primary-map-nav').click()");
     await new Promise(r=>setTimeout(r,250));
     fs.writeFileSync(path.join(folder,'05-expedition.png'),(await win.webContents.capturePage()).toPNG());
@@ -362,8 +405,8 @@ function verifyPortableProfile(folder){
    try{
      if(profileCheck==='upgrade'){
        const legacy=await win.webContents.executeJavaScript("localStorage.getItem('moolva-map-mode')");
-       if(legacy!=='online')throw Error('4.1.0 map preference not retained: '+legacy);
-       const checkpoint=path.join(profilePath,'Backups','before-5.0.json');
+       if(legacy!=='online')throw Error('5.0.0 map preference not retained: '+legacy);
+       const checkpoint=path.join(profilePath,'Backups','before-5.1.json');
        if(!fs.existsSync(checkpoint))throw Error('Legacy checkpoint is missing');
        await win.webContents.executeJavaScript(`(()=>{
          const search=document.getElementById('search');
@@ -396,7 +439,7 @@ function verifyPortableProfile(folder){
            const report=await win.webContents.executeJavaScript('MoOLVaReliability.copyReport()');
            if(!report||!clipboard.readText().includes('renderer-'))throw Error('Crash diagnostics unavailable');
            fs.writeFileSync(path.join(folder,'13-profile.json'),JSON.stringify({
-             upgradedFrom:'4.1.0', restoredFavorite:recovered, safeModeAfterCrash:safe, copiedDiagnostics:report,
+             upgradedFrom:'5.0.0', restoredFavorite:recovered, safeModeAfterCrash:safe, copiedDiagnostics:report,
              rollingSnapshots:profile.backupCount
            },null,2));
            clearTimeout(timeout);
@@ -492,7 +535,7 @@ app.whenReady().then(()=>{
  });
  // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
  ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{
-   details.requestHeaders['User-Agent']='MoOLVa-Griby/5.0.0 (+https://github.com/svarshan/git-repo)';
+   details.requestHeaders['User-Agent']='MoOLVa-Griby/5.1.0 (+https://github.com/svarshan/git-repo)';
    callback({requestHeaders:details.requestHeaders});
  });
  createWindow();

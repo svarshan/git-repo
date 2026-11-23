@@ -23,12 +23,12 @@ test('offline pages, photo manifests, journal and compare are connected',()=>{
  const html=read('index.html'),js=read('app.js');
  for(const path of ['catalog.js','photos.js','app.js','styles.css'])assert.ok(html.includes(path));
  for(const id of ['catalog','favorites','diary','map','quality','compare','overlay'])assert.ok(html.includes('id="'+id+'"'));
- for(const term of ['localStorage','renderCatalog','renderCompare','renderDiary','renderQuality','stopSpeech','photos[b.latin]'])assert.ok(js.includes(term));
+ for(const term of ['localStorage','renderCatalog','renderCompare','renderDiary','renderQuality','stopSpeech','photoAtlas.active(b.latin)'])assert.ok(js.includes(term));
  assert.ok(!/https?:\/\/[^"']+\.js/.test(html),'Remote javascript is forbidden');
 });
 test('Windows installer, portable, icon and screenshot run are configured',()=>{
  const p=JSON.parse(read('package.json')),main=read('main.cjs');
- assert.equal(p.version,'5.0.0');
+ assert.equal(p.version,'5.1.0');
  assert.match(p.build.nsis.artifactName,/Setup/);
  assert.match(p.build.portable.artifactName,/Portable/);
  assert.match(main,/capturePage/);

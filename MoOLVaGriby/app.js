@@ -13,11 +13,11 @@
   for(const row of window.MoOLVa20Core.cleanObservations(window.MOOLVA_REGION_OBS20)){
     if(!observations.has(row.latin))observations.set(row.latin,row);
   }
-  const photos = window.MOOLVA_PHOTOS && typeof window.MOOLVA_PHOTOS === 'object' ? window.MOOLVA_PHOTOS : {};
+  const photoAtlas=window.MoOLVaPhotos51;
   const byId = new Map(birds.map(b=>[b.id,b])), byLatin=new Map(birds.map(b=>[b.latin,b]));
   const $ = s => document.querySelector(s);
   const escapeHTML = value => String(value ?? '').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const safePhoto=b=>{const x=photos[b.latin];return x&&/^media\/photos\/[A-Za-z0-9_-]+\.jpg$/.test(x.file)?x:null;};
+  const safePhoto=b=>photoAtlas.active(b.latin)[0];
   const latinTranslate = text => String(text).toLowerCase().replace(/[ё]/g,'е').replace(/[а-я]/g,c=>({'а':'a','б':'b','в':'v','г':'g','д':'d','е':'e','ж':'zh','з':'z','и':'i','й':'y','к':'k','л':'l','м':'m','н':'n','о':'o','п':'p','р':'r','с':'s','т':'t','у':'u','ф':'f','х':'kh','ц':'ts','ч':'ch','ш':'sh','щ':'shch','ы':'y','э':'e','ю':'yu','я':'ya','ь':'','ъ':''}[c]||c)).normalize('NFKD').replace(/[\u0300-\u036f]/g,'');
   const atlas=window.MoOLVaAtlas40;
   const searchAtlas=atlas.makeSearch(birds,latinTranslate);
@@ -63,7 +63,7 @@
    training:['Тренажёр','Запоминайте признаки и различия между видами'],
    compare:['Сравнение грибов','Изучайте отличия похожих видов'],diary:['Дневник грибника','Ваши собственные наблюдения, сохранённые локально'],
    map:['Мои места','Личные находки без выдуманных географических точек'],favorites:['Избранное','Сохранённые виды из энциклопедии'],
-   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 5.0.0 · Умный атлас']};
+   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 5.1.0 · Умный атлас']};
   function nav(next){if(!headings[next])return;stopSpeech();closeDetail();page=next;
     document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));
     document.querySelectorAll('.sidebar nav button').forEach(x=>x.classList.toggle('selected',x.dataset.page===page));
@@ -71,7 +71,7 @@
     if(page==='catalog')renderCatalog();if(page==='favorites')renderFav();if(page==='compare')renderCompare();
     if(page==='diary')renderDiary();if(page==='map')renderMap();if(page==='quality')renderQuality();
     window.scrollTo(0,0);}
-  function sourceLink(b){const img=safePhoto(b);if(!img)return '<p class="photo-credit">Подтверждённая фотография не загружена. Имитировать её не будем.</p>';
+  function sourceLink(b){const img=safePhoto(b);if(!img)return '<p class="photo-credit">Фото с подходящей лицензией пока нет.</p>';
     const link=/^https:\/\/(commons\.wikimedia\.org\/wiki\/File:|www\.inaturalist\.org\/photos\/)/.test(img.source)?'<a href="'+escapeHTML(img.source)+'" target="_blank" rel="noopener noreferrer">Открыть первоисточник фотографии ↗</a>':'';
     return '<p class="photo-credit">Фото: '+escapeHTML(img.author||'автор указан в первоисточнике')+' · '+escapeHTML(img.license||'условия не указаны')+'. Категория по метаданным; визуальная идентификация вида не подтверждена. '+link+'</p>';}
   function closeDetail(){if(currentId===null)return;stopSpeech();$('#overlay').hidden=true;document.body.style.overflow='';currentId=null;}
@@ -149,8 +149,8 @@
     const b=byId.get(entry.speciesId);return '<article class="diaryrow"><div><h3>'+escapeHTML(b?.name||'Неизвестный вид')+'</h3><p>'+escapeHTML(entry.date)+' · '+escapeHTML(entry.place)+'</p><p>'+escapeHTML(entry.notes||'Нет заметок')+'</p><small class="muted">Определение предварительное · личная запись</small></div><button data-delete="'+escapeHTML(entry.id)+'">Удалить</button></article>';
   }).join(''):'<div class="empty">В дневнике пока нет записей. Добавьте первую находку выше.</div>';}
   function renderMap(){const entries=state.diary.slice().reverse();$('#mapItems').innerHTML=entries.length?entries.map(x=>'<div class="place"><div><h3>⌖ '+escapeHTML(x.place)+'</h3><p>'+escapeHTML(x.date)+' · '+escapeHTML(byId.get(x.speciesId)?.name||'Гриб')+'</p></div><span class="chip">Моё наблюдение</span></div>').join(''):'<div class="empty">Географических точек пока нет. Добавьте место в дневник — здесь появится его название.</div>';}
-  function renderQuality(){const list=birds.map(b=>({b,p:safePhoto(b)}));const present=list.filter(x=>x.p).length;$('#qualityStats').innerHTML='<div><span>Всего видов</span><strong>'+birds.length+'</strong><small>учебные карточки</small></div><div><span>Файлов фотографий</span><strong>'+present+'</strong><small>из Commons и iNaturalist</small></div><div><span>Без фото</span><strong>'+(birds.length-present)+'</strong><small>не подменяются</small></div><div><span>Экспертно подтверждено</span><strong>0</strong><small>визуальный аудит ещё требуется</small></div>';
-    $('#qualityItems').innerHTML=list.map(x=>'<div class="qualityrow"><div><b>'+escapeHTML(x.b.name)+'</b> <span>· '+escapeHTML(x.b.latin)+'</span></div><span>'+(x.p?'Файл есть · нужен визуальный аудит':'Нет лицензированного фото')+'</span><button data-open="'+escapeHTML(x.b.id)+'">Паспорт</button></div>').join('');}
+  function renderQuality(){const list=birds.map(b=>({b,count:photoAtlas.active(b.latin).length}));const present=list.filter(x=>x.count).length;$('#qualityStats').innerHTML='<div><span>Всего видов</span><strong>'+birds.length+'</strong><small>учебные карточки</small></div><div><span>Видов с фотографиями</span><strong>'+present+'</strong><small>из Commons и iNaturalist</small></div><div><span>Без фото</span><strong>'+(birds.length-present)+'</strong><small>снимки ещё подбираются</small></div><div><span>Экспертно подтверждено</span><strong>0</strong><small>проверка ракурса и вида проводится отдельно</small></div>';
+    $('#qualityItems').innerHTML=list.map(x=>'<div class="qualityrow"><div><b>'+escapeHTML(x.b.name)+'</b> <span>· '+escapeHTML(x.b.latin)+'</span></div><span>'+(x.count?'Снимков: '+x.count:'Нет лицензированного фото')+'</span><button data-open="'+escapeHTML(x.b.id)+'">Паспорт</button></div>').join('');}
   function handleClick(e){const t=e.target.closest('button,[data-close]');if(!t)return;
     if(t.dataset.page){nav(t.dataset.page);return;}
     if(t.dataset.goto){nav(t.dataset.goto);return;}
@@ -180,7 +180,7 @@
       if(!byId.has(speciesId)||!place||!date)return;
       state.diary.push({id:(typeof crypto!=='undefined'&&crypto.randomUUID?crypto.randomUUID():String(Date.now())+'-'+Math.random().toString(36).slice(2)),speciesId,place:place.slice(0,100),date,notes:notes.slice(0,1000)});
       if(!save()){state.diary.pop();return;}$('#obsPlace').value='';$('#obsNote').value='';renderDiary();renderStats();toast('Наблюдение сохранено только на этом устройстве');});
-    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#atlas40-glossary').open)closeDetail();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();nav('catalog');$('#search').focus();}});
+    window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('#atlas40-glossary').open&&!$('#photo51-viewer').open)closeDetail();if((e.ctrlKey||e.metaKey)&&e.key.toLowerCase()==='k'){e.preventDefault();nav('catalog');$('#search').focus();}});
     window.addEventListener('pagehide',stopSpeech);
     renderStats();renderCatalog();renderCompare();renderDiary();renderMap();
   }

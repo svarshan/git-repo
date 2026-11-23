@@ -1,7 +1,7 @@
-name: MoOLVa Griby 5.0.0 Regional Encyclopedia - Windows Portable
+name: MoOLVa Griby 5.1.0 Photo Atlas - Windows Portable
 on:
   push:
-    branches: [feature/moolva-griby-5.0]
+    branches: [feature/moolva-griby-5.1-photo-atlas]
     paths: ['MoOLVaGriby/**', '.github/workflows/moolva-griby-windows.yml']
   workflow_dispatch:
 permissions:
@@ -24,13 +24,13 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: Reuse verified 4.1.0 build data when available
+      - name: Reuse verified 5.0.0 build data when available
         id: reuse
         continue-on-error: true
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh run download 45222764791 --name griby34-build-data --dir bundle
+          gh run download 45228545137 --name griby34-build-data --dir bundle
           test -s bundle/maps/nizhny-novgorod.pmtiles
           test -s bundle/offline-localities.js
           test -s bundle/build/moolva-griby.ico
@@ -68,6 +68,13 @@ jobs:
           fi
           "$tools_dir/pmtiles" verify "$tools_dir/region.pmtiles"
           cp "$tools_dir/region.pmtiles" bundle/maps/nizhny-novgorod.pmtiles
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Bundle attributed photos for offline use
+        run: |
+          python -m pip install Pillow==11.3.0
+          python scripts/prepare_photo_atlas51.py bundle photo-atlas51-plan.json
       - uses: actions/upload-artifact@v4
         with:
           name: griby34-build-data
@@ -104,7 +111,7 @@ jobs:
       - name: Run the Portable EXE in a fresh Windows profile
         timeout-minutes: 4
         run: |
-          $exe = (Resolve-Path 'dist/MoOLVa-Griby-5.0.0-Full-Portable-x64.exe').Path
+          $exe = (Resolve-Path 'dist/MoOLVa-Griby-5.1.0-Full-Portable-x64.exe').Path
           $dir = Join-Path (Get-Location).Path 'dist/evidence'
           $proc = Start-Process -FilePath $exe -Wait -PassThru -ArgumentList @("`"--moolva-evidence-dir=$dir`"")
           if ($proc.ExitCode -ne 0) { Get-Content "$dir/gui-error.txt" -ErrorAction SilentlyContinue; throw "Portable exited with $($proc.ExitCode)" }
@@ -116,19 +123,22 @@ jobs:
           if (-not (Test-Path 'dist/MoOLVa-Griby-Data/Local Storage')) { throw 'Portable profile missing next to EXE' }
           if (-not (Test-Path "$dir/14-encyclopedia.json")) { throw 'Missing encyclopedia verification' }
           if (-not (Test-Path "$dir/12-map-fallback.json")) { throw 'Missing partial tile fallback verification' }
+          if (-not (Test-Path "$dir/15-photo-atlas.json")) { throw 'Missing photo atlas verification' }
+          if (-not (Test-Path "$dir/15-photo-atlas.png")) { throw 'Missing photo atlas screenshot' }
+          Copy-Item 'bundle/photo-atlas51-report.json' "$dir/photo-atlas51-report.json"
           Get-FileHash $exe -Algorithm SHA256 | Format-List | Out-File -Encoding utf8 'dist/SHA256.txt'
-      - name: Upgrade a real 4.1.0 Portable profile and recover damaged data
+      - name: Upgrade a real 5.0.0 Portable profile and recover damaged data
         timeout-minutes: 8
         run: |
-          $exe = (Resolve-Path 'dist/MoOLVa-Griby-5.0.0-Full-Portable-x64.exe').Path
+          $exe = (Resolve-Path 'dist/MoOLVa-Griby-5.1.0-Full-Portable-x64.exe').Path
           $evidence = (Resolve-Path 'dist/evidence').Path
           $case = Join-Path $env:RUNNER_TEMP 'Профиль атласа'
           New-Item -ItemType Directory -Force $case | Out-Null
-          $previous = Join-Path $case 'MoOLVa-Griby-4.1.0.exe'
-          $candidate = Join-Path $case 'MoOLVa-Griby-5.0.0.exe'
-          curl.exe -fLsS --retry 2 -o $previous https://github.com/svarshan/git-repo/releases/download/griby-v4.1.0-full/MoOLVa-Griby-4.1.0-Full-Portable-x64.exe
+          $previous = Join-Path $case 'MoOLVa-Griby-5.0.0.exe'
+          $candidate = Join-Path $case 'MoOLVa-Griby-5.1.0.exe'
+          curl.exe -fLsS --retry 2 -o $previous https://github.com/svarshan/git-repo/releases/download/griby-v5.0.0-full/MoOLVa-Griby-5.0.0-Full-Portable-x64.exe
           if ($LASTEXITCODE -ne 0) { throw 'Previous release download failed' }
-          if ((Get-FileHash $previous -Algorithm SHA256).Hash -ne '1651A40BA1E08FE59FBA17D7644A1BABE79E3A17528905FC5D0F62CE09CA223C') { throw 'Previous release hash mismatch' }
+          if ((Get-FileHash $previous -Algorithm SHA256).Hash -ne 'FCBB39FFA0A7FF245BAE70FB5A0E58688F6114DBDFDA382680011813D2439DAC') { throw 'Previous release hash mismatch' }
           Copy-Item $exe $candidate
           function Run-Atlas($file, $out, $extra) {
             $arguments = @("`"--moolva-evidence-dir=$out`"")
@@ -140,7 +150,7 @@ jobs:
           Run-Atlas $candidate $evidence 'upgrade'
           $profile = Join-Path $case 'MoOLVa-Griby-Data'
           $backup = Join-Path $profile 'Backups'
-          $checkpoint = Get-Content (Join-Path $backup 'before-5.0.json') -Raw | ConvertFrom-Json
+          $checkpoint = Get-Content (Join-Path $backup 'before-5.1.json') -Raw | ConvertFrom-Json
           if ($checkpoint.values.'moolva-map-mode' -ne 'online') { throw 'Missing legacy map setting in checkpoint' }
           $snapshots = @(Get-ChildItem $backup -Filter 'snapshot-*.json' | Sort-Object Name -Descending)
           if ($snapshots.Count -lt 3) { throw 'Missing rolling snapshots' }
@@ -150,12 +160,12 @@ jobs:
           if (-not (Test-Path "$evidence/13-profile.json")) { throw 'Missing profile recovery evidence' }
       - uses: actions/upload-artifact@v4
         with:
-          name: MoOLVa-Griby-5.0.0-Full-Portable-x64
-          path: MoOLVaGriby/dist/MoOLVa-Griby-5.0.0-Full-Portable-x64.exe
+          name: MoOLVa-Griby-5.1.0-Full-Portable-x64
+          path: MoOLVaGriby/dist/MoOLVa-Griby-5.1.0-Full-Portable-x64.exe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: MoOLVa-Griby-5.0.0-Windows-QA
+          name: MoOLVa-Griby-5.1.0-Windows-QA
           path: |
             MoOLVaGriby/dist/evidence/
             MoOLVaGriby/dist/SHA256.txt
@@ -176,22 +186,22 @@ jobs:
           node-version: '22'
       - uses: actions/download-artifact@v4
         with:
-          name: MoOLVa-Griby-5.0.0-Full-Portable-x64
+          name: MoOLVa-Griby-5.1.0-Full-Portable-x64
           path: current
       - uses: actions/download-artifact@v4
         with:
-          name: MoOLVa-Griby-5.0.0-Windows-QA
+          name: MoOLVa-Griby-5.1.0-Windows-QA
           path: qa
       - name: Publish the Windows-tested full EXE
         run: |
           set -euo pipefail
-          tag=griby-v5.0.0-full
-          exe=current/MoOLVa-Griby-5.0.0-Full-Portable-x64.exe
+          tag=griby-v5.1.0-full
+          exe=current/MoOLVa-Griby-5.1.0-Full-Portable-x64.exe
           node -e 'const data=require("./MoOLVaGriby/atlas50-data.js"); const atlas=require("./MoOLVaGriby/atlas50.js"); process.stdout.write(JSON.stringify(atlas.validate(data),null,2)+"\n");' > MoOLVa-Griby-Atlas-Package.json
           digest=$(sha256sum "$exe" | cut -d' ' -f1)
           grep -qi "$digest" qa/SHA256.txt
           if gh release view "$tag" >/dev/null 2>&1; then
             test "$(gh api "repos/$GH_REPO/git/ref/tags/$tag" --jq .object.sha)" = "$GITHUB_SHA"
           else
-            gh release create "$tag" "$exe" MoOLVa-Griby-Atlas-Package.json qa/evidence/14-encyclopedia.png qa/evidence/14-encyclopedia.json qa/evidence/13-profile.json qa/SHA256.txt --target "$GITHUB_SHA" --latest=false --title 'MoOLVa Грибы 5.0.0 «Региональная энциклопедия» Portable' --notes 'Группы двойников, объяснения определителя, региональные источники, тренажёр и отдельный пакет данных. Portable для Windows x64.'
+            gh release create "$tag" "$exe" MoOLVa-Griby-Atlas-Package.json qa/evidence/14-encyclopedia.png qa/evidence/14-encyclopedia.json qa/evidence/13-profile.json qa/evidence/15-photo-atlas.png qa/evidence/15-photo-atlas.json qa/evidence/photo-atlas51-report.json qa/SHA256.txt --target "$GITHUB_SHA" --latest=false --title 'MoOLVa Грибы 5.1.0 «Фотоатлас» Portable' --notes 'Лицензированные фотографии, ракурсы и полноэкранный просмотр в офлайн-атласе. Список видов и покрытие по фото приведены в отчёте. Portable для Windows x64.'
           fi

@@ -4,9 +4,10 @@
   const core=window.MoOLVa20Core,base=window.MOOLVA_MUSHROOMS||[];
   if(!core||!base.length||!document.querySelector('.sidebar nav'))return;
   const $=id=>document.getElementById(id),html=txt=>String(txt??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;','\'':'&#39;'}[c]));
+  const photoAtlas=window.MoOLVaPhotos51;
   const byLatin=new Map(base.map(b=>[b.latin,b])),byId=new Map(base.map(b=>[b.id,b]));
   const reviewKey='moolva-griby-v2-photo-review',geoKey='moolva-griby-v2-my-coordinates',oldKey='moolva-griby-1.0-data';
-  const region=core.cleanObservations(window.MOOLVA_REGION_OBS20||[]),gallery=window.MOOLVA_GALLERY20||{},photos=window.MOOLVA_PHOTOS||{};
+  const region=core.cleanObservations(window.MOOLVA_REGION_OBS20||[]);
   const safeMode=window.MoOLVaSafeMode;
   const note='Сходство изображений и результаты определения по признакам не подтверждают вид и не означают, что гриб можно употреблять в пищу.';
   const chapters=[
@@ -63,7 +64,7 @@
   if(safeMode)document.getElementById('primary-map-nav').hidden=true;
   const aboutSection=document.querySelector('#about .aboutbox');
   if(aboutSection){const updates=document.createElement('section');updates.className='p20-qa';
-    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 5.0.0</div>';
+    updates.innerHTML='<h3>Обновления MoOLVa</h3><p>Проверка запускается только по кнопке и обращается к публичному GitHub Releases. Файлы автоматически не устанавливаются.</p><button class="p20-action" id="p20-update-check">Проверить новую версию</button><div id="p20-update-status" class="p20-message">Текущая версия 5.1.0</div>';
     aboutSection.append(updates);}
   const photoReview=()=>{try{return JSON.parse(localStorage.getItem(reviewKey)||'{}')}catch{return {}}};
   const personalGeo=()=>{try{const x=JSON.parse(localStorage.getItem(geoKey)||'[]');return Array.isArray(x)?x.filter(o=>Number.isFinite(o.lat)&&Number.isFinite(o.lon)).slice(-300):[]}catch{return []}};
@@ -138,14 +139,14 @@
     const host=$('p20-photo-results');host.textContent='Сравнение локальных изображений…';
     try{
       const images=await Promise.all(uploadURLs.map(imageReady)),input=imageHistogram(images[0]);
-      const existing=base.filter(b=>core.eligiblePhoto(photos[b.latin])).slice(0,80),comparisons=[];
-      for(const b of existing){
-        try{const image=await imageReady(photos[b.latin].file);comparisons.push({b,score:core.scoreColors(input,imageHistogram(image))});}
+      const existing=base.map(b=>({b,photo:photoAtlas.active(b.latin)[0]})).filter(x=>x.photo).slice(0,80),comparisons=[];
+      for(const {b,photo} of existing){
+        try{const image=await imageReady(photo.file);comparisons.push({b,photo,score:core.scoreColors(input,imageHistogram(image))});}
         catch{}
       }
       comparisons.sort((a,b)=>b.score-a.score);
       host.innerHTML='<div class="p20-note">Это сходство распределения цветов, а не уверенность в виде. Красные, коричневые и белые грибы разных видов могут выглядеть почти одинаково. Не используйте результат для употребления в пищу.</div>'+
-        comparisons.slice(0,8).map(x=>'<article class="p20-hit"><img loading="lazy" src="'+html(photos[x.b.latin].file)+'" alt="'+html(x.b.name)+'"><div><b>'+html(x.b.name)+'</b><i>'+html(x.b.latin)+'</i><p>Схожая цветовая палитра; не идентификация.</p><button data-open="'+html(x.b.id)+'">Открыть вид</button></div></article>').join('');
+        comparisons.slice(0,8).map(x=>'<article class="p20-hit"><img loading="lazy" src="'+html(x.photo.file)+'" alt="'+html(x.b.name)+'"><div><b>'+html(x.b.name)+'</b><i>'+html(x.b.latin)+'</i><p>Схожая цветовая палитра; не идентификация.</p><button data-open="'+html(x.b.id)+'">Открыть вид</button></div></article>').join('');
       if(!comparisons.length)host.innerHTML='<div class="p20-message">Не получилось найти доступные для локального сравнения фотографии.</div>';
     }catch(e){host.textContent='Не удалось обработать фотографию: '+String(e.message||e).slice(0,120);}
   }
@@ -153,25 +154,76 @@
     if(safeMode)return;
     const detail=$('detail');if(!detail||!detail.children.length||detail.querySelector('#p20-detail-gallery'))return;
     const latin=detail.querySelector('.latin')?.textContent?.trim(),b=byLatin.get(latin);if(!b)return;
-    const entries=[photos[b.latin],...(Array.isArray(gallery[b.latin])?gallery[b.latin]:[])].filter(core.eligiblePhoto);
+    const entries=photoAtlas.active(b.latin);
     const wrapper=document.createElement('section');wrapper.id='p20-detail-gallery';wrapper.className='p20-gallery';
-    wrapper.innerHTML='<h3>Фотоатлас: '+entries.length+' фотографий</h3><p>Фото предоставлены авторами, соответствие виду по картинкам не аттестовано.</p>'+
-      (entries.length?entries.map(x=>'<figure><img loading="lazy" src="'+html(x.file)+'" alt="'+html(b.name)+'"><figcaption>'+html(x.author||'автор по ссылке')+' · '+html(x.license||'')+'</figcaption><a href="'+html(x.source)+'" target="_blank" rel="noopener noreferrer">Источник ↗</a></figure>').join(''):'<div class="p20-message">Лицензированных фото пока нет.</div>');
+    wrapper.innerHTML='<h3>Фотоатлас · снимков: '+entries.length+'</h3>'+
+      (entries.length?'<div class="photo51-grid">'+entries.map((photo,index)=>
+        '<figure><button type="button" data-photo51-index="'+index+'" aria-label="Увеличить: '+html(photoAtlas.viewLabel(photo))+'">'+
+        '<img loading="lazy" src="'+html(photo.file)+'" alt="'+html(b.name)+'"></button>'+
+        '<figcaption><b>'+html(photoAtlas.viewLabel(photo))+'</b><br>'+html(photo.author||'автор по ссылке')+
+        ' · '+html(photo.license||'')+'</figcaption><a href="'+html(photo.source)+'" target="_blank" rel="noopener noreferrer">Источник ↗</a></figure>'
+      ).join('')+'</div>':'<div class="p20-message">Фото с подходящей лицензией пока нет.</div>');
+    wrapper.addEventListener('click',event=>{
+      const button=event.target.closest('[data-photo51-index]');
+      if(button)openPhotoViewer(b,entries,Number(button.dataset.photo51Index));
+    });
     detail.querySelector('.detail-content')?.prepend(wrapper);
     const meta=document.createElement('div');meta.className='p20-message';const n=region.filter(x=>x.latin===b.latin).length;
     meta.textContent=n?'В выборке '+n+' опубликованных наблюдений сообщества для региона; наличие конкретного гриба не подтверждается по одному наблюдению.':'Подтверждённых региональных наблюдений в текущей выборке нет.';
     detail.querySelector('.detail-content')?.append(meta);
   }
+  let viewedPhotos=[],viewedSpecies='',viewedIndex=0;
+  function openPhotoViewer(species,entries,index){
+    viewedSpecies=species.name;
+    viewedPhotos=entries;
+    viewedIndex=index;
+    renderPhotoViewer();
+    $('photo51-viewer').showModal();
+  }
+  function renderPhotoViewer(){
+    const photo=viewedPhotos[viewedIndex];
+    if(!photo)return;
+    $('photo51-viewer-title').textContent=viewedSpecies;
+    $('photo51-full').src=photo.file;
+    $('photo51-full').alt=viewedSpecies+' · '+photoAtlas.viewLabel(photo);
+    $('photo51-credit').innerHTML=html(photoAtlas.viewLabel(photo)+' · '+photo.author+' · ')+
+      (photoAtlas.licenseLink(photo.license)?'<a href="'+html(photoAtlas.licenseLink(photo.license))+'" target="_blank" rel="noopener noreferrer">'+html(photo.license)+'</a>':html(photo.license))+
+      (photo.modified?' · '+html(photo.modified):'')+' · <a href="'+html(photo.source)+'" target="_blank" rel="noopener noreferrer">Оригинал ↗</a>';
+    $('photo51-position').textContent=(viewedIndex+1)+' из '+viewedPhotos.length;
+    $('photo51-prev').disabled=viewedIndex===0;
+    $('photo51-next').disabled=viewedIndex===viewedPhotos.length-1;
+  }
+  function advancePhoto(delta){
+    const index=viewedIndex+delta;
+    if(index<0||index>=viewedPhotos.length)return;
+    viewedIndex=index;
+    renderPhotoViewer();
+  }
+  $('photo51-prev').addEventListener('click',()=>advancePhoto(-1));
+  $('photo51-next').addEventListener('click',()=>advancePhoto(1));
+  $('photo51-viewer').addEventListener('keydown',event=>{
+    if(event.key==='ArrowLeft')advancePhoto(-1);
+    if(event.key==='ArrowRight')advancePhoto(1);
+  });
+  function coverage(){
+    const cards=base.map(item=>{
+      const images=photoAtlas.active(item.latin);
+      return {latin:item.latin,count:images.length,views:[...new Set(images.map(x=>x.view).filter(x=>x&&x!=='general'))]};
+    });
+    return {species:cards.length,photoSpecies:cards.filter(x=>x.count>0).length,
+      multiple:cards.filter(x=>x.count>1).length,
+      missing:cards.filter(x=>!x.count).map(x=>x.latin),cards};
+  }
   function renderQuality20(){
     const parent=$('quality');if(!parent)return;
-    const q=core.quality(base,photos,gallery),marks=photoReview(),checked=Object.values(marks).filter(v=>v==='checked').length,
+    const q=coverage(),marks=photoReview(),checked=Object.values(marks).filter(v=>v==='checked').length,
      issues=Object.values(marks).filter(v=>v==='issue').length;
     let extra=$('p20-qa-center');
     if(!extra){extra=document.createElement('div');extra.id='p20-qa-center';extra.className='p20-qa';parent.prepend(extra);}
-    extra.innerHTML='<h3>Центр качества PRO 2.0</h3><p>Фотоотчёт основан на источнике и лицензии, не на экспертной визуальной идентификации. Ваши отметки остаются личными и не являются сертификацией.</p>'+
-    '<div class="p20-mini-stats"><div><b>'+q.photoSpecies+'/'+q.species+'</b><span>видов с фото</span></div><div><b>'+q.galleryFiles+'</b><span>дополнительных кадров</span></div><div><b>'+checked+'</b><span>лично просмотрено</span></div><div><b>'+issues+'</b><span>ошибки по вашим отметкам</span></div></div>'+
+    extra.innerHTML='<h3>Фотоатлас</h3><p>У каждого снимка указан источник. В галереях подписаны распознанные ракурсы и детали.</p>'+
+    '<div class="p20-mini-stats"><div><b>'+q.photoSpecies+'/'+q.species+'</b><span>видов с фото</span></div><div><b>'+q.multiple+'</b><span>видов с несколькими снимками</span></div><div><b>'+checked+'</b><span>лично просмотрено</span></div><div><b>'+issues+'</b><span>ошибки по вашим отметкам</span></div></div>'+
     '<button class="p20-action" id="p20-audit-export">Экспорт проверки фото JSON</button>'+
-    '<div class="p20-qa-rows">'+base.slice(0,120).map(b=>'<div class="p20-qa-row"><b>'+html(b.name)+'</b><span>'+ (core.eligiblePhoto(photos[b.latin])?'фото есть':'фото отсутствует')+'</span>'+
+    '<div class="p20-qa-rows">'+base.map(b=>'<div class="p20-qa-row"><b>'+html(b.name)+'</b><span>'+ (photoAtlas.active(b.latin).length?'Снимков: '+photoAtlas.active(b.latin).length:'Фото отсутствует')+'</span>'+
     '<button data-review20="checked" data-latin20="'+html(b.latin)+'">✓ Просмотрел</button><button data-review20="issue" data-latin20="'+html(b.latin)+'">! Ошибка</button>'+
     '<span>'+html(marks[b.latin]||'не проверено')+'</span></div>').join('')+'</div>';
   }
@@ -213,7 +265,7 @@
     const viewer=new MutationObserver(()=>{if($('overlay')&&!$('overlay').hidden)integrateDetail();});
     viewer.observe($('detail'),{childList:true}); // No subtree observation: avoids recursive gallery injection.
     document.addEventListener('click',ev=>{if(ev.target.closest('[data-page="quality"]'))requestAnimationFrame(renderQuality20);});
-    document.addEventListener('click',ev=>{if(ev.target?.id==='p20-audit-export'){const data={version:'2.0.0',created:new Date().toISOString(),audit:core.quality(base,photos,gallery),visualVerification:'not independently completed',personalReviews:photoReview()};download('MoOLVa-Griby-Photo-Audit.json',JSON.stringify(data,null,2),'application/json');}});
+    document.addEventListener('click',ev=>{if(ev.target?.id==='p20-audit-export'){const data={version:'2.0.0',created:new Date().toISOString(),audit:coverage(),visualVerification:'not independently completed',personalReviews:photoReview()};download('MoOLVa-Griby-Photo-Audit.json',JSON.stringify(data,null,2),'application/json');}});
     document.addEventListener('click',ev=>{
       const b=ev.target.closest('[data-review20]');if(!b)return;const latin=b.dataset.latin20;
       if(!byLatin.has(latin)||!['checked','issue'].includes(b.dataset.review20))return;

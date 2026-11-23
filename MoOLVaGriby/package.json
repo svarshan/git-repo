@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "5.0.0",
-  "description": "MoOLVa Грибы 5.0.0 — Региональная энциклопедия",
+  "version": "5.1.0",
+  "description": "MoOLVa Грибы 5.1.0 — Фотоатлас",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -33,6 +33,9 @@
       "atlas50.js",
       "atlas50-ui.js",
       "atlas50.css",
+      "photo-atlas51.js",
+      "photos-atlas51.js",
+      "photo-atlas51.css",
       "main.cjs",
       "media/photos/**/*",
       "package.json",
@@ -84,10 +87,10 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-5.0.0-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-5.1.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-5.0.0-Full-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-5.1.0-Full-Portable-${arch}.exe"
     },
     "extraResources": [
       {
