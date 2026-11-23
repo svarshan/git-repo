@@ -4,6 +4,15 @@
   const regionAdded=Array.isArray(window.MOOLVA_EXTRA_SPECIES20)?window.MOOLVA_EXTRA_SPECIES20:[];
   const latinKnown=new Set(birds.map(x=>x.latin));
   for(const item of regionAdded){if(window.MoOLVa20Core?.safeSpecies(item)&&typeof item.id==='string'&&!latinKnown.has(item.latin)){birds.push(item);latinKnown.add(item.latin);}}
+  const atlas50=window.MoOLVaAtlas50;
+  const regionPack=window.MoOLVaAtlas50Current;
+  const lookalikes=atlas50.createCatalog(regionPack,birds);
+  window.MoOLVaAtlas50Groups=lookalikes;
+  const publications=new Map(regionPack.publications.map(p=>[p.latin,p]));
+  const observations=new Map();
+  for(const row of window.MoOLVa20Core.cleanObservations(window.MOOLVA_REGION_OBS20)){
+    if(!observations.has(row.latin))observations.set(row.latin,row);
+  }
   const photos = window.MOOLVA_PHOTOS && typeof window.MOOLVA_PHOTOS === 'object' ? window.MOOLVA_PHOTOS : {};
   const byId = new Map(birds.map(b=>[b.id,b])), byLatin=new Map(birds.map(b=>[b.latin,b]));
   const $ = s => document.querySelector(s);
@@ -15,8 +24,8 @@
   const months=['январь','февраль','март','апрель','май','июнь','июль','август','сентябрь','октябрь','ноябрь','декабрь'];
   const storeKey='moolva-griby-1.0-data';
   function load(){try{const data=JSON.parse(localStorage.getItem(storeKey)||'{}');return {
-   favorites:new Set(Array.isArray(data.favorites)?data.favorites.filter(x=>byId.has(x)):[]),
-   diary:Array.isArray(data.diary)?data.diary.filter(x=>x&&typeof x==='object'&&byId.has(x.speciesId)).slice(-1000):[]};}
+   favorites:new Set(Array.isArray(data.favorites)?data.favorites.filter(x=>typeof x==='string'):[]),
+   diary:Array.isArray(data.diary)?data.diary.filter(x=>x&&typeof x==='object'&&typeof x.speciesId==='string').slice(-1000):[]};}
    catch{return {favorites:new Set(),diary:[]};}}
   let state=load(),page='catalog',visible=18,currentId=null;
   function save(){try{window.MoOLVaProfile41.setItem(storeKey,JSON.stringify({favorites:[...state.favorites],diary:state.diary}));return true;}catch{toast('Не удалось записать данные на диск');return false;}}
@@ -50,9 +59,11 @@
   function renderFav(){const list=birds.filter(b=>state.favorites.has(b.id));$('#favCards').innerHTML=list.length?list.map(card).join(''):'<div class="empty">Вы пока не добавили грибы в избранное. Нажмите ♡ в карточке вида.</div>';}
   function renderStats(){const imgs=birds.filter(b=>safePhoto(b)).length;$('#statTotal').textContent=birds.length;$('#statHazard').textContent=birds.filter(b=>hazard(b.risk)).length;$('#statImages').textContent=imgs+'/'+birds.length;$('#statDiary').textContent=state.diary.length;$('#counter').textContent=birds.length+' видов';}
   const headings={catalog:['Грибной атлас','Изучайте виды и опасные двойники, сохраняйте наблюдения'],
+   lookalikes:['Группы двойников','Общие признаки, различия и источники'],
+   training:['Тренажёр','Запоминайте признаки и различия между видами'],
    compare:['Сравнение грибов','Изучайте отличия похожих видов'],diary:['Дневник грибника','Ваши собственные наблюдения, сохранённые локально'],
    map:['Мои места','Личные находки без выдуманных географических точек'],favorites:['Избранное','Сохранённые виды из энциклопедии'],
-   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 4.1.0 · Умный атлас']};
+   quality:['Фото и источники','Авторы, лицензии, прозрачность данных'],about:['О приложении','MoOLVa Грибы 5.0.0 · Умный атлас']};
   function nav(next){if(!headings[next])return;stopSpeech();closeDetail();page=next;
     document.querySelectorAll('.page').forEach(x=>x.classList.toggle('active',x.id===page));
     document.querySelectorAll('.sidebar nav button').forEach(x=>x.classList.toggle('selected',x.dataset.page===page));
@@ -64,10 +75,30 @@
     const link=/^https:\/\/(commons\.wikimedia\.org\/wiki\/File:|www\.inaturalist\.org\/photos\/)/.test(img.source)?'<a href="'+escapeHTML(img.source)+'" target="_blank" rel="noopener noreferrer">Открыть первоисточник фотографии ↗</a>':'';
     return '<p class="photo-credit">Фото: '+escapeHTML(img.author||'автор указан в первоисточнике')+' · '+escapeHTML(img.license||'условия не указаны')+'. Категория по метаданным; визуальная идентификация вида не подтверждена. '+link+'</p>';}
   function closeDetail(){if(currentId===null)return;stopSpeech();$('#overlay').hidden=true;document.body.style.overflow='';currentId=null;}
+  function regionHTML(item){
+    const publication=publications.get(item.latin);
+    const evidence=item.regionEvidence;
+    const observation=observations.get(item.latin);
+    const placeId=window.MOOLVA_REGION_META20?.placeId;
+    const link=(href,label)=>'<a href="'+escapeHTML(href)+'" target="_blank" rel="noopener noreferrer">'+label+' ↗</a>';
+    const lines=[];
+    if(publication)lines.push('<p><strong>Публикация заповедника</strong> · '+escapeHTML(publication.note)+' '+link(publication.url,'Керженский заповедник')+'</p>');
+    if(evidence?.provider==='iNaturalist'&&Number.isSafeInteger(evidence.taxonId)&&Number.isSafeInteger(evidence.count)&&evidence.count>0){
+      const filtered=Number.isSafeInteger(placeId)&&placeId>0
+        ? 'https://www.inaturalist.org/observations?place_id='+placeId+'&taxon_id='+evidence.taxonId+'&quality_grade=research'
+        : 'https://www.inaturalist.org/taxa/'+evidence.taxonId;
+      lines.push('<p><strong>Наблюдения сообщества</strong> · '+evidence.count+' в региональной выборке. '+link(filtered,'iNaturalist')+'</p>');
+    }else if(observation){
+      lines.push('<p><strong>Наблюдение сообщества</strong> · '+escapeHTML(observation.date||'дата не указана')+'. '+link(observation.source,'Карточка iNaturalist')+'</p>');
+    }
+    return '<section class="atlas50-source" aria-label="Региональные сведения"><h3>Нижегородская область</h3>'+
+      (lines.join('')||'<p>В текущем пакете нет региональных сведений об этом виде.</p>')+'</section>';
+  }
   function openDetail(id){
     const b=byId.get(id);if(!b)return;closeDetail();currentId=id;
     const similar=byLatin.get(b.similar),period=b.months.length?b.months.map(m=>months[m-1]).join(', '):'недостаточно достоверных данных';
     const terms=atlas.glossaryFor(b).map(key=>'<button type="button" data-atlas-term="'+key+'">'+escapeHTML(atlas.glossary[key].title)+'</button>').join('');
+    const relatedGroups=lookalikes.filter(group=>group.entries.some(entry=>entry.item.id===b.id));
     const names=atlas.aliases[b.id],traitSource=atlas.traitSources[b.id];
     const dangerous=hazard(b.risk),riskText=dangerous?'<div class="red-warning"><b>'+escapeHTML(hazardLabel(b))+'</b> — не собирайте для употребления. Некоторые токсины вызывают отсроченные симптомы.</div>':'<div class="note">Справочный статус не означает, что найденный вами гриб безопасен для употребления. Возможны похожие ядовитые виды.</div>';
     $('#detail').innerHTML='<div class="detail-header"><span class="eyebrow">ПАСПОРТ ВИДА · ГРИБНОЙ АТЛАС</span><h2>'+escapeHTML(b.name)+'</h2><div class="latin">'+escapeHTML(b.latin)+'</div></div><div class="detail-photo">'+mediaHTML(b,'detail')+'</div>'+
@@ -78,8 +109,10 @@
       (terms?'<div class="atlas40-term-links" aria-label="Термины из карточки">'+terms+'</div>':'')+'<h3>Местообитание</h3><p>'+escapeHTML(b.habitat)+'. <b>Наличие этого вида в конкретной точке Нижегородской области не подтверждено.</b></p>'+
       '<h3>Ориентировочный сезон</h3><p>'+escapeHTML(period)+'. Сроки зависят от погоды и природной зоны, не являются прогнозом.</p>'+
       '<h3>Похожие виды и двойники</h3><p>'+(similar?escapeHTML(similar.name)+' — '+escapeHTML(similar.latin):escapeHTML(b.similar||'Требуется сравнение у специалиста'))+'. По отдельному внешнему признаку определять гриб нельзя.</p>'+
+      regionHTML(b)+
       '<h3>Фотография и первоисточник</h3>'+sourceLink(b)+'<p class="photo-credit">Таксономию и статус сверяйте с научными справочниками и региональными гербарными данными. '+(b.regionEvidence?'Публикации сообщества: '+escapeHTML(b.regionEvidence.count)+' сообщений в регионе (не экспертное подтверждение вида)':'Региональное присутствие не аттестовано')+'.</p>'+
       '<div class="detail-actions"><button class="primary" data-fav="'+escapeHTML(b.id)+'">'+(state.favorites.has(b.id)?'♥ В избранном':'♡ В избранное')+'</button>'+
+      relatedGroups.map(g=>'<button data-atlas50-group="'+escapeHTML(g.id)+'">Группа двойников</button>').join('')+
       (similar?'<button data-compare="'+escapeHTML(b.id)+'">⇄ Сравнить с двойником</button>':'')+
       '<button data-speak="'+escapeHTML(b.id)+'">▷ Озвучить описание</button><button data-stop>■ Стоп</button><button data-observe="'+escapeHTML(b.id)+'">＋ Записать находку</button></div></div>';
     $('#overlay').hidden=false;document.body.style.overflow='hidden';$('.modal').scrollTop=0;}

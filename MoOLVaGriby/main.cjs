@@ -91,7 +91,7 @@ function createWindow(){
  win=new BrowserWindow({width:1420,height:920,minWidth:960,minHeight:680,autoHideMenuBar:true,show:false,backgroundColor:'#0a1512',
   icon:path.join(__dirname,'build','moolva-griby.ico'),webPreferences:{preload:path.join(__dirname,'preload.cjs'),nodeIntegration:false,contextIsolation:true,sandbox:true,webSecurity:true}});
  win.webContents.setWindowOpenHandler(({url})=>{
-  if(/^https:\/\/www\.google\.com\/maps\//.test(url)||/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org|www\.mushroomexpert\.com|mushrooms\.linnaeus\.naturalis\.nl|protomaps\.com)\//.test(url))shell.openExternal(url);
+  if(/^https:\/\/www\.google\.com\/maps\//.test(url)||/^https:\/\/(commons\.wikimedia\.org|www\.inaturalist\.org|www\.gbif\.org|github\.com|www\.poison\.org|www\.mediawiki\.org|www\.nn\.ru|nn\.aif\.ru|niann\.ru|www\.openstreetmap\.org|www\.mushroomexpert\.com|www\.first-nature\.com|(?:old\.|www\.)?kerzhenskiy\.ru|www\.unn\.ru|mushrooms\.linnaeus\.naturalis\.nl|protomaps\.com)\//.test(url))shell.openExternal(url);
   return {action:'deny'};
  });
  win.webContents.on('will-navigate',(event,url)=>{if(url!==entryUrl)event.preventDefault();});
@@ -186,6 +186,47 @@ function createWindow(){
     fs.writeFileSync(path.join(folder,'11-smart-atlas.json'),JSON.stringify(smartAtlas,null,2));
     if(!Object.values(smartAtlas).every(Boolean))throw Error('Smart Atlas GUI failed '+JSON.stringify(smartAtlas));
     fs.writeFileSync(path.join(folder,'11-smart-atlas.png'),(await win.webContents.capturePage()).toPNG());
+    const encyclopedia=await win.webContents.executeJavaScript(`(()=>{
+      const get=id=>document.getElementById(id);
+      const click=selector=>document.querySelector(selector).click();
+      click('[data-page="lookalikes"]');
+      const matrix=get('atlas50-comparison');
+      const groups=get('atlas50-group').options.length;
+      const multi=groups===5 && matrix.querySelectorAll('thead [data-open]').length===3 &&
+        matrix.querySelector('[data-trait="poreTone"][data-relation="differs"]');
+      click('#atlas50-differences');
+      const filtered=!matrix.querySelector('[data-trait="surface"]');
+      click('#atlas50-comparison [data-open="g001"]');
+      const passport=Boolean(get('detail').querySelector('[data-atlas50-group="brown-boletes"]'));
+      click('#detail [data-atlas50-group="brown-boletes"]');
+      const linked=Boolean(get('lookalikes').classList.contains('active') && get('overlay').hidden);
+      click('[data-page="catalog"]');
+      const search=get('search');
+      search.value='Ganoderma lucidum';
+      search.dispatchEvent(new Event('input'));
+      click('#cards [data-open]');
+      const publication=Boolean(get('detail').querySelector('.atlas50-source a[href*="kerzhenskiy"]'));
+      click('#closeModal');
+      search.value='';
+      search.dispatchEvent(new Event('input'));
+      click('[data-goto20="id20"]');
+      click('[data-atlas-answer="pores"]');
+      const earlier=get('atlas40-question').querySelector('[data-atlas-edit="surface"]');
+      earlier.value='gills';
+      earlier.dispatchEvent(new Event('change'));
+      const editable=Boolean(get('atlas40-results').querySelector('details') &&
+        get('atlas40-results').textContent.includes('в атласе «Трубочки / поры»'));
+      click('#atlas40-reset');
+      click('[data-page="training"]');
+      click('#atlas50-lesson [data-atlas50-answer]');
+      const trainer=Boolean(get('atlas50-feedback').textContent && get('atlas50-next') &&
+        localStorage.getItem('moolva-griby-atlas-v50-training'));
+      click('[data-page="lookalikes"]');
+      return {groups,multi:Boolean(multi),filtered,passport,linked,publication,editable,trainer};
+    })()`,true);
+    if(!Object.values(encyclopedia).every(Boolean))throw Error('Encyclopedia GUI failed '+JSON.stringify(encyclopedia));
+    await win.webContents.executeJavaScript("document.querySelector('#atlas50-comparison').scrollIntoView()");
+    fs.writeFileSync(path.join(folder,'14-encyclopedia.png'),(await win.webContents.capturePage()).toPNG());
     await win.webContents.executeJavaScript("document.querySelector('#primary-map-nav').click()");
     await new Promise(r=>setTimeout(r,250));
     fs.writeFileSync(path.join(folder,'05-expedition.png'),(await win.webContents.capturePage()).toPNG());
@@ -279,6 +320,28 @@ function createWindow(){
     fs.writeFileSync(path.join(folder,'12-map-fallback.json'),JSON.stringify(fallbackReport,null,2));
     if(!fallback.centerPreserved||!fallback.zoomPreserved||!partialMap.completed||!partialMap.cancelled)
       throw Error('Partial map fallback failed '+JSON.stringify(fallbackReport));
+    const nextLoad=()=>new Promise(resolve=>win.webContents.once('did-finish-load',resolve));
+    let reloaded=nextLoad();
+    await win.webContents.executeJavaScript(`(()=>{
+      const payload={...MoOLVaAtlas50Current,version:2};
+      const json=new File([JSON.stringify(payload)],'atlas-update.json',{type:'application/json'});
+      const transfer=new DataTransfer();
+      transfer.items.add(json);
+      const input=document.getElementById('atlas50-package-file');
+      input.files=transfer.files;
+      input.dispatchEvent(new Event('change'));
+    })()`,true);
+    await reloaded;
+    const installed=await win.webContents.executeJavaScript(`MoOLVaAtlas50Current.version===2 &&
+      !document.getElementById('atlas50-package-rollback').hidden &&
+      document.querySelectorAll('#atlas50-group option').length===5`);
+    if(!installed)throw Error('Atlas data package was not activated after reload');
+    reloaded=nextLoad();
+    await win.webContents.executeJavaScript("document.getElementById('atlas50-package-rollback').click()");
+    await reloaded;
+    const rolledBack=await win.webContents.executeJavaScript('MoOLVaAtlas50Current.version===1');
+    if(!rolledBack)throw Error('Atlas data package rollback failed');
+    fs.writeFileSync(path.join(folder,'14-encyclopedia.json'),JSON.stringify({...encyclopedia,installed,rolledBack},null,2));
     clearTimeout(failure);app.exit(0);
    }catch(e){fs.writeFileSync(path.join(folder,'gui-error.txt'),String(e.stack||e));clearTimeout(failure);app.exit(3);}
   });
@@ -296,8 +359,8 @@ function verifyPortableProfile(folder){
    try{
      if(profileCheck==='upgrade'){
        const legacy=await win.webContents.executeJavaScript("localStorage.getItem('moolva-map-mode')");
-       if(legacy!=='online')throw Error('4.0.1 map preference not retained: '+legacy);
-       const checkpoint=path.join(profilePath,'Backups','before-4.1.json');
+       if(legacy!=='online')throw Error('4.1.0 map preference not retained: '+legacy);
+       const checkpoint=path.join(profilePath,'Backups','before-5.0.json');
        if(!fs.existsSync(checkpoint))throw Error('Legacy checkpoint is missing');
        await win.webContents.executeJavaScript(`(()=>{
          const search=document.getElementById('search');
@@ -330,7 +393,7 @@ function verifyPortableProfile(folder){
            const report=await win.webContents.executeJavaScript('MoOLVaReliability.copyReport()');
            if(!report||!clipboard.readText().includes('renderer-'))throw Error('Crash diagnostics unavailable');
            fs.writeFileSync(path.join(folder,'13-profile.json'),JSON.stringify({
-             upgradedFrom:'4.0.1', restoredFavorite:recovered, safeModeAfterCrash:safe, copiedDiagnostics:report,
+             upgradedFrom:'4.1.0', restoredFavorite:recovered, safeModeAfterCrash:safe, copiedDiagnostics:report,
              rollingSnapshots:profile.backupCount
            },null,2));
            clearTimeout(timeout);
@@ -423,7 +486,7 @@ app.whenReady().then(()=>{
  });
  // OSM raster tile policy: app-identifying User-Agent and normal HTTP caching, no bulk fetching.
  ses.webRequest.onBeforeSendHeaders({urls:['https://tile.openstreetmap.org/*']},(details,callback)=>{
-   details.requestHeaders['User-Agent']='MoOLVa-Griby/4.1.0 (+https://github.com/svarshan/git-repo)';
+   details.requestHeaders['User-Agent']='MoOLVa-Griby/5.0.0 (+https://github.com/svarshan/git-repo)';
    callback({requestHeaders:details.requestHeaders});
  });
  createWindow();

@@ -44,8 +44,13 @@
     current = result.next;
     const question = atlas.questions[current];
     const selected = Object.keys(answers).length;
-    const summary = history.map(({key,value}) => '<li>'+escape(atlas.questions[key].label)+
-      ' — '+escape(value ? answerLabels[key]?.[value] || atlas.labelValue(key,value) : 'пропущено')+'</li>').join('');
+    const summary = history.map(({key,value}) => {
+      const trait=atlas.questions[key];
+      return '<li><label>'+escape(trait.label)+' <select class="atlas50-edit" data-atlas-edit="'+key+'">'+
+        '<option value=""'+(!value?' selected':'')+'>Пропущено</option>'+
+        Object.entries(trait.values).map(([id,label])=>'<option value="'+id+'"'+(id===value?' selected':'')+'>'+
+          escape(answerLabels[key]?.[id]||label)+'</option>').join('')+'</select></label></li>';
+    }).join('');
 
     byId('atlas40-question').innerHTML = (question
       ? '<h3 tabindex="-1">'+escape(question.prompt)+'</h3><div class="atlas40-choices">'+
@@ -76,11 +81,24 @@
         : 'Сочетание признаков не найдено. Можно вернуться и уточнить ответы.';
       results.innerHTML = '<p role="status">'+summary+'</p>'+
         (result.undocumented ? '<p class="muted">У '+result.undocumented+' карточек нет сведений для проверки выбранных признаков.</p>' : '')+
+        (result.excluded.length?'<details><summary>Есть противоречия в '+result.excluded.length+' карточках</summary><ul>'+
+          result.excluded.map(row=>'<li><b>'+escape(row.item.name)+'</b> · '+row.conflicts.map(key=>
+            escape(atlas.questions[key].label)+': в атласе «'+escape(atlas.labelValue(key,row.profile[key]))+'»').join(', ')+'</li>').join('')+
+          '</ul></details>':'')+
         '<div class="p20-results">'+cards+'</div>'+
         (result.ranked.length>shown ? '<button type="button" id="atlas40-more">Показать ещё</button>' : '');
     }
     if (focus) byId('atlas40-question').querySelector('h3').focus();
   }
+  host.addEventListener('change',event=>{
+    const key=event.target.dataset.atlasEdit;
+    if(!key)return;
+    const step=history.find(x=>x.key===key);
+    step.value=event.target.value;
+    shown=8;
+    render();
+    host.querySelector('[data-atlas-edit="'+key+'"]').focus();
+  });
   host.addEventListener('click',event => {
     const control = event.target.closest('button');
     if (!control) return;

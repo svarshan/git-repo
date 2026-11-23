@@ -1,0 +1,18 @@
+.atlas50-toolbar{display:flex;flex-wrap:wrap;align-items:end;gap:12px 20px;margin-bottom:16px}
+.atlas50-toolbar label{display:flex;gap:7px;align-items:center}
+.atlas50-toolbar select{max-width:min(100%,440px);padding:9px;background:#132a22;color:#eaf3dd;border:1px solid #53765e;border-radius:8px}
+.atlas50-scroll{overflow:auto;border:1px solid #446351;border-radius:12px;margin:12px 0}
+.atlas50-scroll table{border-collapse:collapse;width:100%;background:#122a22;color:#e9f3e9}
+.atlas50-scroll th,.atlas50-scroll td{text-align:left;vertical-align:top;padding:10px;border:1px solid #446351;min-width:130px}
+.atlas50-scroll th:first-child{min-width:150px}
+.atlas50-scroll th small,.atlas50-scroll th i{display:block;font-size:12px;font-weight:normal;margin-top:5px;color:#afd0bd}
+.atlas50-scroll [data-relation="differs"] th,.atlas50-scroll [data-relation="differs"] td:not(.atlas50-missing){background:#3b3520;color:#ffedba}
+.atlas50-scroll .atlas50-missing{color:#a8beb4;font-style:italic}
+.atlas50-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:12px;margin-top:18px}
+.atlas50-cards article,.atlas50-lesson{background:#122a22;padding:14px;border:1px solid #446351;border-radius:10px}
+.atlas50-danger{display:block;margin:7px 0;color:#ffb7a5}
+.atlas50-edit{max-width:100%;color:#e4f4e6;background:#10261e;border:1px solid #527461;padding:4px;border-radius:5px}
+.atlas50-source{margin:12px 0;padding:12px;background:#122b22;border:1px solid #446351;border-radius:9px}
+.atlas50-source p{margin:7px 0}
+.atlas50-pack{margin:14px 0;padding:14px;border:1px solid #446351;border-radius:10px}
+.atlas50-pack label{display:block;margin:10px 0}

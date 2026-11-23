@@ -12,7 +12,9 @@ const keys = {
   'moolva-griby-v34-trips':'array',
   'moolva-griby-v2-photo-review':'object',
   'moolva-griby-last-place':'object',
-  'moolva-map-mode':'mode'
+  'moolva-map-mode':'mode',
+  'moolva-griby-atlas-v50-pack':'object',
+  'moolva-griby-atlas-v50-training':'object'
 };
 const limit = 12 * 1024 * 1024;
 const historyLimit = 5;
@@ -69,7 +71,7 @@ function readJson(file) {
 
 function openProfile(profile, version) {
   const folder = path.join(profile,'Backups');
-  const checkpoint = path.join(folder,'before-4.1.json');
+  const checkpoint = path.join(folder,'before-'+version.split('.').slice(0,2).join('.')+'.json');
   const runtimeFile = path.join(profile,'startup-state.json');
   let runtime = readJson(runtimeFile) || {};
   const files = () => fs.readdirSync(folder)
@@ -105,12 +107,13 @@ function openProfile(profile, version) {
     fs.mkdirSync(folder,{recursive:true});
     const live = validValues(current);
     const backups = files();
-    if (existingProfile && !backups.length && !fs.existsSync(checkpoint) && Object.keys(live).length) {
+    if (existingProfile && runtime.version!==version && !fs.existsSync(checkpoint) && Object.keys(live).length) {
       atomicJson(checkpoint,{schema:1,version,created:new Date().toISOString(),values:live});
     }
     const previous = newestValid(backups)?.values || load(checkpoint) || {};
     const values = {...previous,...live};
     save(values);
+    if(runtime.version!==version)writeRuntime({...runtime,version});
     return {values,recovered:Object.keys(values).filter(key => !Object.hasOwn(live,key)).length};
   }
   function writeRuntime(next) {
@@ -119,10 +122,10 @@ function openProfile(profile, version) {
   }
   function begin(safe) {
     const last = runtime.pending ? Number(runtime.failures || 0) : 0;
-    writeRuntime({pending:true,failures:safe ? Math.max(1,last) : last+1,lastIssue:runtime.lastIssue || ''});
+    writeRuntime({...runtime,pending:true,failures:safe ? Math.max(1,last) : last+1,lastIssue:runtime.lastIssue || ''});
   }
   function ready() {
-    writeRuntime({pending:false,failures:0,lastIssue:runtime.lastIssue || ''});
+    writeRuntime({...runtime,pending:false,failures:0,lastIssue:runtime.lastIssue || ''});
   }
   function issue(reason) {
     writeRuntime({...runtime,lastIssue:reason});

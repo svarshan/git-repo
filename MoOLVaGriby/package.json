@@ -1,7 +1,7 @@
 {
   "name": "moolva-griby",
-  "version": "4.1.0",
-  "description": "MoOLVa Грибы 4.1.0 — Стабильный атлас",
+  "version": "5.0.0",
+  "description": "MoOLVa Грибы 5.0.0 — Региональная энциклопедия",
   "private": true,
   "main": "main.cjs",
   "scripts": {
@@ -29,6 +29,10 @@
       "smart-atlas40.js",
       "smart-atlas-ui40.js",
       "smart-atlas40.css",
+      "atlas50-data.js",
+      "atlas50.js",
+      "atlas50-ui.js",
+      "atlas50.css",
       "main.cjs",
       "media/photos/**/*",
       "package.json",
@@ -80,10 +84,10 @@
       "allowToChangeInstallationDirectory": true,
       "perMachine": false,
       "createDesktopShortcut": true,
-      "artifactName": "MoOLVa-Griby-4.1.0-Setup-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-5.0.0-Setup-${arch}.exe"
     },
     "portable": {
-      "artifactName": "MoOLVa-Griby-4.1.0-Full-Portable-${arch}.exe"
+      "artifactName": "MoOLVa-Griby-5.0.0-Full-Portable-${arch}.exe"
     },
     "extraResources": [
       {

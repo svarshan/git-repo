@@ -135,13 +135,15 @@
   function identify(species, answers, skipped) {
     const selected = Object.entries(answers).filter(([key,value]) => Object.hasOwn(questions,key) &&
       Object.hasOwn(questions[key].values,value));
-    const compatible = species.map(item => {
+    const assessed = species.map(item => {
       const profile = traitsOf(item);
       const matched = selected.filter(([key,value]) => profile[key] === value).map(([key]) => key);
       const unknown = selected.filter(([key,value]) => !profile[key] ||
         ((key==='ring'||key==='volva') && value==='no' && profile[key]==='yes')).map(([key]) => key);
-      return {item,profile,matched,unknown};
-    }).filter(row => row.matched.length + row.unknown.length === selected.length);
+      const conflicts = selected.filter(([key]) => !matched.includes(key) && !unknown.includes(key)).map(([key]) => key);
+      return {item,profile,matched,unknown,conflicts};
+    });
+    const compatible = assessed.filter(row => row.conflicts.length===0);
     const ranked = compatible.filter(row => row.matched.length)
       .sort((a,b) => b.matched.length-a.matched.length || a.item.name.localeCompare(b.item.name,'ru'));
     const pool = selected.length && ranked.length ? ranked : compatible;
@@ -158,7 +160,7 @@
         best = score;
       }
     }
-    return {ranked, next, undocumented:compatible.length-ranked.length};
+    return {ranked, next, excluded:assessed.filter(row=>row.conflicts.length), undocumented:compatible.length-ranked.length};
   }
 
   function editDistance(first, second) {
@@ -207,7 +209,7 @@
     };
   }
 
-  const api = {questions, glossary, glossaryFor, aliases, traitSources, labelValue, comparison, identify, makeSearch};
+  const api = {questions, glossary, glossaryFor, aliases, traitSources, labelValue, traitsOf, comparison, identify, makeSearch};
   if (typeof module === 'object' && module.exports) module.exports = api;
   if (root) root.MoOLVaAtlas40 = api;
 })(typeof window === 'undefined' ? null : window);
