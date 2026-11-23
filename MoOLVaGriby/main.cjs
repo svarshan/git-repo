@@ -213,7 +213,7 @@ function createWindow(){
       click('[data-atlas-answer="pores"]');
       const earlier=get('atlas40-question').querySelector('[data-atlas-edit="surface"]');
       earlier.value='gills';
-      earlier.dispatchEvent(new Event('change'));
+      earlier.dispatchEvent(new Event('change',{bubbles:true}));
       const editable=Boolean(get('atlas40-results').querySelector('details') &&
         get('atlas40-results').textContent.includes('в атласе «Трубочки / поры»'));
       click('#atlas40-reset');
