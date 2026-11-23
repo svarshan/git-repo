@@ -90,8 +90,11 @@ def import_photo(row, root, local_source):
                     if len(raw) > MAX_BYTES:
                         raise ValueError("Photo exceeds size limit")
                     with Image.open(BytesIO(raw)) as img:
-                        if img.format not in {"JPEG", "PNG", "WEBP"} or min(img.size)<170:
-                            raise ValueError("Unsupported or undersized photo")
+                        supported = {"JPEG", "PNG", "WEBP"}
+                        if is_commons:
+                            supported.add("MPO")  # Wikimedia may store multiple JPEG frames in a .jpg.
+                        if img.format not in supported or min(img.size) < 170:
+                            raise ValueError(f"Unsupported or undersized photo: {img.format} {img.size}")
                         photo = ImageOps.exif_transpose(img).convert("RGB")
                         photo.thumbnail((680, 680))
                         photo.save(file, quality=83, optimize=True)
