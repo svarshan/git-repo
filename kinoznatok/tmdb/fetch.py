@@ -12,6 +12,23 @@ from urllib.parse import urlencode
 from urllib.request import Request, urlopen
 
 
+# Карточки, по которым готовятся авторские формулировки для режима подсказок.
+EDITORIAL_WORKS = {
+    'Q91540', 'Q105031', 'Q167726', 'Q11621', 'Q51416', 'Q488655', 'Q387601', 'Q222939', 'Q25188',
+    'Q13417189', 'Q18547944', 'Q46717', 'Q127367', 'Q218235', 'Q206576', 'Q22000542', 'Q777739',
+    'Q1999930', 'Q625110', 'Q2528155', 'Q913426', 'Q53105', 'Q1195685', 'Q2306068', 'Q2368678',
+    'Q4271831', 'Q1272202', 'Q21637453', 'Q737904', 'Q201293', 'Q79784', 'Q23831', 'Q728553',
+    'Q13417244', 'Q8539', 'Q147235', 'Q386880', 'Q22908690', 'Q264221', 'Q192837', 'Q83071',
+    'Q85808226', 'Q23673', 'Q23567', 'Q56876444', 'Q65980217', 'Q4249828', 'Q600931', 'Q1668081',
+    'Q16272273', 'Q2332537', 'Q3500392', 'Q472018', 'Q2370768', 'Q134430', 'Q40895', 'Q179673',
+    'Q215518', 'Q36479', 'Q36092', 'Q188439', 'Q15270647', 'Q18647981', 'Q103372692', 'Q132863',
+    'Q182153', 'Q170035', 'Q104905', 'Q174811', 'Q6144664', 'Q5815826', 'Q483815', 'Q174555',
+    'Q129193', 'Q156401', 'Q305250', 'Q67208596', 'Q260138', 'Q2682217', 'Q1965370', 'Q3999206',
+    'Q4096274', 'Q4260298', 'Q4113875', 'Q2369324', 'Q39571', 'Q196602', 'Q155653', 'Q29011',
+    'Q21697406'
+}
+
+
 class ApiError(RuntimeError):
     def __init__(self, code):
         self.code = code
@@ -129,6 +146,7 @@ def get_record(key, wikidata, auth):
             {"name": p["name"], "character": p.get("character") or None}
             for p in (credits.get("cast") or [])[:12] if p.get("name")
         ],
+        **({"overview_for_editor": item.get("overview") or ""} if EDITORIAL_WORKS.intersection(wikidata) else {}),
         "poster_path": media_path(item, "poster_path"),
         "backdrop_path": media_path(item, "backdrop_path"),
     }
