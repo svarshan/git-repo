@@ -1,0 +1,33 @@
+name: КиноЗнаток · Обновить данные TMDB
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - kinoznatok-tmdb
+    paths:
+      - .github/workflows/kinoznatok-tmdb.yml
+      - kinoznatok/tmdb/**
+permissions:
+  contents: read
+
+jobs:
+  fetch-catalog:
+    name: Выгрузка карточек TMDB
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Получить данные напрямую через TMDB API
+        env:
+          TMDB_READ_TOKEN: ${{ secrets.TMDB_READ_TOKEN }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: python3 kinoznatok/tmdb/fetch.py --output out/tmdb_catalog.json
+      - name: Сохранить выгрузку TMDB
+        uses: actions/upload-artifact@v7
+        with:
+          name: kinoznatok-tmdb-catalog
+          path: out/tmdb_catalog.json
+          if-no-files-found: error
+          retention-days: 30
