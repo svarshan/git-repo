@@ -1,0 +1,33 @@
+name: КиноЗнаток · Фильмы 2000–2026
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - kinoznatok-tmdb
+    paths:
+      - .github/workflows/kinoznatok-modern.yml
+      - kinoznatok/modern/**
+
+permissions:
+  contents: read
+
+jobs:
+  movies:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          persist-credentials: false
+      - name: Отобрать вышедшие фильмы
+        env:
+          TMDB_READ_TOKEN: ${{ secrets.TMDB_READ_TOKEN }}
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        run: python3 -m kinoznatok.modern.fetch
+      - name: Сохранить карточки и пути к постерам
+        uses: actions/upload-artifact@v7
+        with:
+          name: kinoznatok-movies-2000-2026
+          path: out/modern-movies.json
+          if-no-files-found: error
+          retention-days: 30
